@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portal Pixel</title>
+  <meta name="description" content="Jogos independentes para jogar direto no navegador.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="index.html"><span class="marca-icone">🎮</span><span data-site-nome></span></a>
+    <label class="busca">
+      <span class="sr">Buscar jogos</span>
+      <input id="busca" type="search" placeholder="Buscar jogos, gêneros, tags…" autocomplete="off">
+    </label>
+  </header>
+
+  <main class="pagina">
+    <p class="slogan"><span data-site-slogan></span> · <strong id="contador"></strong></p>
+    <section id="destaque" class="destaque"></section>
+    <nav id="filtros" class="filtros" aria-label="Filtrar por gênero"></nav>
+    <div id="conteudo"></div>
+  </main>
+
+  <footer class="rodape">
+    © <span data-ano></span> <span data-site-autor></span> · <span data-site-nome></span>
+  </footer>
+
+  <script src="jogos.js"></script>
+  <script src="assets/comum.js"></script>
+  <script src="assets/vitrine.js"></script>
+</body>
+</html>

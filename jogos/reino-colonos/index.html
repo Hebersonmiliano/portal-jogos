@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reino dos Colonos</title>
+<link rel="stylesheet" href="fontes.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="cv" aria-label="Mapa do reino"></canvas>
+<header id="topo">
+  <h1>Reino dos Colonos</h1>
+  <div id="estoque"></div>
+  <div id="tempo" aria-label="Velocidade">
+    <button data-v="0" title="Pausa (espaço)">❚❚</button><button data-v="1">1×</button><button data-v="2">2×</button><button data-v="4">4×</button>
+  </div>
+  <button id="bstats" title="Produção, estoque e soldados ao longo do tempo">Estatísticas</button>
+  <button id="som" title="Música e efeitos, só efeitos ou desligado">Som</button>
+  <button id="salvar" title="O jogo também se salva sozinho a cada 20 segundos">Salvar</button>
+  <button id="novo" title="Gera um mapa novo">Novo mapa</button>
+</header>
+<aside id="lado">
+  <section id="obj"></section>
+  <section id="info"></section>
+</aside>
+<nav id="ferr" aria-label="Ferramentas"></nav>
+<div id="msg" role="status"></div>
+<section id="stats" hidden aria-label="Estatísticas">
+  <header><h3>Estatísticas</h3><button id="st-fecha" title="Fechar">✕</button></header>
+  <div class="st-barra"><div id="st-grupos"></div><div id="st-modo"></div></div>
+  <div id="st-legenda"></div>
+  <canvas id="st-graf"></canvas>
+  <table id="st-tabela"></table>
+</section>
+<div id="fim" hidden><div class="caixa"><h2 id="fim-tit"></h2><p id="fim-txt"></p><div><button id="fim-cont">Continuar olhando</button><button id="fim-novo">Novo mapa</button></div></div></div>
+<script src="arte.js"></script>
+<script src="mundo.js"></script>
+<script src="logistica.js"></script>
+<script src="predios.js"></script>
+<script src="militar.js"></script>
+<script src="ia.js"></script>
+<script src="salvar.js"></script>
+<script src="estatisticas.js"></script>
+<script src="som.js"></script>
+<script src="jogo.js"></script>
+</body>
+</html>

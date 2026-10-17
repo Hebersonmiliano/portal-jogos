@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crepúsculo dos Reinos</title>
+<link rel="stylesheet" href="fontes.css">
+<link rel="stylesheet" href="style.css"></head><body><main>
+<header class="top"><h1>Crepúsculo dos Reinos</h1><p class="sub" id="sub">Mova, ataque e proteja as suas costas.</p></header>
+<div class="ord" id="ord"></div>
+<div class="stage"><canvas id="c"></canvas><div id="espada" hidden title="Espada Celestial"><div class="ebar"><i id="efill"></i></div><span>⚔</span></div><div id="dlg" hidden><canvas id="dret" width="72" height="72"></canvas><div class="dtexto"><b id="dnm"></b><p id="dtx"></p><small>Clique ou Enter ▸</small></div></div></div>
+<aside class="side">
+<div class="bar">
+<button id="bm">Mover</button><button id="ba">Atacar</button><button id="bs" hidden>Habilidade</button><span id="hbs" class="hbs"></span><button id="bp">Poção</button><button id="bd" title="Defender (D): metade do dano e sem ataque pelas costas até o próximo turno">🛡 Defender</button><button id="bi" hidden>✦ Invocar Aurora</button><button id="bu">Desfazer</button><button id="bw">Encerrar turno</button><button id="br">Reiniciar</button><button id="bz" class="on">Som: ligado</button><button id="rl" title="Girar o mapa para a esquerda (Q)">⟲ Girar</button><button id="rr" title="Girar o mapa para a direita (E)">Girar ⟳</button><button id="bt">Menu</button><button id="bf">Tela cheia</button>
+</div>
+<div class="box" id="inf"></div><div class="box" id="lg"></div>
+<p class="tip">Ataque pelas costas causa +50% de dano, e de um terreno mais alto causa mais. Defender (D) corta o dano pela metade e protege as costas até o próximo turno. No celular ou tablet: toque uma vez para ver a prévia e de novo para confirmar. O Fogo atinge uma área, inclusive aliados. Ao encerrar o turno, escolha para onde o herói vai olhar. Atalhos: Esc cancela, Enter confirma a direção, Q e E giram o mapa. Árvores e colunas ficam transparentes quando escondem alguém.</p>
+</aside>
+</main>
+<div id="ov"></div>
+<script src="intro.js"></script>
+<script src="mapa.js"></script>
+<script src="telas.js"></script>
+<script src="trabalho.js"></script>
+<script src="arte.js"></script>
+<script src="dialogo.js"></script>
+<script src="fases/ato1.js"></script>
+<script src="fases/ato2.js"></script>
+<script src="fases/ato3.js"></script>
+<script src="fases/ato3_areth.js"></script>
+<script src="fases/ato3_mare.js"></script>
+<script src="fases/ato4.js"></script>
+<script src="game.js"></script>
+<script src="habilidades.js"></script>
+<script src="conquistas.js"></script>
+<script src="espada.js"></script>
+<script src="base.js"></script>
+<script src="saves.js"></script>
+<script src="musica.js"></script></body></html>

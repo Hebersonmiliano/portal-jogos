@@ -1,0 +1,7 @@
+# Cabecalhos para Cloudflare Pages / Netlify.
+# So sao necessarios se um jogo Godot 4 for exportado COM threads.
+# Recomendado: exportar SEM threads (Godot 4.3+) e apagar este bloco.
+# Nao aplique ao site inteiro: COEP bloqueia as fontes do Google na vitrine.
+/jogos/foxaventura/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jogo</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="index.html"><span class="marca-icone">🎮</span><span data-site-nome></span></a>
+    <a class="voltar" href="index.html">← Todos os jogos</a>
+  </header>
+
+  <main id="principal" class="pagina">
+    <div class="cabecalho-jogo">
+      <div>
+        <h1 id="titulo"></h1>
+        <p id="generos" class="cartao-generos"></p>
+      </div>
+      <div class="acoes">
+        <button id="favorito" class="botao botao-sec" type="button">☆ Favoritar</button>
+        <button id="tela-cheia" class="botao botao-sec" type="button" disabled>⛶ Tela cheia</button>
+      </div>
+    </div>
+
+    <div id="palco" class="palco"></div>
+
+    <div class="detalhes">
+      <section>
+        <h2>Sobre o jogo</h2>
+        <p id="descricao"></p>
+        <div id="tags" class="tags"></div>
+      </section>
+      <aside>
+        <dl class="ficha">
+          <dt>Controles</dt><dd id="controles"></dd>
+          <dt>Celular</dt><dd id="celular"></dd>
+          <dt>Feito em</dt><dd id="engine"></dd>
+          <dt>Lançamento</dt><dd id="lancamento"></dd>
+        </dl>
+      </aside>
+    </div>
+
+    <section class="secao">
+      <h2>Você também pode gostar</h2>
+      <div id="parecidos" class="grade"></div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    © <span data-ano></span> <span data-site-autor></span> · <span data-site-nome></span>
+  </footer>
+
+  <script src="jogos.js"></script>
+  <script src="assets/comum.js"></script>
+  <script src="assets/pagina-jogo.js"></script>
+</body>
+</html>

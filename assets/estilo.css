@@ -1,0 +1,161 @@
+:root {
+  --fundo: #0f1020;
+  --painel: #1a1b33;
+  --painel-2: #24264a;
+  --borda: #34366a;
+  --texto: #ecebff;
+  --suave: #a3a3cc;
+  --acento: #ffcc33;
+  --novo: #33d17a;
+  --breve: #8a7dff;
+  --cor: #5566aa;
+  --raio: 14px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--fundo);
+  background-image: radial-gradient(circle at 20% -10%, #2a2160 0, transparent 45%);
+  color: var(--texto);
+  font: 16px/1.5 "Nunito", system-ui, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: inherit; }
+h1, h2, h3 { line-height: 1.2; margin: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* Topo */
+.topo {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px max(16px, calc((100% - 1200px) / 2));
+  background: rgb(15 16 32 / .85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--borda);
+}
+.marca {
+  display: flex; align-items: center; gap: 10px;
+  font-family: "Press Start 2P", monospace; font-size: 14px;
+  text-decoration: none; white-space: nowrap; color: var(--acento);
+}
+.marca-icone { font-size: 22px; }
+.busca { flex: 1; max-width: 420px; margin-left: auto; }
+.busca input {
+  width: 100%; padding: 10px 14px; border-radius: 999px;
+  border: 1px solid var(--borda); background: var(--painel);
+  color: var(--texto); font: inherit;
+}
+.busca input:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+.voltar { margin-left: auto; color: var(--suave); text-decoration: none; }
+.voltar:hover { color: var(--texto); }
+
+.pagina { width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; flex: 1; }
+.slogan { color: var(--suave); margin: 0 0 16px; }
+.slogan strong { color: var(--texto); }
+
+/* Destaque */
+.destaque {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 24px;
+  padding: 32px; border-radius: var(--raio); margin-bottom: 24px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--cor) 55%, #000) 0%, var(--painel) 70%);
+  border: 1px solid color-mix(in srgb, var(--cor) 50%, var(--borda));
+}
+.destaque h2 { font-size: clamp(24px, 4vw, 40px); margin: 6px 0 10px; }
+.destaque p { color: #d8d6f5; max-width: 60ch; margin: 0 0 20px; }
+.destaque-rotulo { font-family: "Press Start 2P", monospace; font-size: 10px; color: var(--acento); }
+.destaque-icone { font-size: clamp(64px, 12vw, 140px); filter: drop-shadow(0 8px 24px rgb(0 0 0 / .5)); }
+
+/* Botões */
+.botao {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border-radius: 999px; border: 0;
+  background: var(--acento); color: #1a1400;
+  font: 800 16px "Nunito", sans-serif; text-decoration: none; cursor: pointer;
+  box-shadow: 0 4px 0 #b38600; transition: transform .1s;
+}
+.botao:hover { transform: translateY(-2px); }
+.botao:active { transform: translateY(2px); box-shadow: 0 2px 0 #b38600; }
+.botao-sec { background: var(--painel-2); color: var(--texto); box-shadow: 0 4px 0 #0a0b18; padding: 10px 16px; font-size: 14px; }
+.botao:disabled { opacity: .45; cursor: default; transform: none; }
+.botao-grande { font-size: 20px; padding: 16px 34px; position: relative; z-index: 1; }
+
+/* Filtros */
+.filtros { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; scrollbar-width: none; }
+.filtros::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none; padding: 8px 16px; border-radius: 999px;
+  border: 1px solid var(--borda); background: var(--painel);
+  color: var(--suave); font: 700 14px "Nunito", sans-serif; cursor: pointer;
+}
+.chip:hover { color: var(--texto); }
+.chip.ativo { background: var(--acento); border-color: var(--acento); color: #1a1400; }
+
+/* Grade de jogos */
+.secao { margin-top: 28px; }
+.secao h2 { font-size: 20px; margin-bottom: 14px; }
+.grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 18px; }
+.cartao {
+  display: block; text-decoration: none; border-radius: var(--raio); overflow: hidden;
+  background: var(--painel); border: 1px solid var(--borda);
+  transition: transform .15s, border-color .15s;
+}
+.cartao:hover, .cartao:focus-visible { transform: translateY(-4px); border-color: var(--acento); }
+.cartao-info { padding: 12px 14px 14px; }
+.cartao-info h3 { font-size: 16px; }
+.cartao-generos { color: var(--suave); font-size: 13px; margin: 4px 0 0; }
+
+.capa {
+  position: relative; aspect-ratio: 16 / 9; overflow: hidden;
+  display: grid; place-items: center;
+  background:
+    radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--cor) 80%, #fff) 0, transparent 60%),
+    linear-gradient(160deg, var(--cor), color-mix(in srgb, var(--cor) 35%, #000));
+}
+.capa img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.capa-icone { font-size: 64px; filter: drop-shadow(0 6px 12px rgb(0 0 0 / .4)); }
+.selos { position: absolute; top: 8px; left: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+.selo { padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; background: rgb(0 0 0 / .6); }
+.selo-novo { background: var(--novo); color: #04210f; }
+.selo-breve { background: var(--breve); color: #fff; }
+
+.vazio { color: var(--suave); text-align: center; padding: 40px 0; }
+
+/* Página do jogo */
+.cabecalho-jogo { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.cabecalho-jogo h1 { font-size: clamp(24px, 4vw, 36px); }
+.acoes { display: flex; gap: 10px; }
+.palco {
+  aspect-ratio: 16 / 9; max-height: 78vh; width: 100%;
+  border-radius: var(--raio); overflow: hidden; background: #000;
+  border: 1px solid var(--borda);
+}
+.palco .capa { height: 100%; aspect-ratio: auto; }
+.palco .capa-icone { font-size: 120px; position: absolute; opacity: .35; }
+.palco iframe { width: 100%; height: 100%; border: 0; display: block; }
+.aviso-breve { position: relative; font-weight: 800; font-size: 18px; background: rgb(0 0 0 / .5); padding: 10px 18px; border-radius: 999px; }
+
+.detalhes { display: grid; grid-template-columns: 1fr 320px; gap: 24px; margin-top: 24px; }
+.detalhes h2 { font-size: 20px; margin-bottom: 8px; }
+.detalhes p { color: #d8d6f5; margin: 0; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.tag { padding: 4px 10px; border-radius: 999px; background: var(--painel-2); color: var(--suave); font-size: 13px; }
+.ficha { margin: 0; padding: 16px 18px; background: var(--painel); border: 1px solid var(--borda); border-radius: var(--raio); }
+.ficha dt { color: var(--suave); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; margin-top: 10px; }
+.ficha dt:first-child { margin-top: 0; }
+.ficha dd { margin: 2px 0 0; }
+
+.rodape { text-align: center; color: var(--suave); font-size: 13px; padding: 24px 16px; border-top: 1px solid var(--borda); }
+
+@media (max-width: 720px) {
+  .topo { flex-wrap: wrap; }
+  .busca { max-width: none; flex-basis: 100%; }
+  .destaque { grid-template-columns: 1fr; padding: 22px; }
+  .destaque-icone { display: none; }
+  .detalhes { grid-template-columns: 1fr; }
+  .grade { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .palco { aspect-ratio: 4 / 3; }
+}
