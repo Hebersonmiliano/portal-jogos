@@ -19,6 +19,25 @@ window.GENEROS = [
 
 window.JOGOS = [
   {
+    id: "brasa-eterna",
+    titulo: "Brasa Eterna",
+    genero: ["Ação", "Aventura", "RPG"],
+    tags: ["pixel art", "estilo Zelda", "elementos", "dois finais"],
+    descricao:
+      "RPG de ação em pixel art no estilo Zelda clássico. Kael e a Faísca atravessam cinco capítulos " +
+      "para recuperar as brasas da Chama Sagrada, dominar fogo, gelo, trovão e vento e enfrentar Morvane.",
+    controles: "Teclado: WASD/setas movem, J ataca (segure para o disparo elemental), K esquiva, I abre os equipamentos. Também funciona com controle e no celular.",
+    url: "jogos/brasa-eterna/index.html",
+    capa: "",
+    cor: "#c8501e",
+    icone: "🔥",
+    engine: "HTML5",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-10-17",
+    destaque: true,
+  },
+  {
     id: "crepusculo",
     titulo: "Crepúsculo dos Reinos",
     genero: ["RPG", "Estratégia"],
