@@ -2251,8 +2251,8 @@ function drawJornada(y){const cur=storyStep();txt('JORNADA',6,y,'#ffd166');txt('
     txt(st.t.slice(0,28),18,yy,done?'#5a8a5a':on?'#ffd166':'#6a5a7a')});
   if(cur)wrap(cur.d,31).slice(0,2).forEach((l,i)=>txt(l,6,y+16+STORY.length*10+i*9,'#c9b8d8'))}
 /* ---------- saves antigos: mapa novo + progresso do jogador ---------- */
-const WV=5;
-const KEEP={C:'c',A:'c',k:'7._',v:'7._',w:'7._',s:'._',b:'.',r:'.',p:'_',K:'._O',D:'_',U:'L',I:'._'};
+const WV=7;
+const KEEP={'_':'Ac','.':'Ac',C:'c',A:'c',k:'7._',v:'7._',w:'7._',s:'._',b:'.',r:'.',p:'_',K:'._O',D:'_',U:'L',I:'._'};
 function mergeTiles(base,saved){if(!saved||saved.length!==base.length||saved[0].length!==base[0].length)return base;
   return base.map((row,r)=>row.map((b,c)=>{const sv=saved[r][c];return KEEP[b]&&sv!==b&&KEEP[b].includes(sv)?sv:b}))}
 /* ---------- mapa em cache e proteção contra travamentos ---------- */
@@ -3058,7 +3058,7 @@ function loadGame(){
   const d=readSave();if(!d)return;
   setDiff(d.diff);initWorld();chapter=d.chapter;Object.assign(player,d.p);
   const oldL=(d.layout||1)<2;
-  for(const k in d.rooms){const rr=ROOMS[k],x=d.rooms[k];if(!rr||(oldL&&+k.split(',')[0]>=10))continue;rr.tiles=(d.wv||0)<WV?mergeTiles(rr.tiles,x.t):x.t.map(t=>t.split(''));rr.chest=x.chest;rr.cleared=x.cl;rr.won=x.won;rr.litDone=x.lit;rr.story=x.st}
+  for(const k in d.rooms){const rr=ROOMS[k],x=d.rooms[k];if(!rr||(oldL&&+k.split(',')[0]>=10))continue;rr.tiles=mergeTiles(rr.tiles,x.t);rr.chest=x.chest;rr.cleared=x.cl;rr.won=x.won;rr.litDone=x.lit;rr.story=x.st}
   fixPlayer2();visited=new Set(d.visited);playTime=d.time||0;caveReturn=d.cave||null;worldMin=d.wmin||480;if(d.fog)FOG=d.fog.split('').map(Number);if(!player.q)player.q={};
   if(d.introPending){playIntro(CH_SCENES[chapter]);return}
   const BK={1:'1,-1',2:(d.layout||1)>=2?'11,10':'11,9',3:'21,18',4:'b4',6:'b6'};
