@@ -19,6 +19,25 @@ window.GENEROS = [
 
 window.JOGOS = [
   {
+    id: "brasa-eterna-2",
+    titulo: "Brasa Eterna 2: Novos Horizontes",
+    genero: ["Ação", "Aventura", "RPG"],
+    tags: ["pixel art", "mundo aberto", "masmorras", "forja +7"],
+    descricao:
+      "A continuação de Brasa Eterna, agora em mundo aberto. Kael segue o rastro da cinza negra até a Vila Aurora: " +
+      "explore masmorras, forje equipamentos até +7, use bombas, gancho e bumerangue, cace monstros raros e guarde fadas que te salvam.",
+    controles: "Teclado: WASD/setas movem, J ataca e fala, K esquiva, L usa o item do atalho, R troca o item, I abre o menu. Também funciona com controle e no celular.",
+    url: "jogos/brasa-eterna-2/index.html",
+    capa: "jogos/brasa-eterna-2/capa.png",
+    cor: "#3a6ad6",
+    icone: "🌅",
+    engine: "HTML5",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-10-18",
+    destaque: true,
+  },
+  {
     id: "brasa-eterna",
     titulo: "Brasa Eterna",
     genero: ["Ação", "Aventura", "RPG"],

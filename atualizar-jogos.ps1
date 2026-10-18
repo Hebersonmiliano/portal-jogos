@@ -9,6 +9,7 @@ $origens = @{
   "crepusculo"    = "C:\Users\teste\crepusculo-dos-reinos"
   "reino-colonos" = "C:\Users\teste\reino-colonos"
   "brasa-eterna"  = "C:\Users\teste\brasa-eterna"
+  "brasa-eterna-2" = "C:\Users\teste\brasa-eterna-2"
   # "foxaventura" = "C:\Users\teste\FoxAventura\export\web"   # export Web do Godot
 }
 
