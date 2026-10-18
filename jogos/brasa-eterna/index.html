@@ -112,12 +112,12 @@ const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FONT='"Press Start 2P", monospace';
 try{document.fonts&&document.fonts.load('8px "Press Start 2P"')}catch(e){}
 const DIFFS=[
-  {name:'FÁCIL',desc:'4 corações, inimigos lentos',hp:8,spd:.75,dmg:.5,boss:8,boss2:10,boss3:12,boss4:14,boss5:16,fire:1.4,ps:.85,drop:.4},
-  {name:'NORMAL',desc:'O desafio equilibrado',hp:6,spd:1,dmg:1,boss:12,boss2:14,boss3:16,boss4:20,boss5:22,fire:1,ps:1,drop:.25},
-  {name:'DIFÍCIL',desc:'Dano dobrado, chefe feroz',hp:6,spd:1.2,dmg:2,boss:18,boss2:20,boss3:24,boss4:28,boss5:30,fire:.7,ps:1.25,drop:.15}];
+  {name:'FÁCIL',desc:'4 corações, inimigos lentos',hp:8,spd:.75,dmg:.5,boss:8,boss2:10,boss3:12,boss4:14,boss5:16,boss6:14,fire:1.4,ps:.85,drop:.4},
+  {name:'NORMAL',desc:'O desafio equilibrado',hp:6,spd:1,dmg:1,boss:12,boss2:14,boss3:16,boss4:20,boss5:22,boss6:18,fire:1,ps:1,drop:.25},
+  {name:'DIFÍCIL',desc:'Dano dobrado, chefe feroz',hp:6,spd:1.2,dmg:2,boss:18,boss2:20,boss3:24,boss4:28,boss5:30,boss6:26,fire:.7,ps:1.25,drop:.15}];
 let diffIdx=1;try{const v=localStorage.getItem('brasa-dif');if(v!==null&&+v>=0&&+v<3)diffIdx=+v}catch(e){}
 let D=DIFFS[diffIdx];
-let unlockedCap=1,selCap=1,titleRow=0,hintWisp=false,saveFlash=0;try{unlockedCap=Math.min(5,Math.max(1,+localStorage.getItem('brasa-cap')||1))}catch(e){}
+let unlockedCap=1,selCap=1,titleRow=0,hintWisp=false,saveFlash=0;try{unlockedCap=Math.min(6,Math.max(1,+localStorage.getItem('brasa-cap')||1))}catch(e){}
 function setDiff(i){diffIdx=(i+3)%3;D=DIFFS[diffIdx];try{localStorage.setItem('brasa-dif',String(diffIdx))}catch(e){}}
 
 /* ---------- utilidades ---------- */
@@ -379,6 +379,37 @@ const SPIRIT=spr(["",
 "...kk.kk.kk.k...",""],{k:'#4a6a88',w:'#e8f4ff'});
 const ASHP={k:'#1a1020',w:'#6a625e',W:'#3a3432',r:'#ff6a2a'};
 const ASH={r:[spr(SK1,ASHP),spr(SK2,ASHP)]};ASH.l=ASH.r.map(flip);
+const LIA=spr(D1,{...HP,g:'#7a4ab0',G:'#4a2a7a',h:'#e8c060',r:'#ff8a3d',o:'#ffd166'});
+const MERCH=spr(D1,{...HP,g:'#c8a040',G:'#8a6a20',h:'#e8e2d0',r:'#3a8ab0',o:'#8fd0e8'});
+const SCORP=spr(["","",
+"..........kk....",
+".........kyyk...",
+"..........kyk...",
+"...........kyk..",
+"..kk.......kyk..",
+".kyyk...kkkyk...",
+".kyk..kkyyyyk...",
+"..kk.kyyyyyyk...",
+"....kyyyyyyyykk.",
+"...kykyykyykykyk",
+"...k.k..k..k.k.k",""],{k:'#2a1a0a',y:'#c88a3a'}),SCORPL=flip(SCORP);
+const COLOS=spr([
+"....kkkkkkkk....",
+"...kgwgggggwgk..",
+"..kggggggggggk..",
+"..kgekggggkegk..",
+"..kggggggggggk..",
+".kkgggbbbbgggkk.",
+"kggkgbddddbgkggk",
+"kgggkbddddbkgggk",
+"kgggkgbbbbgkgggk",
+".kkkkggggggkkkk.",
+"....kgggggggk...",
+"....kggkkggk....",
+"...kgggk.kgggk..",
+"...kgggk.kgggk..",
+"...kkkkk.kkkkk..",
+""],{k:'#2a4a5a',g:'#a8d8e8',w:'#ffffff',e:'#c06bff',b:'#3a2a4a',d:'#0a0610'});
 const MORV=spr([
 "...k.k.kk.k.k...",
 "...kkkkkkkkkk...",
@@ -402,7 +433,7 @@ const GEM=spr(["..kkkk..",".kcCCck.","kcwCCCck","kCCCCCck",".kCCCck.","..kCck.."
 const KEY=spr(["..kkk...",".kyyyk..",".kykyk..",".kyyyk..","..kyk...","..kyyk..","..kyk...","..kyyk.."],{k:'#1a1020',y:'#ffd166'});
 
 /* ---------- tiles ---------- */
-const SOLID=new Set([...'TR~b#DpCcSWFULGrKIQqVZJMNHh']);
+const SOLID=new Set([...'TR~b#DpCcSWFULGrKIQqVZJMNHh12345dnm']);
 const TC={};
 const THEMES={
   meadow:{g1:'#4c9a3f',g2:'#3f8536',g3:'#6cbf4a',w1:'#2f6fbf',w2:'#2a62a8',wave:'#5a9ae8',wall:'#3b3246',wallHi:'#52465e',mort:'#241d2c',spot:'#2f283a',fl:'#2a2230',fl2:'#211a27',fl3:'#33293b'},
@@ -415,6 +446,9 @@ const THEMES={
   snow:{g1:'#d8e4ec',g2:'#c4d4e0',g3:'#ffffff',w1:'#4a7aa0',w2:'#3e6a8e',wave:'#8fc0e0',wall:'#4a5a6e',wallHi:'#6a7a90',mort:'#2a3444',spot:'#3e4c5e',fl:'#3a4656',fl2:'#2e3846',fl3:'#465466',
     tree:['#14302e','#e8f4ff','#1e403c','#2a4e48'],bush:['#2a4a4a','#e8f4ff','#3a5a5a','#4a6a6a']},
   temple4:{g1:'#d8e4ec',g2:'#c4d4e0',g3:'#ffffff',w1:'#2a5a80',w2:'#244e70',wave:'#6aa0c8',wall:'#3a4a5e',wallHi:'#56687e',mort:'#222c3a',spot:'#344254',fl:'#2e3a4a',fl2:'#253040',fl3:'#3a485a'},
+  desert:{g1:'#d8b878',g2:'#c8a868',g3:'#ead8a8',w1:'#3a8ab0',w2:'#2e78a0',wave:'#8fd0e8',wall:'#7a5a32',wallHi:'#9a7a4a',mort:'#4a3418',spot:'#6a4a28',fl:'#c8b088',fl2:'#b8a078',fl3:'#d8c098',
+    tree:['#1a3a1a','#6ac05a','#2a5a2a','#3a8a3a'],bush:['#5a4a2a','#b8a05a','#6a5a32','#8a7a4a']},
+  pyramid:{g1:'#d8b878',g2:'#c8a868',g3:'#ead8a8',w1:'#2a5a7a',w2:'#24506e',wave:'#6aa0c8',wall:'#7a5a32',wallHi:'#9a7a4a',mort:'#4a3418',spot:'#6a4a28',fl:'#5a4428',fl2:'#4a3820',fl3:'#6a5232'},
   tower:{g1:'#5a5348',g2:'#4a443a',g3:'#7a7060',w1:'#2a2a4a',w2:'#24243e',wave:'#5a5a8a',wall:'#3a2a3a',wallHi:'#54405a',mort:'#20162a',spot:'#30223a',fl:'#2a2030',fl2:'#20182a',fl3:'#362a3e'}};
 let TH=THEMES.meadow;
 function grass(g){P(g,0,0,TH.g1,16,16);for(let i=0;i<14;i++)P(g,rnd()*16|0,rnd()*16|0,TH.g2);for(let i=0;i<5;i++){const x=rnd()*15|0,y=1+rnd()*14|0;P(g,x,y,TH.g3);P(g,x+1,y-1,TH.g3)}}
@@ -452,6 +486,11 @@ function drawTile(g,ch,v,dark){
     case'J':base();P(g,4,10,'#1a1020',8,6);P(g,5,11,'#3a3540',6,5);P(g,5,3,'#2a2a3a',6,7);P(g,6,2,'#2a2a3a',4,9);break;
     case'P':base();P(g,2,2,'#3a3540',12,12);P(g,3,3,'#8a8494',10,10);P(g,5,5,'#c9b8d8',6,6);P(g,7,7,'#ffd166',2,2);break;
     case'M':case'N':base();if(ch==='N'){P(g,2,2,'#3a3540',12,12);P(g,3,3,'#ffd166',10,10)}circ(g,8,8.5,6.5,6,(d,dx,dy)=>d>.75?'#3a4a5a':dy>.35?'#8a9ab0':dx+dy<-.5?'#ffffff':'#c9d6e8');break;
+    case'1':case'2':base();P(g,6,12,'#3a3540',4,4);for(let i=2;i<14;i++){const y=ch==='1'?15-i:i;P(g,i,y-1,'#1a1020',1,3);P(g,i,y,'#e8f8ff',1,1);P(g,i,y-1,'#8fd0ff',1,1)}break;
+    case'3':base();circ(g,8,8,5.5,5.5,d=>d>.6?'#c8901a':'#ffe27a');P(g,7,0,'#ffd166',2,3);P(g,7,13,'#ffd166',2,3);P(g,0,7,'#ffd166',3,2);P(g,13,7,'#ffd166',3,2);break;
+    case'4':case'5':base();P(g,4,11,'#3a3540',8,5);circ(g,8,6,4.5,5.5,(d,dx,dy)=>ch==='5'?(d>.6?'#c8901a':dx+dy<-.3?'#ffffff':'#ffe27a'):(d>.6?'#2a1a3a':'#5a4a6a'));break;
+    case'd':base();circ(g,8,10,7.5,5.5,(d,dx,dy)=>d>.8?'#a88a50':dy<-.2?'#ecd8a0':'#d0b070');break;
+    case'n':case'm':base();break;
     case'H':case'h':base();P(g,4,10,'#1a1020',8,6);P(g,5,11,'#3a3540',6,5);P(g,5,3,ch==='h'?'#ffd84a':'#6a5a2a',6,7);P(g,6,2,ch==='h'?'#fffbe0':'#8a7a3a',4,9);P(g,7,4,'#ffffff',1,2);break;
     case'O':base();circ(g,8,9,6.5,5.5,d=>d>.7?'#2a1e16':'#0a0610');break;
     case'K':if(dark){P(g,0,0,TH.wall,16,16);P(g,0,0,TH.wallHi,16,1)}else{grass(g);circ(g,8,9.5,7.4,6,(d,dx,dy)=>d>.75?'#3a3540':dy>.35?'#5c5766':'#8a8494')}
@@ -462,7 +501,7 @@ function drawTile(g,ch,v,dark){
 }
 function tileImg(ch,v,dark,theme='meadow'){const key=ch+v+(dark?'d':'')+theme;if(TC[key])return TC[key];const[c,g]=mk(16,16);TH=THEMES[theme]||THEMES.meadow;srand(ch.charCodeAt(0)*977+v*131+7);drawTile(g,ch,v,dark);return TC[key]=c}
 function buildBg(rm){const[c,g]=mk(W,H);for(let r=0;r<ROWS;r++)for(let cc=0;cc<COLS;cc++){const v=(((cc*73856093)^(r*19349663))>>>0)%4;g.drawImage(tileImg(rm.tiles[r][cc],v,rm.dark>0,rm.theme||'meadow'),cc*TS,r*TS)}return c}
-const FPAL=['#e0452b','#ff8a3d','#ffd166'],BPAL=['#2a5ad6','#5a9aff','#cfe8ff'];
+const DPAL=['#1a0e24','#5a2a7a','#c06bff'],FPAL=['#e0452b','#ff8a3d','#ffd166'],BPAL=['#2a5ad6','#5a9aff','#cfe8ff'];
 function flame(g,x,y,s,t,pal=FPAL){const f=Math.round(Math.sin(t*.25+x*.7)*1.5+Math.sin(t*.41)*1);x=Math.round(x);y=Math.round(y);
   P(g,x-3*s,y-5*s+f,pal[0],6*s,5*s-f);P(g,x-2*s,y-8*s+f,pal[1],4*s,8*s-f);P(g,x-s,(y-10*s+f*1.4)|0,pal[2],2*s,6*s)}
 
@@ -690,6 +729,51 @@ const DEFS={
   bossIntro2:'KAEL: Você matou meus pais e queimou minha cidade. Hoje isso acaba.',
   winLines:[['MORVANE: Impossível... depois de séculos... a Chama escolheu você...',280],['Faísca: A última brasa está no coração dele, Kael. Pegue-a...',240],['Faísca: E então... você vai precisar escolher.',220]],
   absorbLine:'Faísca: As cinco brasas... Kael, você está brilhando como o sol!',
+  onEnter(rm){if(!rm.won)rm.closePending=true}},
+ /* ===== PARTE 2 — CAPÍTULO 6: O Deserto de Vidro ===== */
+ '50,51':{name:'Acampamento da Ordem',dark:0,theme:'desert',map:[
+  "TTTTTTTTTTTTTTTT","T..WWW....WWW..T","T..WEW....WEW..T","T..............T","T...R...........",
+  "T...............","T.....R.........","T..WWW....WWW..T","T..WEW....WEW..T","T..............T","TTTTTTTTTTTTTTTT"],
+  enemies:[['scorpion',12,3],['ashman',7,9]],
+  onEnter(rm){if(!rm.seen){rm.seen=true;showMsg('Faísca: O deserto ao leste... A cinza negra caiu além das dunas.',220)}}},
+ '51,51':{name:'Dunas Cantantes',dark:0,theme:'desert',map:[
+  "TTTTTTTTTTTTTTTT","T....dd....R...T","T...ddd........T","T..ddd....R....T","......dddd......",
+  "......dddd......","......dddd......","T..R....ddd....T","T.........dd...T","T....R.....d...T","TTTTTTTTTTTTTTTT"],
+  enemies:[['scorpion',3,8],['scorpion',13,2]],
+  onEnter(rm){if(!rm.seen){rm.seen=true;showMsg('Faísca: Dunas no caminho! Uma rajada de vento as espalha (Q troca o elemento).',240)}}},
+ '52,51':{name:'Oásis de Vidro',dark:0,theme:'desert',gateMsg:'A pirâmide está selada. A luz das Ruínas do Sol, a leste, deve abri-la.',map:[
+  "TTTTTTT..TTTTTTT","T......GG......T","T...~~~~~~~~...T","T..~~~~~~~~~~..T","...~~~~~~~~~~...",
+  "...~~~~~~~~~~...","....~~~~~~~~....","T..n........m..T","T..T........T..T","T..............T","TTTTTTTTTTTTTTTT"],
+  enemies:[],
+  onEnter(rm){if(!rm.seen2){rm.seen2=true;showMsg('Faísca: Um oásis! A Lia está ali... e um mercador. Toque neles para conversar.',240)}}},
+ '53,51':{name:'Ruínas do Sol',dark:0,theme:'desert',beams:[{c:1,r:2,d:[1,0]}],
+  puzzle(rm){for(const row of rm.tiles)if(row.includes('4'))return false;const o=ROOMS['52,51'];for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(o.tiles[r][c]==='G')o.tiles[r][c]='.';
+    sfx.door();shake=8;showMsg('A luz alcançou o cristal! Ao longe, a pirâmide se abriu.',220);return true},map:[
+  "TTTTTTTTTTTTTTTT","T..............T","T3......1.....RT","T..R...........T","...............T",
+  "....R..........T","...............T","T.........R....T","T.......1.....4T","T..............T","TTTTTTTTTTTTTTTT"],
+  enemies:[['scorpion',11,4],['ashman',4,6]],
+  onEnter(rm){if(!rm.cleared)showMsg('Faísca: Espelhos antigos! Gire-os com a espada e leve a luz do sol até o cristal.',260)}},
+ '52,50':{name:'Topo da Pirâmide',dark:0,theme:'desert',gust:true,secrets:{'7,2':{to:'p1'},'8,2':{to:'p1'}},map:[
+  "TTTTTTTTTTTTTTTT","TWWWWWWWWWWWWWWT","TWWWWWWOOWWWWWWT","T.WWWWW..WWWWW.T","T...WWW..WWW...T",
+  "T......==......T","T..R...==...R..T","T......==......T","T..d...==...d..T","T......==......T","TTTTTTT..TTTTTTT"],
+  enemies:[['scorpion',3,5],['scorpion',12,7],['ashman',5,9]]},
+ 'p1':{name:'Pirâmide: Câmara dos Espelhos',dark:.7,theme:'pyramid',beams:[{c:1,r:1,d:[1,0]}],secrets:{'1,8':{to:'p2'}},
+  puzzle(rm){for(const row of rm.tiles)if(row.includes('4'))return false;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(rm.tiles[r][c]==='G')rm.tiles[r][c]='_';bg=buildBg(rm);sfx.door();showMsg('A passagem para baixo se abriu!',180);return true},map:[
+  "################","#3_____1_______#","#______________#","#______________#","#______________#",
+  "#______2____1__#","#______________#","#GG____________#","#OG_________4__#","#GG____________#","#######XX#######"],
+  enemies:[['scorpion',4,3],['ashman',11,7]]},
+ 'p2':{name:'Pirâmide: Salão das Areias',dark:.75,theme:'pyramid',beams:[{c:13,r:1,d:[-1,0]}],secrets:{'14,8':{to:'b6'}},
+  puzzle(rm){for(const row of rm.tiles)if(row.includes('4'))return false;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(rm.tiles[r][c]==='G')rm.tiles[r][c]='_';bg=buildBg(rm);sfx.door();showMsg('O caminho para o fundo da pirâmide se abriu!',180);return true},map:[
+  "################","#__2_________3_#","#______________#","#______________#","#__d___dd______#",
+  "#______________#","#______dd______#","#____________GG#","#__1________4GO#","#____________GG#","#######XX#######"],
+  enemies:[['scorpion',5,6],['scorpion',11,3],['spirit',8,2]]},
+ 'b6':{name:'Coração da Pirâmide',dark:.6,theme:'pyramid',beams:[{c:1,r:5,d:[1,0]}],doorOpen:'X',map:[
+  "################","#____1______2__#","#______________#","#______________#","#______________#",
+  "#3___2_________#","#______________#","#______________#","#______________#","#____1______1__#","#######XX#######"],
+  enemies:[['colossus',7,3]],bossRoom:true,jewel:'topaz',
+  bossIntro:'Faísca: Um colosso de vidro e cinza negra! O vidro reflete tudo... use a luz dos espelhos!',
+  winLines:[['Faísca: Kael... o Colosso era só vidro e cinza negra. Alguém o controlava.',260],['Faísca: E veja... ele deixou um fragmento para trás.',200]],
+  absorbLine:'Faísca: Essa cinza negra... é do mesmo fogo que eu, mas fria. Quem fez isso?',
   onEnter(rm){if(!rm.won)rm.closePending=true}}
 };
 const CHAPS={
@@ -697,8 +781,9 @@ const CHAPS={
   2:{start:'10,12',bounds:[10,13,10,12],intro:'Faísca: A brasa despertou algo em você. Segure o botão da espada e solte para lançar fogo!',respawn:'Sua chama reacendeu na margem.'},
   3:{start:'21,22',bounds:[20,22,18,22],intro:'Faísca: Segure a espada ainda mais tempo para soltar o Pulso de Brasa em todas as direções!',respawn:'Sua chama reacendeu na floresta.'},
   4:{start:'31,32',bounds:[30,32,30,32],intro:'Faísca: A terceira brasa aqueceu seus pés... Sua esquiva agora é uma Investida de Brasa: derrete gelo e queima!',respawn:'Sua chama reacendeu na trilha gelada.'},
-  5:{start:'41,45',bounds:[41,41,43,45],intro:'Faísca: Aperte Q (ou E no celular) para trocar o elemento da sua brasa!',respawn:'Sua chama reacendeu nas ruínas de Brasalume.'}};
-let ROOMS={},room=null,roomXY=[1,2],bg=null,torches=[],curKey='1,2',caveReturn=null,waterOK=false,warpFade=0,previewing=false,menuRow=0,menuFlash=0,choiceSel=0,hintAura=false,hintAura2=false,hintShadow=false,hintMenu=false,hintShield=false,hintShield2=false,jm=false,sockIdx=0,hintJewel=false;
+  5:{start:'41,45',bounds:[41,41,43,45],intro:'Faísca: Aperte Q (ou E no celular) para trocar o elemento da sua brasa!',respawn:'Sua chama reacendeu nas ruínas de Brasalume.'},
+  6:{start:'50,51',bounds:[50,53,50,51],intro:'Faísca: Um ano depois... e uma cinza negra caiu no deserto. Vamos, Mestre Kael!',respawn:'Sua chama reacendeu no acampamento da Ordem.'}};
+let ROOMS={},room=null,roomXY=[1,2],bg=null,torches=[],curKey='1,2',caveReturn=null,waterOK=false,warpFade=0,previewing=false,menuRow=0,menuFlash=0,choiceSel=0,shopSel=0,hintGlass=false,hintGlass2=false,hintAura=false,hintAura2=false,hintShadow=false,hintMenu=false,hintShield=false,hintShield2=false,jm=false,sockIdx=0,hintJewel=false;
 let player,enemies=[],projectiles=[],pickups=[],particles=[],titleEmbers=[];
 let absorbT=0,state='title',scroll=null,frame=0,shake=0,hitstop=0,deadT=0,winT=0,playTime=0,lockCD=0,lostStep=0,chapter=1,pshots=[],hazards=[],bolts=[],visited=new Set();
 let msg={text:'',t:0},banner={text:'',t:0},msgQueue=[];
@@ -735,6 +820,8 @@ function spawn(type,c,r){
   if(type==='crab')Object.assign(e,{hp:3,spd:.9,dx:Math.random()<.5?-1:1});
   if(type==='frog')Object.assign(e,{hp:2,spd:1.1,shotT:60+Math.random()*60|0,hop:0,hx:0,hy:0});
   if(type==='wisp')Object.assign(e,{hp:2,fly:true,fireOnly:true,spd:.4,ph:Math.random()*6});
+  if(type==='scorpion')Object.assign(e,{hp:3,dmg:2,spd:.8,state:'under',t:60+Math.random()*60|0,fl:false});
+  if(type==='colossus')Object.assign(e,{hp:D.boss6,maxHp:D.boss6,dmg:2,boss:true,title:'COLOSSO DE VIDRO',t:0,lit:0,state:null,st:0,hb:{x:4,y:6,w:24,h:24}});
   if(type==='ashman')Object.assign(e,{hp:2,dmg:1,spd:.55,state:null});
   if(type==='shadow')Object.assign(e,{hp:999,dmg:2,fly:true,noDrop:true,stun:0});
   if(type==='morvane')Object.assign(e,{hp:D.boss5,maxHp:D.boss5,dmg:1,boss:true,title:'MORVANE',aura:'ice',auraT:0,vulnT:0,t:0,hb:{x:4,y:4,w:24,h:26}});
@@ -957,7 +1044,7 @@ function spawnWave(i){room.wave=i;enemies=room.waves[i].map(([t,c,r])=>spawn(t,c
 function enterCave(sec,c,r){AS.caves[sec.to]=1;saveAS();caveReturn={room:curKey,x:sec.ret?sec.ret[0]:c*TS,y:sec.ret?sec.ret[1]:r*TS+14};const p=player;
   loadRoom(sec.to);p.x=120;p.y=128;p.fx=p.x+8;p.fy=p.y-6;p.dashT=p.kbT=p.atkT=0;p.glide=0;warpFade=30;sfx.door();afterEnter()}
 function exitCave(){const C=caveReturn,p=player;caveReturn=null;loadRoom(C.room);p.x=C.x;p.y=C.y;p.fx=p.x+8;p.fy=p.y-6;p.dashT=p.kbT=p.atkT=0;p.glide=0;warpFade=30;afterEnter()}
-function nearestEnemy(x,y,range){let best=null,bd=range;for(const e of enemies){if(e.type==='queen'&&e.state!=='attack')continue;if(e.type==='hunter'&&e.state==='vanish')continue;if(e.type==='spirit'&&!e.vis)continue;const c=center(e),d=Math.hypot(c.x-x,c.y-y);if(d<bd){bd=d;best=e}}return best}
+function nearestEnemy(x,y,range){let best=null,bd=range;for(const e of enemies){if(e.type==='queen'&&e.state!=='attack')continue;if(e.type==='hunter'&&e.state==='vanish')continue;if(e.type==='spirit'&&!e.vis)continue;if(e.type==='scorpion'&&e.state==='under')continue;const c=center(e),d=Math.hypot(c.x-x,c.y-y);if(d<bd){bd=d;best=e}}return best}
 function shieldBlock(b){
   const p=player;if(!eqId('shield')||p.atkT>0||p.dashT>0)return false;
   const[fx,fy]=DIRV[p.facing],l=Math.hypot(b.vx,b.vy)||1,dot=(b.vx*fx+b.vy*fy)/l,lv=eqLv('shield');
@@ -1054,6 +1141,14 @@ const TRACKS={
   boss5:{bpm:156,chords:[[45,'m'],[41,'M'],[38,'m'],[40,'M']],bass:[0,0,12,0,0,0,12,7],lead:'sawtooth',
     mel:[81,'_',84,'_',88,'_',86,84, 81,'_','_','_',77,'_',81,'_', 74,'_',77,'_',81,'_',79,77, 76,'_',80,'_',83,'_',88,'_'],
     drums:{k:'k.k.k.k.k.k.k.k.',s:'....s.......s..s',h:'h.h.h.h.h.h.h.h.'}},
+  desert:{bpm:96,chords:[[40,'m'],[41,'M'],[43,'M'],[41,'M']],bass:[0,null,7,null,0,null,7,null],arp:'16',arpType:'triangle',lead:'square',
+    mel:[76,'_',77,'_',80,'_',81,'_', 80,'_',77,'_',76,'_','_','_', 79,'_',77,'_',76,'_',74,'_', 76,'_','_','_','_','_',null,null],
+    drums:{k:'k.......k..k....',s:'....s.......s...',h:'..h...h...h...h.'}},
+  pyramid:{bpm:64,chords:[[40,'m'],[41,'M'],[40,'m'],[39,'M']],bass:[0,null,null,null,null,null,null,null],arp:'8',arpType:'sine',lead:'sine',
+    mel:[88,'_','_','_',89,'_',88,'_', 84,'_','_','_',null,null,null,null, 83,'_','_','_',84,'_',80,'_', 81,'_','_','_','_','_',null,null]},
+  boss6:{bpm:148,chords:[[40,'m'],[41,'M'],[38,'M'],[40,'M']],bass:[0,0,12,0,0,12,0,12],lead:'sawtooth',
+    mel:[76,'_',77,'_',80,'_',77,76, 74,'_','_','_',77,'_',74,'_', 72,'_',74,'_',77,'_',80,'_', 81,'_','_','_',80,'_',76,'_'],
+    drums:{k:'k...k..kk...k...',s:'....s.......s..s',h:'h.h.h.h.h.h.h.h.'}},
   cave:{bpm:60,chords:[[40,'m'],[36,'M'],[45,'m'],[47,'M']],bass:[0,null,null,null,null,null,null,null],arp:'8',arpType:'sine'},
   victory:{bpm:100,chords:[[36,'M'],[41,'M'],[43,'M'],[36,'M']],bass:[0,null,7,null,0,null,7,null],lead:'square',
     mel:[72,76,79,'_',84,'_','_','_', 81,'_',77,'_',81,'_',84,'_', 83,'_',79,'_',74,'_',79,'_', 84,'_','_','_','_','_',null,null],
@@ -1062,7 +1157,7 @@ const TRACKS={
 const LEADV={square:.04,sawtooth:.032,triangle:.07,sine:.07};
 let bgm=null;
 function getNB(){if(!NB){NB=AC.createBuffer(1,AC.sampleRate*1.5|0,AC.sampleRate);const a=NB.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}return NB}
-const CT={1:['field1','dungeon','boss'],2:['swamp','temple','boss2'],3:['ashwood','fort','boss3'],4:['snow','temple4','boss4'],5:['ruins','tower','boss5']};
+const CT={1:['field1','dungeon','boss'],2:['swamp','temple','boss2'],3:['ashwood','fort','boss3'],4:['snow','temple4','boss4'],5:['ruins','tower','boss5'],6:['desert','pyramid','boss6']};
 function roomTrack(){const t=CT[chapter]||CT[1];if(room.cave)return'cave';if(room.bossRoom)return room.won?t[1]:t[2];if(room.dark>=.35)return t[1];return t[0]}
 function playTrack(name){
   if(!AC||(bgm&&bgm.name===name))return;stopTrack();const T=TRACKS[name];if(!T)return;
@@ -1093,6 +1188,32 @@ function musicTick(){
     B.step++;B.next+=s16;
   }}catch(e){}
 }
+/* ---------- espelhos de luz, dunas e loja (cap. 6) ---------- */
+function turnMirror(c,r){const t=room.tiles[r][c];if(t!=='1'&&t!=='2')return;room.tiles[r][c]=t==='1'?'2':'1';bg=buildBg(room);sparks(c*TS+8,r*TS+8,'#e8f8ff',6);tone(1400,.08,'triangle',.05,1800)}
+function beamPath(rm){const out=[],hits=[];for(const b of rm.beams||[]){let c=b.c,r=b.r,dx=b.d[0],dy=b.d[1];
+  for(let n=0;n<80;n++){c+=dx;r+=dy;if(c<0||c>=COLS||r<0||r>=ROWS)break;const t=rm.tiles[r][c];
+    if(t==='1'){out.push([c,r,dx,dy,1]);const ndx=-dy,ndy=-dx;dx=ndx;dy=ndy;continue}
+    if(t==='2'){out.push([c,r,dx,dy,1]);const ndx=dy,ndy=dx;dx=ndx;dy=ndy;continue}
+    if(t==='4'||t==='5'){hits.push([c,r]);break}
+    if(SOLID.has(t)&&t!=='~')break;out.push([c,r,dx,dy,0])}}return{cells:out,hits}}
+function drawBeams(){const B=room.beamCells;if(!B||!B.length)return;const fl=frame%4<2;
+  for(const[c,r,dx,dy,m]of B){if(m)continue;const x=c*TS,y=r*TS;ctx.globalAlpha=.5;if(dx)P(ctx,x,y+5,'#ffd84a',16,6);else P(ctx,x+5,y,'#ffd84a',6,16);ctx.globalAlpha=1;
+    if(dx)P(ctx,x,y+7,fl?'#ffffff':'#fff8c0',16,2);else P(ctx,x+7,y,fl?'#ffffff':'#fff8c0',2,16)}
+  for(const b of room.beams||[])glow(b.c*TS+8,b.r*TS+8,26,'255,230,120',.4)}
+const LIA_LINES=['LIA: Mestre! O mercador do oásis aceita gemas. Ele tem joias raras!','LIA: A pirâmide ao norte está selada. Dizem que a luz das Ruínas do Sol a abre.',
+  'LIA: Os espelhos antigos guiam a luz do sol. Gire-os com a espada!','LIA: Eu vi a cinza negra cair... ela não queimava. Era fria.'];
+const SHOP=[['ruby','Rubi',40],['sapph','Safira',40],['emer','Esmeralda',40],['topaz','Topázio',40],['ame','Ametista',40],['potion','Poção: vida cheia',15],['heart','Coração extra',120]];
+function updShop(){
+  if(pressed.up){shopSel=(shopSel+SHOP.length-1)%SHOP.length;sfx.gem()}if(pressed.down){shopSel=(shopSel+1)%SHOP.length;sfx.gem()}
+  if(pressed.atk){const[id,n,c]=SHOP[shopSel],p=player,sold=id==='heart'&&room.story;
+    if(sold||p.gems<c)sfx.locked();
+    else{p.gems-=c;if(JEWELS[id])p.jewels[id]++;else if(id==='potion')p.hp=p.maxHp;else{p.maxHp+=2;p.hp=p.maxHp;room.story=true}sfx.item();unlock('shop');saveGame()}}
+  if(pressed.dash||pressed.start||pressed.menu){state='play';lockCD=240}}
+function drawShop(){ctx.fillStyle='rgba(8,5,14,.94)';ctx.fillRect(0,HUD,W,H);txt('MERCADOR DO OÁSIS',6,HUD+4,'#ffd166');txt('×'+player.gems,W-6,HUD+4,'#8ff3ff',8,'right');ctx.drawImage(GEM,W-50,HUD+4);
+  SHOP.forEach(([id,n,c],i)=>{const y=HUD+22+i*16,on=i===shopSel,sold=id==='heart'&&room.story;if(on)P(ctx,4,y-3,'#2a1e36',W-8,14);
+    if(JEWELS[id])drawJewel(10,y-1,id);else if(id==='potion'){P(ctx,11,y,'#e0452b',5,6);P(ctx,12,y-2,'#c9b8d8',3,2)}else ctx.drawImage(HEART,9,y-1);
+    txt(n,24,y,on?'#ffd166':'#c9b8d8');txt(sold?'vendido':c+' gemas',W-8,y,sold?'#5a4a6a':player.gems>=c?'#6cc45a':'#e0452b',8,'right')});
+  txt('A: comprar  B: sair',W/2,HUD+H-12,'#5a4a6a',8,'center')}
 /* ---------- conquistas e recompensas ---------- */
 const ACH=[
   {id:'kill1',n:'Primeiro Golpe',d:'Derrote um inimigo',r:{gems:5}},
@@ -1118,7 +1239,9 @@ const ACH=[
   {id:'elems',n:'Mestre dos Elementos',d:'Dispare os 4 elementos',r:{jewel:'topaz'}},
   {id:'hard',n:'Sem Medo',d:'Vença um capítulo no Difícil',r:{jewel:'ame'}},
   {id:'die1',n:'Renascer',d:'Sua chama se apagou uma vez',r:{gems:5}},
-  {id:'ends',n:'Dois Caminhos',d:'Veja os dois finais',r:{scarf:'ice'}}];
+  {id:'ends',n:'Dois Caminhos',d:'Veja os dois finais',r:{scarf:'ice'}},
+  {id:'boss6',n:'Vidro Estilhaçado',d:'Vença o Colosso de Vidro',r:{gems:50}},
+  {id:'shop',n:'Bom Freguês',d:'Compre algo no oásis',r:{gems:10}}];
 const SCARVES={mae:{n:'Cachecol da Mãe',r:'#e0452b',o:'#ff8a3d'},gold:{n:'Cachecol Dourado',r:'#c8901a',o:'#ffe27a'},aurora:{n:'Cachecol Aurora',r:'#8a4adf',o:'#4adf9a'},ice:{n:'Cachecol Glacial',r:'#2a5ad6',o:'#8fd0ff'}};
 let AS={got:{},kills:0,pots:0,bushes:0,rooms:{},caves:{},elems:{},scarves:{mae:1},scarf:'mae'};
 try{const v=JSON.parse(localStorage.getItem('brasa-conq')||'null');if(v)AS=Object.assign(AS,v)}catch(e){}
@@ -1160,6 +1283,7 @@ function readSave(){try{const d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null
 let savedGame=readSave();
 if(savedGame&&savedGame.rooms&&savedGame.rooms['21,18']&&savedGame.rooms['21,18'].won&&(savedGame.layout||1)>=2)unlockedCap=Math.max(unlockedCap,4);
 if(savedGame&&savedGame.rooms&&savedGame.rooms.b4&&savedGame.rooms.b4.won)unlockedCap=Math.max(unlockedCap,5);
+try{if(JSON.parse(localStorage.getItem('brasa-fim')||'[]').length)unlockedCap=Math.max(unlockedCap,6)}catch(e){}
 if(savedGame&&savedGame.rooms){if((savedGame.rooms['11,9']&&savedGame.rooms['11,9'].won&&(savedGame.layout||1)<2)||((savedGame.layout||1)>=2&&savedGame.rooms['11,10']&&savedGame.rooms['11,10'].won))unlockedCap=Math.max(unlockedCap,3);else if(savedGame.rooms['1,-1']&&savedGame.rooms['1,-1'].won)unlockedCap=Math.max(unlockedCap,2)}
 function saveGame(over={}){
   try{const rooms={};for(const k in ROOMS){const rr=ROOMS[k];rooms[k]={t:rr.tiles.map(x=>x.join('')),chest:rr.chest,cl:!!rr.cleared,won:!!rr.won,lit:!!rr.litDone,st:!!rr.story}}
@@ -1294,11 +1418,14 @@ function swordHits(){
     else if(ch==='I'&&swordFx()==='fire')meltAt(c,r);
     else if(ch==='J'&&!p.hit.has('J'+c+','+r)){p.hit.add('J'+c+','+r);hitCrystal(c,r)}
     else if(ch==='H'&&swordFx()==='storm')hitStorm(c,r);
+    else if((ch==='1'||ch==='2')&&!p.hit.has('M'+c+','+r)){p.hit.add('M'+c+','+r);turnMirror(c,r)}
   }
   if(dirty)bg=buildBg(room);
 }
 function damageEnemy(e,amt=1,fire=false,fx=null){
   if(e.inv>0)return;
+  if(e.type==='colossus'&&!(e.lit>0)){const c=center(e);sparks(c.x,c.y,'#e8f8ff',5);sfx.tink();e.inv=8;if(!hintGlass2){hintGlass2=true;showMsg('Faísca: O vidro reflete tudo! Atraia-o para o feixe de luz dos espelhos.',260)}return}
+  if(e.type==='scorpion'&&e.state==='under'){sfx.tink();e.inv=8;return}
   if(e.type==='shadow'){const c=center(e);if(fire||fx==='dash'){e.stun=90;const pc=center(player),dx=c.x-pc.x,dy=c.y-pc.y,l=Math.hypot(dx,dy)||1;e.x=clamp(e.x+dx/l*24,0,W-16);e.y=clamp(e.y+dy/l*24,0,H-16);sparks(c.x,c.y,'#ff8a3d',10);tone(180,.3,'sawtooth',.05,90)}else sfx.tink();e.inv=10;return}
   if(e.type==='ashman'&&e.state==='pile'&&!fire&&fx!=='dash'){sfx.tink();e.inv=8;return}
   if(e.type==='morvane'&&!(e.vulnT>0)){const el=fx==='ice'||fx==='storm'||fx==='wind'?fx:(fire||fx==='dash')?'fire':null,c=center(e);
@@ -1333,7 +1460,7 @@ function killEnemy(e){
     if(room.clearJewel){const j=room.clearJewel;player.jewels[j]++;sfx.item();msgQueue.push(['Faísca: Achei uma '+JEWELS[j].name+' escondida aqui! '+JEWELS[j].desc+'.',240]);jewelHint()}}
 }
 function bossDie(e){
-  {const B={boss:'boss1',queen:'boss2',hunter:'boss3',traitor:'boss4',morvane:'boss5'}[e.type];if(B)unlock(B);if(!room.tookHit)unlock('noHit')}
+  {const B={boss:'boss1',queen:'boss2',hunter:'boss3',traitor:'boss4',morvane:'boss5',colossus:'boss6'}[e.type];if(B)unlock(B);if(!room.tookHit)unlock('noHit')}
   room.won=true;playTrack('victory');shake=20;hitstop=12;sfx.boss();projectiles=[];hazards=[];
   for(let i=0;i<5;i++)poof(e.x+Math.random()*32,e.y+Math.random()*32);sparks(e.x+16,e.y+16,'#ff8a3d',30);
   enemies.forEach(b=>poof(b.x+8,b.y+8));enemies=[];
@@ -1375,6 +1502,8 @@ function touchTiles(){
       if(p.keys>0){p.keys--;for(let rr=0;rr<ROWS;rr++)for(let cc=0;cc<COLS;cc++)if(room.tiles[rr][cc]==='D')room.tiles[rr][cc]='_';bg=buildBg(room);sfx.door();shake=6;showMsg('A porta se abriu. Algo enorme respira lá dentro...',200);saveGame();return}
       if(lockCD<=0){showMsg(room.lockMsg||'Trancada. Deve haver uma chave na cripta a oeste.',180);sfx.locked();lockCD=240}
     }else if(ch==='C')openChest(c,r);
+    else if(ch==='n'&&lockCD<=0){room.liaI=((room.liaI==null?-1:room.liaI)+1)%LIA_LINES.length;showMsg(LIA_LINES[room.liaI],260);lockCD=280;tone(880,.06,'triangle',.04)}
+    else if(ch==='m'&&lockCD<=0){state='shop';shopSel=0;lockCD=240;sfx.gem();return}
     else if(ch==='Z'&&!room.cleared){room.cleared=true;p.slide=null;sparks(c*TS+8,r*TS+6,'#8fd0ff',16);sfx.secret();sealDone('gelo')}
     else if(ch==='G'&&lockCD<=0){showMsg(room.gateMsg||'Um portão de ferro selado. E se eu acender os braseiros?',200);sfx.locked();lockCD=300}
   }
@@ -1427,6 +1556,10 @@ function updEnemy(e){
     else if(e.state==='rest'){if(--e.t<=0)e.state=null}
     else if(d<110){e.state='growl';e.t=30;tone(110,.25,'sawtooth',.04,70)}
     else{wander(e,e.spd*.6);if(e.dx)e.fl=e.dx<0}}
+  else if(e.type==='scorpion'){e.t--;const pc=center(player),ec=center(e),dx=pc.x-ec.x,dy=pc.y-ec.y,d=Math.hypot(dx,dy)||1;
+    if(e.state==='under'){move(e,dx/d*e.spd,dy/d*e.spd,true);if(frame%5===0)part(ec.x,ec.y+4,Math.random()-.5,-.4,'#c8a868',16,2);
+      if(e.t<=0||d<20){e.state='up';e.t=90;sparks(ec.x,ec.y,'#c8a868',8);tone(300,.1,'square',.03,600)}}
+    else{e.fl=dx<0;if(e.t<=60&&e.t>48)move(e,dx/d*2.4,dy/d*2.4,true);if(e.t<=0){e.state='under';e.t=90+Math.random()*60|0}}}
   else if(e.type==='ashman'){
     if(e.state==='pile'){if(--e.t<=0){e.state=null;e.hp=2;const q=center(e);poof(q.x,q.y);tone(150,.2,'sawtooth',.04,300)}else if(frame%12===0)part(e.x+8,e.y+12,0,-.3,'#ff6a2a',14);return}
     const pc=center(player),ec=center(e),dx=pc.x-ec.x,dy=pc.y-ec.y;let mx=0,my=0;if(Math.abs(dx)>Math.abs(dy))mx=Math.sign(dx);else my=Math.sign(dy);
@@ -1446,7 +1579,7 @@ function updEnemy(e){
     if(d<64)move(e,-dx/d*e.spd,-dy/d*e.spd,true);else if(d>110)move(e,dx/d*e.spd,dy/d*e.spd,true);
     if(--e.shotT<=0){e.shotT=Math.round((100+Math.random()*50)*D.fire);if(d<170){shoot(ec.x,ec.y,Math.atan2(dy,dx),2*D.ps,'arrow');tone(700,.06,'square',.03,300)}}}
   else if(e.boss)updBoss(e);
-  if(enemies.includes(e)&&!(e.type==='queen'&&e.state!=='attack'&&e.state!=='emerge')&&!(e.type==='hunter'&&e.state==='vanish')&&!(e.type==='spirit'&&!e.vis)&&!(e.type==='ashman'&&e.state==='pile')&&!(e.type==='shadow'&&e.stun>0)&&!(e.boss&&room.closePending)&&overlap(body(e),pbody()))hurtPlayer(e.dmg,center(e),e);
+  if(enemies.includes(e)&&!(e.type==='queen'&&e.state!=='attack'&&e.state!=='emerge')&&!(e.type==='hunter'&&e.state==='vanish')&&!(e.type==='spirit'&&!e.vis)&&!(e.type==='ashman'&&e.state==='pile')&&!(e.type==='scorpion'&&e.state==='under')&&!(e.type==='shadow'&&e.stun>0)&&!(e.boss&&room.closePending)&&overlap(body(e),pbody()))hurtPlayer(e.dmg,center(e),e);
 }
 function shoot(x,y,a,s,kind='fire'){projectiles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:300,kind})}
 function updBoss(e){
@@ -1455,6 +1588,7 @@ function updBoss(e){
   if(e.type==='hunter')return updHunter(e);
   if(e.type==='traitor')return updTraitor(e);
   if(e.type==='morvane')return updMorvane(e);
+  if(e.type==='colossus')return updColossus(e);
   const ph2=e.hp<=e.maxHp/2,pc=center(player),ec=center(e);e.t--;
   const minX=16,maxX=W-48,minY=16,maxY=H-48;
   if(e.state==='walk'){
@@ -1493,6 +1627,15 @@ function updTraitor(e){
     if(e.t<=0){e.state='walk';e.t=Math.round((ph2?140:200)*D.fire);
       if(ph2&&enemies.filter(w=>w.type==='wisp').length<2){const w=spawn('wisp',2+Math.random()*12|0,2);w.noDrop=true;enemies.push(w);poof(w.x+8,w.y+8)}}}
 }
+function updColossus(e){
+  const ph2=e.hp<=e.maxHp/2,pc=center(player),ec=center(e);e.t++;
+  if(e.lit>0){e.lit--;if(frame%6===0)part(ec.x+Math.random()*20-10,ec.y-10,0,-.5,'#fff8c0',16)}
+  if(e.state==='slam'){if(--e.st<=0){e.state=null;shake=10;sfx.thud();for(let i=0;i<10;i++){const a=i*Math.PI/5;hazards.push({x:ec.x+Math.cos(a)*30,y:ec.y+Math.sin(a)*30,t:8+i,kind:'ice'})}}return}
+  const dx=pc.x-ec.x,dy=pc.y-ec.y,d=Math.hypot(dx,dy)||1,sp=(e.lit>0?.2:(ph2?.6:.45))*D.spd;
+  e.x=clamp(e.x+dx/d*sp,16,W-48);e.y=clamp(e.y+dy/d*sp,16,H-48);
+  if(!(e.lit>0)&&e.t%Math.round((ph2?120:170)*D.fire)===0){const a=Math.atan2(dy,dx);for(let i=-1;i<=1;i++)shoot(ec.x,ec.y,a+i*.3,1.6*D.ps,'ice');sfx.shoot()}
+  if(!(e.lit>0)&&d<50&&e.t%60===0){e.state='slam';e.st=40;tone(120,.4,'sawtooth',.05,60)}
+  if(ph2&&e.t%400===0&&enemies.filter(s2=>s2.type==='scorpion').length<2){const s2=spawn('scorpion',2+Math.random()*12|0,8);s2.noDrop=true;enemies.push(s2)}}
 const WEAK={fire:'ice',ice:'fire',storm:'wind',wind:'storm'},AURAS=['fire','ice','storm','wind'];
 function updMorvane(e){
   const ph=e.hp<=e.maxHp*.2?3:e.hp<=e.maxHp*.5?2:1,pc=center(player),ec=center(e);e.t++;
@@ -1563,6 +1706,8 @@ function updatePlay(){
       if(s.small){if(SOLID.has(ch)&&ch!=='~')dead=true}
       else if(ch==='J'){hitCrystal(c,r);dead=true}
       else if(ch==='H'||ch==='h'){if(k==='storm')hitStorm(c,r);else sfx.tink();dead=true}
+      else if(ch==='1'||ch==='2'){turnMirror(c,r);dead=true}
+      else if(ch==='d'&&k==='wind'){room.tiles[r][c]=room.dark?'_':'.';bg=buildBg(room);for(let q=0;q<10;q++)part(c*TS+8,r*TS+8,s.vx*.6+Math.random()-.5,s.vy*.6+Math.random()-.5,'#d8b878',24,2);noise(.2,.06,800);dead=true}
       else if(k==='ice'){if(ch==='~'){room.tiles[r][c]='i';bg=buildBg(room);sparks(c*TS+8,r*TS+8,'#cfe8ff',4);tone(1500,.05,'sine',.03,900)}else if(SOLID.has(ch))dead=true}
       else if(k==='wind'){if(ch==='M'||ch==='N'){pushBoulder(c,r,s.vx,s.vy);dead=true}else if(ch==='b'||ch==='r'){room.tiles[r][c]='.';revealAt(c,r);bg=buildBg(room);leaves(c*TS+8,r*TS+8);sfx.cut()}else if(SOLID.has(ch)&&ch!=='~')dead=true}
       else if(k==='storm'&&ch!=='K'){if(SOLID.has(ch)&&ch!=='~')dead=true}
@@ -1593,6 +1738,14 @@ function updatePlay(){
   if(room.arenaPending&&player.y<H-48){room.arenaPending=false;for(const[r,c]of room.arenaDoors)room.tiles[r][c]='G';bg=buildBg(room);shake=8;sfx.thud();spawnWave(0);showMsg('Emboscada! Derrote os caçadores para abrir o portão!',220)}
   if(room.closePending&&doorFar(room)){room.closePending=false;room.tookHit=false;for(const[r,c]of doorT(room))room.tiles[r][c]=room.doorChar||'#';bg=buildBg(room);shake=8;sfx.thud();sfx.roar();
     showMsg(room.bossIntro||'',260);if(room.bossIntro2)msgQueue.push([room.bossIntro2,220])}
+  if(room.beams){const BP=beamPath(room);room.beamCells=BP.cells;
+    for(const[c,r]of BP.hits)if(room.tiles[r][c]==='4'){room.tiles[r][c]='5';bg=buildBg(room);sfx.secret();sparks(c*TS+8,r*TS+6,'#ffe27a',16);checkRoomPuzzle()}
+    for(const e of enemies){if(e.type==='scorpion'&&e.state==='under')continue;const bb=body(e);
+      if(BP.cells.some(([c,r])=>overlap(bb,{x:c*TS+3,y:r*TS+3,w:10,h:10}))){
+        if(e.type==='colossus'){if(!(e.lit>0)){sfx.secret();const q=center(e);sparks(q.x,q.y,'#fff8c0',14);if(!hintGlass){hintGlass=true;showMsg('O Colosso brilhou na luz! Ataque agora!',150)}}e.lit=180}
+        else if(!e.boss)e.burn=Math.max(e.burn||0,40)}}}
+  if(room.gust){const k=frame%360;if(k<110){if(!player.dashT)move(player,-.75,0);if(frame%2===0)part(W+2,Math.random()*H,-4-Math.random()*2,Math.random()-.5,'#e8d098',60,2)}
+    if(k===0&&!room.gustHint){room.gustHint=true;showMsg('Faísca: Rajadas de areia! Elas empurram você. Use a esquiva para avançar.',220)}}
   if(room.memSpot&&!room.story){const[mc,mr]=room.memSpot;if(Math.hypot(player.x+8-(mc*TS+8),player.y+10-(mr*TS+8))<22){room.story=true;player.hp=player.maxHp;sfx.heart();
     showMsg('Kael: Esta era a minha casa... Mãe, pai... eu cheguei até aqui.',260);msgQueue.push(['Faísca: Eles estariam orgulhosos de você, Kael. Eu sei que estariam.',240],['Kael: Por eles. Por Brasalume. Vamos terminar isso.',200])}}
   if(room.ashRain&&frame%70===0){const pc=center(player);hazards.push({x:clamp(pc.x+Math.random()*80-40,20,W-20),y:clamp(pc.y+Math.random()*60-30,20,H-20),t:50})}
@@ -1626,6 +1779,7 @@ function step(){
   else if(state==='menu')updMenu();
   else if(state==='choice')updChoice();
   else if(state==='achv')updAchv();
+  else if(state==='shop')updShop();
   else if(state==='play'){if(hitstop>0)hitstop--;else{updatePlay();updParticles()}}
   else if(state==='scroll'){scroll.t+=1/36;if(scroll.t>=1){state='play';scroll=null;afterEnter()}}
   else if(state==='dead'){deadT++;updParticles();if(deadT>60&&(pressed.start||pressed.atk))respawn()}
@@ -1648,6 +1802,9 @@ function drawAnimTiles(rm,ox,oy){
     if(ch==='~'){for(let k=0;k<2;k++){const wx=(c*7+k*6+(frame>>3))%14,wy=(k*7+3+r*3)%15;P(ctx,x+wx,y+wy,wave,3,1)}}
     else if(ch==='S'||ch==='L')flame(ctx,x+8,y+8,1,frame+c*13);
     else if(ch==='q')flame(ctx,x+8,y+3,1,frame+c*7);
+    else if(ch==='n')ctx.drawImage(LIA,x,y-Math.round(Math.abs(Math.sin(frame*.05))));
+    else if(ch==='m'){ctx.drawImage(MERCH,x,y);if((frame>>4)%2)txt('$',x+8,y-9,'#ffd166',8,'center')}
+    else if(ch==='5'&&frame%10<5)P(ctx,x+6+(frame%5),y+3,'#ffffff',1,1);
     else if(ch==='J'){const ci=(rm.crystals||[]).findIndex(([a,b])=>a===c&&b===r);if(ci>=0){const on=rm.mem&&rm.mem.lit===ci;ctx.globalAlpha=on?1:.55;P(ctx,x+5,y+3,CRYS[ci],6,7);P(ctx,x+6,y+2,CRYS[ci],4,9);P(ctx,x+6,y+4,'#ffffff',1,2);ctx.globalAlpha=1;if(on)glow(x+8,y+7,22,'255,255,255',.4)}}
     else if(ch==='F'&&rm.won&&rm.tiles[r][c+1]==='F')flame(ctx,x+16,y+8,2,frame);
   }
@@ -1750,6 +1907,9 @@ function drawEnemy0(e){
   else if(e.type==='wisp'){ctx.globalAlpha=.75+Math.sin(e.anim*.1)*.2;flame(ctx,x+8,y+14,1,frame+e.ph*10,BPAL);P(ctx,x+6,y+8,'#0e1a24');P(ctx,x+9,y+8,'#0e1a24');ctx.globalAlpha=1;if(e.flash&&frame&2)P(ctx,x+5,y+5,'#ffffff',6,8);return}
   else if(e.type==='wolf'){img=(e.fl?WOLF.l:WOLF.r)[e.state==='dash'?1:(e.anim>>3)%2];shadow(x+2,y+15,12);if(e.state==='growl'&&frame%6<3){ctx.drawImage(white(img),x+(frame%2),y);return}}
   else if(e.type==='archer'){img=e.fl?ARCH.l:ARCH.r;shadow(x+3,y+15,10);if(e.shotT<18&&frame%4<2){ctx.drawImage(white(img),x,y);return}}
+  else if(e.type==='scorpion'){if(e.state==='under'){const w=Math.round(Math.sin(frame*.3));P(ctx,x+3,y+11+w,'#b89858',10,4);P(ctx,x+5,y+10,'#d8b878',6,2);return}img=e.fl?SCORPL:SCORP;shadow(x+3,y+15,10)}
+  else if(e.type==='colossus'){shadow(x+4,y+31,24);const lit=e.lit>0;ctx.drawImage((e.flash&&frame&2)||(lit&&frame%6<3)?white(COLOS):COLOS,0,0,16,16,x,y,32,32);
+    if(lit)glow(x+16,y+16,26,'255,240,180',.4);else if(frame%20<2)P(ctx,x+8+(frame%13),y+6,'#ffffff',2,2);if(e.state==='slam'&&frame%6<3)P(ctx,x,y+30,'#cfe8ff',32,2);return}
   else if(e.type==='ashman'){if(e.state==='pile'){P(ctx,x+3,y+11,'#3a3432',10,4);P(ctx,x+5,y+9,'#5a5250',6,3);if(frame%10<5)P(ctx,x+7,y+10,'#ff6a2a',2,1);return}img=(e.dx<0?ASH.l:ASH.r)[(e.anim>>4)%2];shadow(x+3,y+15,10)}
   else if(e.type==='shadow'){ctx.globalAlpha=e.stun>0?.4:.85;for(let i=0;i<6;i++){const a=frame*.07+i*1.05;P(ctx,Math.round(x+8+Math.cos(a)*9),Math.round(y+10+Math.sin(a)*6),'#1a0e24',4,4)}
     P(ctx,x+2,y+2,'#07040c',12,14);P(ctx,x+4,y+6,'#c06bff',2,2);P(ctx,x+10,y+6,'#c06bff',2,2);ctx.globalAlpha=1;return}
@@ -1803,7 +1963,7 @@ function drawPickup(k){
   if(k.type==='heart')ctx.drawImage(HEART,k.x,k.y+bob);
   else if(k.type==='gem')ctx.drawImage(GEM,k.x,k.y+bob);
   else if(k.type==='jewel')drawJewel(k.x+1,k.y+1+bob,k.j);
-  else if(k.type==='flame'){flame(ctx,k.x+8,k.y+16+bob,2,frame);}
+  else if(k.type==='flame'){flame(ctx,k.x+8,k.y+16+bob,2,frame,chapter>=6?DPAL:FPAL);}
 }
 const darkC=document.createElement('canvas');darkC.width=W/4;darkC.height=H/4;const dg=darkC.getContext('2d');
 function lights(px,py){
@@ -1812,6 +1972,7 @@ function lights(px,py){
   for(const b of projectiles)if(b.kind!=='arrow')L.push({x:b.x,y:b.y,r:22,warm:1});
   for(const k of pickups)if(k.type==='flame')L.push({x:k.x+8,y:k.y+8,r:90,warm:1});
   if(room.won)L.push({x:W/2,y:24,r:110,warm:1});
+  if(room.beamCells)for(let i=0;i<room.beamCells.length;i+=2){const[c,r]=room.beamCells[i];L.push({x:c*TS+8,y:r*TS+8,r:22,warm:1})}
   for(const s of pshots)L.push({x:s.x,y:s.y,r:30,warm:(s.kind||'fire')==='fire'?1:0});
   for(const e of enemies)if(e.boss)L.push({x:e.x+16,y:e.y+10,r:e.hp<=e.maxHp/2?44:30,warm:1});
   return L;
@@ -1844,7 +2005,7 @@ function drawProjectiles(){
     drawShot(s,x,y,f)}
 }
 function drawWorld(){
-  ctx.drawImage(bg,0,0);drawAnimTiles(room,0,0);
+  ctx.drawImage(bg,0,0);drawAnimTiles(room,0,0);drawBeams();
   pickups.forEach(drawPickup);
   if(room.memSpot&&!room.story&&frame%4<2){const[mc,mr]=room.memSpot;P(ctx,mc*TS+4+(frame%9),mr*TS+4+(frame%7),'#ffd166',2,2)}
   if(room.ghost){ctx.globalAlpha=.45+Math.sin(frame*.05)*.15;hooded(room.ghost[0],room.ghost[1]+Math.sin(frame*.04)*2,1,'#cfe8ff');ctx.globalAlpha=1}
@@ -1924,8 +2085,9 @@ function drawEnd(){
       if(deadT>60&&(frame>>5)%2===0)txt('J ou ENTER: tentar de novo',W/2,140,'#f4e9d8',8,'center')}}
   if(state==='win'){ctx.fillStyle=`rgba(14,10,20,${Math.min(.85,winT/60)})`;ctx.fillRect(0,0,W,H+HUD);
     ctx.save();ctx.translate(0,0);drawParticles();ctx.restore();
-    flame(ctx,W/2,70,3,frame);
-    txt('BRASA '+chapter+' DE 5',W/2,86,'#ffd166',16,'center',true);txt('RECUPERADA!',W/2,108,'#ff8a3d',16,'center',true);
+    flame(ctx,W/2,70,3,frame,chapter>=6?DPAL:FPAL);
+    if(chapter>=6){txt('CINZA NEGRA',W/2,86,'#c06bff',16,'center',true);txt('ENCONTRADA',W/2,108,'#e0c0ff',16,'center',true);txt('CAPÍTULO 7 EM BREVE',W/2,127,'#c06bff',8,'center')}
+    else{txt('BRASA '+chapter+' DE 5',W/2,86,'#ffd166',16,'center',true);txt('RECUPERADA!',W/2,108,'#ff8a3d',16,'center',true)}
     const s=Math.floor(playTime/60);txt(`Tempo ${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}   Gemas ${player.gems}`,W/2,140,'#c9b8d8',8,'center');txt('Dificuldade '+D.name,W/2,152,'#9a8aaa',8,'center');
     if(winT>90&&(frame>>5)%2===0)txt(chapter<5?'ENTER: Capítulo '+(chapter+1):'ENTER: voltar ao título',W/2,166,'#f4e9d8',8,'center')}
 }
@@ -1939,7 +2101,7 @@ function render(){
   if(state==='scroll')drawScroll();else drawWorld();
   if(warpFade>0){ctx.fillStyle='rgba(0,0,0,'+(warpFade/30)+')';ctx.fillRect(0,0,W,H)}
   ctx.restore();
-  drawHUD();drawOverlays();if(state==='menu')drawMenu();if(state==='choice')drawChoice();if(state==='achv')drawAchv();drawEnd();drawToasts();
+  drawHUD();drawOverlays();if(state==='menu')drawMenu();if(state==='choice')drawChoice();if(state==='achv')drawAchv();if(state==='shop')drawShop();drawEnd();drawToasts();
 }
 
 /* ---------- abertura cinematográfica ---------- */
@@ -2133,7 +2295,7 @@ const SCENES5=[
 ];
 const CREDITS={pages:[{text:'',hold:640}],tick(t){if(t%4===0)rise(Math.random()*W,200)},
   draw(t){P(ctx,0,0,'#06040a',W,H+HUD);
-    const L=[['BRASA ETERNA','#ffd166',16],['',0,8],['Uma aventura de Kael e Faísca','#c9b8d8',8],['',0,8],['Ideia, história e direção','#ff8a3d',8],['Heberson','#f4e9d8',8],['',0,8],['Programação, arte e música','#ff8a3d',8],['Claude (Anthropic)','#f4e9d8',8],['',0,8],['Obrigado por jogar!','#ffd166',8]];
+    const L=[['BRASA ETERNA','#ffd166',16],['',0,8],['Uma aventura de Kael e Faísca','#c9b8d8',8],['',0,8],['Ideia, história e direção','#ff8a3d',8],['Heberson','#f4e9d8',8],['',0,8],['Programação, arte e música','#ff8a3d',8],['Claude (Anthropic)','#f4e9d8',8],['',0,8],['Obrigado por jogar!','#ffd166',8],['',0,8],['Parte 2 liberada no título!','#ff8a3d',8]];
     let y=210-t*.42;for(const[s2,c,z]of L){if(s2)txt(s2,W/2,Math.round(y),c,z,'center',z>8);y+=z>8?28:14}}};
 const FIMCARD=(name,col,extra)=>({pages:[{text:'',hold:260}],draw(t){P(ctx,0,0,'#06040a',W,H+HUD);flame(ctx,W/2,64,3,frame);glow(W/2,50,90);
   ctx.globalAlpha=clamp((t-20)/40,0,1);txt('FIM',W/2,78,'#ffd166',24,'center',true);txt(name,W/2,116,col,8,'center');if(extra)txt(extra,W/2,132,'#9a8aaa',8,'center');ctx.globalAlpha=1}});
@@ -2162,16 +2324,39 @@ const END2=[
   tick(t){if(t%3===0)ash(true)},
   draw(t){sky('#0a0610','#2a1028');stars(30,53);hills(120,6,'#120a14');ctx.globalAlpha=clamp((t-60)/100,0,1);P(ctx,180,88,'#07040c',14,30);P(ctx,183,96,'#c06bff',3,2);P(ctx,189,96,'#c06bff',3,2);ctx.globalAlpha=1}},
  FIMCARD('Final: O Último Guardião','#6cc4a0','Continua...?'),CREDITS];
-const CH_SCENES={2:SCENES2,3:SCENES3,4:SCENES4,5:SCENES5},CH_NAMES=['','O Golem de Cinzas','A Rainha das Marés','O Caçador de Cinzas','O Guardião Traidor','A Última Brasa'];
+const SCENES6=[
+ {pages:[{text:'',hold:200}],tick(t){if(t%3===0)rise(Math.random()*W,150)},
+  draw(t){P(ctx,0,0,'#06040a',W,H+HUD);flame(ctx,W/2,60,3,frame);glow(W/2,46,90);ctx.globalAlpha=clamp((t-10)/40,0,1);txt('BRASA ETERNA',W/2,76,'#ffd166',16,'center',true);
+    ctx.globalAlpha=clamp((t-60)/40,0,1);txt('PARTE 2',W/2,104,'#ff8a3d',16,'center',true);ctx.globalAlpha=1}},
+ {pages:[{text:'Um ano se passou. A Ordem dos Guardiões renasceu, e Kael agora era o seu mestre.'},
+         {text:'LIA: Mestre Kael! Uma cinza negra caiu no Deserto de Vidro, ao sul!'},
+         {text:'LIA: Desde aquela noite, as chamas da torre tremem no escuro.'},
+         {text:'FAÍSCA: Eu sinto algo lá... um fogo parecido com o meu. Mas frio.',hold:180}],
+  draw(t){sky('#6ab0e8','#fff0d0');P(ctx,0,110,'#c8a26b',W,90);for(let i=0;i<6;i++)P(ctx,i*48,106,'#8a8494',20,4);tower(214,30,'#6a5a5a',true);flame(ctx,214,26,2,frame);
+    ctx.drawImage(kaelSet('').down[(frame>>4)%2],96,68,40,40);ctx.drawImage(LIA,150,80,32,32);faisca(70,70+Math.sin(frame*.08)*3,2)}},
+ {pages:[{text:'Longe dali, sob a lua do deserto, alguém observava a cinza negra.'},
+         {text:'???: A Chama ainda queima... Interessante.',hold:170},
+         {text:'???: Vamos ver quanto tempo ela dura, Kael.',hold:190}],
+  tick(t){if(t%3===0)ash(true)},
+  draw(t){sky('#0a0812','#3a2a3a');stars(40,71);disc(70,40,12,'#e8e2d0');hills(120,10,'#2a2018');P(ctx,0,140,'#1a140e',W,60);
+    ctx.globalAlpha=clamp((t-40)/120,0,1);P(ctx,184,96,'#07040c',14,34);P(ctx,187,104,'#e8e8ff',3,2);P(ctx,193,104,'#e8e8ff',3,2);ctx.globalAlpha=1;
+    P(ctx,120,128,'#07040c',8,6);glow(124,130,14,'192,107,255',.3)}},
+ {pages:[{text:'',hold:280}],tick(t){if(t%3===0)rise(Math.random()*W,150)},
+  draw(t){P(ctx,0,0,'#0e0a04',W,H+HUD);flame(ctx,W/2,60,3,frame);glow(W/2,46,90,'255,200,120',.35);
+    ctx.globalAlpha=clamp((t-20)/40,0,1);txt('BRASA',W/2,70,'#6a4a14',24,'center',true);txt('BRASA',W/2,68,'#ffe27a',24,'center');txt('ETERNA',W/2,100,'#d8b878',16,'center',true);
+    ctx.globalAlpha=clamp((t-90)/40,0,1);txt('CAPÍTULO 6',W/2,126,'#c9b8d8',8,'center');txt('O Deserto de Vidro',W/2,138,'#9a8aaa',8,'center');ctx.globalAlpha=1}}];
+const CH_SCENES={2:SCENES2,3:SCENES3,4:SCENES4,5:SCENES5,6:SCENES6},CH_NAMES=['','O Golem de Cinzas','A Rainha das Marés','O Caçador de Cinzas','O Guardião Traidor','A Última Brasa','O Deserto de Vidro'];
 const pageFull=pg=>Math.ceil(pg.text.length*1.5),pageDur=pg=>pageFull(pg)+(pg.hold||150);
 function startIntro(){initWorld();chapter=1;playIntro(SCENES)}
 function playIntro(sc){intro={scenes:sc,si:0,pi:0,pt:0,st:0,parts:[]};state='intro';stopTrack();stopMusic();introMusic()}
 function goChapter(n){chapter=n;unlockedCap=Math.max(unlockedCap,n);try{localStorage.setItem('brasa-cap',String(unlockedCap))}catch(e){}
   const p=player;p.keys=0;p.hasWave=true;if(n>=3)p.hasPulse=true;if(n>=4)p.hasDashFire=true;if(n>=5){p.hasHeart=true;p.elemSel=p.elemSel||'fire'}p.hp=p.maxHp;p.charge=0;absorbT=0;msgQueue=[];playIntro(CH_SCENES[n])}
-function startChFresh(n){initWorld();chapter=n;const p=player;p.maxHp=D.hp+2*(n-1);p.hp=p.maxHp;p.hasWave=true;p.hasPulse=n>=3;p.hasDashFire=n>=4;p.hasHeart=n>=5;p.elemSel=n>=5?'fire':null;if(n>=3)p.gems=n>=5?70:n>=4?50:30;playIntro(CH_SCENES[n])}
+function startChFresh(n){initWorld();chapter=n;const p=player;p.maxHp=D.hp+2*(n-1);p.hp=p.maxHp;p.hasWave=true;p.hasPulse=n>=3;p.hasDashFire=n>=4;p.hasHeart=n>=5;p.elemSel=n>=5?'fire':null;if(n>=3)p.gems=n>=6?90:n>=5?70:n>=4?50:30;
+  if(n>=6&&savedGame&&savedGame.p&&savedGame.chapter>=5){Object.assign(p,JSON.parse(JSON.stringify(savedGame.p)));p.hp=p.maxHp;p.keys=0;p.hasWave=p.hasPulse=p.hasDashFire=p.hasHeart=true;p.elemSel=p.elemSel||'fire'}
+  playIntro(CH_SCENES[n])}
 function endIntro(){const fin=intro&&intro.ending;stopMusic();intro=null;if(fin){initWorld();savedGame=readSave();state='title';playTrack('title');return}startGame()}
 function updChoice(){if(pressed.left||pressed.right||pressed.up||pressed.down){choiceSel=1-choiceSel;sfx.gem()}
-  if(pressed.atk||pressed.start){const k=choiceSel===0?'eterna':'guardiao';try{const L=JSON.parse(localStorage.getItem('brasa-fim')||'[]');if(!L.includes(k))L.push(k);localStorage.setItem('brasa-fim',JSON.stringify(L));if(L.length>=2)unlock('ends')}catch(e){}
+  if(pressed.atk||pressed.start){const k=choiceSel===0?'eterna':'guardiao';try{const L=JSON.parse(localStorage.getItem('brasa-fim')||'[]');if(!L.includes(k))L.push(k);localStorage.setItem('brasa-fim',JSON.stringify(L));if(L.length>=2)unlock('ends');unlockedCap=Math.max(unlockedCap,6);localStorage.setItem('brasa-cap',String(unlockedCap))}catch(e){}
     playIntro(choiceSel===0?END1:END2);intro.ending=true}}
 function drawChoice(){ctx.fillStyle='rgba(6,3,14,.9)';ctx.fillRect(0,0,W,H+HUD);flame(ctx,W/2,50,3,frame);glow(W/2,38,70);
   txt('O QUE KAEL VAI FAZER?',W/2,62,'#ffd166',8,'center');
@@ -2197,10 +2382,10 @@ function drawIntro(){
   if(fa>0){ctx.fillStyle=`rgba(0,0,0,${fa})`;ctx.fillRect(0,0,W,H+HUD)}
   P(ctx,0,0,'#000',W,18);P(ctx,0,150,'#000',W,50);
   txt('A avançar  ENTER pular',W-6,5,'#5a4a6a',8,'right',false);
-  let text=pg.text,who=null;const sm=text.match(/^(FAÍSCA|KAEL|CAÇADOR|MORVANE|VAREK|ESPÍRITO): /);if(sm){who=sm[1];text=text.slice(sm[0].length)}
+  let text=pg.text,who=null;const sm=text.match(/^(FAÍSCA|KAEL|CAÇADOR|MORVANE|VAREK|ESPÍRITO|LIA|\?\?\?): /);if(sm){who=sm[1];text=text.slice(sm[0].length)}
   const lines=wrap(text,who?25:30).slice(0,who?3:4);let n=Math.floor(I.pt/1.5);
-  if(who){const kc=who==='KAEL'?'#6cc4a0':who==='CAÇADOR'?'#ff4a2a':who==='MORVANE'?'#c06bff':who==='VAREK'?'#8fd0ff':who==='ESPÍRITO'?'#cfe8ff':'#ff8a3d';P(ctx,6,154,kc,34,34);P(ctx,7,155,'#120c18',32,32);
-    if(who==='KAEL')ctx.drawImage(PS.down[0],7,156,32,32);else if(who==='CAÇADOR')ctx.drawImage(HUNTER,7,155,32,32);else if(who==='MORVANE'){P(ctx,7,155,'#07040c',32,32);P(ctx,14,166,'#c06bff',5,2);P(ctx,26,166,'#c06bff',5,2)}else if(who==='VAREK')ctx.drawImage(TRAITOR,7,155,32,32);else if(who==='ESPÍRITO')ctx.drawImage(SPIRIT,7,155,32,32);else faisca(23,171,1);txt(who,46,154,kc)}
+  if(who){const kc=who==='KAEL'?'#6cc4a0':who==='CAÇADOR'?'#ff4a2a':who==='MORVANE'?'#c06bff':who==='VAREK'?'#8fd0ff':who==='ESPÍRITO'?'#cfe8ff':who==='LIA'?'#b08ae0':who==='???'?'#e8e8ff':'#ff8a3d';P(ctx,6,154,kc,34,34);P(ctx,7,155,'#120c18',32,32);
+    if(who==='KAEL')ctx.drawImage(PS.down[0],7,156,32,32);else if(who==='CAÇADOR')ctx.drawImage(HUNTER,7,155,32,32);else if(who==='MORVANE'){P(ctx,7,155,'#07040c',32,32);P(ctx,14,166,'#c06bff',5,2);P(ctx,26,166,'#c06bff',5,2)}else if(who==='VAREK')ctx.drawImage(TRAITOR,7,155,32,32);else if(who==='ESPÍRITO')ctx.drawImage(SPIRIT,7,155,32,32);else if(who==='LIA')ctx.drawImage(LIA,7,156,32,32);else if(who==='???'){P(ctx,7,155,'#07040c',32,32);P(ctx,15,166,'#e8e8ff',4,2);P(ctx,26,166,'#e8e8ff',4,2)}else faisca(23,171,1);txt(who,46,154,kc)}
   const x0=who?46:10,y0=who?166:156;
   lines.forEach((l,i)=>{if(n<=0)return;txt(l.slice(0,n),x0,y0+i*11,'#f4e9d8');n-=l.length+1});
   if(I.pt>=pageFull(pg)&&text&&(frame>>4)%2){P(ctx,W-12,191,'#ff8a3d',5,1);P(ctx,W-11,192,'#ff8a3d',3,1);P(ctx,W-10,193,'#ff8a3d',1,1)}
