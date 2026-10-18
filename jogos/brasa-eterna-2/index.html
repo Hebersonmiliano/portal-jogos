@@ -2067,6 +2067,11 @@ function drawCastle(){const C=player.castle,b=C.b,ink='#1a1020',f=frame,nt=night
   // terrenos vazios
   if(C.owned)for(const k of CKEYS){const P0=CPL[k];if(P0.x==null||b[k]||k==='keep')continue;const x=P0.x*16,y=P0.y*16;for(let i=0;i<4;i++)P(ctx,x+10+i*16,y+30-(i%2)*4,'#8a8494',10,6);P(ctx,x+8,y+12,'#a0703a',60,3);P(ctx,x+12,y+8,'#a0703a',3,14);P(ctx,x+64,y+8,'#a0703a',3,14)}
   if(b.tower){const x=36*16,y=21*16;P(ctx,x-2,y-40,ink,36,72);P(ctx,x,y-38,'#8a8494',32,68);for(let i=0;i<16;i++)P(ctx,x+16-i,y-60+i,'#a01a2a',i*2,1);P(ctx,x+15,y-76,'#5a3418',2,18);P(ctx,x+17,y-76,'#ffd166',14,8);flame(ctx,x+24,y-70,1,f);P(ctx,x+12,y-20,ink,8,12);P(ctx,x+13,y-19,nt?'#ffd166':'#3a4a6a',6,10)}}
+/* ---------- saves antigos: mapa novo + progresso do jogador ---------- */
+const WV=5;
+const KEEP={C:'c',A:'c',k:'7._',v:'7._',w:'7._',s:'._',b:'.',r:'.',p:'_',K:'._O',D:'_',U:'L',I:'._'};
+function mergeTiles(base,saved){if(!saved||saved.length!==base.length||saved[0].length!==base[0].length)return base;
+  return base.map((row,r)=>row.map((b,c)=>{const sv=saved[r][c];return KEEP[b]&&sv!==b&&KEEP[b].includes(sv)?sv:b}))}
 /* ---------- mapa em cache e proteção contra travamentos ---------- */
 const MAPC={'.':'#4c9a3f',',':'#5aa84a',b:'#3a8a3a',T:'#1f5a2a',R:'#8a8494',W:'#6a5a4a','~':'#2f6fbf',B:'#9a6a3a','=':'#c8a26b',Y:'#a0402a',y:'#e8d8b8',j:'#7a4a28',f:'#a0703a',l:'#ffd166',o:'#5c5766',g:'#c08040',C:'#ffd166',c:'#8a5a2a','6':'#c06bff',i:'#a8d8f0','&':'#2f7a3a','*':'#ff8a3d','^':'#c8a26b',A:'#9a5ad6',k:'#6a5a4a',v:'#6a6476',w:'#5a6068','9':'#8a5a2a','8':'#c890e8'};
 const MAPCACHE=new Map();
@@ -2834,7 +2839,7 @@ try{if(JSON.parse(localStorage.getItem('brasa2-fim')||'[]').length)unlockedCap=M
 if(savedGame&&savedGame.rooms){if((savedGame.rooms['11,9']&&savedGame.rooms['11,9'].won&&(savedGame.layout||1)<2)||((savedGame.layout||1)>=2&&savedGame.rooms['11,10']&&savedGame.rooms['11,10'].won))unlockedCap=Math.max(unlockedCap,3);else if(savedGame.rooms['1,-1']&&savedGame.rooms['1,-1'].won)unlockedCap=Math.max(unlockedCap,2)}
 function saveGame(over={}){
   try{const rooms={};for(const k in ROOMS){const rr=ROOMS[k];rooms[k]={t:rr.tiles.map(x=>x.join('')),chest:rr.chest,cl:!!rr.cleared,won:!!rr.won,lit:!!rr.litDone,st:!!rr.story}}
-    const p=player;const d=Object.assign({v:1,layout:2,chapter,diff:diffIdx,p:{maxHp:p.maxHp,hp:Math.max(1,p.hp),gems:p.gems,keys:p.keys,hasWave:!!p.hasWave,eq:{...p.eq},bag:{...p.bag},fxLv:p.fxLv,jewels:{...p.jewels},sock:JSON.parse(JSON.stringify(p.sock)),emerApplied:p.emerApplied,hasPulse:!!p.hasPulse,hasDashFire:!!p.hasDashFire,hasHeart:!!p.hasHeart,elemSel:p.elemSel,q:JSON.parse(JSON.stringify(p.q||{})),mp:p.mp,sta:p.sta,plus:{...p.plus},mat:{...p.mat},it:{...p.it},tool:p.tool,legacy:p.legacy,fame:p.fame,love:JSON.parse(JSON.stringify(p.love||{})),gifts:{...(p.gifts||{})},relics:{...(p.relics||{})},castle:JSON.parse(JSON.stringify(p.castle||{})),food:{...(p.food||{})},recipes:{...(p.recipes||{})},fpick:{...(p.fpick||{})}},
+    const p=player;const d=Object.assign({v:1,layout:2,wv:WV,chapter,diff:diffIdx,p:{maxHp:p.maxHp,hp:Math.max(1,p.hp),gems:p.gems,keys:p.keys,hasWave:!!p.hasWave,eq:{...p.eq},bag:{...p.bag},fxLv:p.fxLv,jewels:{...p.jewels},sock:JSON.parse(JSON.stringify(p.sock)),emerApplied:p.emerApplied,hasPulse:!!p.hasPulse,hasDashFire:!!p.hasDashFire,hasHeart:!!p.hasHeart,elemSel:p.elemSel,q:JSON.parse(JSON.stringify(p.q||{})),mp:p.mp,sta:p.sta,plus:{...p.plus},mat:{...p.mat},it:{...p.it},tool:p.tool,legacy:p.legacy,fame:p.fame,love:JSON.parse(JSON.stringify(p.love||{})),gifts:{...(p.gifts||{})},relics:{...(p.relics||{})},castle:JSON.parse(JSON.stringify(p.castle||{})),food:{...(p.food||{})},recipes:{...(p.recipes||{})},fpick:{...(p.fpick||{})}},
       rooms,visited:[...visited],room:curKey,cave:caveReturn,wmin:worldMin,fog:FOG.join(''),x:p.x,y:p.y,time:playTime},over);
     d.when=Date.now();localStorage.setItem(skey(),JSON.stringify(d));savedGame=d;saveFlash=90}catch(e){}
 }
@@ -2847,7 +2852,7 @@ function loadGame(){
   const d=readSave();if(!d)return;
   setDiff(d.diff);initWorld();chapter=d.chapter;Object.assign(player,d.p);
   const oldL=(d.layout||1)<2;
-  for(const k in d.rooms){const rr=ROOMS[k],x=d.rooms[k];if(!rr||(oldL&&+k.split(',')[0]>=10))continue;rr.tiles=x.t.map(t=>t.split(''));rr.chest=x.chest;rr.cleared=x.cl;rr.won=x.won;rr.litDone=x.lit;rr.story=x.st}
+  for(const k in d.rooms){const rr=ROOMS[k],x=d.rooms[k];if(!rr||(oldL&&+k.split(',')[0]>=10))continue;rr.tiles=(d.wv||0)<WV?mergeTiles(rr.tiles,x.t):x.t.map(t=>t.split(''));rr.chest=x.chest;rr.cleared=x.cl;rr.won=x.won;rr.litDone=x.lit;rr.story=x.st}
   fixPlayer2();visited=new Set(d.visited);playTime=d.time||0;caveReturn=d.cave||null;worldMin=d.wmin||480;if(d.fog)FOG=d.fog.split('').map(Number);if(!player.q)player.q={};
   if(d.introPending){playIntro(CH_SCENES[chapter]);return}
   const BK={1:'1,-1',2:(d.layout||1)>=2?'11,10':'11,9',3:'21,18',4:'b4',6:'b6'};
