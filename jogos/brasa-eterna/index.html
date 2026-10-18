@@ -1812,14 +1812,20 @@ function drawHUD(){
 }
 function drawOverlays(){
   if(saveFlash>0&&state==='play'){ctx.globalAlpha=Math.min(1,saveFlash/30);txt('SALVO',W-6,HUD+5,'#6cc45a',8,'right');ctx.globalAlpha=1}
-  if(banner.t>0&&state==='play'){const a=Math.min(1,banner.t/30);ctx.globalAlpha=a;
-    const w=banner.text.length*8+20;P(ctx,(W-w)/2,HUD+8,'#120c18',w,16);P(ctx,(W-w)/2,HUD+23,'#ff8a3d',w,1);
-    txt(banner.text,W/2,HUD+12,'#ffd166',8,'center');ctx.globalAlpha=1}
-  const boss=enemies.find(e=>e.boss);
-  if(boss&&!room.closePending&&state==='play'){P(ctx,47,HUD+H-10,'#1a1020',162,6);P(ctx,48,HUD+H-9,'#3a2a3a',160,4);P(ctx,48,HUD+H-9,'#e0452b',Math.round(160*boss.hp/boss.maxHp),4);
-    if(msg.t<=0)txt(boss.title||'',W/2,HUD+H-21,'#ffd166',8,'center')}
-  if(msg.t>0&&(state==='play'||state==='scroll')){const lines=wrap(msg.text,28).slice(0,4);const h=lines.length*11+9,y=HUD+H-h-(boss?14:6);
-    P(ctx,7,y-1,'#ffd166',242,h+2);P(ctx,8,y,'#120c18',240,h);lines.forEach((l,i)=>txt(l,14,y+5+i*11,'#f4e9d8'))}
+  // Legendas e nome da sala ficam do lado oposto ao Kael; se ainda o cobrirem, ficam transparentes.
+  const boss=enemies.find(e=>e.boss),pb={x:player.x,y:player.y+HUD,w:16,h:16};
+  const top=player.y+8>H*.5,showM=msg.t>0&&(state==='play'||state==='scroll');
+  const lines=showM?wrap(msg.text,28).slice(0,4):[],mh=lines.length*11+9,my=top?HUD+4:HUD+H-mh-(boss?14:6);
+  if(boss&&!room.closePending&&state==='play'){const fade=overlap(pb,{x:47,y:HUD+H-22,w:162,h:22});ctx.globalAlpha=fade?.4:1;
+    P(ctx,47,HUD+H-10,'#1a1020',162,6);P(ctx,48,HUD+H-9,'#3a2a3a',160,4);P(ctx,48,HUD+H-9,'#e0452b',Math.round(160*boss.hp/boss.maxHp),4);
+    if(!showM||top)txt(boss.title||'',W/2,HUD+H-21,'#ffd166',8,'center');ctx.globalAlpha=1}
+  if(banner.t>0&&state==='play'){const w=banner.text.length*8+20;
+    const by=showM?(top?my+mh+4:my-20):(top?HUD+8:HUD+H-(boss?40:28));
+    const cover=overlap(pb,{x:(W-w)/2,y:by,w,h:16});ctx.globalAlpha=Math.min(1,banner.t/30)*(cover?.4:1);
+    P(ctx,(W-w)/2,by,'#120c18',w,16);P(ctx,(W-w)/2,by+15,'#ff8a3d',w,1);txt(banner.text,W/2,by+4,'#ffd166',8,'center');ctx.globalAlpha=1}
+  if(showM){const cover=overlap(pb,{x:7,y:my-1,w:242,h:mh+2});
+    ctx.globalAlpha=cover?.4:.92;P(ctx,7,my-1,'#ffd166',242,mh+2);P(ctx,8,my,'#120c18',240,mh);
+    ctx.globalAlpha=cover?.6:1;lines.forEach((l,i)=>txt(l,14,my+5+i*11,'#f4e9d8'));ctx.globalAlpha=1}
 }
 function drawTitle(){
   if(!drawTitle.bg){const saved=room;const tmp={tiles:DEFS['1,2'].map.map(r=>r.split('')),dark:0};drawTitle.bg=buildBg(tmp);room=saved}
