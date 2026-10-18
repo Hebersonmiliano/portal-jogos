@@ -443,7 +443,7 @@ const GEM=spr(["..kkkk..",".kcCCck.","kcwCCCck","kCCCCCck",".kCCCck.","..kCck.."
 const KEY=spr(["..kkk...",".kyyyk..",".kykyk..",".kyyyk..","..kyk...","..kyyk..","..kyk...","..kyyk.."],{k:'#1a1020',y:'#ffd166'});
 
 /* ---------- tiles ---------- */
-const SOLID=new Set([...'TR~b#DpCcSWFULGrKIQqVZJMNHh12345dnmflogYyztuaxe6kvwsA89%&*']);const SPECB=[[2,2],[13,2],[2,8],[13,8]];
+const SOLID=new Set([...'TR~b#DpCcSWFULGrKIQqVZJMNHh12345dnmflogYyztuaxe6kvwsA89%&*!']);const SPECB=[[2,2],[13,2],[2,8],[13,8]];
 const TC={};
 const THEMES={
   meadow:{g1:'#4c9a3f',g2:'#3f8536',g3:'#6cbf4a',w1:'#2f6fbf',w2:'#2a62a8',wave:'#5a9ae8',wall:'#3b3246',wallHi:'#52465e',mort:'#241d2c',spot:'#2f283a',fl:'#2a2230',fl2:'#211a27',fl3:'#33293b'},
@@ -513,6 +513,7 @@ function drawTile(g,ch,v,dark){
     case'6':grass(g);P(g,4,1,'#07040c',8,15);P(g,3,5,'#07040c',10,9);P(g,6,3,'#2a1a3a',2,8);P(g,9,6,'#5a2a7a',1,5);break;
     case'%':floor(g,v);break;
     case'&':case'*':base();break;
+    case'!':base();P(g,7,6,'#6b4428',2,10);P(g,8,6,'#8a5a2a',1,10);for(const[a,b,w]of[[1,3,7],[8,2,7],[2,6,5],[9,5,5],[5,0,6]])P(g,a,b,'#2f8a3a',w,2);P(g,4,1,'#4ab04a',8,2);break;
     case'^':P(g,0,0,'#c8a26b',16,16);for(let i=0;i<12;i++)P(g,rnd()*16|0,rnd()*16|0,'#b8915a');P(g,0,0,'#7a7480',3,16);P(g,13,0,'#7a7480',3,16);break;
     case'0':drawTile(g,'#',v,dark);P(g,2,3,'#ffd166',12,13);P(g,3,4,'#07040c',10,12);P(g,4,3,'#ffd166',8,1);P(g,5,2,'#ffd166',6,1);P(g,5,7,'#a01a2a',2,2);P(g,9,7,'#a01a2a',2,2);P(g,6,11,'#3a1a2a',4,1);break;
     case'k':drawTile(g,dark?'#':'W',v,dark);P(g,7,1,'#1a1410',1,4);P(g,8,4,'#1a1410',1,3);P(g,6,7,'#1a1410',2,1);P(g,5,8,'#1a1410',1,4);P(g,9,8,'#1a1410',1,3);P(g,10,11,'#1a1410',1,4);P(g,4,12,'#1a1410',1,2);break;
@@ -875,6 +876,8 @@ function genWorld(){const C=80,R=60,g=[];srand(777);
   for(let y=12;y<=17;y++)for(let x=41;x<=49;x++)S(x,y,'.');for(let y=13;y<=15;y++)for(let x=42;x<=48;x++)S(x,y,'Y');for(let x=42;x<=48;x++)S(x,16,'y');S(45,16,'j');for(let x=41;x<=45;x++)S(x,17,'=');
   // estrada para a Fortaleza da Brasa (borda leste)
   for(let x=76;x<=79;x++)S(x,30,x>=78?'^':'=');S(77,29,'g');
+  // estrada sul para a Costa Coral
+  for(let y=56;y<=59;y++)S(40,y,y>=58?'^':'=');S(41,55,'g');
   // ilha do lago com pinos para o gancho
   for(let y=25;y<=27;y++)for(let x=65;x<=67;x++)S(x,y,'.');S(66,25,'9');S(65,26,'A');S(66,31,'9');
   return g.map(r=>r.join(''))}
@@ -889,9 +892,9 @@ Object.assign(DEFS,{
   mouths:{'12,4':'A parede desabou: uma gruta!','72,4':'A entrada do covil!','20,56':'O bloco cedeu: a Cripta Afundada!'},
   labels:[[45,13,'BIBLIOTECA','#8fd0ff'],[33,22,'POUSADA','#ffd166'],[47,22,'FERRARIA','#ff8a3d'],[33,34,'MERCEARIA','#6cc45a'],[47,34,'ANCIÃO','#c8b0ff'],[31,26,'ROSA','#ff9ec4'],[43,26,'POÇO','#8fd0ff']],
   houses:[[42,13,'library'],[31,22,'inn'],[45,22,'forge'],[31,34,'shop'],[45,34,'elder'],[29,26,'rosa']],
-  doors:{'78,30':{to:'castle',pos:[19*16+8,25*16-4]},'79,30':{to:'castle',pos:[19*16+8,25*16-4]},'45,16':{to:'in-lib',pos:[11*16+8,12*16-4]},'31,28':{to:'in-rosa'},'43,27':{to:'cist',pos:[248,300],ret:[43*16,28*16-4]},'12,4':{to:'gruta',pos:[248,300],ret:[192,92]},'72,4':{to:'covil',pos:[184,204],ret:[72*16,5*16-4]},'20,56':{to:'cripta',pos:[248,300],ret:[320,55*16-4]},'33,24':{to:'in-inn'},'47,24':{to:'in-forge'},'33,36':{to:'in-shop'},'47,36':{to:'in-elder'}},
+  doors:{'40,58':{to:'w8',pos:[32*16,3*16-4]},'40,59':{to:'w8',pos:[32*16,3*16-4]},'78,30':{to:'castle',pos:[19*16+8,25*16-4]},'79,30':{to:'castle',pos:[19*16+8,25*16-4]},'45,16':{to:'in-lib',pos:[11*16+8,12*16-4]},'31,28':{to:'in-rosa'},'43,27':{to:'cist',pos:[248,300],ret:[43*16,28*16-4]},'12,4':{to:'gruta',pos:[248,300],ret:[192,92]},'72,4':{to:'covil',pos:[184,204],ret:[72*16,5*16-4]},'20,56':{to:'cripta',pos:[248,300],ret:[320,55*16-4]},'33,24':{to:'in-inn'},'47,24':{to:'in-forge'},'33,36':{to:'in-shop'},'47,36':{to:'in-elder'}},
   signs:{'35,25':'Pousada Brasa Dormida: descanse e salve o jogo.','49,25':'Ferraria do Brandão: armas e armaduras.','35,37':'Mercearia da Nina: poções e joias.','49,37':'Casa do Ancião Odo.',
-    '41,18':'Norte: Pedra Negra. Cuidado!','55,31':'Leste: Campos dos Lobos e o Lago.','25,31':'Oeste: Bosque Antigo.','14,6':'Gruta Cristalina. A parede está rachada... bombas resolvem!','75,8':'Covil do Lobo Alfa. Uma pedra enorme tapa a entrada.','22,54':'Cripta Afundada. Selada por um bloco de ferro maciço.','18,47':'Fonte das Fadas. Elas curam todo o HP!','21,31':'Jardim das Flores. As flores mais bonitas de Aurora.','77,29':'Leste: Fortaleza da Brasa. Ruínas tomadas por monstros...','48,29':'Terreno vazio. Um bom lugar para um lar, quem sabe um dia...'},
+    '41,18':'Norte: Pedra Negra. Cuidado!','55,31':'Leste: Campos dos Lobos e o Lago.','25,31':'Oeste: Bosque Antigo.','14,6':'Gruta Cristalina. A parede está rachada... bombas resolvem!','75,8':'Covil do Lobo Alfa. Uma pedra enorme tapa a entrada.','22,54':'Cripta Afundada. Selada por um bloco de ferro maciço.','18,47':'Fonte das Fadas. Elas curam todo o HP!','21,31':'Jardim das Flores. As flores mais bonitas de Aurora.','41,55':'Sul: Costa Coral e o Porto Coral. Cheiro de mar!','77,29':'Leste: Fortaleza da Brasa. Ruínas tomadas por monstros...','48,29':'Terreno vazio. Um bom lugar para um lar, quem sabe um dia...'},
   npcs:[
    {id:'zeca2',name:'COCHEIRO ZECA',col:'#c8a26b',pal:{g:'#5a7a3a',G:'#3a5a2a',h:'#3a2414'},x:74*16,y:31*16,hide:()=>!(player.castle&&player.castle.b.stable),talk:n=>openDlg(n,['Para a Fortaleza, Majestade?'],[{t:'Ir para o Castelo',f:()=>travel('castle',19*16+8,24*16)},{t:'Ficar'}])},
    {id:'tobias',name:'TOBIAS',col:'#8fb0e8',pal:NP.guard,x:51*16,y:29*16,talk:n=>questTalk(n,'lobos',['Viajante! Lobos atacam quem passa pelos campos ao leste.','Pode derrotar 5 deles? A vila agradece.'],q=>['Ainda faltam '+(5-q.n)+' lobos. À noite eles ficam mais ousados!'],['Você limpou a estrada! Tome, você merece.'],['A estrada está segura graças a você, Mestre Kael.'])},
@@ -909,6 +912,27 @@ Object.assign(DEFS,{
   npcs:[{id:'brandao',name:'BRANDÃO',col:'#d8a070',pal:NP.smith,x:48,y:64,talk:n=>brandaoRing(n)||openDlg(n,['Ferraria do Brandão! Aço bom, preço justo... quase.','Traga minério de ferro, cristais e joias que eu levo suas peças até +7!'],[{t:'Forjar equipamento',f:()=>openShop('FERRARIA DO BRANDÃO',SHOP_FORJA)},{t:'Melhorar equipamento',f:openForge},{t:'Só olhando'}])}]},
  'in-shop':{name:'Mercearia da Nina',theme:'shop',dark:0,music:'inn',map:mkInt('shop').map,deco:mkInt('shop').deco,enemies:[],
   npcs:[{id:'nina',name:'NINA',col:'#ff8a8a',pal:NP.nina,x:112,y:48,talk:n=>openDlg(n,['Mercearia da Nina, às suas ordens!'],[{t:'Ver produtos',f:()=>openShop('MERCEARIA DA NINA',SHOP_VILA)},{t:'Até mais'}])}]},
+ w8:{name:'Costa Coral',theme:'coast',dark:0,outdoor:true,big:true,map:genCoast(),fruit:genCoast.ft,enemies:[],
+  doors:{'31,0':{to:'w7',pos:[40*16,57*16-4]},'32,0':{to:'w7',pos:[40*16,57*16-4]},'22,24':{to:'in-concha'},'30,24':{to:'in-polvo'},'38,24':{to:'in-emporio'},'22,31':{to:'in-estaleiro'},'38,31':{to:'in-marina'}},
+  houses:[[20,22,'stilt',0],[28,22,'tavern2',1],[36,22,'stilt',2],[20,29,'shipyard',3],[36,29,'stilt',4]],
+  labels:[[22,22,'POUSADA','#ffd166'],[30,22,'TAVERNA','#ff8a3d'],[38,22,'EMPÓRIO','#6cc45a'],[22,29,'ESTALEIRO','#c9d6e8'],[38,29,'CAPITÃ','#4ad0d0']],
+  signs:{'33,4':'Bem-vindo à Costa Coral! O Porto Coral fica ao sul.','28,34':'Píer do Farol. O farol está apagado há anos...','12,23':'Fogueira dos pescadores.'},
+  npcs:[{id:'lula',name:'PESCADOR LULA',col:'#4ad0d0',pal:{g:'#3a7aa0',G:'#24506a',h:'#2a1a10'},x:26*16,y:35*16,talk:n=>questTalk(n,'caranguejos',['Caranguejos gigantes invadiram a praia! Ninguém consegue pescar.','Derrota 8 deles pra mim?'],q=>['Faltam '+(8-q.n)+' caranguejos. Eles ficam na areia perto do mar.'],['A praia voltou a ser nossa! Toma, um presente do mar.'],['Hoje a pesca tá boa, graças a você!'])},
+   {id:'joca',name:'JOCA',col:'#ffd166',pal:{g:'#e0a040',G:'#a07020',h:'#2a1a10'},x:30*16,y:27*16,wander:[24*16,26*16,40*16,33*16],lines:['Já viu o farol? Dizem que só fogo de verdade acende ele de novo.','Minha mãe faz a melhor cocada da costa!','Um krakenzinho vive no fundo do mar. É raro de pescar!']},
+   {id:'tuca',name:'TUCA',col:'#ff9ec4',pal:{g:'#e06a8a',G:'#a04a6a',h:'#4a2a14',fem:1},x:34*16,y:27*16,wander:[24*16,26*16,40*16,33*16],lines:['Bem-vindo ao Porto Coral, forasteiro!','As palmeiras dão coco, as bananeiras dão banana... e o maracujá sobe nas cercas!','O Empório da Iara vende armas de coral. Muito melhores que as da Aurora!']}]},
+ 'in-concha':{name:'Pousada Concha',theme:'coastIn',dark:0,music:'inn',map:mkInt('concha').map,deco:mkInt('concha').deco,enemies:[],
+  npcs:[{id:'perola',name:'DONA PÉROLA',col:'#f4ecf4',pal:{g:'#e8d8e8',G:'#b8a8b8',h:'#e8e2d0',fem:1},x:3*16,y:3*16,talk:n=>openDlg(n,['Pousada Concha! Rede, brisa e barulho do mar.','Um quarto custa '+price(12)+' gemas. Dormir cura e salva o jogo.'],[{t:'Dormir ('+price(12)+' gemas)',f:()=>{const c=price(12),p=player;if(p.gems<c){showMsg('Faltam gemas para o quarto.',140);return}p.gems-=c;p.hp=p.maxHp;p.mp=mpMax();worldMin=(Math.floor(worldMin/1440)+1)*1440+360;warpFade=90;saveGame();toasts.push({title:'DESCANSOU NA POUSADA',sub:'Vida cheia e jogo salvo',t:180});sfx.heart()}},{t:'Agora não'}])}]},
+ 'in-polvo':{name:'Taverna do Polvo',theme:'coastIn',dark:.15,music:'jk',map:mkInt('polvo').map,deco:mkInt('polvo').deco,enemies:[],
+  npcs:[{id:'chico',name:'CHICO CONCHA',col:'#e8d8c8',pal:{g:'#a03a3a',G:'#6a2424',h:'#2a1a10',y:'#ffd166'},x:8*16,y:4*16,talk:n=>openDlg(n,['Ahoy! Aqui se joga a Concha Esperta!','Eu escondo a pérola, embaralho as conchas e você adivinha. Topa?'],[{t:'Apostar 10 gemas',f:()=>startShell(10)},{t:'Apostar 30 gemas',f:()=>startShell(30)},{t:'Apostar 60 gemas',f:()=>startShell(60)},{t:'Agora não'}])}]},
+ 'in-emporio':{name:'Empório Coral',theme:'coastIn',dark:0,music:'inn',map:mkInt('emporio').map,deco:mkInt('emporio').deco,enemies:[],
+  npcs:[{id:'iara',name:'IARA',col:'#6cc45a',pal:{g:'#3a9a8a',G:'#24705a',h:'#1a1010',fem:1},x:8*16,y:3*16,talk:n=>{const q=player.q.conchas;
+    if(!q){openDlg(n,['Empório Coral, às ordens! Armas de coral, as melhores da costa.','Ah, e me ajudaria muito: preciso de 6 conchas da praia para os colares.'],[{t:'Ver produtos',f:()=>openShop('EMPÓRIO CORAL',SHOP_CORAL)},{t:'Aceitar missão das conchas',f:()=>qStart('conchas')},{t:'Até logo'}]);return}
+    if(q.s==='ready'){qFinish('conchas');openDlg(n,['Conchas lindas! Tome: a receita secreta da minha avó.']);return}
+    openDlg(n,['Empório Coral, às ordens!'],[{t:'Ver produtos',f:()=>openShop('EMPÓRIO CORAL',SHOP_CORAL)},{t:'Até logo'}])}}]},
+ 'in-estaleiro':{name:'Estaleiro e Forja do Mar',theme:'coastIn',dark:.1,music:'inn',map:mkInt('estaleiro').map,deco:mkInt('estaleiro').deco,enemies:[],
+  npcs:[{id:'netuno',name:'MESTRE NETUNO',col:'#4ad0d0',pal:{g:'#4a5a6a',G:'#2a3a4a',h:'#e8e2d0',s:'#d8a070'},x:8*16,y:4*16,talk:n=>openDlg(n,['Faço barcos e forjo armas com sal e fogo!','Traga materiais que eu melhoro seus equipamentos.'],[{t:'Melhorar equipamento',f:openForge},{t:'Até logo'}])}]},
+ 'in-marina':{name:'Casa da Capitã Marina',theme:'coastIn',dark:0,music:'inn',map:mkInt('marina').map,deco:mkInt('marina').deco,enemies:[],
+  npcs:[{id:'marina',name:'CAPITÃ MARINA',col:'#4ad0d0',pal:{g:'#2a4a8a',G:'#1a2a5a',h:'#c86a2a',y:'#ffd166',fem:1},x:8*16,y:3*16,talk:n=>questTalk(n,'farol',['Sou a Capitã Marina. Desde que o farol apagou, os barcos se perdem à noite.','O braseiro fica no fim do píer. Só fogo de verdade acende ele. Pode tentar?'],q=>['O farol fica no fim do píer, ao sul. Use fogo: espada de fogo, disparo elemental ou bumerangue rubro!'],['A luz voltou! Os barcos já estão chegando. Obrigada, herói!'],['Esta noite o mar está iluminado. Você é bem-vindo aqui sempre.'])}]},
  castle:{name:'Fortaleza da Brasa',theme:'meadow',dark:0,outdoor:true,music:'castle',persistClear:true,map:mkCastle(),enemies:[['skel',8,8,'R'],['skel',30,8],['skel',12,20],['bat',26,14],['wolf',8,14],['wolf',30,20,'R'],['skel',20,12],['bat',14,22]],
   doors:{'19,27':{to:'w7',pos:[76*16,30*16-4]},'20,27':{to:'w7',pos:[76*16,30*16-4]}},signs:{},houses:[],labels:[],
   onClear:r=>{const p=player;if(!p.castle.owned){p.castle.owned=1;unlock('castle1');addFame(15,'Fortaleza conquistada');if(p.q.forte&&p.q.forte.s==='on')qProg('forte');
@@ -1249,7 +1273,7 @@ function timedTick(){for(const k in room.litTimes||{}){const[c,r]=k.split(',').m
 function chainBolt(src){const c=center(src);let best=null,bd=72;
   for(const e of enemies){if(e===src||e.hp<=0)continue;const q=center(e),d=Math.hypot(q.x-c.x,q.y-c.y);if(d<bd){bd=d;best=e}}
   if(!best)return;const q=center(best);bolts.push({x1:c.x,y1:c.y,x2:q.x,y2:q.y,t:10});tone(1600,.08,'square',.03,400);best.inv=0;damageEnemy(best,[.5,1,1.5][(eqLv('sword')||1)-1])}
-function lightAt(c,r){if(room.timed)(room.litTimes=room.litTimes||{})[c+','+r]=frame;room.tiles[r][c]='L';torches.push({x:c*TS+8,y:r*TS+6});bg=buildBg(room);sfx.chest();sparks(c*TS+8,r*TS+6,'#ffd166',12);checkLit();checkRoomPuzzle()}
+function lightAt(c,r){if(curKey==='w8'&&c===30&&r===46)setTimeout0(farolLit);if(room.timed)(room.litTimes=room.litTimes||{})[c+','+r]=frame;room.tiles[r][c]='L';torches.push({x:c*TS+8,y:r*TS+6});bg=buildBg(room);sfx.chest();sparks(c*TS+8,r*TS+6,'#ffd166',12);checkLit();checkRoomPuzzle()}
 function revealAt(c,r){const sec=room.secrets&&room.secrets[c+','+r];if(!sec)return false;room.tiles[r][c]='O';bg=buildBg(room);sfx.secret();showMsg('Uma passagem secreta!',150);return true}
 function secretHints(){
   if(!room.secrets||frame%20)return;
@@ -1276,7 +1300,7 @@ function nearestEnemy(x,y,range){let best=null,bd=range;for(const e of enemies){
 function shieldBlock(b){
   const p=player;if(!eqId('shield')||p.atkT>0||p.dashT>0)return false;
   const[fx,fy]=DIRV[p.facing],l=Math.hypot(b.vx,b.vy)||1,dot=(b.vx*fx+b.vy*fy)/l,lv=eqLv('shield');
-  const mir=['shieldMirror','shieldTower','shieldIron','shieldRoyal'].includes(eqId('shield'));if(dot>(mir?(lv>=2?.25:0):(lv>=2?-.2:-.45)))return false;
+  const mir=['shieldMirror','shieldTower','shieldIron','shieldRoyal','shieldTurtle'].includes(eqId('shield'));if(dot>(mir?(lv>=2?.25:0):(lv>=2?-.2:-.45)))return false;
   sparks(b.x,b.y,'#ffd166',6);sfx.tink();
   if(mir?lv>=2:lv>=3)pshots.push({x:b.x,y:b.y,vx:-b.vx*(mir&&lv>=3?2.2:1.6),vy:-b.vy*(mir&&lv>=3?2.2:1.6),life:60,hit:new Set(),small:true});
   return true;
@@ -1397,7 +1421,7 @@ const LEADV={square:.04,sawtooth:.032,triangle:.07,sine:.07};
 let bgm=null;
 function getNB(){if(!NB){NB=AC.createBuffer(1,AC.sampleRate*1.5|0,AC.sampleRate);const a=NB.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1}return NB}
 const CT={1:['field1','dungeon','boss'],2:['swamp','temple','boss2'],3:['ashwood','fort','boss3'],4:['snow','temple4','boss4'],5:['ruins','tower','boss5'],6:['desert','pyramid','boss6'],7:['aurora','inn','boss6']};
-function roomTrack(){if(room.arena)return room.fight?room.music:room.after;if(room.music)return room.music;if(room.outdoor)return nightAlpha()>.3?'night':'aurora';const t=CT[chapter]||CT[1];if(room.cave)return'cave';if(room.bossRoom)return room.won?t[1]:t[2];if(room.dark>=.35)return t[1];return t[0]}
+function roomTrack(){if(room.arena)return room.fight?room.music:room.after;if(curKey==='w8')return nightAlpha()>.3?'night':'coral';if(room.music)return room.music;if(room.outdoor)return nightAlpha()>.3?'night':'aurora';const t=CT[chapter]||CT[1];if(room.cave)return'cave';if(room.bossRoom)return room.won?t[1]:t[2];if(room.dark>=.35)return t[1];return t[0]}
 function playTrack(name){
   if(AC&&!OPT.music){stopTrack();return}
   if(!AC||(bgm&&bgm.name===name))return;stopTrack();const T=TRACKS[name];if(!T)return;
@@ -1503,6 +1527,8 @@ Object.assign(TRACKS,{
   castle:{v2:1,bpm:96,bars:[[38,'M'],[43,'M'],[45,'M'],[38,'M'],[47,'m'],[43,'M'],[45,'M'],[45,'M']],pad:'str',bass:[0,_,7,_,0,_,7,_],arp:{ins:'piano',r:8,oct:36},vol:{arp:.02},
     mel:{ins:'brass',v:.045,n:[74,'_','_',78,81,'_',86,'_', 83,'_',81,'_',79,'_','_','_', 81,'_',85,'_',88,'_',85,'_', 86,'_','_','_','_','_',81,'_', 83,'_','_',81,79,'_',78,'_', 79,'_',83,'_',86,'_',83,'_', 81,'_',78,'_',76,'_',81,'_', 81,'_','_','_','_','_','_','_']},
     drums:{k:'k.......k.......',s:'....s.......s...',T:'T...............'}},
+  coral:{v2:1,bpm:112,bars:[[43,'M'],[40,'m'],[36,'M'],[38,'M']],bass:[0,_,7,0,_,7,0,_],arp:{ins:'bell',r:8,oct:48},vol:{arp:.03},
+    mel:{ins:'flute',v:.045,n:[79,'_',83,81,79,'_',76,'_', 79,'_','_',76,74,'_',72,'_', 72,'_',76,79,84,'_',83,81, 81,'_','_','_',79,'_',78,'_']},drums:{k:'k..k..k.k..k..k.',h:'..h...h...h...h.',t:'......t.......t.'}},
   victory2:{v2:1,bpm:120,bars:[[48,'M'],[41,'M'],[43,'M'],[48,'M']],pad:'str',bass:[0,_,7,_,0,_,7,_],
     mel:{ins:'brass',v:.05,n:[72,'_',72,76,79,'_','_','_', 77,'_',76,'_',74,'_',72,'_', 74,'_',76,'_',79,'_',83,'_', 84,'_','_','_','_','_','_','_']},drums:{k:'k.......k.......',s:'....s.......s...',T:'T...............'}}
 });
@@ -1531,6 +1557,8 @@ Object.assign(THEMES,{forge:{...THEMES.house,wall:'#3e3a46',wallHi:'#5a5464',mor
   elder:{...THEMES.house,wall:'#2e2840',wallHi:'#463e5e',mort:'#1a1628',spot:'#241e34',fl:'#4a3a6a',fl2:'#3a2a5a',fl3:'#5a4a7a'},
   home:{...THEMES.house,wall:'#6a4a3a',wallHi:'#8a6a4a',mort:'#3a2414',spot:'#5a3a2a',fl:'#c89060',fl2:'#b07a50',fl3:'#d8a070'},
   lib:{...THEMES.house,wall:'#3a2418',wallHi:'#5a3a24',mort:'#20140c',spot:'#2a1a10',fl:'#7a3a2a',fl2:'#6a2e20',fl3:'#8a4a34'},
+  coast:{...THEMES.meadow,g1:'#e8d090',g2:'#d8c080',g3:'#f4e4a8',w1:'#2ab0c0',w2:'#24a0b0',wave:'#8ae8e8',tree:['#1a4a2a','#4ab04a','#2a6a3a','#2f8a3a']},
+  coastIn:{...THEMES.house,wall:'#8a6a4a',wallHi:'#a88a5a',mort:'#5a4028',spot:'#6a5038',fl:'#d8c098',fl2:'#c8b088',fl3:'#e8d0a8'},
   royal:{...THEMES.house,wall:'#5a5466',wallHi:'#7a7486',mort:'#3a3446',spot:'#4a4456',fl:'#8a7a6a',fl2:'#7a6a5a',fl3:'#9a8a7a'},
   rosa:{...THEMES.house,wall:'#9a5a5a',wallHi:'#b87070',mort:'#5a3030',spot:'#7a4444',fl:'#d8a878',fl2:'#c89868',fl3:'#e8b888'}});
 function mkInt(k){const C=mkInt.c||(mkInt.c={});if(C[k])return C[k];
@@ -1542,6 +1570,11 @@ function mkInt(k){const C=mkInt.c||(mkInt.c={});if(C[k])return C[k];
     put('ingots',12,6);put('crate',1,8);put('crate',2,8);put('grind',10,7);put('coal',13,8,2,1)}
   if(k==='shop'){put('banner',7,0,2,1,0);put('window',4,0,1,1,0);put('window',11,0,1,1,0);put('shelf',1,1,5,1);put('shelf',10,1,5,1);put('counter',5,4,6,1);put('fruit',1,6);put('fruit',2,6);put('sack',13,6);put('sack',14,6);put('sack',14,7);put('barrel',1,8);put('rugG',6,7,4,2,0);put('plant',14,9)}
   if(k==='elder'){put('round',7,0,2,1,0);put('books',1,1,3,1);put('books',12,1,3,1);put('candles',5,1);put('candles',10,1);put('desk',7,4,3,1);put('orb',11,3);put('scope',13,5);put('carpet',5,6,6,3,0);put('plant',1,8);put('plant',14,8);put('herbs',4,0,1,1,0)}
+  if(k==='concha'){put('net',2,0,3,1,0);put('window',9,0,1,1,0);put('window',13,0,1,1,0);put('bar',1,4,4,1);put('hammock',8,2,3,1);put('hammock',12,2,3,1);put('shells',14,6);put('plant',1,9);put('plant',14,9);put('rugG',5,7,6,2,0);put('table',7,6,2,1)}
+  if(k==='polvo'){put('net',1,0,4,1,0);put('helm',12,0,2,1,0);put('bar',2,6,4,1);put('keg',1,1);put('keg',2,1);put('keg',3,1);put('table',7,6,2,1);put('table',11,6,2,1);put('stool',6,6,1,1,0);put('stool',9,6,1,1,0);put('stool',10,6,1,1,0);put('stool',13,6,1,1,0);put('anchor',14,8);put('shells',1,9);put('table',7,3,3,1)}
+  if(k==='emporio'){put('shelf',1,1,5,1);put('shelf',10,1,5,1);put('counter',5,4,6,1);put('aquarium',1,6,2,1);put('fruit',13,6);put('fruit',14,6);put('net',7,0,2,1,0);put('shells',14,9);put('barrel',1,9)}
+  if(k==='estaleiro'){put('boat',1,6,5,3);put('rack',6,1,3,1);put('anvil',10,5);put('furnace',12,1,3,2);put('anchor',14,8);put('helm',2,0,2,1,0);put('barrel',10,9);put('crate',11,9)}
+  if(k==='marina'){put('helm',7,0,2,1,0);put('mapw',2,0,3,1,0);put('desk',7,4,3,1);put('bed',13,1,1,2);put('books',1,1,3,1);put('globe',14,6);put('anchor',1,8);put('shells',14,9);put('plant',1,9)}
   if(k==='keep'){put('banner2',3,0,1,1,0);put('banner2',12,0,1,1,0);put('carpetR',7,3,2,7,0);put('throne',7,1,2,2);put('hearth',4,1,2,1);put('bed2',12,1,2,2);put('chestG',1,2);put('chestG',1,3);put('table',2,7,2,1);put('candles',10,1);put('plant',1,9);put('plant',14,9);put('armor',14,4)}
   if(k==='forge2'){put('furnace',1,1,3,2);put('furnace',12,1,3,2);put('rack',5,1,3,1);put('rack',8,1,3,1);put('anvil',6,5);put('anvil',10,5);put('armor',1,5);put('armor',14,5);put('trough',2,8,2,1);put('barrel',14,8);put('ingots',12,8);put('shieldw',4,0,1,1,0);put('shieldw',11,0,1,1,0)}
   if(k==='kitchen'){put('stove',1,1,2,1);put('stove',4,1,2,1);put('stove',10,1,2,1);put('cupboard',13,1);put('cupboard',14,1);put('table',5,6,3,1);put('table',10,6,3,1);put('barrel',1,8);put('barrel',2,8);put('sack',14,8);put('fruit',13,8);put('herbs',7,0,1,1,0);put('herbs',8,0,1,1,0);put('mugs',7,1,2,1)}
@@ -1609,6 +1642,14 @@ function deco(k,x,y,w,h){const ink='#1a1020',f=frame;switch(k){
   case'lectern':{const id=room.books&&room.books[(x/TS)+','+(y/TS)],B=BOOKS[id]||{c:'#a03030'};shadow(x+2,y+14,12);P(ctx,x+6,y+8,ink,4,8);P(ctx,x+7,y+8,'#6b4428',2,8);P(ctx,x+3,y+14,'#5a3a1a',10,2);
     P(ctx,x+1,y+2,ink,14,7);P(ctx,x+2,y+3,'#f4ead8',12,5);P(ctx,x+8,y+3,ink,1,5);P(ctx,x+2,y+2,B.c,12,1);if(!(AS.books&&AS.books[id])&&frame%30<15)P(ctx,x+13,y,'#ffffff',1,1)}break;
   case'globe':P(ctx,x+7,y+10,'#6b4428',2,5);P(ctx,x+4,y+14,'#6b4428',8,2);fc(x+8,y+6,6,6,ink);fc(x+8,y+6,5,5,'#3a6ad6');P(ctx,x+5,y+4,'#4c9a3f',3,3);P(ctx,x+9,y+7,'#4c9a3f',3,2);break;
+  case'net':for(let i=0;i<w;i+=4){P(ctx,x+i,y+2,'#c8a868',1,12)}for(let j=2;j<14;j+=4)P(ctx,x,y+j,'#c8a868',w,1);P(ctx,x+w/2-2,y+8,'#e8d8c8',4,4);break;
+  case'hammock':P(ctx,x,y+4,'#6b4428',2,8);P(ctx,x+w-2,y+4,'#6b4428',2,8);for(let i=2;i<w-2;i++)P(ctx,x+i,y+6+Math.round(Math.sin((i/(w-4))*Math.PI)*4),'#e0603a',1,3);break;
+  case'shells':P(ctx,x+2,y+10,'#f4d8c8',5,4);P(ctx,x+3,y+9,'#f4d8c8',3,1);P(ctx,x+9,y+8,'#ff9ec4',5,6);P(ctx,x+10,y+7,'#ff9ec4',3,1);P(ctx,x+5,y+4,'#e8e2d0',4,4);break;
+  case'helm':fc(x+w/2,y+8,7,7,ink);fc(x+w/2,y+8,6,6,'#8a5a2a');fc(x+w/2,y+8,3,3,'#c8a26b');for(let i=0;i<8;i++){const a=i*.785;P(ctx,Math.round(x+w/2+Math.cos(a)*8)-1,Math.round(y+8+Math.sin(a)*8)-1,'#6b4428',2,2)}break;
+  case'anchor':P(ctx,x+7,y+2,'#5a6068',2,12);P(ctx,x+4,y+4,'#5a6068',8,2);P(ctx,x+3,y+12,'#5a6068',10,2);P(ctx,x+2,y+10,'#5a6068',2,3);P(ctx,x+12,y+10,'#5a6068',2,3);fc(x+8,y+2,2,2,'#5a6068');break;
+  case'aquarium':P(ctx,x,y+2,ink,w,13);P(ctx,x+1,y+3,'#3a8ad6',w-2,11);for(let i=0;i<3;i++){const fx=x+4+((frame>>2)+i*9)%(w-8);P(ctx,fx,y+6+i*3,['#ffd166','#ff8a3d','#e0452b'][i],3,2)}P(ctx,x+2,y+12,'#3a8a3a',2,2);break;
+  case'boat':P(ctx,x,y+h-14,ink,w,12);for(let i=0;i<w;i++)P(ctx,x+i,y+h-13,'#8a5a2a',1,10-Math.round(Math.abs(i-w/2)/(w/2)*4));P(ctx,x,y+h-13,'#a87a4a',w,2);P(ctx,x+w/2-1,y+2,'#6b4428',2,h-16);P(ctx,x+w/2+1,y+4,'#e8e2d0',14,14);break;
+  case'mapw':P(ctx,x+2,y+2,'#e8d8b0',w-4,12);P(ctx,x+6,y+4,'#4ad0d0',10,6);P(ctx,x+20,y+6,'#4c9a3f',12,6);P(ctx,x+12,y+10,'#e0452b',2,2);break;
   case'throne':P(ctx,x+4,y,ink,w-8,h);P(ctx,x+5,y+1,'#c8901a',w-10,h-2);P(ctx,x+8,y+4,'#a01a2a',w-16,h-10);P(ctx,x+4,y+h-8,'#c8901a',w-8,6);P(ctx,x+w/2-2,y-3,'#ffd166',4,4);flame(ctx,x+w/2,y+2,1,frame);break;
   case'carpetR':P(ctx,x,y,'#7a1a2a',w,h);P(ctx,x+2,y,'#a02a3a',w-4,h);P(ctx,x+2,y,'#ffd166',1,h);P(ctx,x+w-3,y,'#ffd166',1,h);break;
   case'banner2':P(ctx,x+3,y+1,'#5a3418',10,2);P(ctx,x+4,y+3,'#a01a2a',8,12);P(ctx,x+4,y+13,'#ffd166',8,1);flame(ctx,x+8,y+11,1,frame);break;
@@ -1619,6 +1660,13 @@ function drawHouses(){const nt=nightAlpha()>.2;for(const[c,r,k]of room.houses){c
 function roof(x,y,c1,c2,seam,step=4){P(ctx,x-3,y,'#1a1020',86,33);for(let ry=0;ry<30;ry+=step){P(ctx,x-2,y+1+ry,(ry/step)%2?c1:c2,84,step-1);for(let rx=((ry/step)%2)*4;rx<84;rx+=8)P(ctx,x-2+rx,y+1+ry,seam,1,step-1)}}
 function win(x,y,nt,frame2,glass){P(ctx,x,y,frame2,12,10);P(ctx,x+1,y+1,nt?'#ffd166':glass||'#8fc0e0',10,8);P(ctx,x+6,y+1,frame2,1,8);P(ctx,x+1,y+5,frame2,10,1);if(nt)glow(x+6,y+5,14,'255,200,100',.25)}
 function houseExt(k,x,y,nt){const ink='#1a1020',f=frame;
+  if(k==='stilt'||k==='tavern2'||k==='shipyard'){const roofC=k==='tavern2'?['#8a3a2a','#a04a3a']:k==='shipyard'?['#5a6a7a','#6a7a8a']:['#c8a868','#d8b878'];
+    for(let i=0;i<4;i++)P(ctx,x+4+i*24,y+40,'#6b4428',3,10);P(ctx,x-3,y+2,ink,86,32);for(let ry=0;ry<30;ry+=3){P(ctx,x-2,y+3+ry,ry%6?roofC[0]:roofC[1],84,3);for(let rx=(ry*7)%5;rx<84;rx+=5)P(ctx,x-2+rx,y+3+ry+2,'#8a6a3a',2,1)}
+    P(ctx,x,y+32,'#a07a4a',80,14);for(let i=0;i<80;i+=6)P(ctx,x+i,y+32,'#8a6a3a',1,14);P(ctx,x,y+46,'#6b4428',80,2);
+    win(x+6,y+35,nt,'#5a3a1a','#8ae8e8');win(x+62,y+35,nt,'#5a3a1a','#8ae8e8');P(ctx,x+33,y+33,ink,14,13);P(ctx,x+34,y+34,'#4ad0d0',12,12);
+    if(k==='tavern2'){fc(x+20,y+20,8,6,'#c05a8a');for(let i=0;i<4;i++)P(ctx,x+14+i*4,y+24,'#c05a8a',2,6);P(ctx,x+18,y+18,'#ffffff',2,2)}
+    if(k==='shipyard'){P(ctx,x+54,y+14,'#5a6068',2,14);P(ctx,x+50,y+16,'#5a6068',10,2);P(ctx,x+49,y+26,'#5a6068',12,2)}
+    if(k==='stilt'){const v=room.houses.find(h=>h[0]*16===x&&h[1]*16===y);const i=v?v[3]:0;if(i===2){P(ctx,x+20,y+14,'#ff7a6a',12,8);P(ctx,x+22,y+10,'#ff9a8a',3,4)}if(i===4){fc(x+20,y+18,6,6,ink);fc(x+20,y+18,5,5,'#8a5a2a');P(ctx,x+19,y+12,'#6b4428',2,12)}if(i===0){P(ctx,x+18,y+16,'#e0603a',16,3);P(ctx,x+18,y+19,'#ffd166',16,1)}}return}
   if(k==='forge2'){P(ctx,x-3,y,ink,86,33);for(let rx=0;rx<84;rx+=7){P(ctx,x-2+rx,y+1,'#4a3a3a',6,31);P(ctx,x-2+rx+6,y+1,'#2a1a1a',1,31)}P(ctx,x-2,y+1,'#ffd166',84,2);
     P(ctx,x+62,y-14,ink,16,24);P(ctx,x+63,y-13,'#5c5766',14,22);P(ctx,x+64,y-15,f%10<5?'#ff8a3d':'#e0452b',12,2);if(f%4===0)part(x+70,y-16,Math.random()-.5,-1.4,Math.random()<.5?'#ffd166':'#ff8a3d',22);
     P(ctx,x,y+32,'#7a7486',80,16);for(let by=32;by<48;by+=4)P(ctx,x,y+by,'#5a5466',80,1);P(ctx,x,y+32,'#ffd166',80,2);P(ctx,x+5,y+36,ink,22,11);P(ctx,x+6,y+37,f%8<4?'#ff6a1a':'#e0452b',20,9);glow(x+16,y+41,18,'255,120,40',.4);
@@ -1788,12 +1836,13 @@ const SC_LUMI=[{pages:[{text:'Uma noite tranquila. A lareira estala baixinho.'},
 const SC_IAN=[{pages:[{text:'Mais uma noite de lareira acesa na casa de Kael.'},{text:'MARIA LUIZA: Esta é a Mariana. A irmã já quer ensinar ela a usar espada!'},{text:'A família está completa. Do lado de fora, as estrelas parecem mais perto.',hold:200}],
   draw(t){SC_LUMI[0].draw(t);P(ctx,150,104,'#8fd0ff',10,6);P(ctx,152,101,'#f2c79a',5,4)}}];
 /* ---------- frutas, fogueiras e culinária ---------- */
-const FOODS={apple:{n:'Maçã',hp:3},straw:{n:'Morango',hp:2,sta:20},orange:{n:'Laranja',hp:2,mp:6},pear:{n:'Pera',hp:3,sta:10},melon:{n:'Melancia',hp:6},pine:{n:'Abacaxi',hp:4,sta:30},grape:{n:'Uvas',hp:1,mp:10},meat:{n:'Carne',hp:2},egg:{n:'Ovo',hp:1},flour:{n:'Farinha',hp:0},cheese:{n:'Queijo',hp:2},milk:{n:'Leite',hp:1,sta:15},
+const FOODS={apple:{n:'Maçã',hp:3},straw:{n:'Morango',hp:2,sta:20},orange:{n:'Laranja',hp:2,mp:6},pear:{n:'Pera',hp:3,sta:10},melon:{n:'Melancia',hp:6},pine:{n:'Abacaxi',hp:4,sta:30},grape:{n:'Uvas',hp:1,mp:10},meat:{n:'Carne',hp:2},coco:{n:'Coco',hp:2,sta:25},manga:{n:'Manga',hp:4},banana:{n:'Banana',hp:3,sta:15},maracuja:{n:'Maracujá',hp:2,mp:12},
+  cocada:{n:'Cocada',hpP:.5,sta:50,dish:1},vitamina:{n:'Vitamina Tropical',mpFull:1,staFull:1,dish:1},tropical:{n:'Salada Tropical',hpP:1,buf:'sta',dish:1},peixecoco:{n:'Peixe no Coco',hpP:.8,buf:'def',dish:1},egg:{n:'Ovo',hp:1},flour:{n:'Farinha',hp:0},cheese:{n:'Queijo',hp:2},milk:{n:'Leite',hp:1,sta:15},
   omelet:{n:'Omelete',hpP:.3,dish:1},roast:{n:'Peixe Assado',hpP:.6,dish:1},stew:{n:'Moqueca de Aurora',hpP:1,staFull:1,buf:'def',dish:1},fish:{n:'Peixe (qualquer)',hp:0,virt:1},burger:{n:'Hambúrguer de Aurora',hpP:1,buf:'atk',dish:1},pizza:{n:'Pizza da Vila',hpP:1,mpFull:1,buf:'def',dish:1},elixir:{n:'Elixir da Chama',hpP:1,mpFull:1,staFull:1,buf:'all',long:1,dish:1},
   salad:{n:'Salada de Frutas',hpP:.5,sta:40,dish:1},juice:{n:'Suco de Laranja',mp:30,dish:1},pie:{n:'Torta de Maçã',hpP:1,dish:1},skewer:{n:'Espetinho do Caçador',hpP:.3,buf:'atk',dish:1},
   icecream:{n:'Sorvete de Melancia',hpP:.2,buf:'sta',dish:1},grill:{n:'Abacaxi Grelhado',hpP:.3,buf:'def',dish:1},jam:{n:'Geleia de Uva',mpFull:1,dish:1},feast:{n:'Banquete de Aurora',hpP:1,mpFull:1,staFull:1,buf:'all',dish:1}};
-const RECIPES={omelet:{egg:2},roast:{fish:2},salad:{apple:1,pear:1,orange:1},juice:{orange:2},jam:{grape:2},skewer:{meat:2},pie:{apple:2,flour:1,egg:1},icecream:{melon:1,milk:1},grill:{pine:1,meat:1},burger:{meat:2,flour:1,cheese:1},pizza:{flour:2,cheese:2,meat:1},feast:{apple:1,orange:1,melon:1,pine:1,grape:1,meat:1,cheese:1},elixir:{grape:2,straw:2,melon:1,pine:1,milk:1},stew:{fish:2,pine:1,milk:1}};
-const RECD={roast:'Peixe na brasa: 60% do HP.',stew:'Moqueca de Aurora: HP e stamina cheios e +3 de defesa.',omelet:'Simples e gostoso: 30% do HP.',burger:'HP cheio e +25% de ataque por 1 minuto.',pizza:'HP e MP cheios e +3 de defesa por 1 minuto.',elixir:'Tudo cheio e todos os bônus por 3 minutos!',salad:'Metade do HP e 40 de stamina.',juice:'Recupera 30 de MP.',pie:'Recupera todo o HP.',skewer:'+25% de ataque por 1 minuto.',icecream:'Stamina infinita por 1 minuto.',grill:'+3 de defesa por 1 minuto.',jam:'Recupera todo o MP.',feast:'Tudo cheio e todos os bônus por 2 minutos!'};
+const RECIPES={omelet:{egg:2},roast:{fish:2},salad:{apple:1,pear:1,orange:1},juice:{orange:2},jam:{grape:2},skewer:{meat:2},pie:{apple:2,flour:1,egg:1},icecream:{melon:1,milk:1},grill:{pine:1,meat:1},burger:{meat:2,flour:1,cheese:1},pizza:{flour:2,cheese:2,meat:1},feast:{apple:1,orange:1,melon:1,pine:1,grape:1,meat:1,cheese:1},elixir:{grape:2,straw:2,melon:1,pine:1,milk:1},stew:{fish:2,pine:1,milk:1},cocada:{coco:2,milk:1},vitamina:{banana:1,manga:1,milk:1},tropical:{coco:1,manga:1,banana:1,maracuja:1},peixecoco:{fish:1,coco:1}};
+const RECD={cocada:'Doce da praia: metade do HP e 50 de stamina.',vitamina:'MP e stamina cheios.',tropical:'HP cheio e stamina infinita por 1 minuto.',peixecoco:'80% do HP e +3 de defesa.',roast:'Peixe na brasa: 60% do HP.',stew:'Moqueca de Aurora: HP e stamina cheios e +3 de defesa.',omelet:'Simples e gostoso: 30% do HP.',burger:'HP cheio e +25% de ataque por 1 minuto.',pizza:'HP e MP cheios e +3 de defesa por 1 minuto.',elixir:'Tudo cheio e todos os bônus por 3 minutos!',salad:'Metade do HP e 40 de stamina.',juice:'Recupera 30 de MP.',pie:'Recupera todo o HP.',skewer:'+25% de ataque por 1 minuto.',icecream:'Stamina infinita por 1 minuto.',grill:'+3 de defesa por 1 minuto.',jam:'Recupera todo o MP.',feast:'Tudo cheio e todos os bônus por 2 minutos!'};
 function foodDesc(k){const F=FOODS[k];if(F.dish)return RECD[k];const o=[];if(F.hp)o.push('+'+F.hp*5+' HP');if(F.mp)o.push('+'+F.mp+' MP');if(F.sta)o.push('+'+F.sta+' stamina');return o.join(', ')+(k==='meat'?'. Melhor cozida!':'.')}
 function eat(k){const p=player,F=FOODS[k];if(!(p.food[k]>0))return;p.food[k]--;const mm=mpMax(),sm=staMax();
   if(F.hp)p.hp=Math.min(p.maxHp,p.hp+F.hp);if(F.hpP)p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*F.hpP));if(F.mp)p.mp=Math.min(mm,p.mp+F.mp);if(F.mpFull)p.mp=mm;if(F.sta)p.sta=Math.min(sm,p.sta+F.sta);if(F.staFull)p.sta=sm;
@@ -1810,6 +1859,14 @@ function foodIcon(k,x,y){if(FISH[k]||k==='fish'){fishIcon(k,x,y);return}switch(k
   case'melon':P(ctx,x,y+3,'#1a1020',9,5);P(ctx,x+1,y+3,'#e0303a',7,3);P(ctx,x+1,y+6,'#3a8a3a',7,1);P(ctx,x+3,y+4,'#1a1020',1,1);P(ctx,x+5,y+4,'#1a1020',1,1);break;
   case'pine':P(ctx,x+2,y+3,'#1a1020',5,6);P(ctx,x+3,y+4,'#e8b83a',3,4);P(ctx,x+3,y+5,'#a07020',1,1);P(ctx,x+3,y,'#3a8a3a',1,3);P(ctx,x+5,y,'#3a8a3a',1,3);P(ctx,x+4,y+1,'#4ab04a',1,2);break;
   case'grape':for(const[a,b]of[[2,2],[5,2],[3,4],[6,4],[4,6]]){P(ctx,x+a,y+b,'#5a2a7a',2,2);P(ctx,x+a,y+b,'#9a5ad6',1,1)}P(ctx,x+4,y,'#6b4428',1,2);break;
+  case'coco':fc(x+4,y+4,4,4,'#1a1020');fc(x+4,y+4,3,3,'#7a4a28');P(ctx,x+3,y+2,'#a87a4a',2,1);break;
+  case'manga':fc(x+4,y+4,4,3,'#1a1020');fc(x+4,y+4,3,2,'#ff8a1a');P(ctx,x+2,y+3,'#e0452b',2,2);P(ctx,x+4,y,'#3a8a3a',2,2);break;
+  case'banana':for(let i=0;i<6;i++)P(ctx,x+1+i,y+5-Math.round(Math.sin(i/5*Math.PI)*3),'#ffd84a',2,2);P(ctx,x,y+5,'#6a4a1a',1,1);break;
+  case'maracuja':fc(x+4,y+4,3,3,'#1a1020');fc(x+4,y+4,3,3,'#a07ad0');P(ctx,x+3,y+3,'#e8c040',2,1);P(ctx,x+4,y,'#3a8a3a',1,2);break;
+  case'cocada':P(ctx,x+1,y+3,'#1a1020',7,5);P(ctx,x+2,y+4,'#f4ead8',5,3);P(ctx,x+3,y+4,'#c8a26b',1,1);break;
+  case'vitamina':P(ctx,x+2,y+1,'#c9b8d8',5,7);P(ctx,x+3,y+2,'#ffc070',3,5);P(ctx,x+5,y,'#3a8a3a',1,3);break;
+  case'tropical':P(ctx,x,y+4,'#c9b8d8',9,4);P(ctx,x+1,y+2,'#ffd84a',2,2);P(ctx,x+3,y+2,'#ff8a1a',2,2);P(ctx,x+5,y+2,'#a07ad0',2,2);break;
+  case'peixecoco':fc(x+4,y+5,4,3,'#7a4a28');P(ctx,x+2,y+3,'#c9d6e8',5,2);break;
   case'meat':P(ctx,x+1,y+2,'#1a1020',6,5);P(ctx,x+2,y+3,'#c05a4a',4,3);P(ctx,x+6,y+5,'#e8e2d0',2,1);P(ctx,x+7,y+4,'#e8e2d0',1,3);break;
   case'salad':P(ctx,x,y+4,'#c9b8d8',9,4);P(ctx,x+1,y+2,'#4ab04a',2,2);P(ctx,x+3,y+2,'#e0452b',2,2);P(ctx,x+5,y+2,'#ff8a1a',2,2);break;
   case'juice':P(ctx,x+2,y+1,'#c9b8d8',5,7);P(ctx,x+3,y+2,'#ff8a1a',3,5);P(ctx,x+5,y,'#ffffff',1,3);break;
@@ -1830,6 +1887,10 @@ function foodIcon(k,x,y){if(FISH[k]||k==='fish'){fishIcon(k,x,y);return}switch(k
 function drawPlant(t,x,y,has){const ink='#1a1020';
   if(t==='apple'||t==='pear'||t==='orange'){const lc={apple:['#1f5a2a','#3a8a3a','#4ab04a'],pear:['#2a5a2a','#4a8a3a','#7ab04a'],orange:['#1a4a2a','#2a7a3a','#3aa04a']}[t];shadow(x+2,y+14,12);P(ctx,x+6,y+8,ink,4,8);P(ctx,x+7,y+8,'#6b4428',2,8);
     fc(x+8,y+2,8,7,ink);fc(x+8,y+2,7,6,lc[1]);fc(x+6,y,4,3,lc[2]);if(has){const fc2={apple:'#e0452b',pear:'#c8d84a',orange:'#ff8a1a'}[t];for(const[a,b]of[[3,2],[10,0],[7,5],[12,4],[5,-2]])P(ctx,x+a,y+b,fc2,2,2)}return}
+  if(t==='coco'){P(ctx,x+7,y,'#6b4428',2,16);for(const[a,b,w]of[[-2,-2,9],[8,-3,9],[0,1,6],[10,0,6]])P(ctx,x+a,y+b,'#2f8a3a',w,2);P(ctx,x+3,y-4,'#4ab04a',10,2);if(has)for(const[a,b]of[[5,0],[9,1],[7,2]])P(ctx,x+a,y+b,'#7a4a28',3,3);return}
+  if(t==='banana'){P(ctx,x+7,y+4,'#6a8a3a',2,12);for(const[a,b]of[[0,0],[9,1],[2,4],[10,5]])P(ctx,x+a,y+b,'#3a9a3a',7,3);if(has){P(ctx,x+9,y+6,'#ffd84a',2,5);P(ctx,x+11,y+7,'#ffd84a',2,4)}return}
+  if(t==='manga'){shadow(x+2,y+14,12);P(ctx,x+6,y+8,ink,4,8);P(ctx,x+7,y+8,'#6b4428',2,8);fc(x+8,y+2,8,7,ink);fc(x+8,y+2,7,6,'#2a6a2a');fc(x+6,y,4,3,'#3a8a3a');if(has)for(const[a,b]of[[3,3],[11,1],[7,6]]){P(ctx,x+a,y+b,'#ff8a1a',3,3);P(ctx,x+a,y+b,'#e0452b',1,1)}return}
+  if(t==='maracuja'){P(ctx,x+1,y+2,'#8a5a2a',14,2);P(ctx,x+2,y,'#8a5a2a',2,16);P(ctx,x+12,y,'#8a5a2a',2,16);P(ctx,x+3,y+4,'#3a8a3a',10,4);P(ctx,x+5,y+3,'#c06bff',2,2);if(has)for(const a of[4,10]){P(ctx,x+a,y+8,'#e8c040',3,4);P(ctx,x+a,y+8,'#a07a20',1,1)}return}
   if(t==='straw'){fc(x+8,y+11,7,4,ink);fc(x+8,y+11,6,3,'#3a8a3a');if(has)for(const[a,b]of[[3,10],[8,12],[12,9],[6,8]])P(ctx,x+a,y+b,'#e0303a',2,2);return}
   if(t==='melon'){P(ctx,x+1,y+12,'#3a8a3a',14,2);P(ctx,x+2,y+10,'#4ab04a',3,2);if(has){fc(x+9,y+9,6,5,ink);fc(x+9,y+9,5,4,'#3a8a3a');for(let i=5;i<14;i+=3)P(ctx,x+i,y+6,'#1f5a2a',1,7)}return}
   if(t==='pine'){for(let i=0;i<5;i++)P(ctx,x+3+i*2,y+6+Math.abs(i-2),'#3a8a3a',2,8-Math.abs(i-2));if(has){P(ctx,x+5,y+1,ink,6,8);P(ctx,x+6,y+2,'#e8b83a',4,6);P(ctx,x+7,y-2,'#4ab04a',2,4)}return}
@@ -1856,14 +1917,16 @@ function drawCook(){const p=player;ctx.fillStyle='rgba(20,10,6,.96)';ctx.fillRec
 /* ---------- pescaria ---------- */
 const FISH={lambari:{n:'Lambari',d:1,hp:2,col:'#c9d6e8',w:'all'},tilapia:{n:'Tilápia',d:1.5,hp:3,col:'#8a9aa8',w:'day'},cego:{n:'Peixe-Cego',d:1.5,hp:3,col:'#e8d8e8',w:'cist'},
   truta:{n:'Truta Prateada',d:2,hp:4,col:'#a8c8e8',w:'river'},bagre:{n:'Bagre Bigodudo',d:2,hp:5,col:'#6a5a4a',w:'rivnight'},carpa:{n:'Carpa Dourada',d:3,hp:6,mp:10,col:'#ffd166',w:'lake'},
+  sardinha:{n:'Sardinha',d:1,hp:2,col:'#a8c8d8',w:'sea'},garoupa:{n:'Garoupa',d:2,hp:5,col:'#8a6a4a',w:'sea'},polvo:{n:'Polvo',d:2.5,hp:4,mp:10,col:'#c05a8a',w:'sea'},espada:{n:'Peixe-Espada',d:3.5,hp:6,col:'#c9d6e8',w:'sea'},atum:{n:'Atum Real',d:3.5,hp:8,sta:30,col:'#3a5a9a',w:'sea'},kraken:{n:'Krakenzinho',d:5,hpP:1,mp:30,col:'#7a3aa0',w:'sea'},
   lua:{n:'Peixe-Lua',d:3,mp:20,col:'#e0c0ff',w:'lakenight'},enguia:{n:'Enguia Elétrica',d:3,mp:15,col:'#ffd84a',w:'cist'},salmao:{n:'Salmão Rubro',d:3.5,hp:8,sta:30,col:'#e0452b',w:'river'},rei:{n:'Rei do Lago',d:5,hpP:1,col:'#8fd0ff',w:'king'}};
 const FISHK=Object.keys(FISH);for(const k of FISHK)FOODS[k]={n:FISH[k].n,hp:FISH[k].hp||0,mp:FISH[k].mp,sta:FISH[k].sta,hpP:FISH[k].hpP};
 let fishS=null;
 function fishSpot(){const p=player,f=DIRV[p.facing];for(let d=1;d<=2;d++){const c=Math.floor((p.x+8+f[0]*12*d)/TS),r=Math.floor((p.y+11+f[1]*12*d)/TS);if(c<0||r<0||c>=COLS||r>=ROWS)return null;const t=room.tiles[r][c];if(t==='~')return[c,r];if(SOLID.has(t))return null}return null}
-function fishWhere(c,r){if(curKey==='cist')return'cist';if(curKey==='w7'){const d=((c-66)/8)**2+((r-26)/5)**2;return d<=1.2?'lake':'river'}return'river'}
+function fishWhere(c,r){if(curKey==='cist')return'cist';if(curKey==='w8')return'sea';if(curKey==='w7'){const d=((c-66)/8)**2+((r-26)/5)**2;return d<=1.2?'lake':'river'}return'river'}
 function rollFish(where){const night=room.outdoor&&nightAlpha()>.3,L=[['lambari',where==='cist'?3:6]];
   if(where==='cist')L.push(['cego',5],['enguia',2]);
   if(where==='lake'){if(!night)L.push(['tilapia',5],['carpa',1.2]);else L.push(['lua',1.5]);L.push(['rei',.25])}
+  if(where==='sea'){L.length=0;L.push(['sardinha',6],['garoupa',3],['espada',1],['atum',.8],['kraken',.15]);if(night)L.push(['polvo',3])}
   if(where==='river'){if(!night)L.push(['tilapia',4]);L.push(['truta',4],['salmao',1]);if(night)L.push(['bagre',4])}
   let t=L.reduce((a,x)=>a+x[1],0)*Math.random();for(const[k,w]of L){if((t-=w)<=0)return k}return'lambari'}
 function castRod(){const sp=fishSpot();if(!sp){if(lockCD<=0){showMsg('Fique de frente para a água para pescar.',140);lockCD=150}sfx.locked();return}
@@ -2067,6 +2130,58 @@ function drawCastle(){const C=player.castle,b=C.b,ink='#1a1020',f=frame,nt=night
   // terrenos vazios
   if(C.owned)for(const k of CKEYS){const P0=CPL[k];if(P0.x==null||b[k]||k==='keep')continue;const x=P0.x*16,y=P0.y*16;for(let i=0;i<4;i++)P(ctx,x+10+i*16,y+30-(i%2)*4,'#8a8494',10,6);P(ctx,x+8,y+12,'#a0703a',60,3);P(ctx,x+12,y+8,'#a0703a',3,14);P(ctx,x+64,y+8,'#a0703a',3,14)}
   if(b.tower){const x=36*16,y=21*16;P(ctx,x-2,y-40,ink,36,72);P(ctx,x,y-38,'#8a8494',32,68);for(let i=0;i<16;i++)P(ctx,x+16-i,y-60+i,'#a01a2a',i*2,1);P(ctx,x+15,y-76,'#5a3418',2,18);P(ctx,x+17,y-76,'#ffd166',14,8);flame(ctx,x+24,y-70,1,f);P(ctx,x+12,y-20,ink,8,12);P(ctx,x+13,y-19,nt?'#ffd166':'#3a4a6a',6,10)}}
+/* ---------- Costa Coral (região 2) ---------- */
+function genCoast(){const C=64,Rr=48,g=[];srand(4242);for(let r=0;r<Rr;r++){const row=[];for(let c=0;c<C;c++)row.push(rnd()<.05?',':'.');g.push(row)}
+  const S=(c,r,t)=>{if(c>=0&&c<C&&r>=0&&r<Rr)g[r][c]=t},G=(c,r)=>(c>=0&&c<C&&r>=0&&r<Rr)?g[r][c]:'W';
+  for(let r=0;r<Rr;r++)for(let c=0;c<C;c++){if(r>=37||c>=57)S(c,r,'~');if(c<2||r<2||c>=C-2)S(c,r,(c+r)%2?'!':'T')}
+  for(let c=2;c<57;c++)if(G(c,36)!=='~')S(c,36,'.');
+  for(let i=0;i<90;i++){const c=2+rnd()*54|0,r=2+rnd()*14|0;if(G(c,r)==='.')S(c,r,rnd()<.75?'!':'b')}
+  for(let i=0;i<40;i++){const c=2+rnd()*14|0,r=14+rnd()*20|0;if(G(c,r)==='.')S(c,r,rnd()<.6?'!':'b')}
+  for(let r=0;r<=20;r++){S(31,r,r===0?'^':'=');S(32,r,r===0?'^':'=')}
+  for(let r=19;r<=36;r++)for(let c=17;c<=44;c++)S(c,r,'.');for(let c=17;c<=44;c++)S(c,27,'=');for(let r=19;r<=36;r++){S(30,r,'=');S(31,r,'=')}
+  const house=(x,y)=>{for(let r=y;r<y+2;r++)for(let c=x;c<x+5;c++)S(c,r,'Y');for(let c=x;c<x+5;c++)S(c,y+2,'y');S(x+2,y+2,'j')};
+  house(20,22);house(28,22);house(36,22);house(20,29);house(36,29);
+  for(let r=37;r<=45;r++){S(30,r,'B');S(31,r,'B')}for(let r=45;r<=47;r++)for(let c=28;c<=33;c++)S(c,r,c===28||c===33||r===47?'~':'.');S(30,46,'U');S(31,46,'.');S(33,45,'W');S(33,46,'W');
+  S(33,4,'g');S(28,34,'g');S(12,23,'g');
+  for(const[c,r]of[[12,24],[50,24]]){for(let y=r-1;y<=r+1;y++)for(let x=c-1;x<=c+1;x++)if(G(x,y)!=='~')S(x,y,'.');S(c,r,'*')}
+  const FT=genCoast.ft={};const plant=(c,r,t)=>{for(let y=r-1;y<=r+1;y++)for(let x=c-1;x<=c+1;x++)if('!b,'.includes(G(x,y)))S(x,y,'.');S(c,r,'&');FT[c+','+r]=t};
+  for(const[c,r]of[[10,34],[15,33],[47,33],[52,34]])plant(c,r,'coco');for(const[c,r]of[[8,18],[12,15]])plant(c,r,'banana');for(const[c,r]of[[48,12],[52,16]])plant(c,r,'manga');for(const[c,r]of[[24,9],[38,9]])plant(c,r,'maracuja');
+  return g.map(r=>r.join(''))}
+const SHELLS=[[6,35],[14,36],[22,36],[40,36],[46,35],[54,36]];
+function spawnShells(){const q=player&&player.q&&player.q.conchas;if(!q||q.s!=='on')return;SHELLS.forEach(([c,r],i)=>{if(!q.got.includes(i)&&!pickups.some(k=>k.type==='concha'&&k.i===i))pickups.push({type:'concha',i,x:c*TS+4,y:r*TS+4,t:20,life:-1})})}
+function farolLit(){unlock('farol');addFame(10,'O farol voltou a brilhar');if(player.q.farol&&player.q.farol.s==='on')qProg('farol');toasts.push({title:'O FAROL ACENDEU!',sub:'Os barcos encontram o caminho de novo',t:220});saveGame()}
+function coastTarget(on,rd,T){if(on('conchas')){const h=pickups.filter(k=>k.type==='concha');if(h.length)return{x:h[0].x+4,y:h[0].y+4}}if(rd('conchas'))return T(38,24);if(on('farol'))return T(30,45);if(rd('farol'))return T(38,31);if(rd('caranguejos'))return T(26,35);if(on('caranguejos'))return T(40,35);return null}
+function coastSpawn(){const night=nightAlpha()>.3;if(enemies.length>=(night?8:5))return;for(let k=0;k<12;k++){const a=Math.random()*6.28,d=170+Math.random()*90,x=player.x+Math.cos(a)*d,y=player.y+Math.sin(a)*d,c=Math.floor((x+8)/TS),r=Math.floor((y+12)/TS);
+  if(c<2||r<2||c>=55||r>=36||(c>=16&&c<=45&&r>=18))continue;if(room.tiles[r][c]!=='.')continue;const L=r>28?['crab','crab','frog']:night?['bat','spirit','skel']:['crab','frog','slime'];const e=spawn(L[Math.random()*L.length|0],c,r);if(night&&Math.random()<.07)makeRare(e);enemies.push(e);return}}
+function drawCoast(){const f=frame;for(let i=0;i<6;i++){const x=((f*.3+i*90)%(RW+40))-20;P(ctx,Math.round(x),37*16+4+(i%3)*30,'#bff4f4',10,1)}
+  for(let c=2;c<57;c++)if(room.tiles[37]&&room.tiles[37][c]==='~'){const y=37*16+Math.round(Math.sin(f*.05+c*.7)*2);P(ctx,c*16,y,'#e8ffff',16,2)}
+  const lx=33*16-6,ly=47*16;P(ctx,lx-2,ly-62,'#1a1020',24,62);for(let i=0;i<7;i++)P(ctx,lx,ly-60+i*8,i%2?'#e8e2d0':'#c03030',20,8);P(ctx,lx-4,ly-70,'#1a1020',28,10);P(ctx,lx-2,ly-68,'#5a5466',24,8);
+  if(room.tiles[46][30]==='L'){glow(lx+10,ly-66,60,'255,220,120',.5);P(ctx,lx+2,ly-68,'#ffd166',16,6);if(nightAlpha()>.2){ctx.globalAlpha=.15;for(let i=0;i<40;i++)P(ctx,lx+10+Math.cos(f*.02)*i*6,ly-66+Math.sin(f*.02)*i*3,'#fff0b0',6,6);ctx.globalAlpha=1}}}
+let shellG=null;
+function startShell(bet){if(player.gems<bet){openDlg({name:'CHICO CONCHA',col:'#e8d8c8'},['Sem gemas, sem pérola, marujo!']);return}player.gems-=bet;const sp=1.6+Math.min(2.4,(AS.shellStreak||0)*.3)+(bet>=60?.8:bet>=30?.4:0);
+  shellG={bet,pearl:Math.random()*3|0,pos:[0,1,2],st:'show',t:0,swaps:6+Math.min(8,(AS.shellStreak||0))+(bet>=30?2:0),sw:null,sp,sel:1,res:0};state='shell';stopTrack();playTrack('jk')}
+function updShell(){const G=shellG;if(!G){state='play';return}G.t++;
+  if(G.st==='show'){if(G.t>=70){G.st='mix';G.t=0}return}
+  if(G.st==='mix'){if(!G.sw){if(G.swaps<=0){G.st='pick';G.t=0;return}let a=Math.random()*3|0,b=(a+1+(Math.random()*2|0))%3;G.sw={a,b,k:0};G.swaps--;tone(500+Math.random()*200,.04,'triangle',.03)}
+    G.sw.k+=G.sp/20;if(G.sw.k>=1){const{a,b}=G.sw;const t=G.pos[a];G.pos[a]=G.pos[b];G.pos[b]=t;G.sw=null}return}
+  if(G.st==='pick'){if(pressed.left){G.sel=(G.sel+2)%3;sfx.gem()}if(pressed.right){G.sel=(G.sel+1)%3;sfx.gem()}
+    if(pressed.atk){G.res=G.pos[G.sel]===G.pearl?1:-1;G.st='end';G.t=0;
+      if(G.res>0){player.gems+=G.bet*2;AS.shellStreak=(AS.shellStreak||0)+1;AS.shellWins=(AS.shellWins||0)+1;unlock('shell1');if(AS.shellStreak>=5)unlock('shell5');G.prize=shellPrize(AS.shellStreak);sfx.item()}
+      else{AS.shellStreak=0;sfx.hurt()}saveAS()}return}
+  if(G.st==='end'&&G.t>40&&(pressed.atk||pressed.dash)){shellG=null;state='play';playTrack(roomTrack());saveGame()}}
+function shellPrize(n){const p=player;if(n===3){p.jewels.sapph++;return'Sequência de 3: Safira!'}if(n===5&&!p.bag.ringSea){p.bag.ringSea=1;return'Sequência de 5: Anel do Mar!'}if(n%4===0){p.gems+=40;return'Bônus: +40 gemas'}return''}
+function drawShell(){const G=shellG;if(!G)return;ctx.fillStyle='rgba(20,30,40,.97)';ctx.fillRect(0,HUD,W,H);P(ctx,0,HUD+110,'#8a5a2a',W,66);P(ctx,0,HUD+110,'#a87a4a',W,3);
+  txt('CONCHA ESPERTA',W/2,HUD+6,'#ffd166',8,'center');txt('Aposta: '+G.bet+'   Sequência: '+(AS.shellStreak||0),W/2,HUD+18,'#8ff3ff',8,'center');
+  const X=i=>48+i*80;for(let slot=0;slot<3;slot++){let x=X(slot),y=HUD+92;const shell=G.pos[slot];
+    if(G.sw&&(slot===G.sw.a||slot===G.sw.b)){const o=slot===G.sw.a?G.sw.b:G.sw.a,k=G.sw.k;x=X(slot)+(X(o)-X(slot))*k;y-=Math.sin(k*Math.PI)*(slot===G.sw.a?14:-6)}
+    const lift=(G.st==='show'&&G.t>10&&G.t<60)||(G.st==='end'&&(shell===G.pearl||slot===G.sel))?14:0;
+    if(shell===G.pearl&&lift){fc(x+12,y+12,4,4,'#ffffff');P(ctx,x+10,y+10,'#e8e8f8',3,2)}
+    fc(x+12,y-lift,16,11,'#1a1020');fc(x+12,y-lift,15,10,'#f4d8c8');for(let i=-10;i<=10;i+=5)P(ctx,Math.round(x+12+i),y-lift-8,'#d8b8a8',1,14);P(ctx,x-2,y+8-lift,'#d8b8a8',28,2);
+    if(G.st==='pick'&&slot===G.sel){P(ctx,x+10,y+22,'#ffd166',5,3);P(ctx,x+11,y+25,'#ffd166',3,2)}}
+  const npc=npcSprites('chico',{g:'#a03a3a',G:'#6a2424',h:'#2a1a10',y:'#ffd166'});ctx.drawImage(npc.down[(frame>>4)%2],W/2-16,HUD+30,32,32);
+  if(G.st==='show')txt('Olhe bem onde está a pérola...',W/2,HUD+140,'#f4e9d8',8,'center');else if(G.st==='mix')txt('Embaralhando!',W/2,HUD+140,'#f4e9d8',8,'center');
+  else if(G.st==='pick')txt('< > escolha a concha  A: confirmar',W/2,HUD+140,'#f4e9d8',8,'center');
+  else{txt(G.res>0?'ACERTOU! +'+G.bet*2+' gemas':'ERROU... a pérola estava em outra',W/2,HUD+132,G.res>0?'#6cc45a':'#e0452b',8,'center');if(G.prize)txt(G.prize,W/2,HUD+144,'#ffd166',8,'center');txt('A: sair',W/2,HUD+158,'#c9b8d8',8,'center')}}
 /* ---------- Jornada: o caminho principal da história ---------- */
 let menuJornada=false;
 const STORY=[
@@ -2078,6 +2193,7 @@ const STORY=[
  {t:'Vença Fenrir no Covil',d:'Nordeste. Erga a pedra com as Luvas de Força.',at:[72,4],ok:()=>!!(AS.bigs&&AS.bigs.fenrir)},
  {t:'Vença o Rei Espectro na Cripta',d:'Ao sul. Forje as Manoplas de Ferro no Brandão.',at:[20,56],ok:()=>!!(AS.bigs&&AS.bigs.spec)},
  {t:'Conquiste a Fortaleza da Brasa',d:'Estrada para o leste, depois da ponte do lago.',at:[78,30],ok:()=>!!(player.castle&&player.castle.owned)},
+ {t:'Conheça a Costa Coral',d:'Siga a estrada para o sul da vila.',at:[40,57],ok:()=>!!AS.rooms.w8},
  {t:'Case-se com Maria Luiza',d:'Converse todo dia: flores, passeios e anéis.',at:'bea',ok:()=>!!(player.love&&player.love.stage>=4)},
  {t:'A Pedra Negra aguarda...',d:'Ela disse "ainda não". O resto chega em breve.',at:[40,7],ok:()=>false}];
 function storyStep(){if(!player||!player.q)return null;for(const st of STORY)if(!st.ok())return st;return null}
@@ -2222,6 +2338,14 @@ Object.assign(ITEMS,{
  armorCrystal:{slot:'body',name:'Armadura de Cristal',desc:'Do Golem. Defesa e magia.',st:{def:4,mp:10},col:'#8fd0ff'},
  bootsFenrir:{slot:'feet',name:'Botas de Fenrir',desc:'Esquiva barata e passos velozes.',st:{sta:40,spd:.15},col:'#3a3a48'},
  swordSpecter:{slot:'sword',name:'Lâmina Espectral',desc:'Do Rei Espectro. Solta raios.',fx:'storm',st:{atk:3},col:'#c06bff'},
+ swordCoral:{slot:'sword',name:'Lâmina de Coral',desc:'Do Empório Coral. Corta como onda.',st:{atk:2},col:'#ff7a6a'},
+ bowCoral:{slot:'bow',name:'Arco de Coral',desc:'Leve e preciso.',st:{atk:1.8},col:'#ff9a8a'},
+ shieldTurtle:{slot:'shield',name:'Casco de Tartaruga',desc:'Duro como pedra, bloqueia dos lados.',st:{def:3.5},col:'#4a8a5a'},
+ helmShell:{slot:'head',name:'Elmo de Concha',desc:'Concha gigante polida.',st:{def:2.5},col:'#e8d8c8'},
+ armorScaleSea:{slot:'body',name:'Escamas Marinhas',desc:'Couraça de escamas azuis.',st:{def:4},col:'#3a8aa0'},
+ bootsSand:{slot:'feet',name:'Botas de Areia',desc:'Correm fácil na praia.',st:{sta:25,spd:.1},col:'#c8a868'},
+ neckPearl:{slot:'neck',name:'Colar de Pérolas',desc:'Pérolas do fundo do mar.',st:{mp:18},col:'#f4ecf4'},
+ ringSea:{slot:'ring',name:'Anel do Mar',desc:'Prêmio da Concha Esperta.',st:{mp:10,sta:10},col:'#4ad0d0'},
  swordRoyal:{slot:'sword',name:'Espada Real',desc:'Forjada na Forja Real do seu castelo.',st:{atk:2.6},col:'#ffd166'},
  bowRoyal:{slot:'bow',name:'Arco Real',desc:'Madeira de lei e corda de prata.',st:{atk:2.2},col:'#c8901a'},
  shieldRoyal:{slot:'shield',name:'Escudo Real',desc:'Bloqueia de frente e dos lados.',st:{def:4},col:'#e0452b'},
@@ -2496,6 +2620,7 @@ function roomLoaded(){
   if(curKey==='in-home'&&player.love.birth){const b=player.love.birth;player.love.birth=0;setTimeout0(()=>playScene(b===1?SC_LUMI:SC_IAN))}
   if(room.arena&&!room.won){room.fight=false;for(const[c,r]of room.gate)room.tiles[r][c]='X';if(room.boss==='spec')for(const[c,r]of SPECB)room.tiles[r][c]='U';torches=torches.filter(t=>!SPECB.some(([c,r])=>t.x===c*TS+8&&t.y===r*TS+6));bg=buildBg(room)}
   rareSpots=[];for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(room.tiles[r][c]==='A')rareSpots.push([c,r]);
+  if(curKey==='w8'){spawnShells();unlock('coast1')}
   if(room.loot&&!room.story){const L=room.loot;pickups.push({type:L.type,j:L.j,m:L.m,x:L.c*TS+4,y:L.r*TS+4,t:20,life:-1,loot:1})}
   if(!room.big)return;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if('l*'.includes(room.tiles[r][c]))lamps.push({x:c*TS+8,y:r*TS+4});
@@ -2510,7 +2635,7 @@ function worldTick(){worldMin+=1/30;
   if(frame%300===0)playTrack(roomTrack());
   if(frame%90===0)worldSpawn();
   for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(!e.boss&&Math.hypot(e.x-player.x,e.y-player.y)>460)enemies.splice(i,1)}}
-function worldSpawn(){if(curKey==='castle'){castleSpawn();return}const night=nightAlpha()>.3,cap=night?9:6;if(enemies.length>=cap)return;
+function worldSpawn(){if(curKey==='castle'){castleSpawn();return}if(curKey==='w8'){coastSpawn();return}const night=nightAlpha()>.3,cap=night?9:6;if(enemies.length>=cap)return;
   for(let k=0;k<12;k++){const a=Math.random()*6.28,d=190+Math.random()*90,x=player.x+Math.cos(a)*d,y=player.y+Math.sin(a)*d,c=Math.floor((x+8)/TS),r=Math.floor((y+12)/TS);
     if(c<2||r<2||c>=COLS-2||r>=ROWS-2||(c>=27&&c<=53&&r>=19&&r<=41))continue;const tt=room.tiles[r][c];if(tt!=='.'&&tt!==',')continue;
     const pick=L=>L[Math.random()*L.length|0];let t;
@@ -2555,8 +2680,8 @@ const QUESTS={
   lobos:{n:'Lobos na Estrada',giver:'Tobias',desc:'Derrote 5 lobos nos campos.',goal:5,reward:{gems:30,jewel:'topaz',recipe:'skewer'}},
   gato:{n:'O Gato da Rosa',giver:'Rosa',desc:'Ache o gato Brasinha no bosque a noroeste.',goal:1,reward:{gems:25,heart:1,recipe:'icecream'}},
   ervas:{n:'Ervas do Curandeiro',giver:'Ito',desc:'Colete 6 ervas pelo mundo.',goal:6,reward:{gems:40,jewel:'emer',recipe:'grill'}}};
-const QORDER=['main7','forte','casar','anel2','anel1','flores','gato','ervas','lobos'];
-Object.assign(QUESTS,{forte:{n:'A Fortaleza Esquecida',giver:'Odo',desc:'Limpe as ruínas da Fortaleza da Brasa, a leste da vila.',goal:1,reward:{gems:60}},flores:{n:'Flores para a Maria Luiza',giver:'Maria Luiza',desc:'Colha 5 flores no Jardim das Flores, a oeste da vila.',goal:5,reward:{gems:20}},
+const QORDER=['main7','forte','farol','conchas','caranguejos','casar','anel2','anel1','flores','gato','ervas','lobos'];
+Object.assign(QUESTS,{conchas:{n:'Conchas para a Iara',giver:'Iara',desc:'Junte 6 conchas na praia da Costa Coral.',goal:6,reward:{gems:30,recipe:'tropical'}},farol:{n:'O Farol Apagado',giver:'Marina',desc:'Acenda o braseiro no fim do píer com fogo.',goal:1,reward:{gems:60,jewel:'sapph'}},caranguejos:{n:'Praga de Caranguejos',giver:'Lula',desc:'Derrote 8 caranguejos na praia.',goal:8,reward:{gems:40,jewel:'topaz'}},forte:{n:'A Fortaleza Esquecida',giver:'Odo',desc:'Limpe as ruínas da Fortaleza da Brasa, a leste da vila.',goal:1,reward:{gems:60}},flores:{n:'Flores para a Maria Luiza',giver:'Maria Luiza',desc:'Colha 5 flores no Jardim das Flores, a oeste da vila.',goal:5,reward:{gems:20}},
   anel1:{n:'O Anel da Avó',giver:'Rosa',desc:'Ache o anel perdido no fundo da Cisterna (sala nordeste).',goal:1,reward:{gems:30}},
   anel2:{n:'O Anel Eterno',giver:'Brandão',desc:'Reúna as 4 relíquias dos chefes gigantes e leve ao Brandão.',goal:4,reward:{gems:0}},
   casar:{n:'O Grande Dia',giver:'Maria Luiza',desc:'Leve o Anel Eterno até a Maria Luiza.',goal:1,reward:{gems:100}}});
@@ -2570,13 +2695,13 @@ function qFinish(id){const p=player,q=p.q[id],rw=QUESTS[id].reward;q.s='done';if
 function questTalk(n,id,offer,onP,ready,done){const q=player.q[id];
   if(!q)openDlg(n,offer,[{t:'Aceitar missão',f:()=>qStart(id)},{t:'Agora não'}]);
   else if(q.s==='on')openDlg(n,onP(q));else if(q.s==='ready'){qFinish(id);openDlg(n,ready)}else openDlg(n,done)}
-function questKill(t){if(t==='wolf')qProg('lobos')}
+function questKill(t){if(t==='wolf')qProg('lobos');if(t==='crab')qProg('caranguejos')}
 function spawnHerbs(){if(curKey!=='w7'||!player||!player.q.ervas||player.q.ervas.s!=='on')return;
   HERBS.forEach(([c,r],i)=>{if(!player.q.ervas.got.includes(i)&&!pickups.some(k=>k.type==='herb'&&k.i===i))pickups.push({type:'herb',i,x:c*TS+4,y:r*TS+4,t:20,life:-1})})}
 function touchMonolith(){const q=player.q.main7;
   if(q&&q.s==='on'){qProg('main7');unlock('stone');openDlg({name:'FAÍSCA',col:'#ff8a3d',faisca:1},['Uma pedra de cinza negra... e ela está pulsando, Kael.','Ouvi uma voz vindo de dentro. Ela só disse: "ainda não".','Vamos contar ao Ancião Odo, na vila.'])}
   else showMsg('Uma pedra negra e fria. Ela pulsa devagar, como um coração.',200)}
-function questTarget(){const q=player.q,on=id=>q[id]&&q[id].s==='on',rd=id=>q[id]&&q[id].s==='ready',T=(c,r)=>({x:c*TS+8,y:r*TS+8});if(curKey!=='w7')return null;
+function questTarget(){const q=player.q,on=id=>q[id]&&q[id].s==='on',rd=id=>q[id]&&q[id].s==='ready',T=(c,r)=>({x:c*TS+8,y:r*TS+8});if(curKey==='w8')return coastTarget(on,rd,T);if(curKey!=='w7')return null;
   if(on('main7'))return T(40,7);if(rd('main7'))return T(47,36);
   const bea=()=>{const b=npcs.find(n=>n.id==='bea');return b?{x:b.x+8,y:b.y+8}:T(36,32)};
   if(on('forte'))return T(78,30);if(rd('forte'))return T(47,36);
@@ -2637,9 +2762,9 @@ function drawMenuTab(){const y0=HUD+18;
     L.forEach(([k,v],i)=>{const y=y0+4+i*20,on=i===optSel;if(on)P(ctx,4,y-4,'#2a1e36',W-8,18);txt(k,14,y,on?'#ffd166':'#c9b8d8');txt(v,W-12,y,v.startsWith('DES')?'#e0452b':'#6cc45a',8,'right')});
     txt('O jogo também salva sozinho',W/2,y0+104,'#5a4a6a',8,'center')}}
 function drawMap(m,y0){const ox=48,oy=y0+2;P(ctx,ox-2,oy-2,'#3a2a48',164,124);ctx.drawImage(m,0,0,80,60,ox,oy,160,120);
-  for(let cy=0;cy<8;cy++)for(let cx=0;cx<10;cx++)if(!FOG[cy*10+cx]){ctx.fillStyle='rgba(14,10,20,.92)';ctx.fillRect(ox+cx*16,oy+cy*16,16,Math.min(16,120-cy*16))}
-  txt('VILA',ox+80,oy+46,'#ffd166',8,'center');const t=questTarget();
-  if(curKey==='w7'){if(frame%20<14)P(ctx,ox+Math.floor((player.x+8)/TS)*2-1,oy+Math.floor((player.y+8)/TS)*2-1,'#ff3a1a',3,3);if(t)P(ctx,ox+Math.floor(t.x/TS)*2-1,oy+Math.floor(t.y/TS)*2-1,'#ffd166',3,3)}
+  if(curKey==='w7'||!room.big)for(let cy=0;cy<8;cy++)for(let cx=0;cx<10;cx++)if(!FOG[cy*10+cx]){ctx.fillStyle='rgba(14,10,20,.92)';ctx.fillRect(ox+cx*16,oy+cy*16,16,Math.min(16,120-cy*16))}
+  if(curKey==='w8')txt('PORTO CORAL',ox+62,oy+42,'#ffd166',8,'center');else txt('VILA',ox+80,oy+46,'#ffd166',8,'center');const t=questTarget();
+  if(room.big){if(frame%20<14)P(ctx,ox+Math.floor((player.x+8)/TS)*2-1,oy+Math.floor((player.y+8)/TS)*2-1,'#ff3a1a',3,3);if(t)P(ctx,ox+Math.floor(t.x/TS)*2-1,oy+Math.floor(t.y/TS)*2-1,'#ffd166',3,3)}
   txt('vermelho: você  amarelo: missão',W/2,HUD+H-10,'#5a4a6a',8,'center')}
 /* ---------- espelhos de luz, dunas e loja (cap. 6) ---------- */
 function turnMirror(c,r){const t=room.tiles[r][c];if(t!=='1'&&t!=='2')return;room.tiles[r][c]=t==='1'?'2':'1';bg=buildBg(room);sparks(c*TS+8,r*TS+8,'#e8f8ff',6);tone(1400,.08,'triangle',.05,1800)}
@@ -2658,6 +2783,7 @@ const LIA_LINES=['LIA: Mestre! O mercador do oásis aceita gemas. Ele tem joias 
 const SHOP=[['ruby','Rubi',40],['sapph','Safira',40],['emer','Esmeralda',40],['topaz','Topázio',40],['ame','Ametista',40],['potion','Poção: vida cheia',15],['heart','Coração extra',120]];
 const SHOP_VILA=[['it:potion','Poção de Vida',12],['it:ether','Éter (MP)',15],['it:tonic','Tônico',10],['it:bomb:5','5 Bombas',25],['it:arrow:10','10 Flechas',8],['it:tent','Tenda',30],['it:bottle','Frasco vazio',40],['eq:rod','Vara de Pesca',30],['fd:egg:3','3 Ovos',6],['fd:flour','Farinha',5],['fd:cheese','Queijo',8],['fd:milk','Leite',5],['rc:juice','Receita: Suco',20],['rc:jam','Receita: Geleia',25],['rc:pie','Receita: Torta',30],['rc:burger','Receita: Hambúrguer',40],['rc:pizza','Receita: Pizza',60],
   ['eq:helmLeather','Capuz de Couro',30],['eq:bootsLeather','Botas de Couro',25],['eq:amuletEmber','Pingente de Brasa',50],['eq:ringMagnet','Anel do Ímã',60],['ruby','Rubi',45],['sapph','Safira',45],['emer','Esmeralda',45],['topaz','Topázio',45],['ame','Ametista',45]];
+const SHOP_CORAL=[['eq:swordCoral','Lâmina de Coral',110,2],['eq:bowCoral','Arco de Coral',95,1],['eq:shieldTurtle','Casco de Tartaruga',110,3],['eq:helmShell','Elmo de Concha',90,1],['eq:armorScaleSea','Escamas Marinhas',140,4],['eq:bootsSand','Botas de Areia',85],['eq:neckPearl','Colar de Pérolas',120],['it:potion','Poção de Vida',12],['it:ether','Éter (MP)',14],['fd:milk','Leite',4],['rc:cocada','Receita: Cocada',25],['rc:vitamina','Receita: Vitamina',35],['rc:peixecoco','Receita: Peixe no Coco',40]];
 const SHOP_REAL=[['eq:swordRoyal','Espada Real',180,6],['eq:bowRoyal','Arco Real',150,4],['eq:shieldRoyal','Escudo Real',170,6],['eq:helmRoyal','Elmo Real',140,4],['eq:armorRoyal','Armadura Real',220,8],['eq:gauntRoyal','Manoplas Reais',160,6],['eq:bootsRoyal','Botas Reais',150,3],['eq:neckRoyal','Colar da Coroa',200,2]];
 const SHOP_CHEF=[['fd:egg:3','3 Ovos',5],['fd:flour','Farinha',4],['fd:cheese','Queijo',6],['fd:milk','Leite',4],['fd:meat:2','2 Carnes',10],['fd:apple:2','2 Maçãs',6],['fd:orange:2','2 Laranjas',6],['fd:grape:2','2 Uvas',8],['rc:feast','Receita: Banquete',80]];
 const SHOP_FORJA=[['eq:swordSteel','Espada de Aço',60],['eq:bowShort','Arco Curto',50],['eq:shieldTower','Escudo Torre',70],['eq:helmIron','Elmo de Ferro',70,2],['eq:armorPlate','Armadura de Placas',80,3],['eq:shieldIron','Escudo Reforçado',90,4],['eq:gauntIron','Manoplas de Ferro',80,5]];
@@ -2753,6 +2879,11 @@ const ACH=[
   {id:'castle1',n:'Senhor do Castelo',d:'Conquiste a Fortaleza da Brasa',ic:'crown',c:'#e0452b',r:{gems:50}},
   {id:'castle5',n:'Reconstrutor',d:'Construa 5 partes do castelo',ic:'hammer',c:'#c9d6e8',r:{jewel:'ruby'},goal:5,prog:()=>player&&player.castle?Object.keys(player.castle.b).length:0},
   {id:'castleAll',n:'Fortaleza da Brasa',d:'Reconstrua o castelo inteiro',ic:'crown',c:'#ffd166',r:{jewel:'ame'},goal:12,prog:()=>player&&player.castle?Object.keys(player.castle.b).length:0},
+  {id:'coast1',n:'Brisa do Mar',d:'Chegue à Costa Coral',ic:'island',c:'#4ad0d0',r:{gems:20}},
+  {id:'fruitC',n:'Frutas Tropicais',d:'Colha as 4 frutas da Costa',ic:'apple',c:'#ffd166',r:{gems:25},goal:4,prog:()=>['coco','manga','banana','maracuja'].filter(k=>(AS.fruits||{})[k]).length},
+  {id:'farol',n:'Luz do Farol',d:'Reacenda o farol do Porto Coral',ic:'fire',c:'#ffd166',r:{jewel:'sapph'}},
+  {id:'shell1',n:'Olho de Águia',d:'Vença a Concha Esperta',ic:'gem',c:'#e8e2d0',r:{gems:15}},
+  {id:'shell5',n:'Mestre das Conchas',d:'Faça 5 vitórias seguidas na Concha Esperta',ic:'gem',c:'#ffd166',r:{jewel:'sapph'},hid:1},
   {id:'platinum',n:'Brasa Eterna',d:'Desbloqueie todas as outras conquistas',ic:'trophy',c:'#e8f8ff',r:{scarf:'gold'}}];
 const SCARVES={mae:{n:'Cachecol da Mãe',r:'#e0452b',o:'#ff8a3d'},gold:{n:'Cachecol Dourado',r:'#c8901a',o:'#ffe27a'},aurora:{n:'Cachecol Aurora',r:'#8a4adf',o:'#4adf9a'},ice:{n:'Cachecol Glacial',r:'#2a5ad6',o:'#8fd0ff'}};
 let AS={got:{},kills:0,pots:0,bushes:0,rooms:{},caves:{},elems:{},scarves:{mae:1},scarf:'mae'};
@@ -3326,6 +3457,7 @@ function updatePlay(){
     if(k.t>12&&overlap(pbody(),{x:k.x,y:k.y,w:s,h:s})){pickups.splice(i,1);if(k.loot)room.story=true;
       if(k.type==='gem'){player.gems++;sfx.gem()}
       else if(k.type==='heart'){player.hp=Math.min(player.maxHp,player.hp+2);sfx.heart()}
+      else if(k.type==='concha'){const q=player.q.conchas;if(q){q.got.push(k.i);qProg('conchas')}sfx.gem()}
       else if(k.type==='food'){player.food[k.k]=(player.food[k.k]||0)+1;AS.fruits=AS.fruits||{};if(k.k!=='meat'){AS.fruits[k.k]=1;unlock('fruit1')}saveAS();sfx.gem();toasts.push({title:'+1 '+FOODS[k.k].n.toUpperCase(),sub:'Coma (bolsa) ou cozinhe',t:80})}
       else if(k.type==='flor'){const q=player.q.flores;if(q){q.got.push(k.i);qProg('flores')}sfx.gem()}
       else if(k.type==='flor2'){player.it.flower=(player.it.flower||0)+1;player.love.fgot.push(k.i);sfx.gem();toasts.push({title:'+1 FLOR',sub:'Um presente para a Maria Luiza',t:90})}
@@ -3394,6 +3526,7 @@ function step(){
   else if(state==='cook')updCook();
   else if(state==='book')updBook();
   else if(state==='build')updBuild();
+  else if(state==='shell')updShell();
   else if(state==='fish')updFish();
   else if(state==='jk')updJk();
   else if(state==='play'){if(pendingScene){const f=pendingScene;pendingScene=null;f()}else if(hitstop>0)hitstop--;else{updatePlay();updParticles()}updCamera(RW<=W&&RH<=H)}
@@ -3590,6 +3723,7 @@ function drawPickup(k){
   const bob=Math.round(Math.sin(k.t*.1)*1.5);
   if(k.type==='heart')ctx.drawImage(HEART,k.x,k.y+bob);
   else if(k.type==='gem')ctx.drawImage(GEM,k.x,k.y+bob);
+  else if(k.type==='concha'){P(ctx,k.x+1,k.y+3+bob,'#f4d8c8',7,4);P(ctx,k.x+2,k.y+2+bob,'#f4d8c8',5,1);P(ctx,k.x+3,k.y+3+bob,'#d8a898',1,4);P(ctx,k.x+5,k.y+3+bob,'#d8a898',1,4);if(frame%30<4)P(ctx,k.x+7,k.y+bob,'#ffffff',1,1)}
   else if(k.type==='food')foodIcon(k.k,k.x,k.y+bob);
   else if(k.type==='flor'||k.type==='flor2'){P(ctx,k.x+3,k.y+4+bob,'#3a8a3a',1,5);P(ctx,k.x+1,k.y+1+bob,'#ff6a8a',5,4);P(ctx,k.x+2,k.y+bob,'#ff6a8a',3,6);P(ctx,k.x+3,k.y+2+bob,'#ffd166',1,1);if(frame%30<4)P(ctx,k.x+6,k.y+bob,'#ffffff',1,1)}
   else if(k.type==='qring'){glow(k.x+4,k.y+4,10,'255,220,120',.5);P(ctx,k.x+1,k.y+3+bob,'#ffd166',6,1);P(ctx,k.x,k.y+4+bob,'#ffd166',1,3);P(ctx,k.x+7,k.y+4+bob,'#ffd166',1,3);P(ctx,k.x+1,k.y+7+bob,'#ffd166',6,1);P(ctx,k.x+3,k.y+bob,'#ff9ec4',2,3)}
@@ -3646,7 +3780,7 @@ function drawProjectiles(){
 function drawWorld(){
   ctx.translate(-camX,-camY);
   ctx.drawImage(bg,0,0);drawAnimTiles(room,0,0);drawBeams();
-  if(curKey==='castle')drawCastle();if(room.houses)drawHouses();if(room.deco)drawDecos();
+  if(curKey==='castle')drawCastle();if(curKey==='w8')drawCoast();if(room.houses)drawHouses();if(room.deco)drawDecos();
   if(room.labels)drawLabels();
   pickups.forEach(drawPickup);drawBombs();if(state==='camp'){if(campKind==='fire')drawBedroll(campPos.x,campPos.y);else drawTent(campPos.x,campPos.y)}
   if(room.memSpot&&!room.story&&frame%4<2){const[mc,mr]=room.memSpot;P(ctx,mc*TS+4+(frame%9),mr*TS+4+(frame%7),'#ffd166',2,2)}
@@ -3755,7 +3889,7 @@ function render(){
   if(state==='scroll')drawScroll();else drawWorld();
   if(warpFade>0){ctx.fillStyle='rgba(0,0,0,'+(warpFade/30)+')';ctx.fillRect(0,0,W,H)}
   ctx.restore();
-  drawHUD();drawOverlays();if(state==='menu')drawMenu();if(state==='choice')drawChoice();if(state==='achv')drawAchv();if(state==='shop')drawShop();if(state==='talk')drawTalk();if(state==='camp')drawCamp();if(state==='forge')drawForge();if(state==='cook')drawCook();if(state==='book')drawBook();if(state==='build')drawBuild();if(state==='fish')drawFishUI();if(state==='jk')drawJk();drawEnd();drawToasts();drawErr();
+  drawHUD();drawOverlays();if(state==='menu')drawMenu();if(state==='choice')drawChoice();if(state==='achv')drawAchv();if(state==='shop')drawShop();if(state==='talk')drawTalk();if(state==='camp')drawCamp();if(state==='forge')drawForge();if(state==='cook')drawCook();if(state==='book')drawBook();if(state==='build')drawBuild();if(state==='shell')drawShell();if(state==='fish')drawFishUI();if(state==='jk')drawJk();drawEnd();drawToasts();drawErr();
 }
 
 /* ---------- abertura cinematográfica ---------- */
