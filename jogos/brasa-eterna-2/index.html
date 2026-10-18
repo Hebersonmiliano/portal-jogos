@@ -443,7 +443,7 @@ const GEM=spr(["..kkkk..",".kcCCck.","kcwCCCck","kCCCCCck",".kCCCck.","..kCck.."
 const KEY=spr(["..kkk...",".kyyyk..",".kykyk..",".kyyyk..","..kyk...","..kyyk..","..kyk...","..kyyk.."],{k:'#1a1020',y:'#ffd166'});
 
 /* ---------- tiles ---------- */
-const SOLID=new Set([...'TR~b#DpCcSWFULGrKIQqVZJMNHh12345dnmflogYyztuaxe6kvwsA89%&*!']);const SPECB=[[2,2],[13,2],[2,8],[13,8]];
+const SOLID=new Set([...'TR~b#DpCcSWFULGrKIQqVZJMNHh12345dnmflogYyztuaxe6kvwsA89%&*!:']);const SPECB=[[2,2],[13,2],[2,8],[13,8]];
 const TC={};
 const THEMES={
   meadow:{g1:'#4c9a3f',g2:'#3f8536',g3:'#6cbf4a',w1:'#2f6fbf',w2:'#2a62a8',wave:'#5a9ae8',wall:'#3b3246',wallHi:'#52465e',mort:'#241d2c',spot:'#2f283a',fl:'#2a2230',fl2:'#211a27',fl3:'#33293b'},
@@ -512,7 +512,7 @@ function drawTile(g,ch,v,dark){
     case'e':floor(g,v);P(g,1,0,'#4a2a14',14,16);for(let y=2;y<16;y+=5){P(g,2,y,'#7a4a28',12,1);for(let x=3;x<13;x+=3)P(g,x,y-3,['#c04848','#4a7ac0','#c8a030'][(x+y)%3],2,3)}break;
     case'6':grass(g);P(g,4,1,'#07040c',8,15);P(g,3,5,'#07040c',10,9);P(g,6,3,'#2a1a3a',2,8);P(g,9,6,'#5a2a7a',1,5);break;
     case'%':floor(g,v);break;
-    case'&':case'*':base();break;
+    case'&':case'*':case':':base();break;
     case'!':base();P(g,7,6,'#6b4428',2,10);P(g,8,6,'#8a5a2a',1,10);for(const[a,b,w]of[[1,3,7],[8,2,7],[2,6,5],[9,5,5],[5,0,6]])P(g,a,b,'#2f8a3a',w,2);P(g,4,1,'#4ab04a',8,2);break;
     case'^':P(g,0,0,'#c8a26b',16,16);for(let i=0;i<12;i++)P(g,rnd()*16|0,rnd()*16|0,'#b8915a');P(g,0,0,'#7a7480',3,16);P(g,13,0,'#7a7480',3,16);break;
     case'0':drawTile(g,'#',v,dark);P(g,2,3,'#ffd166',12,13);P(g,3,4,'#07040c',10,12);P(g,4,3,'#ffd166',8,1);P(g,5,2,'#ffd166',6,1);P(g,5,7,'#a01a2a',2,2);P(g,9,7,'#a01a2a',2,2);P(g,6,11,'#3a1a2a',4,1);break;
@@ -878,6 +878,8 @@ function genWorld(){const C=80,R=60,g=[];srand(777);
   for(let x=76;x<=79;x++)S(x,30,x>=78?'^':'=');S(77,29,'g');
   // estrada sul para a Costa Coral
   for(let y=56;y<=59;y++)S(40,y,y>=58?'^':'=');S(41,55,'g');
+  // Totem Solar escondido (forma Raposa)
+  for(let y=21;y<=23;y++)for(let x=76;x<=77;x++)if(G(x,y)!=='~')S(x,y,'.');S(77,22,':');
   // ilha do lago com pinos para o gancho
   for(let y=25;y<=27;y++)for(let x=65;x<=67;x++)S(x,y,'.');S(66,25,'9');S(65,26,'A');S(66,31,'9');
   return g.map(r=>r.join(''))}
@@ -958,7 +960,7 @@ Object.assign(DEFS,{
   npcs:[{id:'ayla',name:'CAPITÃ AYLA',col:'#8fb0e8',pal:{g:'#3a5aa0',G:'#24386a',h:'#2a1a10',y:'#c9d6e8',fem:1},x:8*16,y:4*16,talk:n=>{const C=player.castle,d=Math.floor(worldMin/1440);
     if(C.gift!==d){C.gift=d;player.it.arrow+=20;player.it.bomb+=5;sfx.item();openDlg(n,['Majestade! A tropa separou sua cota do dia.','20 flechas e 5 bombas. Boa caçada!'])}else openDlg(n,['A guarda está em formação. Volte amanhã para a próxima cota.'])}}]},
  'in-lib':{name:'Grande Biblioteca de Aurora',theme:'lib',dark:.15,music:'library',map:mkLib().map,deco:mkLib().deco,books:mkLib().books,enemies:[],
-  npcs:[{id:'lyra',name:'SÁBIA LYRA',col:'#8fd0ff',pal:{g:'#3a4a8a',G:'#24306a',h:'#e8e2d0',fem:1},x:12*16,y:1*16,talk:n=>openDlg(n,['Bem-vinda, alma curiosa, à Grande Biblioteca de Aurora!','Aqui guardamos toda a história: da Chama Sagrada até os gigantes das profundezas.','Toque num atril para ler. Livros lidos: '+Object.keys(AS.books||{}).length+' de '+BKEYS.length+'.'])}]},
+  npcs:[{id:'lyra',name:'SÁBIA LYRA',col:'#8fd0ff',pal:{g:'#3a4a8a',G:'#24306a',h:'#e8e2d0',fem:1},x:12*16,y:1*16,talk:n=>lyraOwl(n)||openDlg(n,['Bem-vinda, alma curiosa, à Grande Biblioteca de Aurora!','Aqui guardamos toda a história: da Chama Sagrada até os gigantes das profundezas.','Toque num atril para ler. Livros lidos: '+Object.keys(AS.books||{}).length+' de '+BKEYS.length+'.'])}]},
  'in-home':{name:'Lar de Kael e Maria Luiza',theme:'home',dark:0,music:'inn',map:mkInt('home').map,deco:mkInt('home').deco,enemies:[],
   npcs:[{id:'wife',name:'MARIA LUIZA',col:'#ff9ec4',pal:NP.bea,x:6*16,y:4*16,talk:n=>wifeTalk(n)},
    {id:'lumi',name:'HELEN CRISTINE',col:'#ffd166',pal:{g:'#ff9ec4',G:'#c06080',h:'#c86a2a',fem:1},small:1,x:9*16,y:6*16,wander:[3*16,5*16,12*16,8*16],hide:()=>!(player.love&&player.love.kids>=1),lines:['Papai! Me conta da Serpente gigante de novo!','A Faísca é minha melhor amiga!','Quando crescer vou ser heroína igual você!','Eu cuido da Mariana quando você sai em aventura!']},
@@ -2182,6 +2184,53 @@ function drawShell(){const G=shellG;if(!G)return;ctx.fillStyle='rgba(20,30,40,.9
   if(G.st==='show')txt('Olhe bem onde está a pérola...',W/2,HUD+140,'#f4e9d8',8,'center');else if(G.st==='mix')txt('Embaralhando!',W/2,HUD+140,'#f4e9d8',8,'center');
   else if(G.st==='pick')txt('< > escolha a concha  A: confirmar',W/2,HUD+140,'#f4e9d8',8,'center');
   else{txt(G.res>0?'ACERTOU! +'+G.bet*2+' gemas':'ERROU... a pérola estava em outra',W/2,HUD+132,G.res>0?'#6cc45a':'#e0452b',8,'center');if(G.prize)txt(G.prize,W/2,HUD+144,'#ffd166',8,'center');txt('A: sair',W/2,HUD+158,'#c9b8d8',8,'center')}}
+/* ---------- formas da Faísca (pets) ---------- */
+const PETS={faisca:{n:'Faísca',d:'Dispara brasas nos inimigos. Fiel desde o primeiro dia.',hint:''},
+  lobo:{n:'Lobo de Brasa',d:'Avança e morde inimigos, deixando-os em chamas.',hint:'Vença Fenrir, o Lobo Negro.'},
+  coruja:{n:'Coruja de Cinza',d:'Penas que atravessam inimigos. Sente segredos por perto.',hint:'Leia 3 livros e fale com a Sábia Lyra.'},
+  tartaruga:{n:'Tartaruga de Lava',d:'Gira em volta do Kael bloqueando tiros. Mais defesa.',hint:'Ajude a Capitã Marina com o farol.'},
+  raposa:{n:'Raposa Solar',d:'Puxa itens de longe, acha mais gemas e ilumina o escuro.',hint:'Um totem dourado brilha a leste, perto do lago.'}};
+const PKEYS=Object.keys(PETS),PXP=[0,15,40,80,140];
+function petLv(f){const P0=player.pet;f=f||P0.form;const x=P0.xp[f]||0;let l=1;PXP.forEach((v,i)=>{if(x>=v)l=i+1});return Math.min(5,l)}
+function petXp(n){const P0=player.pet;if(!P0)return;const f=P0.form,l0=petLv(f);P0.xp[f]=(P0.xp[f]||0)+n;const l1=petLv(f);if(l1>l0){toasts.push({title:PETS[f].n.toUpperCase()+' NÍVEL '+l1+'!',sub:'A Faísca ficou mais forte',t:180});sparks(player.fx,player.fy,'#ffd166',16);if(l1>=5)unlock('petMax')}}
+function unlockPet(k){const P0=player.pet;if(!P0||P0.got[k])return;P0.got[k]=1;unlock('pet1');toasts.push({title:'NOVA FORMA: '+PETS[k].n.toUpperCase(),sub:'Troque no menu, aba FAÍSCA',t:260});[523,659,784,1047,1319].forEach((f,i)=>tone(f,.18,'triangle',.05,0,i*.09));sparks(player.fx,player.fy,'#ffd166',24);saveGame()}
+function lyraOwl(n){if(Object.keys(AS.books||{}).length>=3&&!player.pet.got.coruja){openDlg(n,['Você leu tanto que a Faísca ouviu cada palavra...','Veja! Ela está mudando de forma!']);unlockPet('coruja');return true}return false}
+const petMagnet=()=>{const P0=player.pet;return P0&&P0.form==='raposa'?70+15*petLv():P0&&P0.form==='faisca'&&petLv()>=2?28:0};
+function petFollow(p){const P0=p.pet;if(P0&&P0.dash)return;let tx,ty;if(P0&&P0.form==='tartaruga'){const a=frame*.05;tx=p.x+8+Math.cos(a)*18;ty=p.y+8+Math.sin(a)*12}else{tx=p.x+8+(p.facing==='right'?-10:10);ty=p.y-6}const k=P0&&P0.form==='tartaruga'?.25:.06;p.fx+=(tx-p.fx)*k;p.fy+=(ty-p.fy)*k}
+function petTick(p){const P0=p.pet;if(!P0||room.closePending)return;const f=P0.form,l=petLv(f);
+  if(f==='lobo'){if(P0.dash){const D=P0.dash,dx=D.tx-p.fx,dy=D.ty-p.fy,d=Math.hypot(dx,dy);p.fx+=dx/(d||1)*4.5;p.fy+=dy/(d||1)*4.5;if(frame%2===0)part(p.fx,p.fy,0,-.3,'#ff8a3d',12);
+      const box={x:p.fx-6,y:p.fy-6,w:12,h:12};for(const e of[...enemies])if(!D.hit&&overlap(box,body(e))){D.hit=1;damageEnemy(e,1+.3*l,true,'dash');tone(220,.08,'sawtooth',.05,110)}
+      if(d<6||D.hit||--D.t<=0){P0.dash=null;p.faiscaT=[0,90,80,70,60,50][l]}return}
+    if(--p.faiscaT<=0){const tg=nearestEnemy(p.fx,p.fy,100);if(tg){const c=center(tg);P0.dash={tx:c.x,ty:c.y,t:40,hit:0};tone(330,.06,'square',.04,660)}else p.faiscaT=30}return}
+  if(f==='tartaruga'){for(let i=projectiles.length-1;i>=0;i--){const b=projectiles[i];if(Math.hypot(b.x-p.fx,b.y-p.fy)<11){projectiles.splice(i,1);sparks(b.x,b.y,'#ff8a3d',6);sfx.tink()}}
+    if(--p.faiscaT<=0){const tg=nearestEnemy(p.fx,p.fy,90);p.faiscaT=[0,170,150,130,115,100][l];if(tg){const c=center(tg),a=Math.atan2(c.y-p.fy,c.x-p.fx);pshots.push({x:p.fx,y:p.fy,vx:Math.cos(a)*2,vy:Math.sin(a)*2,life:60,hit:new Set(),small:true})}}return}
+  if(f==='coruja'){if(frame%40===0)for(let r=Math.floor(p.y/TS)-5;r<=Math.floor(p.y/TS)+5;r++)for(let c=Math.floor(p.x/TS)-6;c<=Math.floor(p.x/TS)+6;c++){if(c<0||r<0||c>=COLS||r>=ROWS)continue;const t=room.tiles[r][c];
+      if('ksAKvw'.includes(t)||(room.secrets&&room.secrets[c+','+r]))for(let i=0;i<3;i++)part(c*TS+8+Math.random()*10-5,r*TS+8+Math.random()*10-5,0,-.4,'#c8b0ff',30)}
+    if(--p.faiscaT<=0){const tg=nearestEnemy(p.fx,p.fy,160);p.faiscaT=[0,120,105,90,80,70][l];if(tg){const c=center(tg),a=Math.atan2(c.y-p.fy,c.x-p.fx),n=l>=4?2:1;
+      for(let i=0;i<n;i++){const aa=a+(n>1?(i-.5)*.2:0);missiles.push({k:'feather',x:p.fx,y:p.fy,vx:Math.cos(aa)*3.6,vy:Math.sin(aa)*3.6,life:60,dm:.8+.25*l,hit:new Set()})}tone(1400,.05,'sine',.03,1800)}else p.faiscaT=30}return}
+  const rate=f==='raposa'?[0,140,120,100,90,80]:[0,150,120,95,75,60];
+  if(--p.faiscaT<=0){const tg=nearestEnemy(p.fx,p.fy,120);p.faiscaT=Math.round(rate[l]*Math.max(.3,1-.25*jc('ame')));
+    if(tg){const c=center(tg),a=Math.atan2(c.y-p.fy,c.x-p.fx),n=l>=4?2:1;for(let i=0;i<n;i++){const aa=a+(n>1?(i-.5)*.25:0);pshots.push({x:p.fx,y:p.fy,vx:Math.cos(aa)*2.6,vy:Math.sin(aa)*2.6,life:70,hit:new Set(),small:true})}
+      tone(f==='raposa'?1200:990,.06,'triangle',.03,1500)}else p.faiscaT=30}}
+function drawPet(){const p=player,f=p.pet?p.pet.form:'faisca',x=Math.round(p.fx),y=Math.round(p.fy+Math.sin(frame*.08)*2),ink='#1a1020';
+  if(f==='faisca'){faisca(p.fx,p.fy+Math.sin(frame*.08)*2,1);return}
+  const fl=(p.pet.dash?p.pet.dash.tx<p.fx:p.facing==='right')?-1:1;
+  if(f==='lobo'){ctx.save();ctx.translate(x,y);ctx.scale(fl,1);P(ctx,-6,-3,ink,12,7);P(ctx,-5,-2,'#e0603a',10,5);P(ctx,3,-6,ink,6,6);P(ctx,4,-5,'#e0603a',4,4);P(ctx,4,-7,'#e0603a',1,2);P(ctx,7,-7,'#e0603a',1,2);P(ctx,6,-4,'#ffd166',1,1);
+    const lg=(frame>>2)%2;P(ctx,-5,4,ink,2,3+lg);P(ctx,3,4,ink,2,4-lg);flame(ctx,-8,2,1,frame);ctx.restore();glow(x,y,14,'255,120,60',.3);return}
+  if(f==='coruja'){const w=(frame>>3)%2;fc(x,y,5,6,ink);fc(x,y,4,5,'#8a7aa0');P(ctx,x-3,y-3,'#ffd166',2,2);P(ctx,x+1,y-3,'#ffd166',2,2);P(ctx,x-2,y-3,ink,1,1);P(ctx,x+2,y-3,ink,1,1);P(ctx,x-1,y,'#e8b83a',2,1);
+    P(ctx,x-8,y-2+(w?-2:1),'#6a5a8a',4,3);P(ctx,x+5,y-2+(w?-2:1),'#6a5a8a',4,3);glow(x,y,12,'200,176,255',.25);return}
+  if(f==='tartaruga'){fc(x,y,7,5,ink);fc(x,y,6,4,'#6a2a1a');P(ctx,x-3,y-1,'#ff8a3d',2,1);P(ctx,x+1,y+1,'#ff8a3d',2,1);P(ctx,x-1,y-3,'#ffd166',1,1);P(ctx,x+(fl<0?-9:6),y-1,'#8a5a3a',3,3);glow(x,y,14,'255,110,40',.3);return}
+  if(f==='raposa'){ctx.save();ctx.translate(x,y);ctx.scale(fl,1);P(ctx,-5,-2,ink,10,6);P(ctx,-4,-1,'#ffb030',8,4);P(ctx,3,-6,ink,5,6);P(ctx,4,-5,'#ffb030',3,4);P(ctx,4,-7,'#ffb030',1,2);P(ctx,6,-7,'#ffb030',1,2);
+    P(ctx,-9,-3,'#ffb030',4,3);P(ctx,-10,-3,'#ffffff',2,2);ctx.restore();glow(x,y,20,'255,220,120',.35);return}}
+function updPetTab(){const L=PKEYS,P0=player.pet;if(pressed.up){petSel=(petSel+L.length-1)%L.length;sfx.gem()}if(pressed.down){petSel=(petSel+1)%L.length;sfx.gem()}
+  if(pressed.atk){const k=L[petSel];if(P0.got[k]){P0.form=k;P0.dash=null;player.faiscaT=40;sparks(player.fx,player.fy,'#ffd166',14);tone(880,.15,'triangle',.05,1320);menuFlash=15}else sfx.locked()}}
+let petSel=0;
+function drawPetTab(y0){const P0=player.pet;txt('FORMAS DA FAÍSCA',6,y0-2,'#ffd166');
+  PKEYS.forEach((k,i)=>{const y=y0+10+i*20,on=i===petSel,got=!!P0.got[k],cur=P0.form===k;if(on)P(ctx,4,y-2,menuFlash>0&&frame%4<2?'#4a3a20':'#2a1e36',W-8,19);
+    P(ctx,8,y,'#0e0a14',16,16);if(got){const sx=player.fx,sy=player.fy,sf=P0.form;player.fx=16;player.fy=y+9;P0.form=k;const sd=P0.dash;P0.dash=null;drawPet();P0.form=sf;P0.dash=sd;player.fx=sx;player.fy=sy}else txt('?',16,y+4,'#5a4a6a',8,'center');
+    txt(got?PETS[k].n:'???',30,y+1,cur?'#ffd166':got?'#c9b8d8':'#5a4a6a');if(cur)txt('EM USO',W-8,y+1,'#6cc45a',8,'right');
+    if(got){const l=petLv(k),x0=PXP[l-1],x1=PXP[l]||PXP[4],xv=P0.xp[k]||0;txt('Nv '+l,30,y+10,'#ff8a3d');P(ctx,72,y+11,'#1a1222',60,4);P(ctx,72,y+11,'#ffd166',l>=5?60:Math.round(60*Math.min(1,(xv-x0)/Math.max(1,x1-x0))),4)}});
+  const k=PKEYS[petSel];wrap(P0.got[k]?PETS[k].d:'Como despertar: '+PETS[k].hint,31).slice(0,2).forEach((l,i)=>txt(l,6,HUD+130+i*10,'#c9b8d8'));txt('A: transformar',6,HUD+152,'#5a4a6a')}
 /* ---------- Jornada: o caminho principal da história ---------- */
 let menuJornada=false;
 const STORY=[
@@ -2272,7 +2321,7 @@ function bigDie(e){const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const 
   for(const q of enemies)poof(q.x+8,q.y+8);enemies=[];projectiles=[];hazards=[];room.won=true;room.fight=false;
   for(const[cc,rr]of room.gate)room.tiles[rr][cc]='X';const[pc2,pr]=room.prize;room.tiles[pr][pc2]='A';bg=buildBg(room);rareSpots.push([pc2,pr]);
   playTrack('victory2');shake=24;hitstop=16;sfx.boss();for(let k=0;k<8;k++)poof(c.x+Math.random()*48-24,c.y+Math.random()*40-20);sparks(c.x,c.y,'#ffd166',40);
-  pickups.push({type:'heartMax',x:(pc2+1)*TS+2,y:pr*TS+2,t:0,life:-1});AS.bigs=AS.bigs||{};AS.bigs[e.type]=1;saveAS();unlock('b_'+e.type);addFame(20,e.title);if(player.q.anel2&&player.q.anel2.s==='on'&&!player.relics[e.type])pickups.push({type:'relic',k:e.type,x:(pc2-1)*TS+4,y:pr*TS+4,t:0,life:-1});if(!room.tookHit)unlock('nohit2');if(diffIdx===2)unlock('hard2');
+  pickups.push({type:'heartMax',x:(pc2+1)*TS+2,y:pr*TS+2,t:0,life:-1});AS.bigs=AS.bigs||{};AS.bigs[e.type]=1;saveAS();unlock('b_'+e.type);petXp(30);if(e.type==='fenrir')unlockPet('lobo');addFame(20,e.title);if(player.q.anel2&&player.q.anel2.s==='on'&&!player.relics[e.type])pickups.push({type:'relic',k:e.type,x:(pc2-1)*TS+4,y:pr*TS+4,t:0,life:-1});if(!room.tookHit)unlock('nohit2');if(diffIdx===2)unlock('hard2');
   toasts.push({title:'CHEFE DERROTADO!',sub:e.title,t:240});msgQueue.push(['Faísca: Conseguimos! Pegue o coração e o baú raro.',220],['Faísca: Sentiu? Longe daqui, a pedra negra pulsou de novo...',260]);saveGame()}
 function fc(cx,cy,rx,ry,col){for(let y=-ry;y<=ry;y++){const w=Math.round(rx*Math.sqrt(Math.max(0,1-(y*y)/(ry*ry))));P(ctx,Math.round(cx-w),Math.round(cy+y),col,w*2,1)}}
 function drawBig(e){const x=Math.round(e.x),y=Math.round(e.y),fl=e.flash>0&&frame%2;
@@ -2370,9 +2419,9 @@ function boomTier(){const n=plusOf('boom');return BOOMT[n>=5?3:n>=3?2:n>=1?1:0]}
 function plusOf(id){return(player&&player.plus&&player.plus[id])||0}
 function fixPlayer2(){const p=player,d={mp:30,sta:100,staT:0,mpT:0,tonicT:0,bowT:0};for(const k in d)if(p[k]==null)p[k]=d[k];p.plus=p.plus||{};p.mat=Object.assign({ferro:0,cristal:0},p.mat);
   p.it=Object.assign({potion:0,ether:0,tonic:0,bomb:0,arrow:0,tent:0,bottle:0,fairy:0},p.it);p.tool=p.tool||'potion';for(const[sl]of SLOTS2)if(!(sl in p.eq))p.eq[sl]=null;
-  p.fame=p.fame||0;p.castle=Object.assign({owned:0,b:{},tax:-1,gift:-1},p.castle);p.food=p.food||{};p.recipes=p.recipes||{salad:1,omelet:1};p.buf=p.buf||{atk:0,def:0};p.fpick=p.fpick||{};p.gifts=p.gifts||{};p.relics=p.relics||{};p.love=Object.assign({pts:0,stage:0,day:-1,date:-1,dates:0,kids:0,wday:0,fday:-1,fgot:[],gift:-1,birth:0,ring2:0},p.love)}
+  p.fame=p.fame||0;p.pet=Object.assign({form:'faisca',got:{faisca:1},xp:{}},p.pet);p.castle=Object.assign({owned:0,b:{},tax:-1,gift:-1},p.castle);p.food=p.food||{};p.recipes=p.recipes||{salad:1,omelet:1};p.buf=p.buf||{atk:0,def:0};p.fpick=p.fpick||{};p.gifts=p.gifts||{};p.relics=p.relics||{};p.love=Object.assign({pts:0,stage:0,day:-1,date:-1,dates:0,kids:0,wday:0,fday:-1,fgot:[],gift:-1,birth:0,ring2:0},p.love)}
 function stat(k){let v=0;for(const[sl]of SLOTS2){const id=player.eq[sl],I=id&&ITEMS[id];if(I&&I.st&&I.st[k])v+=I.st[k]*(1+.25*plusOf(id))}return v}
-const mpMax=()=>30+Math.round(stat('mp')),staMax=()=>100+Math.round(stat('sta')),defVal=()=>stat('def')+(player.buf&&player.buf.def>0?3:0);
+const mpMax=()=>30+Math.round(stat('mp')),staMax=()=>100+Math.round(stat('sta')),defVal=()=>stat('def')+(player.buf&&player.buf.def>0?3:0)+(player.pet&&player.pet.form==='tartaruga'?.8+.4*petLv():0);
 function atkSword(){const id=player.eq.sword,I=ITEMS[id]||{};return((I.st&&I.st.atk)||1)*(1+.25*plusOf(id))*(player.buf&&player.buf.atk>0?1.25:1)}
 function atkBow(){const id=player.eq.bow,I=ITEMS[id]||{};return((I.st&&I.st.atk)||1)*(1+.25*plusOf(id))}
 const fmt=v=>String(Math.round(v*10)/10).replace('.',',');
@@ -2425,7 +2474,8 @@ function updMissiles(){for(let i=missiles.length-1;i>=0;i--){const m=missiles[i]
   if(!dead){const box={x:m.x-4,y:m.y-4,w:8,h:8};for(const e of[...enemies])if(!m.hit.has(e)&&overlap(box,body(e))){m.hit.add(e);damageEnemy(e,m.dm,false,m.k);if(m.k==='arrow'){dead=true;break}}}
   if(dead){missiles.splice(i,1);if(m.k==='rock'){for(let q=0;q<10;q++)part(m.x,m.y,Math.random()*2-1,-Math.random()*1.5,m.iron?'#9aa0a8':'#8a8494',22,2,.12);sfx.thud();shake=Math.max(shake,3)}}}}
 function drawMissiles(){for(const m of missiles){const x=Math.round(m.x),y=Math.round(m.y);
-  if(m.k==='arrow'){const l=Math.hypot(m.vx,m.vy),ux=m.vx/l,uy=m.vy/l;for(let i=0;i<7;i++)P(ctx,Math.round(x-ux*i),Math.round(y-uy*i),i<2?'#e8e2d0':i>5?'#e0452b':'#8a5a2a',1,1)}
+  if(m.k==='feather'){P(ctx,x-3,y-1,'#c8b0ff',6,2);P(ctx,x-2,y-2,'#ffffff',3,1)}
+  else if(m.k==='arrow'){const l=Math.hypot(m.vx,m.vy),ux=m.vx/l,uy=m.vy/l;for(let i=0;i<7;i++)P(ctx,Math.round(x-ux*i),Math.round(y-uy*i),i<2?'#e8e2d0':i>5?'#e0452b':'#8a5a2a',1,1)}
   else{shadow(x-4,y+6,8);P(ctx,x-4,y-4,'#1a1020',8,8);P(ctx,x-3,y-3,m.iron?'#5a6068':'#6a6476',6,6);P(ctx,x-2,y-3,m.iron?'#9aa0a8':'#9a94a6',3,2)}}}
 function drawBow(p,x,y){const[vx,vy]=DIRV[p.facing],bx=x+8+vx*9,by=y+10+vy*6,c=(ITEMS[p.eq.bow]||{}).col||'#8a5a2a';
   if(vx){P(ctx,bx,by-5,c,1,10);P(ctx,bx-vx,by-6,c,1,1);P(ctx,bx-vx,by+5,c,1,1);P(ctx,bx-vx*2,by-4,'#e8e2d0',1,8)}else{P(ctx,bx-5,by,c,10,1);P(ctx,bx-6,by-vy,c,1,1);P(ctx,bx+5,by-vy,c,1,1);P(ctx,bx-4,by-vy*2,'#e8e2d0',8,1)}}
@@ -2681,7 +2731,7 @@ const QUESTS={
   gato:{n:'O Gato da Rosa',giver:'Rosa',desc:'Ache o gato Brasinha no bosque a noroeste.',goal:1,reward:{gems:25,heart:1,recipe:'icecream'}},
   ervas:{n:'Ervas do Curandeiro',giver:'Ito',desc:'Colete 6 ervas pelo mundo.',goal:6,reward:{gems:40,jewel:'emer',recipe:'grill'}}};
 const QORDER=['main7','forte','farol','conchas','caranguejos','casar','anel2','anel1','flores','gato','ervas','lobos'];
-Object.assign(QUESTS,{conchas:{n:'Conchas para a Iara',giver:'Iara',desc:'Junte 6 conchas na praia da Costa Coral.',goal:6,reward:{gems:30,recipe:'tropical'}},farol:{n:'O Farol Apagado',giver:'Marina',desc:'Acenda o braseiro no fim do píer com fogo.',goal:1,reward:{gems:60,jewel:'sapph'}},caranguejos:{n:'Praga de Caranguejos',giver:'Lula',desc:'Derrote 8 caranguejos na praia.',goal:8,reward:{gems:40,jewel:'topaz'}},forte:{n:'A Fortaleza Esquecida',giver:'Odo',desc:'Limpe as ruínas da Fortaleza da Brasa, a leste da vila.',goal:1,reward:{gems:60}},flores:{n:'Flores para a Maria Luiza',giver:'Maria Luiza',desc:'Colha 5 flores no Jardim das Flores, a oeste da vila.',goal:5,reward:{gems:20}},
+Object.assign(QUESTS,{conchas:{n:'Conchas para a Iara',giver:'Iara',desc:'Junte 6 conchas na praia da Costa Coral.',goal:6,reward:{gems:30,recipe:'tropical'}},farol:{n:'O Farol Apagado',giver:'Marina',desc:'Acenda o braseiro no fim do píer com fogo.',goal:1,reward:{gems:60,jewel:'sapph',pet:'tartaruga'}},caranguejos:{n:'Praga de Caranguejos',giver:'Lula',desc:'Derrote 8 caranguejos na praia.',goal:8,reward:{gems:40,jewel:'topaz'}},forte:{n:'A Fortaleza Esquecida',giver:'Odo',desc:'Limpe as ruínas da Fortaleza da Brasa, a leste da vila.',goal:1,reward:{gems:60}},flores:{n:'Flores para a Maria Luiza',giver:'Maria Luiza',desc:'Colha 5 flores no Jardim das Flores, a oeste da vila.',goal:5,reward:{gems:20}},
   anel1:{n:'O Anel da Avó',giver:'Rosa',desc:'Ache o anel perdido no fundo da Cisterna (sala nordeste).',goal:1,reward:{gems:30}},
   anel2:{n:'O Anel Eterno',giver:'Brandão',desc:'Reúna as 4 relíquias dos chefes gigantes e leve ao Brandão.',goal:4,reward:{gems:0}},
   casar:{n:'O Grande Dia',giver:'Maria Luiza',desc:'Leve o Anel Eterno até a Maria Luiza.',goal:1,reward:{gems:100}}});
@@ -2690,7 +2740,7 @@ function qRewardText(rw){return[rw.gems?'+'+rw.gems+' gemas':'',rw.jewel?'+1 '+J
 function qStart(id){player.q[id]={s:'on',n:0,got:[]};toasts.push({title:'NOVA MISSÃO',sub:QUESTS[id].n,t:180});tone(660,.1,'square',.05,990);spawnHerbs();spawnFlowers();saveGame()}
 function qProg(id,k=1){const q=player.q[id];if(!q||q.s!=='on')return;const G=QUESTS[id].goal;q.n=Math.min(G,q.n+k);
   if(q.n>=G){q.s='ready';toasts.push({title:'MISSÃO CUMPRIDA',sub:'Volte a '+QUESTS[id].giver,t:200});sfx.chest()}else toasts.push({title:QUESTS[id].n,sub:q.n+' / '+G,t:90})}
-function qFinish(id){const p=player,q=p.q[id],rw=QUESTS[id].reward;q.s='done';if(rw.gems)p.gems+=rw.gems;if(rw.jewel)p.jewels[rw.jewel]++;if(rw.heart){p.maxHp+=2;p.hp=p.maxHp}if(rw.recipe){p.recipes[rw.recipe]=1;toasts.push({title:'NOVA RECEITA',sub:FOODS[rw.recipe].n,t:200})}
+function qFinish(id){const p=player,q=p.q[id],rw=QUESTS[id].reward;q.s='done';if(rw.gems)p.gems+=rw.gems;if(rw.jewel)p.jewels[rw.jewel]++;if(rw.heart){p.maxHp+=2;p.hp=p.maxHp}if(rw.pet)unlockPet(rw.pet);if(rw.recipe){p.recipes[rw.recipe]=1;toasts.push({title:'NOVA RECEITA',sub:FOODS[rw.recipe].n,t:200})}
   if(qRewardText(rw))toasts.push({title:'RECOMPENSA',sub:qRewardText(rw),t:200});sfx.item();addFame(id==='main7'?15:10,QUESTS[id].n);const nd=Object.values(p.q).filter(x=>x.s==='done').length;if(nd>=1)unlock('quest1');saveGame()}
 function questTalk(n,id,offer,onP,ready,done){const q=player.q[id];
   if(!q)openDlg(n,offer,[{t:'Aceitar missão',f:()=>qStart(id)},{t:'Agora não'}]);
@@ -2728,11 +2778,12 @@ function drawWorldHud(){const night=nightAlpha()>.3,h=Math.floor((worldMin%1440)
 function innSleep(){const p=player,c=price(10);if(p.gems<c){showMsg('Você precisa de '+c+' gemas para o quarto.',160);sfx.locked();return}
   p.gems-=c;p.hp=p.maxHp;worldMin=(Math.floor(worldMin/1440)+1)*1440+360;warpFade=90;unlock('sleep');saveGame();toasts.push({title:'DESCANSOU NA POUSADA',sub:'Vida cheia e jogo salvo',t:180});sfx.heart()}
 /* menu em abas */
-const MTABS=['EQUIPAMENTO','BOLSA','MISSÕES','MAPA','CONQUISTAS','OPÇÕES'];
+const MTABS=['EQUIPAMENTO','BOLSA','MISSÕES','MAPA','CONQUISTAS','OPÇÕES','FAÍSCA'];
 function drawTabs(){P(ctx,0,HUD,'#1a1222',W,13);P(ctx,0,HUD+13,'#3a2a48',W,1);const pl=(frame>>4)%2;txt('<',4-pl,HUD+3,'#ff8a3d');txt(MTABS[menuTab],W/2-18,HUD+3,'#ffd166',8,'center');txt('>',W/2+MTABS[menuTab].length*4-14+pl,HUD+3,'#ff8a3d');
-  MTABS.forEach((t,i)=>P(ctx,W-50+i*8,HUD+4,i===menuTab?'#ffd166':'#3a2a48',5,5));
+  MTABS.forEach((t,i)=>P(ctx,W-58+i*8,HUD+4,i===menuTab?'#ffd166':'#3a2a48',5,5));
   txt('Q/R: abas',W-6,HUD+H-10,'#5a4a6a',8,'right')}
 function updMenuTab(){if(pressed.start||pressed.menu||pressed.dash){state='play';saveGame();return}
+  if(menuTab===6){updPetTab();return}
   if(menuTab===1){updBag();return}
   if(menuTab===2&&(pressed.left||pressed.right)){menuJornada=!menuJornada;sfx.gem()}
   if(menuTab===2){const L=Object.keys(player.q||{});if(pressed.up)questSel=Math.max(0,questSel-1);if(pressed.down)questSel=Math.min(Math.max(0,L.length-1),questSel+1)}
@@ -2742,7 +2793,7 @@ function updMenuTab(){if(pressed.start||pressed.menu||pressed.dash){state='play'
     if(pressed.atk&&optSel===4){saveGame();toasts.push({title:'JOGO SALVO',sub:'Espaço '+saveSlot+' - '+(DEFS[curKey]?DEFS[curKey].name:''),t:150});sfx.chest();return}
     if(pressed.atk||pressed.left||pressed.right){if(optSel===4){}else if(optSel===3)toggleFull();else{const k=['music','sfx','shake'][optSel];OPT[k]=OPT[k]?0:1;try{localStorage.setItem('brasa2-opt',JSON.stringify(OPT))}catch(e){}
       if(k==='music'){if(OPT.music)playTrack(roomTrack());else stopTrack()}}tone(660,.06,'triangle',.05)}}}
-function drawMenuTab(){const y0=HUD+18;
+function drawMenuTab(){const y0=HUD+18;if(menuTab===6){drawPetTab(y0);return}
   if(menuTab===1){drawBag();return}
   if(menuTab===2){const ids=Object.keys(player.q||{});drawFame(y0);if(!ids.length||menuJornada){drawJornada(y0+(player.love&&player.love.stage?28:20));return}
     const qt=Math.max(0,Math.min(questSel-2,ids.length-5)),y1=y0+(player.love&&player.love.stage?30:22);txt('< > jornada',W-6,y1-10,'#5a4a6a',8,'right');ids.slice(qt,qt+5).forEach((id,j)=>{const i=qt+j,q=player.q[id],Qd=QUESTS[id],y=y1+j*23,on=i===questSel;if(on)P(ctx,4,y-2,'#2a1e36',W-8,22);
@@ -2884,6 +2935,9 @@ const ACH=[
   {id:'farol',n:'Luz do Farol',d:'Reacenda o farol do Porto Coral',ic:'fire',c:'#ffd166',r:{jewel:'sapph'}},
   {id:'shell1',n:'Olho de Águia',d:'Vença a Concha Esperta',ic:'gem',c:'#e8e2d0',r:{gems:15}},
   {id:'shell5',n:'Mestre das Conchas',d:'Faça 5 vitórias seguidas na Concha Esperta',ic:'gem',c:'#ffd166',r:{jewel:'sapph'},hid:1},
+  {id:'pet1',n:'Nova Forma',d:'A Faísca aprende uma nova forma',ic:'fire',c:'#ff8a3d',r:{gems:20}},
+  {id:'pet4',n:'Mil Faces da Chama',d:'Desperte as 4 formas da Faísca',ic:'fire',c:'#ffd166',r:{jewel:'ame'},goal:4,prog:()=>player&&player.pet?Object.keys(player.pet.got).length-1:0},
+  {id:'petMax',n:'Laço Eterno',d:'Leve uma forma ao nível 5',ic:'heart',c:'#ff8a3d',r:{jewel:'ruby'}},
   {id:'platinum',n:'Brasa Eterna',d:'Desbloqueie todas as outras conquistas',ic:'trophy',c:'#e8f8ff',r:{scarf:'gold'}}];
 const SCARVES={mae:{n:'Cachecol da Mãe',r:'#e0452b',o:'#ff8a3d'},gold:{n:'Cachecol Dourado',r:'#c8901a',o:'#ffe27a'},aurora:{n:'Cachecol Aurora',r:'#8a4adf',o:'#4adf9a'},ice:{n:'Cachecol Glacial',r:'#2a5ad6',o:'#8fd0ff'}};
 let AS={got:{},kills:0,pots:0,bushes:0,rooms:{},caves:{},elems:{},scarves:{mae:1},scarf:'mae'};
@@ -2894,7 +2948,7 @@ function rewardText(rw){return rw.gems?'+'+rw.gems+' gemas':rw.jewel?'+1 '+JEWEL
 function unlock(id){if(AS.got[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;AS.got[id]=1;const rw=a.r;
   if(rw.gems)player.gems+=rw.gems;if(rw.jewel)player.jewels[rw.jewel]++;if(rw.scarf){AS.scarves[rw.scarf]=1;AS.scarf=rw.scarf}
   AS.when=AS.when||{};AS.when[id]=Date.now();saveAS();achToasts.push({a,t:260});[659,988,1319].forEach((f,i)=>tone(f,.22,'sine',.06,0,i*.09));tone(1976,.5,'triangle',.03,0,.3)}
-function checkAch(){const p=player;if(!p)return;familyTick();
+function checkAch(){const p=player;if(!p)return;familyTick();if(p.pet){if(AS.bigs&&AS.bigs.fenrir&&!p.pet.got.lobo)unlockPet('lobo');if(p.q.farol&&p.q.farol.s==='done'&&!p.pet.got.tartaruga)unlockPet('tartaruga')}
   if(AS.lastG==null)AS.lastG=p.gems;if(p.gems>AS.lastG)AS.gemsTotal=(AS.gemsTotal||0)+p.gems-AS.lastG;AS.lastG=p.gems;
   for(const a of ACH)if(a.goal&&!AS.got[a.id]&&a.prog()>=a.goal)unlock(a.id);
   if(p.plus&&Object.values(p.plus).some(v=>v>=7))unlock('plus7');if(plusOf('boom')>=5)unlock('boomGold');
@@ -2991,7 +3045,7 @@ try{if(JSON.parse(localStorage.getItem('brasa2-fim')||'[]').length)unlockedCap=M
 if(savedGame&&savedGame.rooms){if((savedGame.rooms['11,9']&&savedGame.rooms['11,9'].won&&(savedGame.layout||1)<2)||((savedGame.layout||1)>=2&&savedGame.rooms['11,10']&&savedGame.rooms['11,10'].won))unlockedCap=Math.max(unlockedCap,3);else if(savedGame.rooms['1,-1']&&savedGame.rooms['1,-1'].won)unlockedCap=Math.max(unlockedCap,2)}
 function saveGame(over={}){
   try{const rooms={};for(const k in ROOMS){const rr=ROOMS[k];rooms[k]={t:rr.tiles.map(x=>x.join('')),chest:rr.chest,cl:!!rr.cleared,won:!!rr.won,lit:!!rr.litDone,st:!!rr.story}}
-    const p=player;const d=Object.assign({v:1,layout:2,wv:WV,chapter,diff:diffIdx,p:{maxHp:p.maxHp,hp:Math.max(1,p.hp),gems:p.gems,keys:p.keys,hasWave:!!p.hasWave,eq:{...p.eq},bag:{...p.bag},fxLv:p.fxLv,jewels:{...p.jewels},sock:JSON.parse(JSON.stringify(p.sock)),emerApplied:p.emerApplied,hasPulse:!!p.hasPulse,hasDashFire:!!p.hasDashFire,hasHeart:!!p.hasHeart,elemSel:p.elemSel,q:JSON.parse(JSON.stringify(p.q||{})),mp:p.mp,sta:p.sta,plus:{...p.plus},mat:{...p.mat},it:{...p.it},tool:p.tool,legacy:p.legacy,fame:p.fame,love:JSON.parse(JSON.stringify(p.love||{})),gifts:{...(p.gifts||{})},relics:{...(p.relics||{})},castle:JSON.parse(JSON.stringify(p.castle||{})),food:{...(p.food||{})},recipes:{...(p.recipes||{})},fpick:{...(p.fpick||{})}},
+    const p=player;const d=Object.assign({v:1,layout:2,wv:WV,chapter,diff:diffIdx,p:{maxHp:p.maxHp,hp:Math.max(1,p.hp),gems:p.gems,keys:p.keys,hasWave:!!p.hasWave,eq:{...p.eq},bag:{...p.bag},fxLv:p.fxLv,jewels:{...p.jewels},sock:JSON.parse(JSON.stringify(p.sock)),emerApplied:p.emerApplied,hasPulse:!!p.hasPulse,hasDashFire:!!p.hasDashFire,hasHeart:!!p.hasHeart,elemSel:p.elemSel,q:JSON.parse(JSON.stringify(p.q||{})),mp:p.mp,sta:p.sta,plus:{...p.plus},mat:{...p.mat},it:{...p.it},tool:p.tool,legacy:p.legacy,fame:p.fame,love:JSON.parse(JSON.stringify(p.love||{})),gifts:{...(p.gifts||{})},relics:{...(p.relics||{})},pet:JSON.parse(JSON.stringify(p.pet||{})),castle:JSON.parse(JSON.stringify(p.castle||{})),food:{...(p.food||{})},recipes:{...(p.recipes||{})},fpick:{...(p.fpick||{})}},
       rooms,visited:[...visited],room:curKey,cave:caveReturn,wmin:worldMin,fog:FOG.join(''),x:p.x,y:p.y,time:playTime},over);
     d.when=Date.now();localStorage.setItem(skey(),JSON.stringify(d));savedGame=d;saveFlash=90}catch(e){}
 }
@@ -3062,13 +3116,10 @@ function updatePlayer(){
     else p.glide=0}
   if(eqId('back')!=='wings'&&!p.dashT&&!p.kbT&&!fits(p,p.x,p.y)){p.x=p.lastSafe.x;p.y=p.lastSafe.y;sfx.locked()}
   if(!p.dashT&&!p.glide&&fits(p,p.x,p.y))p.lastSafe={x:p.x,y:p.y};
-  if(p.fxLv&&!room.closePending&&--p.faiscaT<=0){const tg=nearestEnemy(p.fx,p.fy,120);p.faiscaT=Math.round([0,150,105,70][p.fxLv]*Math.max(.3,1-.25*jc('ame')));
-    if(tg){const c=center(tg),a=Math.atan2(c.y-p.fy,c.x-p.fx),n=p.fxLv>=3?2:1;
-      for(let i=0;i<n;i++){const aa=a+(n>1?(i-.5)*.25:0);pshots.push({x:p.fx,y:p.fy,vx:Math.cos(aa)*2.6,vy:Math.sin(aa)*2.6,life:70,hit:new Set(),small:true})}
-      tone(990,.06,'triangle',.03,1500)}else p.faiscaT=30}
+  petTick(p);
   if(eqId('ring')==='ringVital'&&++p.regenT>=[0,1500,1200,900][eqLv('ring')]){p.regenT=0;if(p.hp<p.maxHp){p.hp++;sfx.heart();sparks(p.x+8,p.y+6,'#e0452b',6)}}
   p.trail.forEach(t=>t.a-=.06);p.trail=p.trail.filter(t=>t.a>0);
-  const tx=p.x+8+(p.facing==='right'?-10:10),ty=p.y-6;p.fx+=(tx-p.fx)*.06;p.fy+=(ty-p.fy)*.06;
+  petFollow(p);
   checkEdges();
 }
 const onMud=p=>tileAt(Math.floor((p.x+8)/TS),Math.floor((p.y+12)/TS))==='m';
@@ -3163,6 +3214,7 @@ function killEnemy(e){
   if(e.type!=='shadow'){AS.kills++;if(room.outdoor&&nightAlpha()>.3)AS.nightKills=(AS.nightKills||0)+1;saveAS()}
   questKill(e.type);
   if(e.rare)rareDrop(e);
+  petXp(e.rare?5:1);if(player.pet&&player.pet.form==='raposa'&&Math.random()<.25+.05*petLv()){const c3=center(e);pickups.push({type:'gem',x:c3.x,y:c3.y,t:0,life:540})}
   if(['wolf','crab','frog'].includes(e.type)&&Math.random()<.35){const c2=center(e);pickups.push({type:'food',k:'meat',x:c2.x-4,y:c2.y,t:0,life:900})}
   if(!e.noDrop)drop(c.x-4,c.y-4);
   if(enemies.length===0&&room.waves&&!room.cleared&&room.wave!=null){
@@ -3221,6 +3273,7 @@ function touchTiles(){
     }else if(ch==='C')openChest(c,r);
     else if(ch==='g'&&lockCD<=0){const t=room.signs&&room.signs[c+','+r];if(t){showMsg(t,200);lockCD=220}}
     else if(ch==='A')openChest(c,r);
+    else if(ch===':'&&lockCD<=0){lockCD=200;if(!player.pet.got.raposa){unlockPet('raposa');showMsg('O Totem Solar brilhou! A Faísca aprendeu a forma da Raposa Solar.',260)}else showMsg('O Totem Solar ainda guarda um calor gostoso.',140)}
     else if(ch==='%'&&room.books&&room.books[c+','+r]&&lockCD<=0){lockCD=60;openBook(room.books[c+','+r]);return}
     else if(ch==='*'&&lockCD<=0){lockCD=240;openDlg({name:'FOGUEIRA',col:'#ff8a3d'},['Uma fogueira crepita. Um lugar seguro para descansar e cozinhar.'],[{t:'Descansar',f:restFire},{t:'Cozinhar',f:openCook},{t:'Seguir viagem'}]);return}
     else if(ch==='o'&&lockCD<=0&&room.doors&&room.doors[c+','+r]){const sec=room.doors[c+','+r];lockCD=240;openDlg({name:'POÇO',col:'#8fd0ff'},['Um poço antigo. Há uma escada de ferro descendo para a escuridão...'],[{t:'Descer',f:()=>enterCave(sec,c,r)},{t:'Ficar aqui'}]);return}
@@ -3449,7 +3502,7 @@ function updatePlay(){
         else if(k==='wind'){damageEnemy(e,.5,false,'wind');if(!e.boss&&enemies.includes(e)){e.kbx=s.vx*1.6;e.kby=s.vy*1.6;e.kbT=14}}}
       for(let j=projectiles.length-1;j>=0;j--){const b=projectiles[j];if(overlap(box,{x:b.x-3,y:b.y-3,w:6,h:6})){projectiles.splice(j,1);sparks(b.x,b.y,C[2],5)}}}
     if(dead){pshots.splice(i,1);sparks(s.x,s.y,C[1],8)}}
-  const mr=Math.max(eqId('ring')==='ringMagnet'?[0,48,72,100][eqLv('ring')]:0,player.fxLv>=2?28:0);
+  const mr=Math.max(eqId('ring')==='ringMagnet'?[0,48,72,100][eqLv('ring')]:0,petMagnet());
   for(let i=pickups.length-1;i>=0;i--){const k=pickups[i];k.t++;
     if(mr&&k.type!=='flame'){const dx=player.x+8-(k.x+4),dy=player.y+8-(k.y+4),d=Math.hypot(dx,dy);if(d<mr&&d>1){k.x+=dx/d*2.2;k.y+=dy/d*2.2}}
     if(k.life>0&&k.t>k.life){pickups.splice(i,1);continue}
@@ -3556,6 +3609,7 @@ function drawAnimTiles(rm,ox,oy){
     else if(ch==='x')flame(ctx,x+8,y+14,1,frame+c*5);
     else if(ch==='&')drawPlant(rm.fruit&&rm.fruit[c+','+r],x,y,!(player&&player.fpick&&player.fpick[curKey+':'+c+','+r]===Math.floor(worldMin/1440)));
     else if(ch==='*')drawFire(x,y);
+    else if(ch===':'){P(ctx,x+3,y+2,'#1a1020',10,14);P(ctx,x+4,y+3,'#c8901a',8,12);P(ctx,x+5,y+4,'#ffd166',6,3);P(ctx,x+5,y+1,'#c8901a',2,3);P(ctx,x+9,y+1,'#c8901a',2,3);if(!(player&&player.pet&&player.pet.got.raposa)){glow(x+8,y+6,16,'255,209,102',.4+.2*Math.sin(frame*.1))}}
     else if(ch==='A'){ctx.globalAlpha=.18+.12*Math.sin(frame*.1+c);P(ctx,x-2,y,'#ffd166',20,18);ctx.globalAlpha=1;if(frame%20<10)P(ctx,x+2+(frame>>2)%12,y+3+(frame>>3)%8,'#ffffff',1,1)}
     else if(ch==='0'&&frame%40<20){P(ctx,x+5,y+7,'#ff3a1a',2,2);P(ctx,x+9,y+7,'#ff3a1a',2,2)}
     else if(ch==='8'&&frame%16<8)P(ctx,x+3+(frame>>4)%10,y+4+(frame>>3)%7,'#ffffff',1,1);
@@ -3737,7 +3791,7 @@ function drawPickup(k){
 }
 const darkC=document.createElement('canvas');darkC.width=W/4;darkC.height=H/4;const dg=darkC.getContext('2d');
 function lights(px,py){
-  const L=[{x:px+8,y:py+8,r:68},{x:player.fx,y:player.fy,r:34,warm:1}];
+  const L=[{x:px+8,y:py+8,r:68},{x:player.fx,y:player.fy,r:player.pet&&player.pet.form==='raposa'?64:34,warm:1}];
   for(const t of torches)L.push({x:t.x,y:t.y,r:46+Math.sin(frame*.2+t.x)*3,warm:1});
   for(const b of projectiles)if(b.kind!=='arrow')L.push({x:b.x,y:b.y,r:22,warm:1});
   for(const k of pickups)if(k.type==='flame')L.push({x:k.x+8,y:k.y+8,r:90,warm:1});
@@ -3794,7 +3848,7 @@ function drawWorld(){
   const dk=roomDark();if(dk)drawDark(dk,lights(player.x,player.y));
   ctx.translate(-camX,-camY);
   drawParticles();
-  faisca(player.fx,player.fy+Math.sin(frame*.08)*2,1);
+  drawPet();
   drawMissiles();drawHookBoom();drawFairies();if(state==='fish')drawBobber();
   drawPrompts();
   ctx.translate(camX,camY);
