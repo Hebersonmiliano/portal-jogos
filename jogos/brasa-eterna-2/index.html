@@ -2067,6 +2067,24 @@ function drawCastle(){const C=player.castle,b=C.b,ink='#1a1020',f=frame,nt=night
   // terrenos vazios
   if(C.owned)for(const k of CKEYS){const P0=CPL[k];if(P0.x==null||b[k]||k==='keep')continue;const x=P0.x*16,y=P0.y*16;for(let i=0;i<4;i++)P(ctx,x+10+i*16,y+30-(i%2)*4,'#8a8494',10,6);P(ctx,x+8,y+12,'#a0703a',60,3);P(ctx,x+12,y+8,'#a0703a',3,14);P(ctx,x+64,y+8,'#a0703a',3,14)}
   if(b.tower){const x=36*16,y=21*16;P(ctx,x-2,y-40,ink,36,72);P(ctx,x,y-38,'#8a8494',32,68);for(let i=0;i<16;i++)P(ctx,x+16-i,y-60+i,'#a01a2a',i*2,1);P(ctx,x+15,y-76,'#5a3418',2,18);P(ctx,x+17,y-76,'#ffd166',14,8);flame(ctx,x+24,y-70,1,f);P(ctx,x+12,y-20,ink,8,12);P(ctx,x+13,y-19,nt?'#ffd166':'#3a4a6a',6,10)}}
+/* ---------- Jornada: o caminho principal da história ---------- */
+let menuJornada=false;
+const STORY=[
+ {t:'Fale com o Ancião Odo',d:'A casa dele fica a sudeste da praça.',at:[47,36],ok:()=>!!player.q.main7},
+ {t:'Investigue a Pedra Negra',d:'Ao norte da vila, depois das montanhas.',at:[40,7],ok:()=>player.q.main7&&player.q.main7.s!=='on'},
+ {t:'Conte ao Ancião Odo o que viu',d:'Volte à casa dele na vila.',at:[47,36],ok:()=>player.q.main7&&player.q.main7.s==='done'},
+ {t:'Vença a Serpente na Cisterna',d:'Desça pelo poço da praça. Leve bombas da Nina!',at:[43,27],ok:()=>!!(AS.bigs&&AS.bigs.serp)},
+ {t:'Vença o Golem na Gruta',d:'Noroeste, depois do pomar. Bomba na parede rachada.',at:[12,4],ok:()=>!!(AS.bigs&&AS.bigs.golem)},
+ {t:'Vença Fenrir no Covil',d:'Nordeste. Erga a pedra com as Luvas de Força.',at:[72,4],ok:()=>!!(AS.bigs&&AS.bigs.fenrir)},
+ {t:'Vença o Rei Espectro na Cripta',d:'Ao sul. Forje as Manoplas de Ferro no Brandão.',at:[20,56],ok:()=>!!(AS.bigs&&AS.bigs.spec)},
+ {t:'Conquiste a Fortaleza da Brasa',d:'Estrada para o leste, depois da ponte do lago.',at:[78,30],ok:()=>!!(player.castle&&player.castle.owned)},
+ {t:'Case-se com Maria Luiza',d:'Converse todo dia: flores, passeios e anéis.',at:'bea',ok:()=>!!(player.love&&player.love.stage>=4)},
+ {t:'A Pedra Negra aguarda...',d:'Ela disse "ainda não". O resto chega em breve.',at:[40,7],ok:()=>false}];
+function storyStep(){if(!player||!player.q)return null;for(const st of STORY)if(!st.ok())return st;return null}
+function drawJornada(y){const cur=storyStep();txt('JORNADA',6,y,'#ffd166');txt('< > missões',W-6,y,'#5a4a6a',8,'right');
+  STORY.forEach((st,i)=>{const yy=y+12+i*10,done=st.ok(),on=st===cur;if(on)P(ctx,4,yy-2,'#2a1e36',W-8,10);P(ctx,8,yy+1,done?'#6cc45a':on?'#ffd166':'#3a2a48',5,5);
+    txt(st.t.slice(0,28),18,yy,done?'#5a8a5a':on?'#ffd166':'#6a5a7a')});
+  if(cur)wrap(cur.d,31).slice(0,2).forEach((l,i)=>txt(l,6,y+16+STORY.length*10+i*9,'#c9b8d8'))}
 /* ---------- saves antigos: mapa novo + progresso do jogador ---------- */
 const WV=5;
 const KEEP={C:'c',A:'c',k:'7._',v:'7._',w:'7._',s:'._',b:'.',r:'.',p:'_',K:'._O',D:'_',U:'L',I:'._'};
@@ -2566,15 +2584,17 @@ function questTarget(){const q=player.q,on=id=>q[id]&&q[id].s==='on',rd=id=>q[id
   if(on('flores')){const h=pickups.filter(k=>k.type==='flor');if(h.length){let b=h[0],bd=1e9;for(const k of h){const d=Math.hypot(k.x-player.x,k.y-player.y);if(d<bd){bd=d;b=k}}return{x:b.x+4,y:b.y+4}}return T(21,35)}if(rd('flores'))return bea();
   if(on('gato')){const c=npcs.find(n=>n.cat);return c?{x:c.x+8,y:c.y+8}:T(14,16)}if(rd('gato'))return T(30,31);
   if(on('ervas')){const h=pickups.filter(k=>k.type==='herb');if(h.length){let b=h[0],bd=1e9;for(const k of h){const d=Math.hypot(k.x-player.x,k.y-player.y);if(d<bd){bd=d;b=k}}return{x:b.x+4,y:b.y+4}}}if(rd('ervas'))return T(43,31);
-  if(rd('lobos'))return T(51,29);if(on('lobos'))return T(64,40);return null}
+  if(rd('lobos'))return T(51,29);if(on('lobos'))return T(64,40);const st=storyStep();if(st&&st.at){if(st.at==='bea'){const b=npcs.find(n=>n.id==='bea');return b?{x:b.x+8,y:b.y+8}:null}return T(st.at[0],st.at[1])}return null}
 function drawQuestArrow(){const t=questTarget();if(!t||state!=='play')return;const sx=t.x-camX,sy=t.y-camY;
   if(sx>8&&sx<W-8&&sy>8&&sy<H-8){const b=Math.round(Math.sin(frame*.15)*2);P(ctx,sx-2,sy-22+b,'#ffd166',5,5);P(ctx,sx-1,sy-17+b,'#ffd166',3,2);P(ctx,sx,sy-15+b,'#ffd166',1,1);return}
   const cx=W/2,cy=H/2,a=Math.atan2(sy-cy,sx-cx),ex=clamp(cx+Math.cos(a)*200,10,W-12),ey=clamp(cy+Math.sin(a)*200,10,H-12);
   if(frame%30<22)for(let i=0;i<5;i++){P(ctx,Math.round(ex-Math.cos(a)*i*2-Math.sin(a)*(i-2)),Math.round(ey-Math.sin(a)*i*2+Math.cos(a)*(i-2)),'#ffd166',2,2);P(ctx,Math.round(ex-Math.cos(a)*i*2+Math.sin(a)*(i-2)),Math.round(ey-Math.sin(a)*i*2-Math.cos(a)*(i-2)),'#ffd166',2,2)}}
 function activeQuest(){const q=player.q||{};for(const id of QORDER)if(q[id]&&(q[id].s==='on'||q[id].s==='ready'))return id;return null}
-function drawTracker(){if(state!=='play'||!room.big)return;const id=activeQuest();if(!id)return;const q=player.q[id],Qd=QUESTS[id];
+function drawTracker(){if(state!=='play')return;const st=storyStep();let y=HUD+3;
+  if(st){const t=st.t.slice(0,28),w=Math.min(W-12,t.length*8+18);ctx.globalAlpha=.85;P(ctx,4,y,'#2a1a08',w,12);ctx.globalAlpha=1;P(ctx,4,y,'#ffd166',w,1);P(ctx,6,y+3,'#ff8a3d',5,5);txt(t,14,y+2,'#ffd166');y+=14}
+  if(!room.big)return;const id=activeQuest();if(!id)return;const q=player.q[id],Qd=QUESTS[id];
   const t=q.s==='ready'?'Volte a '+Qd.giver:(Qd.goal>1?Qd.n+' '+q.n+'/'+Qd.goal:Qd.n);const w=Math.min(W-12,t.length*8+18);
-  ctx.globalAlpha=.85;P(ctx,4,HUD+3,'#120c18',w,12);ctx.globalAlpha=1;P(ctx,6,HUD+6,'#ffd166',5,5);txt(t.slice(0,28),14,HUD+5,q.s==='ready'?'#6cc45a':'#f4e9d8')}
+  ctx.globalAlpha=.85;P(ctx,4,y,'#120c18',w,12);ctx.globalAlpha=1;P(ctx,6,y+3,'#c9b8d8',5,5);txt(t.slice(0,28),14,y+2,q.s==='ready'?'#6cc45a':'#f4e9d8')}
 function drawWorldHud(){const night=nightAlpha()>.3,h=Math.floor((worldMin%1440)/60),m=Math.floor(worldMin%60);
   P(ctx,152,4,'#1a1222',42,16);if(!room.outdoor&&player.keys>0){ctx.drawImage(KEY,156,8);txt('×'+player.keys,166,8,'#ffd166')}else txt(String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'),173,8,night?'#8fd0ff':'#ffd166',8,'center');
   if(worldMapC){const pc=Math.floor((player.x+8)/TS),pr=Math.floor((player.y+8)/TS),sx=clamp(pc-21,0,COLS-42),sy=clamp(pr-10,0,ROWS-20);
@@ -2589,6 +2609,7 @@ function drawTabs(){P(ctx,0,HUD,'#1a1222',W,13);P(ctx,0,HUD+13,'#3a2a48',W,1);co
   txt('Q/R: abas',W-6,HUD+H-10,'#5a4a6a',8,'right')}
 function updMenuTab(){if(pressed.start||pressed.menu||pressed.dash){state='play';saveGame();return}
   if(menuTab===1){updBag();return}
+  if(menuTab===2&&(pressed.left||pressed.right)){menuJornada=!menuJornada;sfx.gem()}
   if(menuTab===2){const L=Object.keys(player.q||{});if(pressed.up)questSel=Math.max(0,questSel-1);if(pressed.down)questSel=Math.min(Math.max(0,L.length-1),questSel+1)}
   else if(menuTab===4){const n=ACH.length;if(pressed.up){achScroll=Math.max(0,achScroll-1);sfx.gem()}if(pressed.down){achScroll=Math.min(n-5,achScroll+1);sfx.gem()}
     if(pressed.left||pressed.right){const L=Object.keys(SCARVES).filter(k=>AS.scarves[k]);if(L.length>1){let i=L.indexOf(AS.scarf);i=(i+(pressed.left?-1:1)+L.length)%L.length;AS.scarf=L[i];saveAS();tone(660,.08,'triangle',.05,990)}}}
@@ -2598,8 +2619,8 @@ function updMenuTab(){if(pressed.start||pressed.menu||pressed.dash){state='play'
       if(k==='music'){if(OPT.music)playTrack(roomTrack());else stopTrack()}}tone(660,.06,'triangle',.05)}}}
 function drawMenuTab(){const y0=HUD+18;
   if(menuTab===1){drawBag();return}
-  if(menuTab===2){const ids=Object.keys(player.q||{});drawFame(y0);if(!ids.length){txt('Nenhuma missão ainda.',W/2,y0+30,'#c9b8d8',8,'center');txt('Converse com os moradores',W/2,y0+46,'#9a8aaa',8,'center');txt('para receber missões!',W/2,y0+58,'#9a8aaa',8,'center');return}
-    const qt=Math.max(0,Math.min(questSel-2,ids.length-5)),y1=y0+(player.love&&player.love.stage?30:22);ids.slice(qt,qt+5).forEach((id,j)=>{const i=qt+j,q=player.q[id],Qd=QUESTS[id],y=y1+j*23,on=i===questSel;if(on)P(ctx,4,y-2,'#2a1e36',W-8,22);
+  if(menuTab===2){const ids=Object.keys(player.q||{});drawFame(y0);if(!ids.length||menuJornada){drawJornada(y0+(player.love&&player.love.stage?28:20));return}
+    const qt=Math.max(0,Math.min(questSel-2,ids.length-5)),y1=y0+(player.love&&player.love.stage?30:22);txt('< > jornada',W-6,y1-10,'#5a4a6a',8,'right');ids.slice(qt,qt+5).forEach((id,j)=>{const i=qt+j,q=player.q[id],Qd=QUESTS[id],y=y1+j*23,on=i===questSel;if(on)P(ctx,4,y-2,'#2a1e36',W-8,22);
       P(ctx,8,y+1,q.s==='done'?'#6cc45a':q.s==='ready'?'#ffd166':'#ff8a3d',5,5);txt(Qd.n,18,y,q.s==='done'?'#6cc45a':'#ffd166');
       txt(q.s==='done'?'Concluída: '+qRewardText(Qd.reward):q.s==='ready'?'Volte a '+Qd.giver+' para a recompensa':(Qd.goal>1?q.n+'/'+Qd.goal+' - ':'')+Qd.desc,18,y+10,'#9a8aaa')});return}
   if(menuTab===3){if(!worldMapC&&curKey!=='w7'&&!(DEFS.w7&&ROOMS.w7&&caveReturn&&caveReturn.room==='w7')){txt('O mapa aparece no',W/2,y0+40,'#c9b8d8',8,'center');txt('mundo aberto (Capítulo 7).',W/2,y0+52,'#c9b8d8',8,'center');return}
