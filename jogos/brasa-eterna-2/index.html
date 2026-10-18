@@ -2067,6 +2067,16 @@ function drawCastle(){const C=player.castle,b=C.b,ink='#1a1020',f=frame,nt=night
   // terrenos vazios
   if(C.owned)for(const k of CKEYS){const P0=CPL[k];if(P0.x==null||b[k]||k==='keep')continue;const x=P0.x*16,y=P0.y*16;for(let i=0;i<4;i++)P(ctx,x+10+i*16,y+30-(i%2)*4,'#8a8494',10,6);P(ctx,x+8,y+12,'#a0703a',60,3);P(ctx,x+12,y+8,'#a0703a',3,14);P(ctx,x+64,y+8,'#a0703a',3,14)}
   if(b.tower){const x=36*16,y=21*16;P(ctx,x-2,y-40,ink,36,72);P(ctx,x,y-38,'#8a8494',32,68);for(let i=0;i<16;i++)P(ctx,x+16-i,y-60+i,'#a01a2a',i*2,1);P(ctx,x+15,y-76,'#5a3418',2,18);P(ctx,x+17,y-76,'#ffd166',14,8);flame(ctx,x+24,y-70,1,f);P(ctx,x+12,y-20,ink,8,12);P(ctx,x+13,y-19,nt?'#ffd166':'#3a4a6a',6,10)}}
+/* ---------- mapa em cache e proteção contra travamentos ---------- */
+const MAPC={'.':'#4c9a3f',',':'#5aa84a',b:'#3a8a3a',T:'#1f5a2a',R:'#8a8494',W:'#6a5a4a','~':'#2f6fbf',B:'#9a6a3a','=':'#c8a26b',Y:'#a0402a',y:'#e8d8b8',j:'#7a4a28',f:'#a0703a',l:'#ffd166',o:'#5c5766',g:'#c08040',C:'#ffd166',c:'#8a5a2a','6':'#c06bff',i:'#a8d8f0','&':'#2f7a3a','*':'#ff8a3d','^':'#c8a26b',A:'#9a5ad6',k:'#6a5a4a',v:'#6a6476',w:'#5a6068','9':'#8a5a2a','8':'#c890e8'};
+const MAPCACHE=new Map();
+function mapCanvasFor(R){const e=MAPCACHE.get(R);if(e&&frame-e.f<240)return e.c;const C=R.tiles[0].length,Rw=R.tiles.length,[mc,mg]=e?[e.c,e.g]:mk(C,Rw);
+  for(let r=0;r<Rw;r++)for(let c=0;c<C;c++)P(mg,c,r,MAPC[R.tiles[r][c]]||'#4c9a3f');MAPCACHE.set(R,{c:mc,g:mg,f:frame});return mc}
+let errMsg='',errT=0,errN=0;
+function safeRecover(e){errN++;errMsg=String(e&&e.message||e).slice(0,60);errT=360;try{localStorage.setItem('brasa2-err',String(e&&e.stack||e).slice(0,600))}catch(_){}try{console.error(e)}catch(_){}
+  for(const k in pressed)pressed[k]=false;if(!['title','slots','intro'].includes(state)){state='play';dlg=null;book=null;eqPick=null;jk=null;fishS=null}
+  if(errN>20){state='title';errN=0}}
+function drawErr(){if(errT<=0)return;errT--;ctx.globalAlpha=Math.min(1,errT/30);P(ctx,4,H+HUD-26,'#3a0a10',W-8,22);txt('Ops! Um erro foi evitado:',8,H+HUD-23,'#ffb0a0');txt(errMsg.slice(0,30),8,H+HUD-13,'#ffffff');ctx.globalAlpha=1}
 /* ---------- chefes gigantes ---------- */
 const BIGB={serp:{title:'SERPENTE DAS ÁGUAS',hp:30,bx:6,by:6,bw:28,bh:28},golem:{title:'GOLEM DE CRISTAL',hp:34,bx:10,by:12,bw:44,bh:48},
   fenrir:{title:'FENRIR, O LOBO NEGRO',hp:34,bx:8,by:14,bw:48,bh:30},spec:{title:'REI ESPECTRO',hp:30,bx:10,by:8,bw:28,bh:50}};
@@ -2467,8 +2477,8 @@ function roomLoaded(){
   if(!room.big)return;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if('l*'.includes(room.tiles[r][c]))lamps.push({x:c*TS+8,y:r*TS+4});
   for(const[hx,hy]of room.houses||[])lamps.push({x:hx*TS+14,y:hy*TS+38},{x:hx*TS+62,y:hy*TS+38});
-  const[mc,mg]=mk(COLS,ROWS),MC={'.':'#4c9a3f',',':'#5aa84a',b:'#3a8a3a',T:'#1f5a2a',R:'#8a8494',W:'#6a5a4a','~':'#2f6fbf',B:'#9a6a3a','=':'#c8a26b',Y:'#a0402a',y:'#e8d8b8',j:'#7a4a28',f:'#a0703a',l:'#ffd166',o:'#5c5766',g:'#c08040',C:'#ffd166',c:'#8a5a2a','6':'#c06bff',i:'#a8d8f0'};
-  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)P(mg,c,r,MC[room.tiles[r][c]]||'#4c9a3f');worldMapC=mc;
+  MAPCACHE.delete(room);
+  worldMapC=mapCanvasFor(room);
   spawnHerbs();spawnFlowers()}
 function worldTick(){worldMin+=1/30;
   const cx0=Math.floor((player.x+8)/TS/8),cy0=Math.floor((player.y+8)/TS/8);
@@ -2588,7 +2598,7 @@ function drawMenuTab(){const y0=HUD+18;
       P(ctx,8,y+1,q.s==='done'?'#6cc45a':q.s==='ready'?'#ffd166':'#ff8a3d',5,5);txt(Qd.n,18,y,q.s==='done'?'#6cc45a':'#ffd166');
       txt(q.s==='done'?'Concluída: '+qRewardText(Qd.reward):q.s==='ready'?'Volte a '+Qd.giver+' para a recompensa':(Qd.goal>1?q.n+'/'+Qd.goal+' - ':'')+Qd.desc,18,y+10,'#9a8aaa')});return}
   if(menuTab===3){if(!worldMapC&&curKey!=='w7'&&!(DEFS.w7&&ROOMS.w7&&caveReturn&&caveReturn.room==='w7')){txt('O mapa aparece no',W/2,y0+40,'#c9b8d8',8,'center');txt('mundo aberto (Capítulo 7).',W/2,y0+52,'#c9b8d8',8,'center');return}
-    if(!worldMapC){const save=room;room=ROOMS.w7;const c0=COLS,r0=ROWS;COLS=room.tiles[0].length;ROWS=room.tiles.length;const tmpN=npcs,tmpL=lamps;roomLoaded();const m=worldMapC;npcs=tmpN;lamps=tmpL;room=save;COLS=c0;ROWS=r0;worldMapC=null;drawMap(m,y0);return}
+    if(!worldMapC){drawMap(mapCanvasFor(ROOMS.w7),y0);return}
     drawMap(worldMapC,y0);return}
   if(menuTab===4){const got=ACH.filter(a=>AS.got[a.id]).length,pc=Math.round(got/ACH.length*100);txt(got+' de '+ACH.length+' desbloqueadas',6,y0-2,'#ffd166');txt(pc+'%',W-6,y0-2,'#8fb0e8',8,'right');
     P(ctx,6,y0+8,'#1a1222',W-12,4);P(ctx,6,y0+8,'#5a8ae8',Math.round((W-12)*got/ACH.length),4);
@@ -3719,7 +3729,7 @@ function render(){
   if(state==='scroll')drawScroll();else drawWorld();
   if(warpFade>0){ctx.fillStyle='rgba(0,0,0,'+(warpFade/30)+')';ctx.fillRect(0,0,W,H)}
   ctx.restore();
-  drawHUD();drawOverlays();if(state==='menu')drawMenu();if(state==='choice')drawChoice();if(state==='achv')drawAchv();if(state==='shop')drawShop();if(state==='talk')drawTalk();if(state==='camp')drawCamp();if(state==='forge')drawForge();if(state==='cook')drawCook();if(state==='book')drawBook();if(state==='build')drawBuild();if(state==='fish')drawFishUI();if(state==='jk')drawJk();drawEnd();drawToasts();
+  drawHUD();drawOverlays();if(state==='menu')drawMenu();if(state==='choice')drawChoice();if(state==='achv')drawAchv();if(state==='shop')drawShop();if(state==='talk')drawTalk();if(state==='camp')drawCamp();if(state==='forge')drawForge();if(state==='cook')drawCook();if(state==='book')drawBook();if(state==='build')drawBuild();if(state==='fish')drawFishUI();if(state==='jk')drawJk();drawEnd();drawToasts();drawErr();
 }
 
 /* ---------- abertura cinematográfica ---------- */
@@ -4035,7 +4045,7 @@ addEventListener('resize',fit);try{document.addEventListener('fullscreenchange',
 
 initWorld();
 let last=performance.now(),acc=0;
-function loop(now){acc+=Math.min(100,now-last);last=now;while(acc>=1000/60){step();acc-=1000/60}render();requestAnimationFrame(loop)}
+function loop(now){acc+=Math.min(100,now-last);last=now;try{while(acc>=1000/60){step();acc-=1000/60}render()}catch(e){acc=0;safeRecover(e)}requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 })();
 </script>
