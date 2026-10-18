@@ -3013,7 +3013,7 @@ function drawAchToast(){if(!achToasts.length)return;const T=achToasts[0];T.t--;i
   const k=Math.min(1,(260-T.t)/14,T.t/14),w=172,h=36,x=Math.round(W-6-w*k),y=HUD+H-h-4;
   P(ctx,x-1,y-1,'#5a8ae8',w+2,h+2);P(ctx,x,y,'#151b2e',w,h);P(ctx,x,y,'#1f2a46',w,12);achIcon(T.a,x+4,y+8,true);
   txt('CONQUISTA OBTIDA',x+28,y+3,'#8fb0e8',8);txt(T.a.n.slice(0,17),x+28,y+15,'#ffffff');txt(rewardText(T.a.r),x+28,y+25,'#6cc45a')}
-function drawToasts(){drawAchToast();if(!toasts.length)return;const T=toasts[0],a=Math.min(1,T.t/20,(220-T.t)/12);ctx.globalAlpha=a;
+function drawToasts(){drawAchToast();if(!toasts.length||state==='play'||state==='scroll')return;const T=toasts[0],a=Math.min(1,T.t/20,(220-T.t)/12);ctx.globalAlpha=a;
   P(ctx,6,2,'#ffd166',244,21);P(ctx,7,3,'#120c18',242,19);trophy(12,8,true);
   txt(T.a?'CONQUISTA: '+T.a.n:T.title,26,5,'#ffd166');txt(T.a?'Prêmio: '+rewardText(T.a.r):T.sub,26,14,'#6cc45a');ctx.globalAlpha=1}
 /* ---------- salvamento ---------- */
@@ -3880,22 +3880,21 @@ function drawHUD(){
     const cur=k===curKey;P(ctx,W-4-(bx1-bx0+1)*10+(gx-bx0)*10,2+(gy-by0)*(by1-by0>3?4:5),cur?'#ff8a3d':visited.has(k)?'#6a5a7a':'#2a2034',9,by1-by0>3?3:4)}
 }
 function drawOverlays(){
-  if(saveFlash>0&&state==='play'){ctx.globalAlpha=Math.min(1,saveFlash/30);txt('SALVO',W-6,HUD+5,'#6cc45a',8,'right');ctx.globalAlpha=1}
-  // Legendas e nome da sala ficam do lado oposto ao Kael; se ainda o cobrirem, ficam transparentes.
+  if(saveFlash>0&&state==='play'){ctx.globalAlpha=Math.min(1,saveFlash/30);txt('SALVO',6,HUD+H-12,'#6cc45a');ctx.globalAlpha=1}
   const boss=enemies.find(e=>e.boss),pb={x:player.x-camX,y:player.y-camY+HUD,w:16,h:16};
-  const top=player.y-camY+8>H*.5,showM=msg.t>0&&(state==='play'||state==='scroll');
-  const lines=showM?wrap(msg.text,28).slice(0,4):[],mh=lines.length*11+9,my=top?HUD+4:HUD+H-mh-(boss?14:6);
   if(boss&&!room.closePending&&state==='play'){const fade=overlap(pb,{x:47,y:HUD+H-22,w:162,h:22});ctx.globalAlpha=fade?.4:1;
-    P(ctx,47,HUD+H-10,'#1a1020',162,6);P(ctx,48,HUD+H-9,'#3a2a3a',160,4);P(ctx,48,HUD+H-9,'#e0452b',Math.round(160*boss.hp/boss.maxHp),4);
-    if(!showM||top)txt(boss.title||'',W/2,HUD+H-21,'#ffd166',8,'center');ctx.globalAlpha=1}
-  if(banner.t>0&&state==='play'){const w=banner.text.length*8+20;
-    const by=showM?(top?my+mh+4:my-20):(top?HUD+8:HUD+H-(boss?40:28));
-    const cover=overlap(pb,{x:(W-w)/2,y:by,w,h:16});ctx.globalAlpha=Math.min(1,banner.t/30)*(cover?.4:1);
-    P(ctx,(W-w)/2,by,'#120c18',w,16);P(ctx,(W-w)/2,by+15,'#ff8a3d',w,1);txt(banner.text,W/2,by+4,'#ffd166',8,'center');ctx.globalAlpha=1}
-  if(showM){const cover=overlap(pb,{x:7,y:my-1,w:242,h:mh+2});
-    ctx.globalAlpha=cover?.4:.92;P(ctx,7,my-1,'#ffd166',242,mh+2);P(ctx,8,my,'#120c18',240,mh);
-    ctx.globalAlpha=cover?.6:1;lines.forEach((l,i)=>txt(l,14,my+5+i*11,'#f4e9d8'));ctx.globalAlpha=1}
-  drawTracker();
+    P(ctx,47,HUD+H-10,'#1a1020',162,6);P(ctx,48,HUD+H-9,'#3a2a3a',160,4);P(ctx,48,HUD+H-9,'#e0452b',Math.round(160*boss.hp/boss.maxHp),4);txt(boss.title||'',W/2,HUD+H-21,'#ffd166',8,'center');ctx.globalAlpha=1}
+  if(state!=='play'&&state!=='scroll')return;
+  // coluna lateral: nome do lugar, Jornada, missão, mensagens e avisos (lado oposto ao Kael)
+  const left=player.x-camX+8>W-126,cw=114,x0=left?4:W-cw-4;let y=HUD+3;
+  const box=(lines,border,col,title,tcol,alpha=1)=>{if(!lines.length&&!title)return;const h=lines.length*10+(title?11:0)+5;if(y+h>HUD+H-6)return;
+    const cover=overlap(pb,{x:x0,y,w:cw,h});ctx.globalAlpha=alpha*(cover?.35:.85);P(ctx,x0,y,border,cw,h);P(ctx,x0+1,y+1,'#120c18',cw-2,h-2);ctx.globalAlpha=alpha*(cover?.5:1);
+    let ty=y+3;if(title){txt(title.slice(0,13),x0+5,ty,tcol);ty+=11}lines.forEach((l,i)=>txt(l,x0+5,ty+i*10,col));ctx.globalAlpha=1;y+=h+3};
+  if(banner.t>0)box(wrap(banner.text,13).slice(0,2),'#ff8a3d','#ffd166',null,null,Math.min(1,banner.t/30));
+  if(state==='play'){const st=storyStep();if(st)box(wrap(st.t,13).slice(0,3),'#c8901a','#ffd166','JORNADA','#ff8a3d');
+    const id=activeQuest();if(id){const q=player.q[id],Qd=QUESTS[id],t=q.s==='ready'?'Volte a '+Qd.giver:(Qd.goal>1?Qd.n+' '+q.n+'/'+Qd.goal:Qd.n);box(wrap(t,13).slice(0,3),'#5a4a6a',q.s==='ready'?'#6cc45a':'#f4e9d8','MISSÃO','#c9b8d8')}}
+  if(msg.t>0&&msg.text)box(wrap(msg.text,13).slice(0,8),'#ffd166','#f4e9d8');
+  if(toasts.length){const T=toasts[0];box(wrap(T.sub||'',13).slice(0,2),'#ffd166','#6cc45a',T.title,'#ffd166',Math.min(1,T.t/20))}
 }
 function drawTitle(){
   if(!drawTitle.bg){const saved=room;const tmp={tiles:DEFS['1,2'].map.map(r=>r.split('')),dark:0};drawTitle.bg=buildBg(tmp);room=saved}
