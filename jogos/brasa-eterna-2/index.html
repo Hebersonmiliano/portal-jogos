@@ -909,8 +909,8 @@ Object.assign(DEFS,{
   npcs:[{id:'lyra',name:'SÁBIA LYRA',col:'#8fd0ff',pal:{g:'#3a4a8a',G:'#24306a',h:'#e8e2d0',fem:1},x:12*16,y:1*16,talk:n=>openDlg(n,['Bem-vinda, alma curiosa, à Grande Biblioteca de Aurora!','Aqui guardamos toda a história: da Chama Sagrada até os gigantes das profundezas.','Toque num atril para ler. Livros lidos: '+Object.keys(AS.books||{}).length+' de '+BKEYS.length+'.'])}]},
  'in-home':{name:'Lar de Kael e Maria Luiza',theme:'home',dark:0,music:'inn',map:mkInt('home').map,deco:mkInt('home').deco,enemies:[],
   npcs:[{id:'wife',name:'MARIA LUIZA',col:'#ff9ec4',pal:NP.bea,x:6*16,y:4*16,talk:n=>wifeTalk(n)},
-   {id:'lumi',name:'LUMI',col:'#ffd166',pal:{g:'#ff9ec4',G:'#c06080',h:'#c86a2a',fem:1},small:1,x:9*16,y:6*16,wander:[3*16,5*16,12*16,8*16],hide:()=>!(player.love&&player.love.kids>=1),lines:['Papai! Me conta da Serpente gigante de novo!','A Faísca é minha melhor amiga!','Quando crescer vou ser heroína igual você!']},
-   {id:'ian',name:'IAN',col:'#8fd0ff',pal:{g:'#4a8ad6',G:'#2a5a9a',h:'#6b3b1f'},small:1,x:11*16,y:7*16,wander:[3*16,5*16,12*16,8*16],hide:()=>!(player.love&&player.love.kids>=2),lines:['Papai, olha minha espada de madeira!','Vrum! Eu sou o Fenrir! Auuu!','Mamãe disse que eu tenho seus olhos.']}]},
+   {id:'lumi',name:'HELEN CRISTINE',col:'#ffd166',pal:{g:'#ff9ec4',G:'#c06080',h:'#c86a2a',fem:1},small:1,x:9*16,y:6*16,wander:[3*16,5*16,12*16,8*16],hide:()=>!(player.love&&player.love.kids>=1),lines:['Papai! Me conta da Serpente gigante de novo!','A Faísca é minha melhor amiga!','Quando crescer vou ser heroína igual você!','Eu cuido da Mariana quando você sai em aventura!']},
+   {id:'ian',name:'MARIANA',col:'#c8b0ff',pal:{g:'#9a6ad6',G:'#6a3aa0',h:'#6b3b1f',fem:1},small:1,x:11*16,y:7*16,wander:[3*16,5*16,12*16,8*16],hide:()=>!(player.love&&player.love.kids>=2),lines:['Papai, olha minha espada de madeira!','Vrum! Eu sou o Fenrir! Auuu!','Mamãe disse que eu tenho os seus olhos.','A Helen Cristine disse que vai me ensinar a pescar!']}]},
  'in-rosa':{name:'Casa da Rosa',theme:'rosa',dark:0,music:'inn',map:mkInt('rosa').map,deco:mkInt('rosa').deco,enemies:[],
   npcs:[{id:'brasinha2',name:'BRASINHA',col:'#ffb070',cat:1,x:10*16,y:8*16-4,hide:()=>!(player.q.gato&&player.q.gato.s==='done'),lines:['Miau! (Brasinha ronrona no colo da Rosa... ou no seu)','Prrr... (ele parece feliz em casa)']}]},
  'in-elder':{name:'Casa do Ancião Odo',theme:'elder',dark:.1,music:'inn',map:mkInt('elder').map,deco:mkInt('elder').deco,enemies:[],
@@ -1682,12 +1682,12 @@ function wedding(){const L=player.love;L.stage=4;L.wday=Math.floor(worldMin/1440
 function buildHome(){const R=ROOMS.w7;if(!R||(R.houses||[]).some(h=>h[2]==='home'))return;for(let r=26;r<=27;r++)for(let c=46;c<=50;c++)R.tiles[r][c]='Y';for(let c=46;c<=50;c++)R.tiles[28][c]='y';R.tiles[28][48]='j';R.tiles[29][48]='.';
   R.houses=[...(R.houses||[]),[46,26,'home']];R.labels=[...(R.labels||[]),[48,26,'LAR DE KAEL','#ff9ec4']];R.doors={...R.doors,'48,28':{to:'in-home'}};if(room===R)bg=buildBg(R)}
 function familyTick(){const L=player.love;if(!L||L.stage<4)return;const d=Math.floor(worldMin/1440);
-  if(L.kids<1&&d>=L.wday+2){L.kids=1;L.birth=1;unlock('kid1');toasts.push({title:'NASCEU A LUMI!',sub:'Sua filha chegou!',t:260});msgQueue.push(['Faísca: Kael, corra para casa! A Maria Luiza tem uma surpresa!',260]);saveGame()}
-  if(L.kids===1&&d>=L.wday+6){L.kids=2;L.birth=2;unlock('kid2');toasts.push({title:'NASCEU O IAN!',sub:'Seu filho chegou!',t:260});msgQueue.push(['Faísca: Mais um na família! Vá para casa conhecer o Ian!',260]);saveGame()}}
+  if(L.kids<1&&d>=L.wday+2){L.kids=1;L.birth=1;unlock('kid1');toasts.push({title:'NASCEU A HELEN CRISTINE!',sub:'Sua primeira filha chegou!',t:260});msgQueue.push(['Faísca: Kael, corra para casa! A Maria Luiza tem uma surpresa!',260]);saveGame()}
+  if(L.kids===1&&d>=L.wday+6){L.kids=2;L.birth=2;unlock('kid2');toasts.push({title:'NASCEU A MARIANA!',sub:'Sua segunda filha chegou!',t:260});msgQueue.push(['Faísca: Mais um na família! Vá para casa conhecer a Mariana!',260]);saveGame()}}
 function wifeTalk(n){const p=player,L=p.love,d=Math.floor(worldMin/1440),o=[];
   if(L.gift!==d)o.push({t:'Lanche da Maria Luiza',f:()=>{L.gift=d;p.hp=p.maxHp;p.mp=mpMax();p.it.potion++;sfx.heart();openDlg(n,['Fiz seu favorito! E coloquei uma poção na sua bolsa.'])}});
   o.push({t:'Cozinhar juntos',f:openCook},{t:'Descansar em casa',f:()=>{p.hp=p.maxHp;worldMin=(Math.floor(worldMin/1440)+1)*1440+360;warpFade=90;saveGame();toasts.push({title:'DESCANSOU EM CASA',sub:'Vida cheia e jogo salvo',t:180});sfx.heart()}},{t:'Até logo, amor!'});
-  openDlg(n,[L.kids>=2?'As crianças não param um minuto! Igualzinhas ao pai.':L.kids?'A Lumi dormiu agora... fala baixinho!':'Bem-vindo ao lar, meu herói.'],o)}
+  openDlg(n,[L.kids>=2?'As meninas não param um minuto! Igualzinhas ao pai.':L.kids?'A Helen Cristine dormiu agora... fala baixinho!':'Bem-vindo ao lar, meu herói.'],o)}
 /* cenas de romance */
 function duo(kx,ky,bx,by,kf,bf,walk){const K=kaelSet(player.eq.body||''),B=npcSprites('bea',NP.bea),fr=walk?(frame>>3)%2:0;ctx.drawImage(K[kf][fr],kx,ky,32,32);ctx.drawImage(B[bf][fr],bx,by,32,32)}
 function hearts(n){for(let i=0;i<n;i++){const t=(frame+i*37)%120,x=60+((i*53)%140),y=130-t*.8;ctx.globalAlpha=Math.max(0,1-t/120);P(ctx,x,y,'#ff6a8a',2,2);P(ctx,x+3,y,'#ff6a8a',2,2);P(ctx,x,y+1,'#ff6a8a',5,2);P(ctx,x+1,y+3,'#ff6a8a',3,1);ctx.globalAlpha=1}}
@@ -1726,10 +1726,10 @@ const SC_CASAMENTO=[{pages:[{text:'A Vila Aurora inteira se reuniu na praça. H�
     duo(98,84,126,84,'down','down');faisca(128,50+Math.sin(t*.1)*4,1);
     if(t>500&&t%40<20){const fx=40+(t*37)%180,fy=30+(t*13)%40;for(let i=0;i<8;i++){const a=i*Math.PI/4;P(ctx,fx+Math.cos(a)*8,fy+Math.sin(a)*8,['#ffd166','#ff6a8a','#8fd0ff'][i%3],2,2)}}hearts(6)}}];
 SC_CASAMENTO.music='wedding';
-const SC_LUMI=[{pages:[{text:'Uma noite tranquila. A lareira estala baixinho.'},{text:'MARIA LUIZA: Kael, venha conhecer a Lumi. Ela tem a sua coragem nos olhos.'},{text:'Kael segura a filha pela primeira vez. A Faísca nunca brilhou tão forte.',hold:200}],
+const SC_LUMI=[{pages:[{text:'Uma noite tranquila. A lareira estala baixinho.'},{text:'MARIA LUIZA: Kael, venha conhecer a Helen Cristine. Ela tem a sua coragem.'},{text:'Kael segura a filha pela primeira vez. A Faísca nunca brilhou tão forte.',hold:200}],
   draw(t){P(ctx,0,18,'#3a2414',W,132);P(ctx,0,110,'#6b4428',W,40);P(ctx,30,40,'#1a1030',36,28);stars(10,4);flame(ctx,200,110,2,frame);glow(200,96,50);
     const K=kaelSet(player.eq.body||''),B=npcSprites('bea',NP.bea);ctx.drawImage(B.right[0],90,78,32,32);ctx.drawImage(K.left[0],130,78,32,32);P(ctx,120,96,'#ff9ec4',10,6);P(ctx,122,93,'#f2c79a',5,4);faisca(126,62+Math.sin(t*.08)*3,1.4);hearts(5)}}];
-const SC_IAN=[{pages:[{text:'Mais uma noite de lareira acesa na casa de Kael.'},{text:'MARIA LUIZA: Este é o Ian. A Lumi já quer ensinar ele a usar espada!'},{text:'A família está completa. Do lado de fora, as estrelas parecem mais perto.',hold:200}],
+const SC_IAN=[{pages:[{text:'Mais uma noite de lareira acesa na casa de Kael.'},{text:'MARIA LUIZA: Esta é a Mariana. A irmã já quer ensinar ela a usar espada!'},{text:'A família está completa. Do lado de fora, as estrelas parecem mais perto.',hold:200}],
   draw(t){SC_LUMI[0].draw(t);P(ctx,150,104,'#8fd0ff',10,6);P(ctx,152,101,'#f2c79a',5,4)}}];
 /* ---------- frutas, fogueiras e culinária ---------- */
 const FOODS={apple:{n:'Maçã',hp:3},straw:{n:'Morango',hp:2,sta:20},orange:{n:'Laranja',hp:2,mp:6},pear:{n:'Pera',hp:3,sta:10},melon:{n:'Melancia',hp:6},pine:{n:'Abacaxi',hp:4,sta:30},grape:{n:'Uvas',hp:1,mp:10},meat:{n:'Carne',hp:2},egg:{n:'Ovo',hp:1},flour:{n:'Farinha',hp:0},cheese:{n:'Queijo',hp:2},milk:{n:'Leite',hp:1,sta:15},
@@ -1896,7 +1896,7 @@ const BKEYS=Object.keys(BOOKS);
 function bookPages(id){if(id!=='diario')return BOOKS[id].pg;const p=player,L=p.love||{},nb=Object.keys(AS.bigs||{}).length;
   return[['kael','Monstros derrotados: '+AS.kills+'. Monstros raros: '+(AS.rare||0)+'. Fama: '+FAMEL[fameLv()][1]+'.'],
     ['giants',nb?'Gigantes vencidos: '+nb+' de 4. '+(nb>=4?'Aurora inteira canta essas batalhas!':'Ainda há gigantes nas profundezas.'):'Nenhum gigante vencido... ainda.'],
-    ['family',L.stage>=4?'Casei com Maria Luiza. '+(L.kids>=2?'Temos a Lumi e o Ian.':L.kids?'Nossa filha Lumi chegou!':'Nosso lar fica ao lado da praça.'):L.stage>=2?'Maria Luiza e eu estamos juntos. Ela guarda cada flor que eu dou.':'Conheci uma moça na vila. Maria Luiza... que nome bonito.'],
+    ['family',L.stage>=4?'Casei com Maria Luiza. '+(L.kids>=2?'Temos a Helen Cristine e a Mariana.':L.kids?'Nossa filha Helen Cristine chegou!':'Nosso lar fica ao lado da praça.'):L.stage>=2?'Maria Luiza e eu estamos juntos. Ela guarda cada flor que eu dou.':'Conheci uma moça na vila. Maria Luiza... que nome bonito.'],
     ['trophy','Conquistas: '+ACH.filter(a=>AS.got[a.id]).length+' de '+ACH.length+'. Livros lidos: '+Object.keys(AS.books||{}).length+' de '+BKEYS.length+'.']]}
 function mkLib(){if(mkLib.c)return mkLib.c;const C=24,Rw=14,g=Array.from({length:Rw},(_,r)=>Array.from({length:C},(_,c)=>r===0||r===Rw-1||c===0||c===C-1?'#':'_'));g[13][11]='X';g[13][12]='X';const D=[],B={};
   const put=(kind,c,r,w=1,h=1,solid=1)=>{D.push([kind,c,r,w,h]);if(solid)for(let y=r;y<r+h;y++)for(let x=c;x<c+w;x++)g[y][x]='%'};
@@ -1935,7 +1935,7 @@ function bookArt(k,w,h){const f=frame;P(ctx,0,0,'#1a1020',w,h);
   if(k==='ash'){sky('#07061a','#2a1a4a');P(ctx,w/2-8,14,16,60,'#07040c');P(ctx,w/2-8,14,'#07040c',16,60);P(ctx,w/2-1,22,'#5a2a7a',2,40);glow(w/2,40,40,'192,107,255',.3+.2*Math.sin(f*.05));return}
   if(k==='blank'){P(ctx,0,0,'#e8d8b0',w,h);txt('...',w/2,h/2-4,'#a08860',8,'center');return}
   if(k==='family'){sky('#ffb070','#ffe0c0');P(ctx,0,70,'#5aa84a',w,h);const L=player.love||{};ctx.drawImage(kaelSet(player.eq.body||'').down[0],w/2-60,30,40,40);
-    if(L.stage>=2)ctx.drawImage(npcSprites('bea',NP.bea).down[0],w/2-20,30,40,40);if(L.kids>=1)ctx.drawImage(npcSprites('lumi',{g:'#ff9ec4',G:'#c06080',h:'#c86a2a',fem:1}).down[0],w/2+22,44,26,26);if(L.kids>=2)ctx.drawImage(npcSprites('ian',{g:'#4a8ad6',G:'#2a5a9a',h:'#6b3b1f'}).down[0],w/2+50,44,26,26);return}
+    if(L.stage>=2)ctx.drawImage(npcSprites('bea',NP.bea).down[0],w/2-20,30,40,40);if(L.kids>=1)ctx.drawImage(npcSprites('lumi',{g:'#ff9ec4',G:'#c06080',h:'#c86a2a',fem:1}).down[0],w/2+22,44,26,26);if(L.kids>=2)ctx.drawImage(npcSprites('ian',{g:'#9a6ad6',G:'#6a3aa0',h:'#6b3b1f',fem:1}).down[0],w/2+50,44,26,26);return}
   if(k==='trophy'){sky('#1a1a3a','#3a3a6a');for(let i=0;i<5;i++){const a=ACH[i*7%ACH.length];ctx.save();ctx.translate(14+i*44,28);ctx.scale(1.6,1.6);achIcon(a,0,0,!!AS.got[a.id]);ctx.restore()}return}}
 function drawBook(){const B=book;if(!B)return;const pages=bookPages(B.id),pg=pages[B.pg],BK=BOOKS[B.id];
   P(ctx,0,0,'#1a0e08',W,H+HUD);P(ctx,4,2,BK.c,W-8,H+HUD-4);P(ctx,8,4,'#e8d8b0',W-16,H+HUD-8);P(ctx,8,4,'#d8c498',W-16,2);
@@ -2565,7 +2565,7 @@ const ACH=[
   {id:'love2',n:'Noivos',d:'Peça a Maria Luiza em noivado',ic:'ring',c:'#ffd166',r:{jewel:'ruby'}},
   {id:'love3',n:'Felizes para Sempre',d:'Case-se com a Maria Luiza',ic:'ring',c:'#ff9ec4',r:{scarf:'ice'}},
   {id:'kid1',n:'Pai de Primeira Viagem',d:'Conheça sua primeira filha',ic:'heart',c:'#ffd166',r:{gems:50}},
-  {id:'kid2',n:'Casa Cheia',d:'Tenha dois filhos',ic:'heart',c:'#6cc45a',r:{jewel:'emer'}},
+  {id:'kid2',n:'Casa Cheia',d:'Tenha duas filhas',ic:'heart',c:'#6cc45a',r:{jewel:'emer'}},
   {id:'fruit1',n:'Colheita',d:'Colha uma fruta',ic:'apple',c:'#e0452b',r:{gems:5}},
   {id:'fruit7',n:'Pomar Completo',d:'Colha as 7 frutas de Aurora',ic:'apple',c:'#6cc45a',r:{gems:30},goal:7,prog:()=>Object.keys(AS.fruits||{}).length},
   {id:'cook1',n:'Cozinheiro',d:'Cozinhe um prato',ic:'pot',c:'#ff8a3d',r:{gems:10}},
