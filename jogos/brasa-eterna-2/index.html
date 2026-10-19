@@ -2128,7 +2128,7 @@ const BOOKS={
    ['ash','Na Pedra Negra, ao norte de Aurora, uma voz disse apenas: "ainda não".'],['blank','As próximas páginas estão em branco. Esta história ainda não foi escrita...']]},
  diario:{t:'Diário de Kael',c:'#6cc4a0',pg:'dyn'}};
 const BKEYS=Object.keys(BOOKS);
-function bookPages(id){if(id!=='diario')return BOOKS[id].pg;const p=player,L=p.love||{},nb=Object.keys(AS.bigs||{}).length;
+function bookPages(id){if(id==='cinza'){const pg=BOOKS.cinza.pg;clueN();return[pg[0],pg[1],...CLUEK.filter(k=>AS.clues[k]).map(k=>['ash',CLUES[k][0]]),pg[pg.length-1]]}if(id!=='diario')return BOOKS[id].pg;const p=player,L=p.love||{},nb=Object.keys(AS.bigs||{}).length;
   return[['kael','Monstros derrotados: '+AS.kills+'. Monstros raros: '+(AS.rare||0)+'. Fama: '+FAMEL[fameLv()][1]+'.'],
     ['giants',nb?'Gigantes vencidos: '+nb+' de 4. '+(nb>=4?'Aurora inteira canta essas batalhas!':'Ainda há gigantes nas profundezas.'):'Nenhum gigante vencido... ainda.'],
     ['family',L.stage>=4?'Casei com Maria Luiza. '+(L.kids>=2?'Temos a Helen Cristine e a Mariana.':L.kids?'Nossa filha Helen Cristine chegou!':'Nosso lar fica ao lado da praça.'):L.stage>=2?'Maria Luiza e eu estamos juntos. Ela guarda cada flor que eu dou.':'Conheci uma moça na vila. Maria Luiza... que nome bonito.'],
@@ -2469,6 +2469,15 @@ function drawSell(){const L=sellList(),p=player;ctx.fillStyle='rgba(8,5,14,.95)'
     txt((e.n+(e.q>1?' x'+e.q:'')).slice(0,19),22,y,on?'#ffd166':'#c9b8d8');txt('+'+e.c,W-18,y,'#6cc45a',8,'right');ctx.drawImage(GEM,W-16,y)});
   if(sellArm>=0)stxt('APERTE A DE NOVO PARA CONFIRMAR A VENDA DO EQUIPAMENTO',W/2,HUD+134,'#ff8a3d','center');
   stxt('A: VENDER   R: COMPRAR   B: SAIR',W/2,HUD+H-10,'#9a8aaa','center')}
+/* ---------- Pistas do segredo da Pedra Negra (a revelação fica para o capítulo final) ---------- */
+const CLUES={serp:['A Serpente sussurra: "Você não nasceu nas águas deste mundo..."','Faísca: Kael... o que ela quis dizer com isso?'],
+  golem:['O Golem range: "As mãos que moldaram estas montanhas... são iguais às suas."','Faísca: Iguais às suas? Que estranho...'],
+  fenrir:['Fenrir rosna baixinho: "Lobo nenhum morde a mão que o desenhou."','Faísca: Desenhou?! Kael, isso está ficando esquisito.'],
+  spec:['O Rei Espectro ri: "Herói? Não... você é quem ESCREVE esta história."','Faísca: Escreve? Mas quem conseguiria escrever um mundo inteiro?'],
+  nebla:['Nebla geme: "Minhas teias tecem destinos... mas o seu foi tecido por você mesmo."','Faísca: A Pedra Negra precisa ouvir isso. Ela sabe de alguma coisa.']};
+const CLUEK=Object.keys(CLUES);
+function clueN(){AS.clues=AS.clues||{};for(const k in(AS.bigs||{}))if(CLUES[k])AS.clues[k]=1;return CLUEK.filter(k=>AS.clues[k]).length}
+function gotClue(k){if(!CLUES[k])return;AS.clues=AS.clues||{};if(AS.clues[k])return;AS.clues[k]=1;saveAS();for(const l of CLUES[k])msgQueue.push([l,240]);toasts.push({title:'PISTA DA PEDRA NEGRA',sub:clueN()+' de 5',t:200})}
 /* ---------- Castelo vivo: trabalhadores e produção diária ---------- */
 function castleProduce(){const p=player,C=p.castle,b=C.b,L=p.love||{},rep=[];p.mat=p.mat||{};const add=(k,q)=>{p.food[k]=(p.food[k]||0)+q};
   if(b.house1){add('egg',2);add('milk',1);rep.push('Dona Cida: 2 ovos e leite')}
@@ -2539,7 +2548,7 @@ const STORY=[
  {t:'Conheça a Costa Coral',d:'Siga a estrada para o sul da vila.',at:[40,57],ok:()=>!!AS.rooms.w8},
  {t:'Conheça o Bosque das Brumas',d:'Siga a estrada para o oeste da vila.',at:[1,30],ok:()=>!!AS.rooms.w9},
  {t:'Vença a Mãe-Aranha no Templo',d:'Ao norte do Bosque. Queime a teia da entrada com fogo.',at:[1,30],ok:()=>!!(AS.bigs&&AS.bigs.nebla)},
- {t:'A Pedra Negra aguarda...',d:'Ela disse "ainda não". O resto chega em breve.',at:[40,7],ok:()=>false}];
+ {t:'A Pedra Negra aguarda...',get d(){return'Pistas dos gigantes: '+clueN()+' de 5. A Pedra Negra guarda um segredo.'},at:[40,7],ok:()=>false}];
 function storyStep(){if(!player||!player.q)return null;for(const st of STORY)if(!st.ok())return st;return null}
 function drawJornada(y){const cur=storyStep();txt('JORNADA',6,y,'#ffd166');txt('< > missões',W-6,y,'#5a4a6a',8,'right');
   STORY.forEach((st,i)=>{const yy=y+12+i*10,done=st.ok(),on=st===cur;if(on)P(ctx,4,yy-2,'#2a1e36',W-8,10);P(ctx,8,yy+1,done?'#6cc45a':on?'#ffd166':'#3a2a48',5,5);
@@ -2626,7 +2635,7 @@ function bigDie(e){const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);const 
   for(const q of enemies)poof(q.x+8,q.y+8);enemies=[];projectiles=[];hazards=[];room.won=true;room.fight=false;
   for(const[cc,rr]of room.gate)room.tiles[rr][cc]='X';const[pc2,pr]=room.prize;room.tiles[pr][pc2]='A';bg=buildBg(room);rareSpots.push([pc2,pr]);
   playTrack('victory2');shake=24;hitstop=16;sfx.boss();for(let k=0;k<8;k++)poof(c.x+Math.random()*48-24,c.y+Math.random()*40-20);sparks(c.x,c.y,'#ffd166',40);
-  pickups.push({type:'heartMax',x:(pc2+1)*TS+2,y:pr*TS+2,t:0,life:-1});AS.bigs=AS.bigs||{};AS.bigs[e.type]=1;saveAS();unlock('b_'+e.type);petXp(30);if(e.type==='nebla'&&player.q.nara&&player.q.nara.s==='on')qProg('nara');if(e.type==='fenrir')unlockPet('lobo');addFame(20,e.title);if(player.q.anel2&&player.q.anel2.s==='on'&&!player.relics[e.type])pickups.push({type:'relic',k:e.type,x:(pc2-1)*TS+4,y:pr*TS+4,t:0,life:-1});if(!room.tookHit)unlock('nohit2');if(diffIdx===2)unlock('hard2');
+  pickups.push({type:'heartMax',x:(pc2+1)*TS+2,y:pr*TS+2,t:0,life:-1});AS.bigs=AS.bigs||{};AS.bigs[e.type]=1;saveAS();unlock('b_'+e.type);petXp(30);gotClue(e.type);if(e.type==='nebla'&&player.q.nara&&player.q.nara.s==='on')qProg('nara');if(e.type==='fenrir')unlockPet('lobo');addFame(20,e.title);if(player.q.anel2&&player.q.anel2.s==='on'&&!player.relics[e.type])pickups.push({type:'relic',k:e.type,x:(pc2-1)*TS+4,y:pr*TS+4,t:0,life:-1});if(!room.tookHit)unlock('nohit2');if(diffIdx===2)unlock('hard2');
   toasts.push({title:'CHEFE DERROTADO!',sub:e.title,t:240});msgQueue.push(['Faísca: Conseguimos! Pegue o coração e o baú raro.',220],['Faísca: Sentiu? Longe daqui, a pedra negra pulsou de novo...',260]);saveGame()}
 function fc(cx,cy,rx,ry,col){for(let y=-ry;y<=ry;y++){const w=Math.round(rx*Math.sqrt(Math.max(0,1-(y*y)/(ry*ry))));P(ctx,Math.round(cx-w),Math.round(cy+y),col,w*2,1)}}
 function drawBig(e){const x=Math.round(e.x),y=Math.round(e.y),fl=e.flash>0&&frame%2;
@@ -3075,7 +3084,10 @@ function spawnHerbs(){if(curKey!=='w7'||!player||!player.q.ervas||player.q.ervas
   HERBS.forEach(([c,r],i)=>{if(!player.q.ervas.got.includes(i)&&!pickups.some(k=>k.type==='herb'&&k.i===i))pickups.push({type:'herb',i,x:c*TS+4,y:r*TS+4,t:20,life:-1})})}
 function touchMonolith(){const q=player.q.main7;
   if(q&&q.s==='on'){qProg('main7');unlock('stone');openDlg({name:'FAÍSCA',col:'#ff8a3d',faisca:1},['Uma pedra de cinza negra... e ela está pulsando, Kael.','Ouvi uma voz vindo de dentro. Ela só disse: "ainda não".','Vamos contar ao Ancião Odo, na vila.'])}
-  else showMsg('Uma pedra negra e fria. Ela pulsa devagar, como um coração.',200)}
+  else{const n=clueN(),F={name:'FAÍSCA',col:'#ff8a3d',faisca:1};if(!n)showMsg('Uma pedra negra e fria. Ela pulsa devagar, como um coração.',200);
+    else if(n<3)openDlg(F,['A pedra pulsa mais forte quando você chega perto.','Uma voz lá de dentro: "Junte as vozes dos gigantes..."'],null);
+    else if(n<5)openDlg(F,['Kael, olha! A pedra está brilhando como um espelho embaçado.','Por um instante eu vi um rosto... mas não era o seu. Ou era?'],null);
+    else openDlg(F,['A pedra virou um espelho. O reflexo está quase nítido...','Um quarto, uma luz de tela, alguém criando um mundo inteiro...','A voz sussurra: "Quase. Ainda não."'],null)}}
 function questTarget(){const q=player.q,on=id=>q[id]&&q[id].s==='on',rd=id=>q[id]&&q[id].s==='ready',T=(c,r)=>({x:c*TS+8,y:r*TS+8});if(curKey==='w8')return coastTarget(on,rd,T);if(curKey==='w9')return mistTarget(on,rd,T);if(curKey!=='w7')return null;
   if(on('main7'))return T(40,7);if(rd('main7'))return T(47,36);
   const bea=()=>{const b=npcs.find(n=>n.id==='bea');return b?{x:b.x+8,y:b.y+8}:T(36,32)};
