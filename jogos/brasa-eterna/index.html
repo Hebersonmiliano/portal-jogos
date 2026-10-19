@@ -434,7 +434,7 @@ const GEM=spr(["..kkkk..",".kcCCck.","kcwCCCck","kCCCCCck",".kCCCck.","..kCck.."
 const KEY=spr(["..kkk...",".kyyyk..",".kykyk..",".kyyyk..","..kyk...","..kyyk..","..kyk...","..kyyk.."],{k:'#1a1020',y:'#ffd166'});
 
 /* ---------- tiles ---------- */
-const SOLID=new Set([...'TR~b#DpCcSWFULGrKIQqVZJMNHh12345dnm']);
+const SOLID=new Set([...'TR~b#DpCcSWFULGrKIQqVZJMNHh12345dn$']);
 const TC={};
 const THEMES={
   meadow:{g1:'#4c9a3f',g2:'#3f8536',g3:'#6cbf4a',w1:'#2f6fbf',w2:'#2a62a8',wave:'#5a9ae8',wall:'#3b3246',wallHi:'#52465e',mort:'#241d2c',spot:'#2f283a',fl:'#2a2230',fl2:'#211a27',fl3:'#33293b'},
@@ -491,7 +491,7 @@ function drawTile(g,ch,v,dark){
     case'3':base();circ(g,8,8,5.5,5.5,d=>d>.6?'#c8901a':'#ffe27a');P(g,7,0,'#ffd166',2,3);P(g,7,13,'#ffd166',2,3);P(g,0,7,'#ffd166',3,2);P(g,13,7,'#ffd166',3,2);break;
     case'4':case'5':base();P(g,4,11,'#3a3540',8,5);circ(g,8,6,4.5,5.5,(d,dx,dy)=>ch==='5'?(d>.6?'#c8901a':dx+dy<-.3?'#ffffff':'#ffe27a'):(d>.6?'#2a1a3a':'#5a4a6a'));break;
     case'd':base();circ(g,8,10,7.5,5.5,(d,dx,dy)=>d>.8?'#a88a50':dy<-.2?'#ecd8a0':'#d0b070');break;
-    case'n':case'm':base();break;
+    case'n':case'$':base();break;
     case'H':case'h':base();P(g,4,10,'#1a1020',8,6);P(g,5,11,'#3a3540',6,5);P(g,5,3,ch==='h'?'#ffd84a':'#6a5a2a',6,7);P(g,6,2,ch==='h'?'#fffbe0':'#8a7a3a',4,9);P(g,7,4,'#ffffff',1,2);break;
     case'O':base();circ(g,8,9,6.5,5.5,d=>d>.7?'#2a1e16':'#0a0610');break;
     case'K':if(dark){P(g,0,0,TH.wall,16,16);P(g,0,0,TH.wallHi,16,1)}else{grass(g);circ(g,8,9.5,7.4,6,(d,dx,dy)=>d>.75?'#3a3540':dy>.35?'#5c5766':'#8a8494')}
@@ -744,7 +744,7 @@ const DEFS={
   onEnter(rm){if(!rm.seen){rm.seen=true;showMsg('Faísca: Dunas no caminho! Uma rajada de vento as espalha (Q troca o elemento).',240)}}},
  '52,51':{name:'Oásis de Vidro',dark:0,theme:'desert',gateMsg:'A pirâmide está selada. A luz das Ruínas do Sol, a leste, deve abri-la.',map:[
   "TTTTTTT..TTTTTTT","T......GG......T","T...~~~~~~~~...T","T..~~~~~~~~~~..T","...~~~~~~~~~~...",
-  "...~~~~~~~~~~...","....~~~~~~~~....","T..n........m..T","T..T........T..T","T..............T","TTTTTTTTTTTTTTTT"],
+  "...~~~~~~~~~~...","....~~~~~~~~....","T..n........$..T","T..T........T..T","T..............T","TTTTTTTTTTTTTTTT"],
   enemies:[],
   onEnter(rm){if(!rm.seen2){rm.seen2=true;showMsg('Faísca: Um oásis! A Lia está ali... e um mercador. Toque neles para conversar.',240)}}},
  '53,51':{name:'Ruínas do Sol',dark:0,theme:'desert',beams:[{c:1,r:2,d:[1,0]}],
@@ -1301,7 +1301,7 @@ function loadGame(){
   const d=readSave();if(!d)return;
   setDiff(d.diff);initWorld();chapter=d.chapter;Object.assign(player,d.p);
   const oldL=(d.layout||1)<2;
-  for(const k in d.rooms){const rr=ROOMS[k],x=d.rooms[k];if(!rr||(oldL&&+k.split(',')[0]>=10))continue;rr.tiles=x.t.map(t=>t.split(''));rr.chest=x.chest;rr.cleared=x.cl;rr.won=x.won;rr.litDone=x.lit;rr.story=x.st}
+  for(const k in d.rooms){const rr=ROOMS[k],x=d.rooms[k];if(!rr||(oldL&&+k.split(',')[0]>=10))continue;rr.tiles=x.t.map(t=>t.split(''));if(k==='52,51')rr.tiles=rr.tiles.map(row=>row.map(t=>t==='m'?'$':t));rr.chest=x.chest;rr.cleared=x.cl;rr.won=x.won;rr.litDone=x.lit;rr.story=x.st}
   visited=new Set(d.visited);playTime=d.time||0;caveReturn=d.cave||null;
   if(d.introPending){playIntro(CH_SCENES[chapter]);return}
   const BK={1:'1,-1',2:(d.layout||1)>=2?'11,10':'11,9',3:'21,18',4:'b4'};
@@ -1504,7 +1504,7 @@ function touchTiles(){
       if(lockCD<=0){showMsg(room.lockMsg||'Trancada. Deve haver uma chave na cripta a oeste.',180);sfx.locked();lockCD=240}
     }else if(ch==='C')openChest(c,r);
     else if(ch==='n'&&lockCD<=0){room.liaI=((room.liaI==null?-1:room.liaI)+1)%LIA_LINES.length;showMsg(LIA_LINES[room.liaI],260);lockCD=280;tone(880,.06,'triangle',.04)}
-    else if(ch==='m'&&lockCD<=0){state='shop';shopSel=0;lockCD=240;sfx.gem();return}
+    else if(ch==='$'&&lockCD<=0){state='shop';shopSel=0;lockCD=240;sfx.gem();return}
     else if(ch==='Z'&&!room.cleared){room.cleared=true;p.slide=null;sparks(c*TS+8,r*TS+6,'#8fd0ff',16);sfx.secret();sealDone('gelo')}
     else if(ch==='G'&&lockCD<=0){showMsg(room.gateMsg||'Um portão de ferro selado. E se eu acender os braseiros?',200);sfx.locked();lockCD=300}
   }
@@ -1807,7 +1807,7 @@ function drawAnimTiles(rm,ox,oy){
     else if(ch==='S'||ch==='L')flame(ctx,x+8,y+8,1,frame+c*13);
     else if(ch==='q')flame(ctx,x+8,y+3,1,frame+c*7);
     else if(ch==='n')ctx.drawImage(LIA,x,y-Math.round(Math.abs(Math.sin(frame*.05))));
-    else if(ch==='m'){ctx.drawImage(MERCH,x,y);if((frame>>4)%2)txt('$',x+8,y-9,'#ffd166',8,'center')}
+    else if(ch==='$'){ctx.drawImage(MERCH,x,y);if((frame>>4)%2)txt('$',x+8,y-9,'#ffd166',8,'center')}
     else if(ch==='5'&&frame%10<5)P(ctx,x+6+(frame%5),y+3,'#ffffff',1,1);
     else if(ch==='J'){const ci=(rm.crystals||[]).findIndex(([a,b])=>a===c&&b===r);if(ci>=0){const on=rm.mem&&rm.mem.lit===ci;ctx.globalAlpha=on?1:.55;P(ctx,x+5,y+3,CRYS[ci],6,7);P(ctx,x+6,y+2,CRYS[ci],4,9);P(ctx,x+6,y+4,'#ffffff',1,2);ctx.globalAlpha=1;if(on)glow(x+8,y+7,22,'255,255,255',.4)}}
     else if(ch==='F'&&rm.won&&rm.tiles[r][c+1]==='F')flame(ctx,x+16,y+8,2,frame);
