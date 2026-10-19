@@ -569,12 +569,13 @@ const DEFS={
   "################","#~~~~______~~~S#","#~~~~______~~__#","~~~~~__pp__~~__#","~~~~~___________",
   "~~~~~___________","~~~~~___________","~~~~~__~~~~~___#","#~~~~__~~~~~__pK","#S____________S#","#######__#######"],
   enemies:[['crab',8,5],['frog',10,2],['wisp',6,5],['crab',12,6]],
-  onEnter(rm){if(rm.tiles[5][0]==='~')showMsg('Faísca: A passagem a oeste está inundada... As velas da câmara a leste devem controlar a água!',280)}},
+  onEnter(rm){if(rm.tiles[5][0]!=='~'&&(rm.tiles[3][0]!=='#'||rm.tiles[7][0]!=='#')){rm.tiles[3][0]=rm.tiles[7][0]='#';bg=buildBg(rm)}
+    if(rm.tiles[5][0]==='~')showMsg('Faísca: A passagem a oeste está inundada... As velas da câmara a leste devem controlar a água!',280)}},
  '13,10':{name:'Câmara das Velas',dark:.85,theme:'sea',map:[
   "################","#S____U__U____S#","#______________#","#______________#","_______________#",
   "______________U#","_______________#","#______________#","#______________#","#S____________S#","################"],
   enemies:[['wisp',4,3],['wisp',11,7],['crab',10,3]],
-  onLit(rm){const h=ROOMS['12,10'];for(let r=0;r<ROWS;r++)for(let c=0;c<=4;c++)if(h.tiles[r][c]==='~')h.tiles[r][c]='_';
+  onLit(rm){const h=ROOMS['12,10'];for(let r=0;r<ROWS;r++)for(let c=0;c<=4;c++)if(h.tiles[r][c]==='~')h.tiles[r][c]='_';h.tiles[3][0]=h.tiles[7][0]='#';
     const spots=[[7,5],[8,7],[5,5]];for(const[c,r]of spots){if(!overlap(pbody(),{x:c*TS,y:r*TS,w:TS,h:TS})){rm.tiles[r][c]='C';break}}
     rm.chest={type:'gems',n:20};bg=buildBg(rm);sfx.door();shake=8;showMsg('As velas acenderam... Você ouve a água escoando no salão do templo!',240)}},
  '11,10':{name:'Trono Afundado',dark:.65,theme:'sea',map:[
@@ -810,8 +811,10 @@ function resetBoulders(){
   for(const[c,r]of home){if(!lost)break;if(!'.,_='.includes(room.tiles[r][c])||overlap(pbody(),{x:c*TS,y:r*TS,w:TS,h:TS}))continue;U[c+','+r]=room.tiles[r][c];room.tiles[r][c]='M';lost--}
   room.under=U;bg=buildBg(room);
 }
+function unstick(){const p=player;if(fits(p,p.x,p.y))return;
+  for(let d=1;d<=40;d++)for(let a=-d;a<=d;a++)for(const[x,y]of[[a,-d],[a,d],[-d,a],[d,a]])if(fits(p,p.x+x,p.y+y)){p.x+=x;p.y+=y;p.fx=p.x+8;p.fy=p.y-6;return}}
 function afterEnter(){
-  const k=curKey;
+  const k=curKey;unstick();
   {const before=room.tiles.map(r=>r.join('')).join();resetBoulders();if(room.tiles.map(r=>r.join('')).join()!==before)msgQueue.push(['Faísca: As rochas voltaram ao lugar. Podemos tentar de novo!',220])}
   const skip=(room.persistClear&&room.cleared)||(room.bossRoom&&room.won);
   if(!skip)enemies=room.enemies.map(([t,c,r])=>spawn(t,c,r));
