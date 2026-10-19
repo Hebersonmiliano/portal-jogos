@@ -65,6 +65,9 @@ kbd {
 .hud .atalhos { font-size: 14px; font-weight: 400; }
 .hud .espaco { flex: 1; }
 .hud .alerta { color: var(--vermelho); }
+.hud .energia { color: var(--amarelo); }
+.rotulo.cafe { font-size: 20px; animation: vapor 1s ease-in-out infinite alternate; }
+@keyframes vapor { from { margin-top: 0; } to { margin-top: -6px; } }
 
 .sub { position: fixed; left: 18px; top: 46px; font-size: 17px; font-weight: 600; text-shadow: 0 2px 3px #000; pointer-events: none; }
 .nivel { color: var(--azul); }

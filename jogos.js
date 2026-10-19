@@ -28,7 +28,7 @@ window.JOGOS = [
       "guarde no estoque e venda na expedição. Contrate funcionários, instale máquinas e esteiras e construa uma indústria totalmente automatizada.",
     controles: "Teclado: WASD/setas andam, E interage (segure na bancada para montar), L abre a loja, Esc pausa.",
     url: "jogos/imperio-industrial/index.html",
-    versao: "1.0",   // mude sempre que atualizar o jogo
+    versao: "1.1",   // mude sempre que atualizar o jogo
     capa: "jogos/imperio-industrial/capa.png",
     cor: "#d9822b",
     icone: "🏭",

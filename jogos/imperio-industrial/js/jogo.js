@@ -17,6 +17,9 @@ const PRECO_FUNCIONARIO = 500;
 const SALARIO = 25;                 // por funcionário, a cada dia
 const DURACAO_DIA = 60;             // segundos
 const INTERVALO_TRANSPORTADORA = 15;
+const PRECO_CAFE = 5;               // por pessoa
+const DURACAO_CAFE = 30;            // segundos de energia
+const BONUS_CAFE = 1.6;             // 60% mais rápido
 
 const MAQUINAS = {
   dobradeira: { nome: 'Dobradeira', preco: 250, velocidade: 0.5,
@@ -36,7 +39,7 @@ const MELHORIAS = {
   automacao_total: { nome: 'Automação total', preco: 15000, desc: 'Centro de controle da indústria. Objetivo final!' },
 };
 
-const ORDEM_LOJA = ['papelao', 'estilete', 'carrinho', 'dobradeira', 'bancada_pro', 'funcionario',
+const ORDEM_LOJA = ['papelao', 'estilete', 'carrinho', 'dobradeira', 'bancada_pro', 'funcionario', 'cafe_equipe',
   'fornecedor_auto', 'esteira', 'transportadora', 'montadora', 'expansao', 'automacao_total'];
 
 const NIVEIS = ['', 'Produção manual', 'Primeiros equipamentos', 'Funcionários', 'Automatização', 'Grande indústria'];
@@ -80,6 +83,7 @@ function estadoInicial() {
     missao: 0, pedido: null, timerPedido: 45,
     timerTransportadora: INTERVALO_TRANSPORTADORA,
     tempoJogo: 0, viuAjuda: false, som: true,
+    energiaJogador: 0, energiaEquipe: 0,              // segundos de cafezinho
     posJogador: { x: -8, z: -1 },
   };
 }
@@ -111,6 +115,9 @@ const capPalete = () => tem('expansao') ? 200 : 60;
 const maxFuncionarios = () => tem('expansao') ? 6 : 3;
 const vagas = () => tem('expansao') ? 4 : 2;
 const folhaPagamento = () => E.funcionarios * SALARIO;
+const ritmoJogador = () => E.energiaJogador > 0 ? BONUS_CAFE : 1;
+const ritmoEquipe = () => E.energiaEquipe > 0 ? BONUS_CAFE : 1;
+const precoCafeEquipe = () => PRECO_CAFE * Math.max(1, E.funcionarios);
 
 function velocidadeBancada() {
   let v = 0.5;
@@ -238,6 +245,17 @@ function jogadorVenderCarga() {
 }
 
 // ---------------------------------------------------------------------
+// CAFEZINHO: energia temporária
+// ---------------------------------------------------------------------
+function tomarCafe() {
+  if (E.dinheiro < PRECO_CAFE) { mensagem('Dinheiro insuficiente para o cafezinho.', 'ruim'); return false; }
+  E.dinheiro -= PRECO_CAFE;
+  E.energiaJogador = DURACAO_CAFE;
+  mensagem(`Cafezinho! Você está ${Math.round((BONUS_CAFE - 1) * 100)}% mais rápido por ${DURACAO_CAFE} s.`, 'bom');
+  return true;
+}
+
+// ---------------------------------------------------------------------
 // VENDAS E PEDIDOS
 // ---------------------------------------------------------------------
 function vender(qtd, preco) {
@@ -303,6 +321,11 @@ function itensLoja() {
       Object.assign(item, { nome: `Funcionário (${E.funcionarios}/${maxFuncionarios()})`, preco: PRECO_FUNCIONARIO,
         desc: `Transporta materiais, monta caixas e organiza o estoque. Salário: ${reais(SALARIO)} por dia.` });
       if (E.funcionarios >= maxFuncionarios()) item.motivo = 'Lotado';
+    } else if (id === 'cafe_equipe') {
+      Object.assign(item, { nome: 'Café para a equipe', preco: precoCafeEquipe(),
+        desc: `Funcionários ${Math.round((BONUS_CAFE - 1) * 100)}% mais rápidos por ${DURACAO_CAFE} s (${reais(PRECO_CAFE)} por pessoa).` });
+      if (E.funcionarios === 0) item.motivo = 'Sem funcionários';
+      else if (E.energiaEquipe > 0) item.motivo = `Energia: ${Math.ceil(E.energiaEquipe)} s`;
     } else if (MAQUINAS[id]) {
       const d = MAQUINAS[id];
       Object.assign(item, { nome: d.nome, preco: d.preco, desc: d.desc });
@@ -325,6 +348,12 @@ function comprar(id) {
   }
   if (E.dinheiro < item.preco) { tocar('erro'); return false; }
   E.dinheiro -= item.preco;
+  if (id === 'cafe_equipe') {
+    E.energiaEquipe = DURACAO_CAFE;
+    mensagem(`Café para a equipe! Funcionários mais rápidos por ${DURACAO_CAFE} s.`, 'bom');
+    tocar('compra');
+    return true;
+  }
   if (id === 'funcionario') E.funcionarios++;
   else if (MAQUINAS[id]) E.maquinas.push({ tipo: id, entrada: 0, saida: 0, progresso: 0 });
   else E.melhorias[id] = true;
@@ -342,6 +371,8 @@ let timerEsteira = 0, timerFornecedor = 0, timerSave = 0;
 
 function atualizarSimulacao(dt) {
   E.tempoJogo += dt;
+  E.energiaJogador = Math.max(0, E.energiaJogador - dt);
+  E.energiaEquipe = Math.max(0, E.energiaEquipe - dt);
   E.maquinas.forEach((m, i) => avancar('m' + i, MAQUINAS[m.tipo].velocidade, dt));
   processarEsteira(dt);
   processarFornecedor(dt);

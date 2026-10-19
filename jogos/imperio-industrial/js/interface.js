@@ -43,6 +43,11 @@ function atualizarHud() {
   $('hud-funcionarios').textContent = `Funcionários ${E.funcionarios}`;
   $('hud-funcionarios').classList.toggle('alerta', E.salarioAtrasado);
   $('hud-dia').textContent = `Dia ${E.dia}`;
+  const cafe = [];
+  if (E.energiaJogador > 0) cafe.push(`você ${Math.ceil(E.energiaJogador)}s`);
+  if (E.energiaEquipe > 0) cafe.push(`equipe ${Math.ceil(E.energiaEquipe)}s`);
+  $('hud-energia').classList.toggle('oculto', cafe.length === 0);
+  $('hud-energia').textContent = '☕ ' + cafe.join(' · ');
   const n = nivel();
   $('hud-nivel').textContent = `Nível ${n}: ${NIVEIS[n]}`;
   $('hud-missao').textContent = textoMissao();
@@ -164,6 +169,7 @@ function mostrarAjuda() {
       <li><b>Armazenar:</b> leve as caixas prontas até o ESTOQUE.</li>
       <li><b>Entregar:</b> na EXPEDIÇÃO, aperte <kbd>E</kbd> para vender (R$ 5 por caixa).</li>
     </ol>
+    <p>Cansou? Tome um <b>cafezinho</b> na COPA (R$ 5): fica mais rápido por 30 s.</p>
     <p>Ande com <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ou setas. <kbd>L</kbd> abre a loja:
     compre equipamentos, máquinas, contrate funcionários e automatize tudo.
     <kbd>Esc</kbd> pausa. O jogo salva sozinho.</p>`,

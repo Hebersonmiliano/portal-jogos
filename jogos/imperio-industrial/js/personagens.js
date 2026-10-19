@@ -121,6 +121,7 @@ function direcoesDaCamera() {
 
 function criarJogador() {
   jogador.boneco = criarBoneco('#3b7dd8', false);
+  jogador.rotuloCafe = rotulo(0, 0, 0, { texto: '☕', classe: 'cafe', visivel: () => E.energiaJogador > 0 });
   jogador.x = E.posJogador.x;
   jogador.z = E.posJogador.z;
   resolverColisao(jogador, 0.35);
@@ -138,13 +139,15 @@ function atualizarJogador(dt, t) {
     let mx = cima.x * v + direita.x * h, mz = cima.z * v + direita.z * h;
     const tam = Math.hypot(mx, mz);
     mx /= tam; mz /= tam;
-    jogador.x += mx * VELOCIDADE_JOGADOR * dt;
-    jogador.z += mz * VELOCIDADE_JOGADOR * dt;
+    const velocidade = VELOCIDADE_JOGADOR * ritmoJogador();   // cafezinho deixa mais rápido
+    jogador.x += mx * velocidade * dt;
+    jogador.z += mz * velocidade * dt;
     jogador.direcao = { x: mx, z: mz };
     resolverColisao(jogador, 0.35);
   }
   if (jogador.trabalhando) jogador.direcao = { x: 0, z: -1 };   // olhando para a bancada
   E.posJogador = { x: jogador.x, z: jogador.z };
+  jogador.rotuloCafe.pos.set(jogador.x, E.cargaQtd > 0 ? 4.6 : 2.6, jogador.z);
   mostrarCarga(jogador.boneco, E.cargaTipo, E.cargaQtd);
   animarBoneco(jogador.boneco, jogador.x, jogador.z, jogador.direcao,
     { andando: jogador.andando, trabalhando: jogador.trabalhando, carregando: E.cargaQtd > 0 }, t);
@@ -183,6 +186,7 @@ function sincronizarFuncionarios() {
       x: -1 + n * 0.6, z: -6.6, direcao: { x: 0, z: 1 }, estado: 'escolher',
       alvo: null, origem: '', destino: '', cargaTipo: '', cargaQtd: 0, espera: 0, andando: false,
       boneco: criarBoneco(CORES_FUNCIONARIOS[n % CORES_FUNCIONARIOS.length], true),
+      rotuloCafe: rotulo(0, 0, 0, { texto: '☕', classe: 'cafe', visivel: () => E.energiaEquipe > 0 }),
     });
   }
 }
@@ -190,7 +194,7 @@ function sincronizarFuncionarios() {
 function andarAte(f, dt) {
   const dx = f.alvo.x - f.x, dz = f.alvo.z - f.z, dist = Math.hypot(dx, dz);
   if (dist < 0.05) { f.x = f.alvo.x; f.z = f.alvo.z; return true; }
-  const passo = Math.min(dist, VELOCIDADE_FUNCIONARIO * dt);
+  const passo = Math.min(dist, VELOCIDADE_FUNCIONARIO * ritmoEquipe() * dt);
   f.x += dx / dist * passo;
   f.z += dz / dist * passo;
   f.direcao = { x: dx / dist, z: dz / dist };
@@ -256,8 +260,16 @@ function pegarCarga(f) {
 }
 
 function entregarCarga(f) {
-  if (f.cargaTipo === 'papelao') E.papelao += f.cargaQtd - abastecer(f.destino, f.cargaQtd);   // sobra volta ao palete
-  else E.estoque += f.cargaQtd - armazenar(f.cargaQtd);                                          // sobra fica no chão do estoque
+  // primeiro guarda o que cabe, depois soma a sobra (em linhas separadas: se fosse
+  // "E.estoque += f.cargaQtd - armazenar(...)", o JavaScript leria o estoque ANTES
+  // de armazenar() somar as caixas e apagaria essa soma)
+  if (f.cargaTipo === 'papelao') {
+    const aceito = abastecer(f.destino, f.cargaQtd);
+    E.papelao += f.cargaQtd - aceito;     // sobra volta ao palete
+  } else {
+    const aceito = armazenar(f.cargaQtd);
+    E.estoque += f.cargaQtd - aceito;     // sobra fica no chão do estoque
+  }
   terminarTarefa(f);
 }
 
@@ -274,7 +286,7 @@ function atualizarFuncionarios(dt, t) {
           else if (andarAte(f, dt)) { f.direcao = { x: 0, z: -1 }; f.estado = 'montando'; }
           break;
         case 'montando':
-          if (!podeMontar() || avancarBancada(dt, RITMO_MONTAGEM)) terminarTarefa(f);
+          if (!podeMontar() || avancarBancada(dt, RITMO_MONTAGEM * ritmoEquipe())) terminarTarefa(f);
           break;
         case 'descansando':
           if (andarAte(f, dt)) { f.espera -= dt; if (f.espera <= 0) f.estado = 'escolher'; }
@@ -282,6 +294,7 @@ function atualizarFuncionarios(dt, t) {
       }
     }
     const carregando = f.cargaQtd > 0;
+    f.rotuloCafe.pos.set(f.x, carregando ? 4.6 : 2.6, f.z);
     mostrarCarga(f.boneco, carregando ? f.cargaTipo : '', f.cargaQtd);
     animarBoneco(f.boneco, f.x, f.z, f.direcao,
       { andando: f.andando, trabalhando: f.estado === 'montando', carregando }, t);

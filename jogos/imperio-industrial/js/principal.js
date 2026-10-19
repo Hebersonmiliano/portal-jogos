@@ -34,7 +34,7 @@ addEventListener('blur', () => { for (const k in teclas) teclas[k] = false; });
 // Interação com as estações
 // ---------------------------------------------------------------------
 function estacaoProxima() {
-  const candidatos = ['balcao', 'palete', 'bancada', 'estoque', 'expedicao', ...E.maquinas.map((m, i) => 'm' + i)];
+  const candidatos = ['balcao', 'palete', 'bancada', 'copa', 'estoque', 'expedicao', ...E.maquinas.map((m, i) => 'm' + i)];
   let melhor = '', menor = DISTANCIA_INTERACAO;
   for (const id of candidatos) {
     const p = pontoDe(id);
@@ -58,6 +58,9 @@ function acaoEm(alvo) {
         return { acao: 'devolver', texto: `E: devolver ${E.cargaQtd} papelão(ões) ao palete` };
       if (E.papelao <= 0) return info('Palete vazio: compre papelão no fornecedor');
       return { acao: 'pegar_papelao', texto: `E: pegar papelão (${E.papelao} no palete)` };
+    case 'copa':
+      if (E.energiaJogador > 0) return info(`Cheio de energia! Mais ${Math.ceil(E.energiaJogador)} s de cafezinho`);
+      return { acao: 'cafe', texto: `E: tomar um cafezinho (${reais(PRECO_CAFE)}): fica mais rápido por ${DURACAO_CAFE} s` };
     case 'estoque':
       if (E.cargaTipo === 'caixa') {
         if (E.estoque >= capEstoque()) return info('Estoque cheio! Venda na expedição');
@@ -94,6 +97,10 @@ function executar(acao, alvo) {
       if (comprarPapelao()) { tocar('compra'); flutuar('+10 papelão', -11.5, 2.6, -3.5, '#e0b070'); }
       else tocar('erro');
       break;
+    case 'cafe':
+      if (tomarCafe()) { tocar('missao'); flutuar('☕ Energia!', ESTACOES.copa.x, 2.6, ESTACOES.copa.z, '#f2c94c'); }
+      else tocar('erro');
+      break;
     case 'pegar_papelao': if (jogadorPegarPapelao() > 0) tocar('pegar'); break;
     case 'devolver': if (jogadorDevolverPapelao() > 0) tocar('soltar'); break;
     case 'abastecer': if (jogadorAbastecer(alvo) > 0) tocar('soltar'); break;
@@ -114,7 +121,7 @@ function atualizarInteracao(dt) {
   if (a.acao === 'montar') {
     if (teclas.Interagir) {
       jogador.trabalhando = true;
-      avancarBancada(dt, 1);
+      avancarBancada(dt, ritmoJogador());
     }
   } else if (a.acao && ePressionado) {
     executar(a.acao, alvo);
