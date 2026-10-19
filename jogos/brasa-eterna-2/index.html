@@ -972,7 +972,7 @@ Object.assign(DEFS,{
    {id:'mor3',name:'LIA ROSA',col:'#c8b0ff',pal:{g:'#7a5ab0',G:'#4a3a7a',h:'#e8c060',fem:1},x:28*16,y:20*16,wander:[25*16,20*16,37*16,21*16],hide:()=>!player.castle.b.house3,lines:['Eu costuro os estandartes do castelo!','A chama no brasão foi ideia da Maria Luiza, sabia?']},
    {id:'mor4',name:'SEU JUCA',col:'#9ae09a',pal:{g:'#4a7a5a',G:'#2a5a3a',h:'#e8e2d0'},x:34*16,y:20*16,wander:[25*16,20*16,37*16,21*16],hide:()=>!player.castle.b.house4,lines:['Já fui aventureiro, hoje só conto histórias.','Cuidado com o Rei do Lago, ele quebra qualquer vara!']}]},
  'in-keep':{name:'Salão do Trono',theme:'royal',dark:0,music:'castle',map:mkInt('keep').map,deco:mkInt('keep').deco,enemies:[],
-  npcs:[{id:'bento',name:'TESOUREIRO BENTO',col:'#ffd166',pal:{g:'#3a3a6a',G:'#24244a',h:'#c8c8c8',y:'#ffd166'},x:3*16,y:4*16,talk:n=>{const C=player.castle;openDlg(n,['O tesouro rende '+castleTax()+' gemas por dia, Majestade.','Os impostos entram sempre que você chega à Fortaleza.'],[{t:'Descansar no castelo',f:()=>{player.hp=player.maxHp;player.mp=mpMax();worldMin=(Math.floor(worldMin/1440)+1)*1440+360;warpFade=90;saveGame();toasts.push({title:'DESCANSOU NO CASTELO',sub:'Tudo cheio e jogo salvo',t:180});sfx.heart()}},{t:'Obrigado, Bento'}])}},
+  npcs:[{id:'bento',name:'TESOUREIRO BENTO',col:'#ffd166',pal:{g:'#3a3a6a',G:'#24244a',h:'#c8c8c8',y:'#ffd166'},x:3*16,y:4*16,talk:n=>{const C=player.castle;openDlg(n,['O tesouro rende '+castleTax()+' gemas por dia, Majestade.',...(famBonus()?['Desde que a rainha e as princesas vieram morar aqui, o reino prospera: +'+famBonus()+'% no tesouro!']:[]),'Os impostos entram sempre que você chega à Fortaleza.'],[{t:'Descansar no castelo',f:()=>{player.hp=player.maxHp;player.mp=mpMax();worldMin=(Math.floor(worldMin/1440)+1)*1440+360;warpFade=90;saveGame();toasts.push({title:'DESCANSOU NO CASTELO',sub:'Tudo cheio e jogo salvo',t:180});sfx.heart()}},{t:'Obrigado, Bento'}])}},
    {id:'wife2',name:'MARIA LUIZA',col:'#ff9ec4',pal:NP.bea,x:10*16,y:4*16,hide:()=>!(player.love&&player.love.stage>=4),talk:n=>wifeTalk(n)},
    {id:'lumi2',name:'HELEN CRISTINE',col:'#ffd166',pal:{g:'#ff9ec4',G:'#c06080',h:'#c86a2a',fem:1},small:1,x:12*16,y:6*16,wander:[3*16,5*16,13*16,8*16],hide:()=>!(player.love&&player.love.kids>=1),lines:['Papai, aqui é um castelo de verdade!','Posso sentar no trono? Só um pouquinho?']},
    {id:'ian2',name:'MARIANA',col:'#c8b0ff',pal:{g:'#9a6ad6',G:'#6a3aa0',h:'#6b3b1f',fem:1},small:1,x:5*16,y:7*16,wander:[3*16,5*16,13*16,8*16],hide:()=>!(player.love&&player.love.kids>=2),lines:['Os guardas me deixam segurar a lança!','Vamos brincar de esconde-esconde na torre?']}]},
@@ -1815,24 +1815,25 @@ const BEA_LOVE=['Sabia que eu guardo cada flor que você me dá?','Quando você 
 function playScene(sc,cb){intro={scenes:sc,si:0,pi:0,pt:0,st:0,parts:[],back:cb||true};state='intro';stopTrack();stopMusic();playTrack(sc.music||'romance')}
 function setTimeout0(f){msgQueue.length=msgQueue.length;pendingScene=f}
 let pendingScene=null;
-function beaTalk(n){const p=player,L=p.love,q=p.q,d=Math.floor(worldMin/1440);let hi=[];if(L.day!==d){L.day=d;L.pts+=2;hi=['(Maria Luiza abre um sorriso ao te ver.)']}if(L.stage===0&&L.pts>=2)L.stage=1;
+function beaTalk(n){const p=player,L=p.love,q=p.q,d=Math.floor(worldMin/1440);let hi=[];if(L.day!==d){L.day=d;L.pts+=2;hi=['(Maria Luiza abre um sorriso ao te ver.)']}if(L.stage===0)L.stage=1;
   if(q.flores&&q.flores.s==='ready'){openDlg(n,['As cinco flores do jardim... você lembrou!','(Maria Luiza fica vermelha.) Kael, eu queria te dizer uma coisa...','Quer namorar comigo?'],[{t:'Sim, quero!',f:()=>{qFinish('flores');L.stage=2;L.pts+=3;unlock('love1');toasts.push({title:'NAMORANDO!',sub:'Maria Luiza agora é sua namorada',t:240});playScene(SC_JARDIM)}}]);return}
-  if(L.stage<2){if(!q.flores&&L.pts>=4){openDlg(n,[...hi,'Sabe do que eu mais gosto? Das flores do Jardim das Flores, a oeste da vila.','Você me traria cinco?'],[{t:'Aceitar missão',f:()=>qStart('flores')},{t:'Agora não'}]);return}
+  if(L.stage<2){if(!q.flores){openDlg(n,[...hi,'Sabe do que eu mais gosto? Das flores do Jardim das Flores, a oeste da vila.','Você me traria cinco?'],[{t:'Aceitar missão',f:()=>qStart('flores')},{t:'Agora não'}]);return}
     openDlg(n,[...hi,q.flores?'Já achou as flores? Ficam no jardim a oeste.':pick(BEA_CHAT)]);return}
   if(L.stage===3&&L.ring2){openDlg(n,['Esse anel... ele brilha como a própria chama!','Kael... é o Anel Eterno?'],[{t:'Casar com a Maria Luiza',f:wedding},{t:'Ainda não'}]);return}
-  if(L.stage===2&&p.it.ring1){openDlg(n,['Kael? Você está tão nervoso...'],[{t:'Pedir em noivado',f:()=>{p.it.ring1=0;L.stage=3;L.pts+=5;unlock('love2');addFame(10,'Noivado com a Maria Luiza');playScene(SC_PEDIDO)}},{t:'Deixa pra lá'}]);return}
+  if(L.stage===2&&p.it.ring1){openDlg(n,['Kael? Você está tão nervoso...'],[{t:'Pedir em noivado',f:()=>{p.it.ring1=0;L.stage=3;L.pts+=5;unlock('love2');ensureAnel2();addFame(10,'Noivado com a Maria Luiza');playScene(SC_PEDIDO)}},{t:'Deixa pra lá'}]);return}
   const o=[{t:'Conversar',f:()=>openDlg(n,[pick(BEA_LOVE)])}];
   if(L.date!==d)o.push({t:'Passeio: Lagoa',f:()=>date('lagoa')},{t:'Passeio: Jardim',f:()=>date('jardim')},{t:'Passeio: Floresta',f:()=>date('floresta')});
   if(p.it.flower>0)o.push({t:'Dar uma flor',f:()=>{p.it.flower--;L.pts+=2;openDlg(n,['Pra mim? Que linda! Vou guardar com as outras.'])}});o.push({t:'Até logo!'});
-  openDlg(n,[...hi,L.stage===3?'Meu noivo chegou! Pensando no grande dia?':'Oi, meu herói! Que bom te ver.'],o)}
+  const tip=L.stage===2&&!L.dates?'Que tal um passeio hoje? Escolha um lugar!':L.stage===2&&!q.anel1&&!p.it.ring1?'A Dona Rosa disse que tem uma surpresa pra você. Vai falar com ela!':L.stage===2&&q.anel1&&q.anel1.s==='on'?'A Dona Rosa perdeu alguma coisa na Cisterna? Ela estava aflita.':null;
+  openDlg(n,[...hi,L.stage===3?'Meu noivo chegou! Pensando no grande dia?':'Oi, meu herói! Que bom te ver.',...(tip?[tip]:[])],o)}
 function date(k){const L=player.love;L.date=Math.floor(worldMin/1440);L.pts+=3;L.dates++;worldMin+=120;playScene({lagoa:SC_LAGOA,jardim:SC_JARDIM,floresta:SC_FLORESTA}[k])}
 function rosaRing(n){const L=player.love,q=player.q.anel1;
-  if(!q&&L&&L.stage===2&&L.pts>=8){openDlg(n,['Kael, todo mundo vê como você olha para a Maria Luiza...','O anel de noivado da minha avó caiu no fundo da Cisterna, na sala nordeste.','Se você achar, ele é seu. Para a Maria Luiza!'],[{t:'Aceitar missão',f:()=>qStart('anel1')},{t:'Depois'}]);return true}
+  if(!q&&L&&L.stage===2&&L.dates>=1){openDlg(n,['Kael, todo mundo vê como você olha para a Maria Luiza...','O anel de noivado da minha avó caiu no fundo da Cisterna, na sala nordeste.','Se você achar, ele é seu. Para a Maria Luiza!'],[{t:'Aceitar missão',f:()=>qStart('anel1')},{t:'Depois'}]);return true}
   if(q&&q.s==='ready'){qFinish('anel1');player.it.ring1=1;openDlg(n,['O anel da minha avó! Brilhando como no dia do casamento dela.','É seu, querido. Agora vá falar com a Maria Luiza!']);return true}
   if(q&&q.s==='on'){openDlg(n,['O anel caiu na Cisterna, na sala nordeste, perto da porta de ferro.']);return true}return false}
-function odoRing(n){const L=player.love;if(!(L&&L.stage===3&&!player.q.anel2)&&odoFort(n))return true;if(L&&L.stage===3&&!player.q.anel2){openDlg(n,['Noivos! A vila inteira está em festa.','A tradição de Aurora pede o Anel Eterno para um casamento abençoado.','Ele é forjado com as 4 relíquias dos gigantes das masmorras. Uma jornada digna de um herói!'],
+function odoRing(n){if(odoFort(n))return true;if(false){openDlg(n,['Noivos! A vila inteira está em festa.','A tradição de Aurora pede o Anel Eterno para um casamento abençoado.','Ele é forjado com as 4 relíquias dos gigantes das masmorras. Uma jornada digna de um herói!'],
     [{t:'Aceitar a super missão',f:()=>{qStart('anel2');const q=player.q.anel2;q.n=Object.keys(player.relics).length;if(q.n>=4)q.s='ready'}},{t:'Depois'}]);return true}return false}
-function brandaoRing(n){const L=player.love,q=player.q.anel2,p=player;if(q&&q.s==='ready'&&!L.ring2){const c=price(150);openDlg(n,['As quatro relíquias dos gigantes! Nunca vi nada igual.','Posso forjar o Anel Eterno por '+c+' gemas.'],[{t:'Forjar o Anel Eterno',f:()=>{if(p.gems<c){openDlg(n,['Faltam gemas, herói. Volte com '+c+'.']);return}
+function brandaoRing(n){ensureAnel2();const L=player.love,q=player.q.anel2,p=player;if(q&&q.s==='ready'&&!L.ring2){const c=price(150);openDlg(n,['As quatro relíquias dos gigantes! Nunca vi nada igual.','Posso forjar o Anel Eterno por '+c+' gemas.'],[{t:'Forjar o Anel Eterno',f:()=>{if(p.gems<c){openDlg(n,['Faltam gemas, herói. Volte com '+c+'.']);return}
     p.gems-=c;L.ring2=1;qFinish('anel2');qStart('casar');p.q.casar.s='ready';shake=6;[0,.14,.28].forEach(d=>{noise(.08,.12,3000,d);tone(1400,.08,'square',.05,700,d)});openDlg(n,['Pronto. O Anel Eterno. Que ele una vocês para sempre.','Agora vá, a Maria Luiza está esperando!'])}},{t:'Depois'}]);return true}return false}
 function wedding(){const L=player.love;L.stage=4;L.wday=Math.floor(worldMin/1440);if(player.q.casar)qFinish('casar');unlock('love3');addFame(30,'O casamento de Kael e Maria Luiza');buildHome();
   playScene(SC_CASAMENTO,()=>{msgQueue.push(['Faísca: Vocês têm um lar agora, ao lado da praça! E a aventura continua...',300]);saveGame()})}
@@ -2150,7 +2151,8 @@ function mkCastle(){const C=40,Rr=28,g=Array.from({length:Rr},(_,r)=>Array.from(
   g[26][19]=g[26][20]='.';g[27][19]=g[27][20]='^';for(let r=8;r<=25;r++){g[r][19]='=';g[r][20]='='}for(let c=3;c<=36;c++)g[20][c]='=';for(let c=3;c<=36;c++)g[9][c]='=';
   for(let r=2;r<=7;r++)for(let c=14;c<=25;c++)g[r][c]='Y';
   srand(5);for(let i=0;i<26;i++){const c=3+rnd()*34|0,r=3+rnd()*22|0;if(g[r][c]==='.'&&!(c>=13&&c<=26&&r<=8))g[r][c]=rnd()<.5?'R':'b'}return g.map(r=>r.join(''))}
-function castleTax(){const n=Object.keys(player.castle.b).length;return player.castle.b.keep?15+10*n:0}
+function famBonus(){const L=player.love||{};return L.stage>=4?25+15*(L.kids||0):0}
+function castleTax(){const n=Object.keys(player.castle.b).length;return player.castle.b.keep?Math.round((15+10*n)*(1+famBonus()/100)):0}
 function castleLoaded(){const R=ROOMS.castle,C=player.castle;if(!R)return;
   R.houses=[];R.labels=[];R.doors={'19,27':{to:'w7',pos:[76*16,30*16-4]},'20,27':{to:'w7',pos:[76*16,30*16-4]}};R.signs={};R.fruit=R.fruit||{};
   for(const k of CKEYS){const P0=CPL[k];if(P0.x==null||k==='keep'||k==='tower')continue;
@@ -2415,6 +2417,29 @@ function drawSell(){const L=sellList(),p=player;ctx.fillStyle='rgba(8,5,14,.95)'
     txt((e.n+(e.q>1?' x'+e.q:'')).slice(0,19),22,y,on?'#ffd166':'#c9b8d8');txt('+'+e.c,W-18,y,'#6cc45a',8,'right');ctx.drawImage(GEM,W-16,y)});
   if(sellArm>=0)stxt('APERTE A DE NOVO PARA CONFIRMAR A VENDA DO EQUIPAMENTO',W/2,HUD+134,'#ff8a3d','center');
   stxt('A: VENDER   R: COMPRAR   B: SAIR',W/2,HUD+H-10,'#9a8aaa','center')}
+/* ---------- Romance: trilha paralela, passo a passo ---------- */
+const RELB={serp:'Serpente',golem:'Golem',fenrir:'Fenrir',spec:'Rei Espectro'};
+function ensureAnel2(){const L=player&&player.love;if(!L||L.stage!==3||L.ring2)return;if(!player.q.anel2)qStart('anel2');const q=player.q.anel2;if(q.s!=='on')return;
+  for(const k in RELN)if(AS.bigs&&AS.bigs[k])player.relics[k]=1;q.n=Object.keys(RELN).filter(k=>player.relics[k]).length;if(q.n>=4)q.s='ready'}
+function romStep(){if(!player||!player.q)return null;const L=player.love||{stage:0},q=player.q,it=player.it||{};if(L.stage>=4)return null;
+  if(L.stage<2){if(!q.flores)return{t:'Fale com a Maria Luiza',d:'Ela passeia perto da praça.',at:'bea'};
+    if(q.flores.s==='on')return{t:'Colha 5 flores ('+q.flores.n+'/5)',d:'No jardim a oeste da praça.',at:'flor'};return{t:'Leve as flores à Maria Luiza',d:'Ela passeia perto da praça.',at:'bea'}}
+  if(L.stage===2){if(!L.dates)return{t:'Passeie com a Maria Luiza',d:'Fale com ela e escolha um passeio.',at:'bea'};
+    if(it.ring1)return{t:'Peça a Maria Luiza em noivado',d:'Fale com ela levando o anel.',at:'bea'};
+    if(!q.anel1)return{t:'Fale com a Dona Rosa',d:'Ela tem uma surpresa para o casal.',at:'rosa'};
+    if(q.anel1.s==='on')return{t:'Ache o anel na Cisterna',d:'Desça pelo poço da praça. Sala nordeste.',at:'well'};return{t:'Leve o anel à Dona Rosa',d:'Ela mora perto da praça.',at:'rosa'}}
+  ensureAnel2();if(L.ring2)return{t:'Case-se com Maria Luiza',d:'Entregue o Anel Eterno a ela.',at:'bea'};const a=q.anel2;
+  if(a&&a.s==='ready')return{t:'Leve as relíquias ao Brandão',d:'Ferraria da vila. Custa '+price(150)+' gemas.',at:'brandao',home:[47,24]};
+  const miss=Object.keys(RELN).filter(k=>!player.relics[k]).map(k=>RELB[k]);return{t:'Junte as relíquias ('+(4-miss.length)+'/4)',d:'Falta vencer: '+miss.join(', ')+'.',at:null}}
+function drawRomArrow(){const t=romTarget();if(!t)return;const q=questTarget(),s0=storyTarget();if((q&&Math.hypot(t.x-q.x,t.y-q.y)<24)||(s0&&Math.hypot(t.x-s0.x,t.y-s0.y)<24))return;
+  const sx=t.x-camX,sy=t.y-camY,c='#ff6a9a',hr=(x,y)=>{P(ctx,x-3,y-2,'#1a1020',7,5);P(ctx,x-2,y+3,'#1a1020',5,1);P(ctx,x-3,y-2,c,3,3);P(ctx,x+1,y-2,c,3,3);P(ctx,x-2,y,c,5,2);P(ctx,x-1,y+2,c,3,1);P(ctx,x,y+3,c,1,1);P(ctx,x-2,y-1,'#ffd0e0',1,1)};
+  if(sx>8&&sx<W-8&&sy>8&&sy<H-8){hr(Math.round(sx),Math.round(sy-24+Math.sin(frame*.12)*2));return}
+  const cx=W/2,cy=H/2,a=Math.atan2(sy-cy,sx-cx),ex=clamp(cx+Math.cos(a)*200,12,W-12),ey=clamp(cy+Math.sin(a)*200,12,H-12);if(frame%30<22)hr(Math.round(ex),Math.round(ey))}
+function romTarget(){const s=romStep();if(!s||!s.at)return null;const T=(c,r)=>({x:c*TS+8,y:r*TS+8});
+  if(s.at!=='flor'&&s.at!=='well'){const n=npcs.find(n=>n.id===s.at&&!(n.hide&&n.hide()));if(n)return{x:n.x+8,y:n.y+8}}
+  if(curKey==='cist'&&s.at==='well')return T(27,8);if(curKey!=='w7')return null;
+  if(s.at==='flor'){const h=pickups.filter(k=>k.type==='flor');let b=null,bd=1e9;for(const k of h){const d=Math.hypot(k.x-player.x,k.y-player.y);if(d<bd){bd=d;b=k}}return b?{x:b.x+4,y:b.y+4}:T(21,35)}
+  if(s.at==='well')return T(43,27);if(s.home)return T(s.home[0],s.home[1]);return null}
 /* ---------- Jornada: o caminho principal da história ---------- */
 let menuJornada=false;
 const STORY=[
@@ -2429,13 +2454,13 @@ const STORY=[
  {t:'Conheça a Costa Coral',d:'Siga a estrada para o sul da vila.',at:[40,57],ok:()=>!!AS.rooms.w8},
  {t:'Conheça o Bosque das Brumas',d:'Siga a estrada para o oeste da vila.',at:[1,30],ok:()=>!!AS.rooms.w9},
  {t:'Vença a Mãe-Aranha no Templo',d:'Ao norte do Bosque. Queime a teia da entrada com fogo.',at:[1,30],ok:()=>!!(AS.bigs&&AS.bigs.nebla)},
- {t:'Case-se com Maria Luiza',d:'Converse todo dia: flores, passeios e anéis.',at:'bea',ok:()=>!!(player.love&&player.love.stage>=4)},
  {t:'A Pedra Negra aguarda...',d:'Ela disse "ainda não". O resto chega em breve.',at:[40,7],ok:()=>false}];
 function storyStep(){if(!player||!player.q)return null;for(const st of STORY)if(!st.ok())return st;return null}
 function drawJornada(y){const cur=storyStep();txt('JORNADA',6,y,'#ffd166');txt('< > missões',W-6,y,'#5a4a6a',8,'right');
   STORY.forEach((st,i)=>{const yy=y+12+i*10,done=st.ok(),on=st===cur;if(on)P(ctx,4,yy-2,'#2a1e36',W-8,10);P(ctx,8,yy+1,done?'#6cc45a':on?'#ffd166':'#3a2a48',5,5);
     txt(st.t.slice(0,28),18,yy,done?'#5a8a5a':on?'#ffd166':'#6a5a7a')});
-  if(cur)wrap(cur.d,31).slice(0,2).forEach((l,i)=>txt(l,6,y+16+STORY.length*10+i*9,'#c9b8d8'))}
+  if(cur)wrap(cur.d,31).slice(0,2).forEach((l,i)=>txt(l,6,y+16+STORY.length*10+i*9,'#c9b8d8'));
+  const rs=romStep(),yr=y+38+STORY.length*10;if(rs){txt('ROMANCE: '+rs.t.slice(0,22),6,yr,'#ff9ec4');if(rs.d)txt(rs.d.slice(0,32),6,yr+9,'#c9b8d8')}else if(player.love&&player.love.stage>=4)txt('Casado com Maria Luiza',6,yr,'#ff9ec4')}
 /* ---------- saves antigos: mapa novo + progresso do jogador ---------- */
 const WV=7;
 const KEEP={'_':'Ac','.':'Ac',C:'c',A:'c',k:'7._',v:'7._',w:'7._',s:'._',b:'.',r:'.',p:'_',K:'._O',D:'_',U:'L',I:'._'};
@@ -2974,7 +2999,7 @@ function questTarget(){const q=player.q,on=id=>q[id]&&q[id].s==='on',rd=id=>q[id
   if(on('gato')){const c=npcs.find(n=>n.cat);return c?{x:c.x+8,y:c.y+8}:T(14,16)}if(rd('gato'))return T(30,31);
   if(on('ervas')){const h=pickups.filter(k=>k.type==='herb');if(h.length){let b=h[0],bd=1e9;for(const k of h){const d=Math.hypot(k.x-player.x,k.y-player.y);if(d<bd){bd=d;b=k}}return{x:b.x+4,y:b.y+4}}}if(rd('ervas'))return T(43,31);
   if(rd('lobos'))return T(51,29);if(on('lobos'))return T(64,40);return null}
-function drawQuestArrow(){if(state!=='play')return;drawMarks();drawStoryArrow();const t=questTarget(),s0=storyTarget();if(!t||(s0&&Math.hypot(t.x-s0.x,t.y-s0.y)<24))return;const sx=t.x-camX,sy=t.y-camY;
+function drawQuestArrow(){if(state!=='play')return;drawMarks();drawStoryArrow();drawRomArrow();const t=questTarget(),s0=storyTarget();if(!t||(s0&&Math.hypot(t.x-s0.x,t.y-s0.y)<24))return;const sx=t.x-camX,sy=t.y-camY;
   if(sx>8&&sx<W-8&&sy>8&&sy<H-8){const b=Math.round(Math.sin(frame*.15)*2);P(ctx,sx-2,sy-22+b,'#ffd166',5,5);P(ctx,sx-1,sy-17+b,'#ffd166',3,2);P(ctx,sx,sy-15+b,'#ffd166',1,1);return}
   const cx=W/2,cy=H/2,a=Math.atan2(sy-cy,sx-cx),ex=clamp(cx+Math.cos(a)*200,10,W-12),ey=clamp(cy+Math.sin(a)*200,10,H-12);
   if(frame%30<22)for(let i=0;i<5;i++){P(ctx,Math.round(ex-Math.cos(a)*i*2-Math.sin(a)*(i-2)),Math.round(ey-Math.sin(a)*i*2+Math.cos(a)*(i-2)),'#ffd166',2,2);P(ctx,Math.round(ex-Math.cos(a)*i*2+Math.sin(a)*(i-2)),Math.round(ey-Math.sin(a)*i*2-Math.cos(a)*(i-2)),'#ffd166',2,2)}}
@@ -4120,7 +4145,8 @@ function drawOverlays(){
   if(banner.t>0){ctx.globalAlpha=Math.min(1,banner.t/30,(150-banner.t)/15+.2);txt(banner.text,W/2,HUD+46,'#ffd166',8,'center',true);ctx.globalAlpha=1}
   // objetivo: só quando muda ou ao apertar O / Select
   if(state==='play'){const st=storyStep(),id=activeQuest();let L=[];if(st)L.push(['JORNADA: '+st.t,'#ffd166']);
-    if(id){const q=player.q[id],Qd=QUESTS[id];L.push([(q.s==='ready'?'VOLTE A '+Qd.giver:Qd.n+(Qd.goal>1?' '+q.n+'/'+Qd.goal:'')),q.s==='ready'?'#6cc45a':'#f4e9d8'])}
+    const rs=romStep(),rq=['flores','anel1','anel2','casar'].includes(id);if(rs)L.push(['ROMANCE: '+rs.t,'#ff9ec4']);
+    if(id&&!rq){const q=player.q[id],Qd=QUESTS[id];L.push([(q.s==='ready'?'VOLTE A '+Qd.giver:Qd.n+(Qd.goal>1?' '+q.n+'/'+Qd.goal:'')),q.s==='ready'?'#6cc45a':'#f4e9d8'])}
     const key=L.map(l=>l[0]).join('|');if(key!==lastObj){lastObj=key;if(key)objT=240}
     if(objT>0&&L.length){const a=Math.min(1,objT/20);ctx.globalAlpha=a*.75;const w=Math.max(...L.map(l=>stw(l[0])))+10;P(ctx,3,HUD+3,'#0e0a14',w,L.length*8+4);ctx.globalAlpha=a;
       L.forEach(([t,c],i)=>stxt(t,8,HUD+6+i*8,c));P(ctx,3,HUD+3,'#ffd166',2,L.length*8+4);ctx.globalAlpha=1}}
