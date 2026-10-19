@@ -801,8 +801,18 @@ function loadRoom(k){
   enemies=[];projectiles=[];pickups=[];particles=[];torches=[];pshots=[];hazards=[];bolts=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if('SL'.includes(room.tiles[r][c]))torches.push({x:c*TS+8,y:r*TS+6});
 }
+function resetBoulders(){
+  if(room.cleared||!DEFS[curKey].map.some(r=>r.includes('M')))return;
+  const U=room.under||{},fl=room.dark?'_':'.',home=[];let lost=0;
+  DEFS[curKey].map.forEach((row,r)=>[...row].forEach((t,c)=>{if(t==='M')home.push([c,r])}));
+  for(const[c,r]of home)if(room.tiles[r][c]==='M')home.splice(home.findIndex(h=>h[0]===c&&h[1]===r),1);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(room.tiles[r][c]==='M'&&!DEFS[curKey].map[r].startsWith('M',c)){room.tiles[r][c]=U[c+','+r]||fl;delete U[c+','+r];lost++}
+  for(const[c,r]of home){if(!lost)break;if(!'.,_='.includes(room.tiles[r][c])||overlap(pbody(),{x:c*TS,y:r*TS,w:TS,h:TS}))continue;U[c+','+r]=room.tiles[r][c];room.tiles[r][c]='M';lost--}
+  room.under=U;bg=buildBg(room);
+}
 function afterEnter(){
   const k=curKey;
+  {const before=room.tiles.map(r=>r.join('')).join();resetBoulders();if(room.tiles.map(r=>r.join('')).join()!==before)msgQueue.push(['Faísca: As rochas voltaram ao lugar. Podemos tentar de novo!',220])}
   const skip=(room.persistClear&&room.cleared)||(room.bossRoom&&room.won);
   if(!skip)enemies=room.enemies.map(([t,c,r])=>spawn(t,c,r));
   AS.rooms[k]=1;
@@ -1042,9 +1052,9 @@ function warpTo(k,x,y){const p=player;p.slide=null;loadRoom(k);p.x=x;p.y=y;p.fx=
 const doorT=rm=>rm.doorTiles||[[10,7],[10,8]];
 function doorFar(rm){const sd=rm.doorSide||'s',p=player;return sd==='e'?p.x<RW-56:sd==='w'?p.x>40:sd==='n'?p.y>40:p.y<RH-48}
 function spawnWave(i){room.wave=i;enemies=room.waves[i].map(([t,c,r])=>spawn(t,c,r));for(const e of enemies)poof(e.x+8,e.y+8);sfx.roar()}
-function enterCave(sec,c,r){AS.caves[sec.to]=1;saveAS();caveReturn={room:curKey,x:sec.ret?sec.ret[0]:c*TS,y:sec.ret?sec.ret[1]:r*TS+14};const p=player;
+function enterCave(sec,c,r){AS.caves[sec.to]=1;saveAS();caveReturn={room:curKey,x:sec.ret?sec.ret[0]:c*TS,y:sec.ret?sec.ret[1]:r*TS+14,prev:caveReturn};const p=player;
   loadRoom(sec.to);p.x=120;p.y=128;p.fx=p.x+8;p.fy=p.y-6;p.dashT=p.kbT=p.atkT=0;p.glide=0;warpFade=30;sfx.door();afterEnter()}
-function exitCave(){const C=caveReturn,p=player;caveReturn=null;loadRoom(C.room);p.x=C.x;p.y=C.y;p.fx=p.x+8;p.fy=p.y-6;p.dashT=p.kbT=p.atkT=0;p.glide=0;warpFade=30;afterEnter()}
+function exitCave(){const C=caveReturn,p=player;caveReturn=C.prev||null;loadRoom(C.room);p.x=C.x;p.y=C.y;p.fx=p.x+8;p.fy=p.y-6;p.dashT=p.kbT=p.atkT=0;p.glide=0;warpFade=30;afterEnter()}
 function nearestEnemy(x,y,range){let best=null,bd=range;for(const e of enemies){if(e.type==='queen'&&e.state!=='attack')continue;if(e.type==='hunter'&&e.state==='vanish')continue;if(e.type==='spirit'&&!e.vis)continue;if(e.type==='scorpion'&&e.state==='under')continue;const c=center(e),d=Math.hypot(c.x-x,c.y-y);if(d<bd){bd=d;best=e}}return best}
 function shieldBlock(b){
   const p=player;if(!eqId('shield')||p.atkT>0||p.dashT>0)return false;
