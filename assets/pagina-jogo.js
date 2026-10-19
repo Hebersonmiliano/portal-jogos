@@ -34,7 +34,8 @@ if (!jogo) {
     // O jogo só carrega quando a pessoa clica, para a página abrir rápido.
     iniciar.onclick = () => {
       const quadro = el("iframe");
-      quadro.src = jogo.url;
+      // "versao" no catálogo força o navegador a baixar a versão nova do jogo (sem cache antigo).
+      quadro.src = jogo.versao ? jogo.url + "?v=" + encodeURIComponent(jogo.versao) : jogo.url;
       quadro.title = jogo.titulo;
       quadro.allow = "fullscreen; autoplay; gamepad";
       quadro.allowFullscreen = true;
