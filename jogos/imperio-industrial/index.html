@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Do Zero ao Império Industrial 3D</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="palco"></div>
+  <div id="rotulos"></div>
+
+  <header class="hud">
+    <span id="hud-dinheiro" class="dinheiro"></span>
+    <span id="hud-papelao"></span>
+    <span id="hud-estoque"></span>
+    <span id="hud-produzidas"></span>
+    <span id="hud-funcionarios"></span>
+    <span id="hud-dia" class="apagado"></span>
+    <span class="espaco"></span>
+    <span class="apagado atalhos">L: loja · Esc: menu</span>
+  </header>
+  <div class="sub">
+    <div id="hud-nivel" class="nivel"></div>
+    <div id="hud-missao" class="missao"></div>
+  </div>
+  <div id="hud-pedido" class="pedido oculto"></div>
+
+  <div id="dica" class="dica oculto"></div>
+  <div id="aviso" class="aviso oculto"></div>
+
+  <aside id="loja" class="painel loja oculto">
+    <div class="loja-topo"><b>LOJA DA FÁBRICA</b><button data-acao="fechar-loja">Fechar (L)</button></div>
+    <div id="lista-loja" class="lista-loja"></div>
+  </aside>
+
+  <div id="menu" class="painel menu oculto">
+    <b>PAUSADO</b>
+    <button data-acao="continuar">Continuar</button>
+    <button data-acao="ajuda">Como jogar</button>
+    <button data-acao="som" id="btn-som">Som: ligado</button>
+    <button data-acao="novo">Novo jogo</button>
+  </div>
+
+  <div id="modal" class="modal oculto">
+    <div class="painel janela">
+      <h2 id="modal-titulo"></h2>
+      <div id="modal-texto"></div>
+      <div id="modal-botoes" class="botoes"></div>
+    </div>
+  </div>
+
+  <div id="erro3d" class="modal oculto">
+    <div class="painel janela">
+      <h2>Não foi possível abrir o 3D</h2>
+      <p>Este navegador não liberou o WebGL. Tente abrir no Google Chrome, Edge ou Firefox atualizados.</p>
+    </div>
+  </div>
+
+  <script src="js/three.min.js"></script>
+  <script src="js/jogo.js"></script>
+  <script src="js/cena.js"></script>
+  <script src="js/personagens.js"></script>
+  <script src="js/interface.js"></script>
+  <script src="js/principal.js"></script>
+</body>
+</html>

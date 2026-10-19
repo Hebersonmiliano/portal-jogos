@@ -19,6 +19,26 @@ window.GENEROS = [
 
 window.JOGOS = [
   {
+    id: "imperio-industrial",
+    titulo: "Do Zero ao Império Industrial",
+    genero: ["Simulação", "Estratégia"],
+    tags: ["3D", "fábrica", "economia", "automação"],
+    descricao:
+      "Comece com R$ 100 e uma bancada numa pequena fábrica de caixas de papelão. Compre material, monte as caixas, " +
+      "guarde no estoque e venda na expedição. Contrate funcionários, instale máquinas e esteiras e construa uma indústria totalmente automatizada.",
+    controles: "Teclado: WASD/setas andam, E interage (segure na bancada para montar), L abre a loja, Esc pausa.",
+    url: "jogos/imperio-industrial/index.html",
+    versao: "1.0",   // mude sempre que atualizar o jogo
+    capa: "jogos/imperio-industrial/capa.png",
+    cor: "#d9822b",
+    icone: "🏭",
+    engine: "HTML5",
+    mobile: false,
+    status: "disponivel",
+    lancamento: "2026-10-19",
+    destaque: true,
+  },
+  {
     id: "brasa-eterna-2",
     titulo: "Brasa Eterna 2: Novos Horizontes",
     genero: ["Ação", "Aventura", "RPG"],

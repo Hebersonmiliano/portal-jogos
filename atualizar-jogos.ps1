@@ -10,13 +10,16 @@ $origens = @{
   "reino-colonos" = "C:\Users\teste\reino-colonos"
   "brasa-eterna"  = "C:\Users\teste\brasa-eterna"
   "brasa-eterna-2" = "C:\Users\teste\brasa-eterna-2"
+  "imperio-industrial" = "C:\Users\adm\OneDrive\Documentos\JOGO DA YASMIN 2? ANO TECNICO\DoZeroAoImperio3D"   # "?" no lugar do simbolo de grau
   # "foxaventura" = "C:\Users\teste\FoxAventura\export\web"   # export Web do Godot
 }
 
 $destinoBase = Join-Path $PSScriptRoot "jogos"
 
 foreach ($id in $origens.Keys) {
-  $origem = $origens[$id]
+  # Resolve-Path aceita curingas (? e *) no caminho
+  $origem = (Resolve-Path $origens[$id] -ErrorAction SilentlyContinue | Select-Object -First 1).Path
+  if (-not $origem) { Write-Warning "$id : pasta nao encontrada em $($origens[$id]) - pulando"; continue }
   $destino = Join-Path $destinoBase $id
   if (-not (Test-Path (Join-Path $origem "index.html"))) {
     Write-Warning "$id : index.html nao encontrado em $origem - pulando"
