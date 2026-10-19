@@ -47,7 +47,7 @@ window.JOGOS = [
       "para recuperar as brasas da Chama Sagrada, dominar fogo, gelo, trovão e vento e enfrentar Morvane.",
     controles: "Teclado: WASD/setas movem, J ataca (segure para o disparo elemental), K esquiva, I abre os equipamentos. Também funciona com controle e no celular.",
     url: "jogos/brasa-eterna/index.html",
-    versao: "2026-10-19c",   // mude sempre que atualizar o jogo
+    versao: "1.1",   // mude sempre que atualizar o jogo
     capa: "jogos/brasa-eterna/capa.png",
     cor: "#c8501e",
     icone: "🔥",

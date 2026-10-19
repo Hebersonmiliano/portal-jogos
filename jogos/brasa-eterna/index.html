@@ -2099,7 +2099,8 @@ function drawTitle(){
   const cr=rows[sel];
   txt(cr==='cont'?saveInfo():cr==='diff'?D.desc:CH_NAMES[selCap],W/2,top+n*12+1,'#9a8aaa',8,'center');
   if((frame>>5)%2===0)txt(cr==='cont'?'ENTER ou A para continuar':'ENTER ou A para jogar',W/2,176,'#f4e9d8',8,'center');
-  {let nf=0;try{nf=JSON.parse(localStorage.getItem('brasa-fim')||'[]').length}catch(e){}txt(nf?'Finais vistos: '+nf+'/2':'VERSÃO 1.0',W/2,190,nf?'#ffd166':'#6a5a7a',8,'center')}
+  {let nf=0;try{nf=JSON.parse(localStorage.getItem('brasa-fim')||'[]').length}catch(e){}txt(nf?'Finais vistos: '+nf+'/2':'VERSÃO 1.1',W/2,190,nf?'#ffd166':'#6a5a7a',8,'center')}
+  txt('v1.1',W-4,4,'#6a5a7a',8,'right');
 }
 function drawEnd(){
   if(state==='dead'){ctx.fillStyle=`rgba(42,8,16,${Math.min(.8,deadT/40*.8)})`;ctx.fillRect(0,0,W,H+HUD);
