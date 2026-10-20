@@ -48,7 +48,7 @@ window.JOGOS = [
       "explore masmorras, forje equipamentos até +7, use bombas, gancho e bumerangue, cace monstros raros e guarde fadas que te salvam.",
     controles: "Teclado: WASD/setas movem, J ataca e fala, K esquiva, L usa o item do atalho, R troca o item, I abre o menu. Também funciona com controle e no celular.",
     url: "jogos/brasa-eterna-2/index.html",
-    versao: "2026-10-19-chefes",   // mude sempre que atualizar o jogo
+    versao: "2026-10-19-alas",   // mude sempre que atualizar o jogo
     capa: "jogos/brasa-eterna-2/capa.png",
     cor: "#3a6ad6",
     icone: "🌅",
