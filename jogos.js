@@ -19,6 +19,24 @@ window.GENEROS = [
 
 window.JOGOS = [
   {
+    id: "horda-eterna",
+    titulo: "Horda Eterna",
+    genero: ["Ação", "RPG"],
+    tags: ["sobrevivência", "hordas", "classes", "poderes"],
+    descricao: "Enfrente hordas, evolua seus poderes e sobreviva ao caos. Escolha sua classe, combine habilidades e encare chefões em uma batalha pela sobrevivência.",
+    controles: "Teclado: WASD/setas para mover. Espaço usa dash. Consulte os atalhos das habilidades na tela do jogo.",
+    url: "jogos/horda-eterna/index.html",
+    versao: "1.0",
+    capa: "",
+    cor: "#7c3aed",
+    icone: "🦇",
+    engine: "HTML5",
+    mobile: false,
+    status: "disponivel",
+    lancamento: "2026-10-21",
+    destaque: true,
+  },
+  {
     id: "imperio-industrial",
     titulo: "Do Zero ao Império Industrial",
     genero: ["Simulação", "Estratégia"],
