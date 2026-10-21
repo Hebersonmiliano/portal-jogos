@@ -1,29 +1,31 @@
 <!doctype html>
 <html lang="pt-BR">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101b20"><title>A Última Transmissão — Caso 01</title><link rel="stylesheet" href="style.css?v=4"><link rel="stylesheet" href="portraits.css?v=5"></head>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b20"><meta name="description" content="Investigue três ambientes da Rádio Aurora, restaure uma gravação, confronte depoimentos e encontre o jornalista desaparecido.">
+<title>A Última Transmissão — Capítulo 1</title>
+<link rel="stylesheet" href="style.css?v=2.0">
+</head>
 <body>
 <div class="app">
-<header><a class="brand" href="#" aria-label="A Última Transmissão"><span class="brand-mark">◉</span><span>A ÚLTIMA<br><b>TRANSMISSÃO</b></span></a><div class="case-label">ARQUIVO 001 <span>O silêncio da meia-noite</span></div><button id="sound" class="quiet" aria-pressed="true">♫ Música ligada</button></header>
-<main>
-<section class="stage" aria-label="Recepção da Rádio Aurora">
-<img id="scene" src="assets/recepcao.png" alt="Recepção da Rádio Aurora durante uma noite de chuva, com mesa, telefone, gravador, janela e porta do estúdio.">
-<div class="vignette"></div><div class="rain" aria-hidden="true"></div>
-<div class="scene-top"><span class="tag"><i></i> RÁDIO AURORA</span><span>00:18 <em> · </em> CHUVA FORTE</span></div>
-<div id="hotspots"></div>
-<div class="location"><span>01 / RECEPÇÃO</span><h1>Há algo errado<br>neste silêncio.</h1><p id="scene-hint">Examine os objetos. Cada detalhe conta.</p></div>
-<button id="reveal" class="reveal" aria-pressed="false">◎ Revelar pontos de interesse</button>
+<header class="topbar"><a href="#" class="brand" aria-label="A Última Transmissão"><span class="brand-mark">◉</span><span>A ÚLTIMA<br><b>TRANSMISSÃO</b></span></a><span class="case-label">CAPÍTULO 01 <span>O silêncio da meia-noite</span></span><div class="header-actions"><button id="sound" class="quiet" aria-pressed="true">♫ Música ligada</button><button id="settings" class="quiet">☷ Opções</button></div></header>
+<div class="mission-bar"><span class="signal" aria-hidden="true"></span><p id="goal">Descubra o que aconteceu com Miguel.</p><span id="save-status" role="status">Salvamento local</span></div>
+<main class="game-layout">
+<section class="exploration" aria-label="Ambientes da investigação">
+<nav id="rooms" class="room-nav" aria-label="Mudar de ambiente"></nav>
+<div class="scene-picture" id="scene-picture"><img id="scene" src="assets/recepcao.png" alt="Recepção da Rádio Aurora"><div class="vignette" aria-hidden="true"></div><div id="hotspots"></div><div class="scene-top"><span class="tag">◉ RÁDIO AURORA</span><span>00:18 · CHUVA FORTE</span></div><span id="scene-loading" class="scene-loading" hidden>Carregando ambiente…</span></div>
+<div class="scene-caption"><div><small id="room-label">01 / RECEPÇÃO</small><h1 id="scene-title" tabindex="-1">Há algo errado neste silêncio.</h1><p id="scene-description">Examine os objetos e registre os detalhes.</p></div><button id="reveal" class="reveal" aria-pressed="false">◎ Mostrar nomes</button></div>
+<details class="object-list"><summary>Explorar os objetos por uma lista</summary><div id="scene-objects"></div></details>
+<div class="field-tip"><span>COMO INVESTIGAR</span><p>Examine os pontos na cena, registre as pistas e compare as versões. Você pode voltar a qualquer ambiente aberto.</p></div>
 </section>
-<aside>
-<div class="side-head"><small>SEU CADERNO DE CAMPO</small><h2>A investigação</h2><p id="goal">Descubra o que aconteceu com o jornalista Miguel.</p></div>
-<div class="tabs" role="tablist" aria-label="Caderno"><button role="tab" id="tab-clues" aria-selected="true" data-tab="clues">Pistas <span id="count">0/6</span></button><button role="tab" id="tab-people" aria-selected="false" data-tab="people">Depoimentos</button></div>
-<div id="notebook" class="notebook"></div>
-<div class="side-bottom"><div class="progress"><div id="bar"></div></div><p id="progress-text">Uma história, seis peças que não se encaixam.</p><button class="primary" id="deduce">Conectar as provas <span>↗</span></button><button class="quiet" id="hint">Preciso de uma orientação</button></div>
-</aside>
+<aside class="casebook" aria-label="Caderno da investigação"><div class="side-head"><small>SEU CADERNO DE CAMPO</small><h2>A investigação</h2><p id="chapter-progress">Cada detalhe faz parte da história.</p></div><nav class="tabs" aria-label="Seções do caderno"><button data-tab="clues" aria-pressed="true">Pistas <span id="count">0/8</span></button><button data-tab="people" aria-pressed="false">Pessoas</button><button data-tab="board" aria-pressed="false">Painel</button></nav><div id="notebook" class="notebook"></div><div class="side-bottom"><div class="progress"><div id="bar"></div></div><p id="progress-text"></p><button id="deduce" class="primary">Painel de provas <span>↗</span></button><button id="hint" class="quiet">Preciso de uma orientação</button></div></aside>
 </main>
-<footer><span>UM MISTÉRIO INTERATIVO <b>•</b> CAPÍTULO PILOTO</span><button id="restart" class="quiet">Recomeçar caso</button></footer>
+<footer><span>MISTÉRIOS DE AURORA <b>•</b> CAPÍTULO 01</span><span>Explore no seu ritmo · Sem limite de tempo</span></footer>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
-<dialog id="modal"><button class="close" aria-label="Fechar janela">×</button><div id="modal-content"></div></dialog>
-<div id="intro" class="intro"><div class="intro-content"><small>UM PEDIDO DE SOCORRO. ONZE SEGUNDOS APAGADOS.</small><p class="intro-kicker">UMA HISTÓRIA PARA DESVENDAR</p><h2>A Última<br><em>Transmissão</em></h2><div class="rule"></div><p>Às 23h47, a Rádio Aurora transmitiu um pedido de socorro. Depois, silêncio. O jornalista Miguel desapareceu antes de revelar uma denúncia.</p><p class="muted">Você chegou dezoito minutos depois da meia-noite. Examine a recepção, confronte as versões e descubra quem tentou calar a verdade.</p><button id="begin" class="primary">Iniciar investigação <span>→</span></button><button id="resume" class="quiet" hidden>Continuar investigação salva</button><p class="intro-note">Clique ou toque nos objetos · Sem limite de tempo · Com desfecho</p></div></div>
-<script src="music.js?v=4"></script><script src="game.js?v=5"></script>
+<dialog id="modal" aria-labelledby="modal-title"><button class="close" id="close-modal" aria-label="Voltar à investigação">×</button><div id="modal-content"></div></dialog>
+<dialog id="intro" class="intro" aria-labelledby="intro-title"><div class="intro-content"><small>UM PEDIDO DE SOCORRO. ONZE SEGUNDOS DE SILÊNCIO.</small><p class="intro-kicker">MISTÉRIOS DE AURORA · CAPÍTULO 01</p><h2 id="intro-title">A Última<br><em>Transmissão</em></h2><div class="rule"></div><p id="intro-copy"></p><p class="muted">Você chega às 00h18. A polícia preservou o prédio, mas ninguém sabe onde Miguel está. Três ambientes, versões conflitantes e uma noite para reconstruir.</p><label for="player-name">Como podemos chamar você? <span>(apelido opcional)</span></label><input id="player-name" maxlength="24" placeholder="Investigador" autocomplete="off"><button id="begin" class="primary">Iniciar investigação <span>→</span></button><button id="resume" class="resume-button" hidden>Continuar investigação salva →</button><p id="migration-note" class="muted" hidden>Encontramos seu progresso da primeira versão. Suas pistas foram preservadas; o estúdio e o arquivo trazem novas etapas.</p><p class="intro-note">Clique ou toque nos pontos da cena · Tab e Enter também funcionam<br>O som começa ao entrar. Você pode silenciá-lo a qualquer momento.</p></div></dialog>
+<input id="import-file" type="file" accept=".json,application/json" hidden>
+<noscript>Este jogo precisa de JavaScript ativado no navegador.</noscript>
+<script src="chapter.js?v=2.0"></script><script src="engine.js?v=2.0"></script><script src="music.js?v=2.0"></script><script src="game.js?v=2.0"></script>
 </body></html>
