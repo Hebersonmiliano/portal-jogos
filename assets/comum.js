@@ -61,6 +61,20 @@ function criarCapa(jogo) {
   else if (ehNovo(jogo)) selos.append(el("span", "selo selo-novo", "Novo"));
   if (jogo.mobile) selos.append(el("span", "selo selo-mobile", "📱 Celular"));
   capa.append(selos);
+  if (jogo.apresentacao) {
+    capa.classList.add("capa-investigacao");
+    const elenco = el("div", "elenco-mini");
+    elenco.setAttribute("aria-hidden", "true");
+    jogo.apresentacao.personagens.forEach((p) => {
+      const img = el("img");
+      img.src = p.imagem;
+      img.alt = "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      elenco.append(img);
+    });
+    capa.append(elenco, el("span", "capa-capitulo", "UM CASO. VÁRIAS VERSÕES."));
+  }
   return capa;
 }
 
@@ -71,8 +85,60 @@ function criarCartao(jogo) {
   const info = el("div", "cartao-info");
   info.append(el("h3", null, jogo.titulo));
   info.append(el("p", "cartao-generos", jogo.genero.join(" · ")));
+  if (jogo.apresentacao) {
+    a.classList.add("cartao-investigacao");
+    info.append(el("p", "cartao-chamada", jogo.apresentacao.card));
+    const fatos = el("p", "cartao-fatos");
+    jogo.apresentacao.recursos.forEach((r) => fatos.append(el("span", null, r.valor + " " + r.rotulo.split(" ")[0])));
+    info.append(fatos, el("span", "cartao-convite", "Investigar o caso →"));
+  }
   a.append(info);
   return a;
+}
+
+// Apresentação opcional: jogos sem esses dados mantêm o cartão e o destaque originais.
+function criarElenco(jogo, completo = false) {
+  const grupo = el("div", completo ? "elenco-completo" : "elenco-destaque");
+  jogo.apresentacao.personagens.forEach((p) => {
+    const figura = el("figure", "retrato-personagem");
+    const img = el("img");
+    img.src = p.imagem;
+    img.alt = "Retrato de " + p.nome;
+    img.loading = "lazy";
+    img.decoding = "async";
+    const legenda = el("figcaption");
+    legenda.append(el("small", null, p.papel), el("strong", null, p.nome));
+    if (completo) legenda.append(el("p", null, p.frase));
+    figura.append(img, legenda);
+    grupo.append(figura);
+  });
+  return grupo;
+}
+
+function criarFatosInvestigacao(jogo) {
+  const fatos = el("div", "investigacao-fatos");
+  jogo.apresentacao.recursos.forEach((r) => {
+    const fato = el("div");
+    fato.append(el("strong", null, r.valor), el("span", null, r.rotulo));
+    fatos.append(fato);
+  });
+  return fatos;
+}
+
+function criarHeroInvestigacao(jogo, iniciar) {
+  const p = jogo.apresentacao, hero = el("div", "investigacao-hero");
+  const fundo = el("img", "investigacao-fundo");
+  fundo.src = jogo.capa;
+  fundo.alt = "";
+  fundo.decoding = "async";
+  const texto = el("div", "investigacao-texto");
+  texto.append(el("span", "investigacao-selo", p.selo), el("h2", null, iniciar ? p.chamada : jogo.titulo), el("p", "investigacao-chamada", iniciar ? p.convite : p.chamada), el("p", "investigacao-resumo", p.resumo), criarFatosInvestigacao(jogo));
+  const botao = el(iniciar ? "button" : "a", "botao investigacao-jogar", "▶ Começar a investigação");
+  if (iniciar) { botao.type = "button"; botao.onclick = iniciar; }
+  else botao.href = "jogo.html?id=" + encodeURIComponent(jogo.id);
+  texto.append(botao, el("p", "investigacao-nota", "Grátis · Sem instalação · Sem limite de tempo"));
+  hero.append(fundo, texto, criarElenco(jogo));
+  return hero;
 }
 
 function preencherMarca() {

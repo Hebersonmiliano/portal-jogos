@@ -40,6 +40,11 @@ function desenharDestaque() {
   const caixa = document.getElementById("destaque");
   if (!jogo) { caixa.hidden = true; return; }
   caixa.replaceChildren();
+  if (jogo.apresentacao) {
+    caixa.classList.add("destaque-investigacao");
+    caixa.append(criarHeroInvestigacao(jogo));
+    return;
+  }
   caixa.style.setProperty("--cor", jogo.cor);
   const texto = el("div", "destaque-texto");
   texto.append(el("span", "destaque-rotulo", ehNovo(jogo) ? "Novo lançamento" : "Em destaque"));

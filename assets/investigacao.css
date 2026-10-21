@@ -1,0 +1,374 @@
+/* Apresentação de jogos de investigação. Só se aplica a jogos com esses dados no catálogo. */
+.destaque.destaque-investigacao {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: #101f28;
+  border-color: #a88c575c;
+}
+.investigacao-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1.12fr 1fr;
+  align-items: center;
+  gap: 34px;
+  padding: 36px;
+  background: #10222c;
+  color: #f0e8d6;
+}
+.investigacao-fundo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .2;
+  z-index: -2;
+}
+.investigacao-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #0a1a24ee 0%, #10222cb3 54%, #09172122 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+.investigacao-selo {
+  display: block;
+  color: #e0bc7b;
+  font: 800 10px/1.7 'Nunito', system-ui, sans-serif;
+  letter-spacing: 1.6px;
+}
+.investigacao-texto h2 {
+  font: 400 clamp(30px, 4vw, 48px)/1.08 Georgia, serif;
+  color: #f3e9d3;
+  margin: 15px 0 18px;
+}
+.investigacao-hero .investigacao-chamada {
+  font: 400 19px/1.5 Georgia, serif;
+  color: #e0bc7b;
+  margin: 0 0 13px;
+}
+.investigacao-hero .investigacao-resumo {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #b9cbcb;
+  margin: 0 0 24px;
+}
+.investigacao-fatos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 23px 0 27px;
+  padding-block: 16px;
+  border-block: 1px solid #c9ad7333;
+}
+.investigacao-fatos strong {
+  display: block;
+  color: #f4dcaf;
+  font: 400 30px Georgia, serif;
+}
+.investigacao-fatos span {
+  display: block;
+  color: #aabfc1;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.investigacao-jogar {
+  background: #ddbd83;
+  color: #132830;
+  box-shadow: 0 4px 0 #947745;
+  font-size: 14px;
+  border-radius: 5px;
+  padding: 14px 20px;
+}
+.investigacao-jogar:focus-visible {
+  outline: 3px solid #f0e2ba;
+  outline-offset: 5px;
+}
+.investigacao-hero .investigacao-nota {
+  font-size: 10px;
+  letter-spacing: .3px;
+  color: #95acae;
+  margin: 15px 0 0;
+}
+.elenco-destaque {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.retrato-personagem {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid #bda06c44;
+  border-radius: 6px;
+  background: #14242d;
+}
+.elenco-destaque .retrato-personagem {
+  height: 200px;
+}
+.retrato-personagem > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 24%;
+}
+.elenco-destaque figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 30px 12px 10px;
+  background: linear-gradient(transparent, #06141be8 55%);
+}
+.retrato-personagem small {
+  display: block;
+  color: #e0bd7e;
+  font-size: 9px;
+  letter-spacing: .6px;
+}
+.retrato-personagem strong {
+  display: block;
+  color: #eee5d5;
+  font-size: 13px;
+  margin-top: 2px;
+}
+.cartao-investigacao {
+  border-color: #a28b5255;
+  background: linear-gradient(160deg, #172933, #111e28);
+}
+.cartao-investigacao:hover,
+.cartao-investigacao:focus-visible {
+  border-color: #ddbd83;
+}
+.capa-investigacao::after {
+  content: '';
+  position: absolute;
+  inset: 35% 0 0;
+  background: linear-gradient(transparent, #07151df2);
+  pointer-events: none;
+}
+.capa-investigacao .elenco-mini {
+  display: flex;
+  gap: 0;
+  position: absolute;
+  left: 12px;
+  bottom: 13px;
+  z-index: 1;
+}
+.capa-investigacao .elenco-mini img {
+  position: static;
+  inset: auto;
+  width: 33px;
+  height: 43px;
+  object-fit: cover;
+  object-position: center 25%;
+  border: 1px solid #dec595;
+  border-radius: 4px;
+  margin-right: -5px;
+  box-shadow: 0 3px 10px #0006;
+}
+.capa-investigacao .capa-capitulo {
+  position: absolute;
+  right: 10px;
+  bottom: 11px;
+  max-width: 78px;
+  font-size: 7px;
+  line-height: 1.6;
+  letter-spacing: 1px;
+  color: #f2d6a5;
+  z-index: 1;
+  text-align: right;
+}
+.cartao-investigacao .cartao-info h3 {
+  color: #efdfbb;
+}
+.cartao-chamada {
+  color: #afc3c6;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 11px 0;
+}
+.cartao-fatos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 11px 0;
+}
+.cartao-fatos span {
+  border: 1px solid #bd9b583b;
+  color: #dbc393;
+  font-size: 9px;
+  border-radius: 4px;
+  padding: 3px 5px;
+}
+.cartao-convite {
+  display: block;
+  padding-top: 10px;
+  border-top: 1px solid #bd9b5829;
+  color: #e1bc7b;
+  font-size: 12px;
+  font-weight: 800;
+}
+.apresentacao-investigacao {
+  border: 1px solid #bda06c44;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+.apresentacao-investigacao .investigacao-texto h2 {
+  font-size: clamp(27px, 3.5vw, 40px);
+}
+.conteudo-investigacao {
+  margin-top: 38px;
+  padding: 30px;
+  background: linear-gradient(150deg, #152833, #101c27);
+  border: 1px solid #a88c5740;
+  border-radius: 14px;
+}
+.conteudo-investigacao h2 {
+  font: 400 30px/1.2 Georgia, serif;
+  color: #eee1c5;
+  margin: 10px 0 12px;
+}
+.investigacao-introducao {
+  color: #adbfbe;
+  font-size: 14px;
+  max-width: 70ch;
+  line-height: 1.8;
+}
+.elenco-completo {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 22px;
+}
+.elenco-completo .retrato-personagem > img {
+  height: auto;
+  aspect-ratio: 3/4;
+}
+.elenco-completo figcaption {
+  padding: 14px;
+}
+.elenco-completo strong {
+  font-size: 16px;
+}
+.elenco-completo figcaption p {
+  color: #a9bdbe;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 10px 0 0;
+}
+.investigacao-galeria {
+  margin-top: 36px;
+  padding-top: 30px;
+  border-top: 1px solid #bda06c33;
+}
+.investigacao-cenas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 23px;
+}
+.investigacao-cenas figure {
+  margin: 0;
+  background: #0a1c26;
+  border: 1px solid #bda06c33;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.investigacao-cenas img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+.investigacao-cenas figcaption {
+  padding: 15px;
+}
+.investigacao-cenas h3 {
+  font-size: 16px;
+  color: #ead7b0;
+}
+.investigacao-cenas p {
+  font-size: 12px;
+  color: #9eb9bc;
+  line-height: 1.8;
+  margin: 8px 0 0;
+}
+.investigacao-experiencia {
+  margin-top: 30px;
+  border-top: 1px solid #bda06c33;
+  padding-top: 25px;
+}
+.investigacao-experiencia > p {
+  color: #b4c5c2;
+  max-width: 80ch;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.investigacao-experiencia ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 25px;
+  gap: 10px 20px;
+  color: #c6d1bd;
+  font-size: 13px;
+}
+.palco-investigacao-ativo {
+  aspect-ratio: auto;
+  height: 85vh;
+  max-height: none;
+  min-height: 580px;
+  scroll-margin-top: 80px;
+}
+[hidden] { display: none !important; }
+@media(max-width: 900px) {
+  .investigacao-hero { gap: 24px; padding: 26px; }
+  .elenco-destaque .retrato-personagem { height: 175px; }
+  .investigacao-texto h2 { font-size: 37px; }
+  .elenco-completo { grid-template-columns: repeat(2, 1fr); }
+}
+@media(max-width: 620px) {
+  .investigacao-hero { grid-template-columns: 1fr; padding: 23px; gap: 25px; }
+  .investigacao-texto h2 { font-size: 37px; }
+  .investigacao-hero .investigacao-chamada { font-size: 18px; }
+  .investigacao-hero .investigacao-resumo { font-size: 13px; }
+  .investigacao-fatos { margin: 20px 0; gap: 10px; }
+  .investigacao-fatos span { font-size: 10px; }
+  .elenco-destaque { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .elenco-destaque .retrato-personagem { height: 145px; }
+  .elenco-destaque figcaption { padding: 30px 6px 8px; }
+  .elenco-destaque small { font-size: 7px; }
+  .elenco-destaque strong { font-size: 10px; line-height: 1.4; }
+  .investigacao-selo { font-size: 8px; letter-spacing: 1px; }
+  .conteudo-investigacao { padding: 22px 17px; }
+  .conteudo-investigacao h2 { font-size: 27px; }
+  .elenco-completo { gap: 10px; }
+  .elenco-completo figcaption { padding: 12px; }
+  .elenco-completo strong { font-size: 14px; }
+  .elenco-completo figcaption p { font-size: 11px; }
+  .investigacao-cenas { grid-template-columns: 1fr; gap: 16px; }
+  .investigacao-experiencia ul { grid-template-columns: 1fr; font-size: 12px; }
+  .investigacao-jogar { font-size: 13px; padding: 13px 17px; }
+  .capa-investigacao .elenco-mini { left: 8px; bottom: 10px; }
+  .capa-investigacao .elenco-mini img { width: 27px; height: 35px; margin-right: -6px; }
+  .capa-investigacao .capa-capitulo { right: 7px; max-width: 51px; font-size: 6px; }
+  .cartao-chamada { font-size: 11px; }
+  .cartao-fatos { gap: 4px; }
+  .cartao-fatos span { font-size: 8px; padding: 2px 4px; }
+  .cartao-convite { font-size: 11px; }
+  .palco-investigacao-ativo { height: 88dvh; min-height: 590px; scroll-margin-top: 85px; }
+}
+@media(max-width: 360px) {
+  .elenco-destaque { grid-template-columns: repeat(2, 1fr); }
+  .elenco-destaque .retrato-personagem { height: 145px; }
+  .elenco-destaque strong { font-size: 12px; }
+}
+@media(prefers-reduced-motion: reduce) {
+  .cartao-investigacao, .investigacao-jogar { transition: none; }
+}
