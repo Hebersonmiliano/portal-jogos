@@ -19,6 +19,24 @@ window.GENEROS = [
 
 window.JOGOS = [
   {
+    id: "ultima-transmissao",
+    titulo: "A Última Transmissão",
+    genero: ["Aventura", "Puzzle"],
+    tags: ["investigação", "mistério", "pistas", "suspense"],
+    descricao: "Um pedido de socorro interrompe a programação da Rádio Aurora. Investigue uma recepção ilustrada, reúna seis pistas, confronte três depoimentos e apresente as provas para solucionar o desaparecimento de um jornalista.",
+    controles: "Clique ou toque nos objetos para examinar as pistas. Consulte os depoimentos no caderno e conecte as provas para concluir o caso. Música ativada ao iniciar; use o botão para silenciar.",
+    url: "jogos/ultima-transmissao/index.html",
+    versao: "2026-10-21-retratos",
+    capa: "jogos/ultima-transmissao/assets/recepcao.png",
+    cor: "#d8b67a",
+    icone: "🔎",
+    engine: "HTML5",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-10-21",
+    destaque: true,
+  },
+  {
     id: "horda-eterna",
     titulo: "Horda Eterna",
     genero: ["Ação", "RPG"],

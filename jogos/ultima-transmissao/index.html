@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101b20"><title>A Última Transmissão — Caso 01</title><link rel="stylesheet" href="style.css?v=4"><link rel="stylesheet" href="portraits.css?v=5"></head>
+<body>
+<div class="app">
+<header><a class="brand" href="#" aria-label="A Última Transmissão"><span class="brand-mark">◉</span><span>A ÚLTIMA<br><b>TRANSMISSÃO</b></span></a><div class="case-label">ARQUIVO 001 <span>O silêncio da meia-noite</span></div><button id="sound" class="quiet" aria-pressed="true">♫ Música ligada</button></header>
+<main>
+<section class="stage" aria-label="Recepção da Rádio Aurora">
+<img id="scene" src="assets/recepcao.png" alt="Recepção da Rádio Aurora durante uma noite de chuva, com mesa, telefone, gravador, janela e porta do estúdio.">
+<div class="vignette"></div><div class="rain" aria-hidden="true"></div>
+<div class="scene-top"><span class="tag"><i></i> RÁDIO AURORA</span><span>00:18 <em> · </em> CHUVA FORTE</span></div>
+<div id="hotspots"></div>
+<div class="location"><span>01 / RECEPÇÃO</span><h1>Há algo errado<br>neste silêncio.</h1><p id="scene-hint">Examine os objetos. Cada detalhe conta.</p></div>
+<button id="reveal" class="reveal" aria-pressed="false">◎ Revelar pontos de interesse</button>
+</section>
+<aside>
+<div class="side-head"><small>SEU CADERNO DE CAMPO</small><h2>A investigação</h2><p id="goal">Descubra o que aconteceu com o jornalista Miguel.</p></div>
+<div class="tabs" role="tablist" aria-label="Caderno"><button role="tab" id="tab-clues" aria-selected="true" data-tab="clues">Pistas <span id="count">0/6</span></button><button role="tab" id="tab-people" aria-selected="false" data-tab="people">Depoimentos</button></div>
+<div id="notebook" class="notebook"></div>
+<div class="side-bottom"><div class="progress"><div id="bar"></div></div><p id="progress-text">Uma história, seis peças que não se encaixam.</p><button class="primary" id="deduce">Conectar as provas <span>↗</span></button><button class="quiet" id="hint">Preciso de uma orientação</button></div>
+</aside>
+</main>
+<footer><span>UM MISTÉRIO INTERATIVO <b>•</b> CAPÍTULO PILOTO</span><button id="restart" class="quiet">Recomeçar caso</button></footer>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<dialog id="modal"><button class="close" aria-label="Fechar janela">×</button><div id="modal-content"></div></dialog>
+<div id="intro" class="intro"><div class="intro-content"><small>UM PEDIDO DE SOCORRO. ONZE SEGUNDOS APAGADOS.</small><p class="intro-kicker">UMA HISTÓRIA PARA DESVENDAR</p><h2>A Última<br><em>Transmissão</em></h2><div class="rule"></div><p>Às 23h47, a Rádio Aurora transmitiu um pedido de socorro. Depois, silêncio. O jornalista Miguel desapareceu antes de revelar uma denúncia.</p><p class="muted">Você chegou dezoito minutos depois da meia-noite. Examine a recepção, confronte as versões e descubra quem tentou calar a verdade.</p><button id="begin" class="primary">Iniciar investigação <span>→</span></button><button id="resume" class="quiet" hidden>Continuar investigação salva</button><p class="intro-note">Clique ou toque nos objetos · Sem limite de tempo · Com desfecho</p></div></div>
+<script src="music.js?v=4"></script><script src="game.js?v=5"></script>
+</body></html>
