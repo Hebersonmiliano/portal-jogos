@@ -26,6 +26,8 @@ Campos úteis: `status: "em-breve"` mostra o jogo na seção "Em breve", sem bot
 
 ## Godot (FoxAventura)
 
+`SECURITY TEST` está integrado em `jogos/security-test/`, com a exportação Web sem threads do Godot 4.7.2. O catálogo oferece teclado, Xbox e toque, e usa uma capa capturada do jogo. A origem de desenvolvimento, na estrutura local, é `../teste-de-seguranca/builds/web/`; o atualizador copia essa exportação e conserva a capa. Para atualizar, reexporte, copie os arquivos Web, aumente `versao` no catálogo e atualize a chave de cache de `jogos.js` nas páginas.
+
 Exporte com o preset **Web** para `jogos/foxaventura/` e renomeie o HTML gerado para `index.html`.
 Se exportar **sem threads** (Godot 4.3+), ele roda em qualquer hospedagem e no celular. Com threads,
 o site precisa dos cabeçalhos do arquivo `_headers`.
