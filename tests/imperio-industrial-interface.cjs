@@ -4,7 +4,7 @@ const elements = new Map(), events = {};
 function el(id) {
   if (!elements.has(id)) {
     const classes = new Set(['menu','modal','loja'].includes(id) ? ['oculto'] : []);
-    elements.set(id, {dataset: {}, style: {}, textContent: '', classList: {
+    elements.set(id, {dataset: {}, style: {}, setAttribute(){}, textContent: '', classList: {
       contains: x => classes.has(x), add: x => classes.add(x), remove: x => classes.delete(x),
       toggle(x, force) { const on = force === undefined ? !classes.has(x) : force; on ? classes.add(x) : classes.delete(x); return on; }
     }, listeners: {}, addEventListener(k,fn) {this.listeners[k]=fn;}, setPointerCapture(){}, appendChild(){} });
@@ -17,7 +17,7 @@ const context = vm.createContext({ console, Math, JSON, setTimeout, clearTimeout
   document: {getElementById:el, querySelectorAll:()=>keys, querySelector:()=>el('coletar'), addEventListener:(k,fn)=>events[k]=fn},
 });
 vm.runInContext('const teclas = {}; const jogador = {x:0,z:0}; const ESTACOES = {}; function novoItemEsteira(){} function pontoDe(){return {x:0,z:0};}',context);
-for (const f of ['js/jogo.js','js/catalogo.js','js/evolucao.js','js/interface.js','js/principal.js']) {
+for (const f of ['js/jogo.js','js/catalogo.js','js/evolucao.js','js/interface.js','js/audio.js','js/principal.js']) {
   let code=fs.readFileSync(base+f,'utf8');
   if(f.endsWith('principal.js')) code=code.replace(/iniciar\(\);\s*$/, '');
   vm.runInContext(code,context);

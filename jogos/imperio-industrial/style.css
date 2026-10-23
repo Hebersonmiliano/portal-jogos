@@ -336,3 +336,9 @@ button:hover:not(:disabled) { background: #355e72; }
 .medalha.ganha strong { color: #dcecba; } .medalha p { margin: 4px 0 6px; font-size: 12px; color: #a8bec6; line-height: 1.4; }
 .medalha small { color: #a5b6a1; font-size: 10px; }
 @media (max-width: 650px) { .medalhas, .desafios-carreira { grid-template-columns: 1fr; } .conquista-toast { bottom: 280px; right: 12px; padding: 12px; } .prestigio { padding: 12px; gap: 12px; } .prestigio strong { font-size: 17px; } }
+
+.volume-audio { display: grid; gap: 3px; text-align: left; font-size: 12px; color: var(--apagado); }
+.volume-audio input { width: 100%; accent-color: var(--amarelo); }
+#btn-ativar-audio { border-color: #91b9a5; color: #cae9d4; }
+.acoes-topo { max-width: 540px; }
+@media (pointer: coarse), (max-width: 700px) { .acoes-topo { width: 148px; } .acoes-topo #btn-ativar-audio { width: 100%; font-size: 11px; padding: 5px; } }

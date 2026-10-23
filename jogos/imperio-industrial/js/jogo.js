@@ -83,7 +83,7 @@ function estadoInicial() {
     dia: 1, timerDia: DURACAO_DIA, salarioAtrasado: false,
     missao: 0, pedido: null, timerPedido: 45,
     timerTransportadora: INTERVALO_TRANSPORTADORA,
-    tempoJogo: 0, viuAjuda: false, som: true,
+    tempoJogo: 0, viuAjuda: false, som: true, musica: true, efeitos: true, volumeMusica: 0.35, volumeEfeitos: 0.7,
     energiaJogador: 0, energiaEquipe: 0,              // segundos de cafezinho
     posJogador: { x: -8, z: -1 },
   };

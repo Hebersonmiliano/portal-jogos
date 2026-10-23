@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Do Zero ao Império Industrial 3D</title>
-  <link rel="stylesheet" href="style.css?v=2.2.1">
+  <link rel="stylesheet" href="style.css?v=2.3.0">
 </head>
 <body>
   <div id="palco"></div>
@@ -34,6 +34,7 @@
     <progress id="fase-progresso" max="1" value="0" aria-label="Dinheiro para a próxima evolução"></progress>
   </section>
   <nav class="acoes-topo" aria-label="Menu do jogo">
+    <button data-acao="ativar-audio" id="btn-ativar-audio">♪ Ativar áudio</button>
     <button data-acao="conquistas">🏆 Conquistas</button>
     <button data-acao="gestao">Produção e contratos</button>
     <button data-acao="loja">Loja</button><button data-acao="pausa">Pausar</button>
@@ -72,7 +73,11 @@
     <button data-acao="ajuda">Como jogar</button>
     <button data-acao="conquistas">🏆 Conquistas e desafios</button>
     <button data-acao="controles">Controles: teclado / Xbox / outros</button>
-    <button data-acao="som" id="btn-som">Som: ligado</button>
+    <button data-acao="som" id="btn-som">Áudio geral: ligado</button>
+    <button data-acao="musica" id="btn-musica">Música: ligada</button>
+    <button data-acao="efeitos" id="btn-efeitos">Efeitos: ligados</button>
+    <label class="volume-audio">Volume da música <input id="volume-musica" type="range" min="0" max="100" step="5" value="35" aria-label="Volume da música"></label>
+    <label class="volume-audio">Volume dos efeitos <input id="volume-efeitos" type="range" min="0" max="100" step="5" value="70" aria-label="Volume dos efeitos"></label>
     <button data-acao="novo">Reiniciar partida do zero</button>
     <button data-acao="sair">Salvar e sair do jogo</button>
   </div>
@@ -93,15 +98,16 @@
     </div>
   </div>
 
-  <script src="js/three.min.js?v=2.2.1"></script>
-  <script src="js/jogo.js?v=2.2.1"></script>
-  <script src="js/catalogo.js?v=2.2.1"></script>
-  <script src="js/cena.js?v=2.2.1"></script>
-  <script src="js/evolucao.js?v=2.2.1"></script>
-  <script src="js/personagens.js?v=2.2.1"></script>
-  <script src="js/interface.js?v=2.2.1"></script>
-  <script src="js/conquistas.js?v=2.2.1"></script>
-  <script src="js/controles.js?v=2.2.1"></script>
-  <script src="js/principal.js?v=2.2.1"></script>
+  <script src="js/three.min.js?v=2.3.0"></script>
+  <script src="js/jogo.js?v=2.3.0"></script>
+  <script src="js/catalogo.js?v=2.3.0"></script>
+  <script src="js/cena.js?v=2.3.0"></script>
+  <script src="js/evolucao.js?v=2.3.0"></script>
+  <script src="js/personagens.js?v=2.3.0"></script>
+  <script src="js/interface.js?v=2.3.0"></script>
+  <script src="js/audio.js?v=2.3.0"></script>
+  <script src="js/conquistas.js?v=2.3.0"></script>
+  <script src="js/controles.js?v=2.3.0"></script>
+  <script src="js/principal.js?v=2.3.0"></script>
 </body>
 </html>

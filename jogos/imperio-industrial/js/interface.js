@@ -7,32 +7,6 @@ const $ = id => document.getElementById(id);
 let pausado = false;
 
 // ---------------------------------------------------------------------
-// Sons gerados na hora (sem arquivos)
-// ---------------------------------------------------------------------
-let audio = null;
-const SONS = {
-  pegar: [520, 0.06], soltar: [380, 0.07], caixa: [660, 0.12], venda: [880, 0.18],
-  compra: [990, 0.15], erro: [150, 0.18], missao: [1175, 0.4],
-};
-
-function tocar(nome) {
-  if (!E.som || !SONS[nome]) return;
-  try {
-    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-    if (audio.state === 'suspended') audio.resume();
-    const [freq, dur] = SONS[nome];
-    const osc = audio.createOscillator(), vol = audio.createGain();
-    osc.type = 'square';
-    osc.frequency.value = freq;
-    vol.gain.setValueAtTime(0.05, audio.currentTime);
-    vol.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + dur);
-    osc.connect(vol).connect(audio.destination);
-    osc.start();
-    osc.stop(audio.currentTime + dur);
-  } catch (e) { /* navegador sem áudio */ }
-}
-
-// ---------------------------------------------------------------------
 // HUD
 // ---------------------------------------------------------------------
 function atualizarHud() {
@@ -160,7 +134,7 @@ function alternarPausa() {
   limparComandos();
   pausado = !pausado;
   $('menu').classList.toggle('oculto', !pausado);
-  $('btn-som').textContent = E.som ? 'Som: ligado' : 'Som: desligado';
+  atualizarBotoesAudio();
   if (pausado) $('menu').querySelector?.('button')?.focus?.();
 }
 
@@ -261,7 +235,10 @@ document.addEventListener('click', ev => {
     case 'fechar-loja': alternarLoja(); break;
     case 'continuar': alternarPausa(); break;
     case 'ajuda': pausado = false; mostrarAjuda(); break;
-    case 'som': E.som = !E.som; btn.textContent = E.som ? 'Som: ligado' : 'Som: desligado'; break;
+    case 'som': E.som = !E.som; ativarAudio(); atualizarBotoesAudio(); salvar(); break;
+    case 'musica': E.musica = !E.musica; ativarAudio(); atualizarBotoesAudio(); salvar(); break;
+    case 'efeitos': E.efeitos = !E.efeitos; ativarAudio(); atualizarBotoesAudio(); salvar(); break;
+    case 'ativar-audio': E.som = true; E.musica = true; if (E.volumeMusica <= 0) E.volumeMusica = 0.35; ativarAudio(); atualizarBotoesAudio(); salvar(); break;
     case 'novo': confirmarNovoJogo(); break;
   }
 });

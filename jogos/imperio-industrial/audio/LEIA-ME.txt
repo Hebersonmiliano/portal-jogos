@@ -1,0 +1,3 @@
+Trilha original gerada para Do Zero ao Império Industrial.
+108 BPM, 16 compassos em loop, WAV mono 22.050 Hz.
+Instrumentos sintetizados matematicamente; sem samples ou gravações de terceiros.

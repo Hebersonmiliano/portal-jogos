@@ -227,6 +227,7 @@ function iniciar() {
   function quadro(agora) {
     const dt = Math.min(0.1, (agora - ultimo) / 1000);
     atualizarControle(dt);
+    atualizarAudio();
     ultimo = agora;
     if (!pausado) tempoVisual += dt;
     const t = tempoVisual;
