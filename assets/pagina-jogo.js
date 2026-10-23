@@ -25,6 +25,12 @@ if (!jogo) {
   (jogo.tags || []).forEach((t) => tags.append(el("span", "tag", t)));
 
   const palco = document.getElementById("palco");
+  window.addEventListener('message', evento => {
+    const quadro = palco.querySelector('iframe');
+    if (jogo.id === 'imperio-industrial' && quadro && evento.source === quadro.contentWindow && evento.data?.tipo === 'imperio-industrial:sair' && (location.protocol === 'file:' || evento.origin === location.origin)) {
+      location.assign('index.html');
+    }
+  });
   if (jogo.status === "disponivel") {
     const iniciar = el("button", "botao botao-grande", "▶ Jogar");
     iniciar.type = "button";
@@ -39,6 +45,11 @@ if (!jogo) {
       const apresentacao = document.getElementById("apresentacao-faisca");
       apresentacao.hidden = false;
       apresentacao.append(criarApresentacaoFaisca(true, () => iniciar.click()));
+    }
+    if (jogo.vitrineImperio) {
+      const apresentacao = document.getElementById("apresentacao-imperio");
+      apresentacao.hidden = false;
+      apresentacao.append(criarVitrineImperio(jogo, () => iniciar.click(), true));
     }
     // O jogo só carrega quando a pessoa clica, para a página abrir rápido.
     iniciar.onclick = () => {
@@ -55,6 +66,10 @@ if (!jogo) {
       }
       if (jogo.id === "faisca") {
         document.getElementById("apresentacao-faisca").hidden = true;
+        palco.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+      if (jogo.vitrineImperio) {
+        document.getElementById("apresentacao-imperio").hidden = true;
         palco.scrollIntoView({ block: "start", behavior: "auto" });
       }
       quadro.focus();

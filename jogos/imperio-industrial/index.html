@@ -14,6 +14,7 @@
     <span id="hud-dinheiro" class="dinheiro"></span>
     <span id="hud-papelao"></span>
     <span id="hud-estoque"></span>
+    <span id="hud-produto"></span>
     <span id="hud-produzidas"></span>
     <span id="hud-funcionarios"></span>
     <span id="hud-dia" class="apagado"></span>
@@ -24,6 +25,36 @@
   <div class="sub">
     <div id="hud-nivel" class="nivel"></div>
     <div id="hud-missao" class="missao"></div>
+  </div>
+  <section class="evolucao-hud" aria-label="Evolução da fábrica">
+    <small>SUA JORNADA INDUSTRIAL</small>
+    <div class="evolucao-titulo"><strong id="fase-nome">Garagem</strong><span id="fase-numero">01 / 06</span></div>
+    <div id="fase-etapas" class="fase-etapas"></div>
+    <div id="fase-proxima"></div>
+    <progress id="fase-progresso" max="1" value="0" aria-label="Dinheiro para a próxima evolução"></progress>
+  </section>
+  <nav class="acoes-topo" aria-label="Menu do jogo">
+    <button data-acao="conquistas">🏆 Conquistas</button>
+    <button data-acao="gestao">Produção e contratos</button>
+    <button data-acao="loja">Loja</button><button data-acao="pausa">Pausar</button>
+    <button data-acao="novo" class="reiniciar">Reiniciar do zero</button>
+  </nav>
+  <section class="guia" aria-label="Orientação da fábrica">
+    <small>PRÓXIMO PASSO</small><div id="hud-guia"></div>
+    <div id="hud-carga"></div>
+    <div id="hud-prestigio"></div>
+    <label id="producao-label" for="producao">Montagem na bancada</label>
+    <progress id="producao" max="1" value="0"></progress>
+  </section>
+  <div class="controles-toque" aria-label="Controles de toque">
+    <div class="direcional">
+      <button class="cima" data-tecla="KeyW" aria-label="Andar para cima">▲</button>
+      <button class="esquerda" data-tecla="KeyA" aria-label="Andar para esquerda">◀</button>
+      <button class="baixo" data-tecla="KeyS" aria-label="Andar para baixo">▼</button>
+      <button class="direita" data-tecla="KeyD" aria-label="Andar para direita">▶</button>
+    </div>
+    <div class="toque-acoes"><button data-tecla="Interagir">Agir / segurar</button>
+    <button data-coletar="true">Retirar caixas</button></div>
   </div>
   <div id="hud-pedido" class="pedido oculto"></div>
 
@@ -39,8 +70,11 @@
     <b>PAUSADO</b>
     <button data-acao="continuar">Continuar</button>
     <button data-acao="ajuda">Como jogar</button>
+    <button data-acao="conquistas">🏆 Conquistas e desafios</button>
+    <button data-acao="controles">Controles: teclado / Xbox / outros</button>
     <button data-acao="som" id="btn-som">Som: ligado</button>
-    <button data-acao="novo">Novo jogo</button>
+    <button data-acao="novo">Reiniciar partida do zero</button>
+    <button data-acao="sair">Salvar e sair do jogo</button>
   </div>
 
   <div id="modal" class="modal oculto">
@@ -51,6 +85,7 @@
     </div>
   </div>
 
+  <div id="conquista-toast" class="conquista-toast oculto" role="status" aria-live="polite"></div>
   <div id="erro3d" class="modal oculto">
     <div class="painel janela">
       <h2>Não foi possível abrir o 3D</h2>
@@ -60,9 +95,13 @@
 
   <script src="js/three.min.js"></script>
   <script src="js/jogo.js"></script>
+  <script src="js/catalogo.js"></script>
   <script src="js/cena.js"></script>
+  <script src="js/evolucao.js"></script>
   <script src="js/personagens.js"></script>
   <script src="js/interface.js"></script>
+  <script src="js/conquistas.js"></script>
+  <script src="js/controles.js"></script>
   <script src="js/principal.js"></script>
 </body>
 </html>

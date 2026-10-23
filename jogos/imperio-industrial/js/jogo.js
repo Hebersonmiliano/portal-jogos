@@ -74,6 +74,7 @@ const CHAVE_SAVE = 'imperio-industrial-3d-v1';
 function estadoInicial() {
   return {
     dinheiro: DINHEIRO_INICIAL, papelao: 0, estoque: 0,
+    modoControle: 'automatico', produto: 'simples', ofertas: [], serialOferta: 0, contratosEntregues: 0,
     cargaTipo: '', cargaQtd: 0,                       // o que o jogador carrega
     bancada: { entrada: 0, saida: 0, progresso: 0 },
     maquinas: [],                                     // {tipo, entrada, saida, progresso}
@@ -91,7 +92,7 @@ function estadoInicial() {
 let E = estadoInicial();
 
 function salvar() {
-  try { localStorage.setItem(CHAVE_SAVE, JSON.stringify(E)); } catch (e) { /* navegador sem salvamento */ }
+  try { localStorage.setItem(CHAVE_SAVE, JSON.stringify(E)); if (typeof salvarConquistas === 'function' && !salvarConquistas()) return false; return true; } catch (e) { return false; }
 }
 
 function carregar() {
@@ -146,16 +147,16 @@ function produtor(id) {
 }
 const capProdutor = id => id === 'bancada' ? capBancada() : capMaquina();
 const idsProdutores = () => ['bancada', ...E.maquinas.map((m, i) => 'm' + i)];
-const podeMontar = () => E.bancada.entrada > 0 && E.bancada.saida < capBancada();
-const maquinaTrabalhando = i => E.maquinas[i].entrada > 0 && E.maquinas[i].saida < capMaquina();
+const podeMontar = () => E.bancada.entrada >= produtoAtual().material && E.bancada.saida < capBancada();
+const maquinaTrabalhando = i => E.maquinas[i].entrada >= produtoAtual().material && E.maquinas[i].saida < capMaquina();
 
 function avancar(id, velocidade, dt) {
   const p = produtor(id);
-  if (!p || p.entrada <= 0 || p.saida >= capProdutor(id)) return false;
-  p.progresso += velocidade * dt;
+  if (!p || p.entrada < produtoAtual().material || p.saida >= capProdutor(id)) return false;
+  p.progresso += velocidade * produtoAtual().ritmo * dt;
   if (p.progresso < 1) return false;
   p.progresso = 0;
-  p.entrada--;
+  p.entrada -= produtoAtual().material;
   p.saida++;
   E.produzidas++;
   avisar('caixa', id);
@@ -239,7 +240,7 @@ function jogadorGuardar() {
 
 function jogadorVenderCarga() {
   if (E.cargaTipo !== 'caixa') return;
-  vender(E.cargaQtd, PRECO_CAIXA);
+  vender(E.cargaQtd, produtoAtual().preco);
   E.cargaQtd = 0;
   limparCarga();
 }
@@ -270,30 +271,29 @@ function venderEstoque(reservar = 0) {
   const q = E.estoque - reservar;
   if (q <= 0) return 0;
   E.estoque -= q;
-  vender(q, PRECO_CAIXA);
+  vender(q, produtoAtual().preco);
   return q;
 }
 
-const podeEntregarPedido = () => !!E.pedido && E.estoque >= E.pedido.qtd;
+const podeEntregarPedido = () => !!E.pedido && (!E.pedido.produto || E.pedido.produto === E.produto) && E.estoque >= E.pedido.qtd;
 
 function entregarPedido() {
   if (!podeEntregarPedido()) return false;
   const q = E.pedido.qtd;
   E.estoque -= q;
-  vender(q, PRECO_PEDIDO);
-  mensagem(`Pedido de ${E.pedido.cliente} entregue: +${reais(q * PRECO_PEDIDO)}!`, 'bom');
+  const preco = E.pedido.preco || PRECO_PEDIDO;
+  vender(q, preco);
+  E.contratosEntregues++;
+  avisar('contrato-entregue');
+  mensagem(`Pedido de ${E.pedido.cliente} entregue: +${reais(q * preco)}!`, 'bom');
   E.pedido = null;
   E.timerPedido = 40 + Math.random() * 30;
   return true;
 }
 
 function novoPedido() {
-  let ritmo = 0.3 + E.funcionarios * 0.3;
-  for (const m of E.maquinas) ritmo += MAQUINAS[m.tipo].velocidade;
-  const qtd = Math.max(5, Math.min(Math.round(ritmo * 45 / 5) * 5, Math.floor(capEstoque() * 0.8)));
-  E.pedido = { cliente: CLIENTES[Math.floor(Math.random() * CLIENTES.length)], qtd, tempo: 120 };
-  mensagem(`Novo pedido: ${E.pedido.cliente} quer ${qtd} caixas (paga ${reais(PRECO_PEDIDO)} cada).`);
-  tocar('missao');
+  gerarOfertas();
+  mensagem('Novos contratos disponíveis! Abra Produção e contratos para escolher um cliente.');
 }
 
 // ---------------------------------------------------------------------
@@ -380,6 +380,7 @@ function atualizarSimulacao(dt) {
   processarDia(dt);
   processarPedido(dt);
   checarMissao();
+  if (typeof verificarConquistas === 'function') verificarConquistas(dt);
   timerSave += dt;
   if (timerSave >= 10) { timerSave = 0; salvar(); }
 }
@@ -456,7 +457,7 @@ function processarDia(dt) {
 
 function processarPedido(dt) {
   if (!E.pedido) {
-    if (E.produzidas === 0) return;
+    if (E.produzidas === 0 || E.ofertas.length > 0) return;
     E.timerPedido -= dt;
     if (E.timerPedido <= 0) novoPedido();
   } else {

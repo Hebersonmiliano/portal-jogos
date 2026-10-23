@@ -1,0 +1,28 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const files=path.resolve(__dirname,'../jogos/imperio-industrial/js');
+const storage=new Map();let fail=false,html='';
+const ctx=vm.createContext({console,Math,JSON,Date,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{if(fail)throw Error('quota');storage.set(k,v);}},$:()=>({classList:{add(){}}}),abrirJanela:(titulo,conteudo)=>html=conteudo,fecharJanela(){}});
+for(const f of ['jogo.js','catalogo.js','conquistas.js']) vm.runInContext(fs.readFileSync(path.join(files,f),'utf8'),ctx);
+const run=s=>vm.runInContext(s,ctx);
+run('inicializarConquistas();');assert.equal(run('carreira.xp'),0);
+run('E.bancada.entrada=1;avancarBancada(2,1);verificarConquistas(.5);');
+assert.equal(run('carreira.totais.produzidas'),1);assert.equal(run('carreira.xp'),30);assert.equal(run('carreira.tipos.simples'),true);
+run('avaliarConquistas();avaliarConquistas();');assert.equal(run('carreira.xp'),30);
+run('E.melhorias.estilete=true;avaliarConquistas();');assert.equal(run('carreira.xp'),70);
+run('carreira.totais.produzidas=50;');assert.equal(run("resgatarDesafio('producao')"),true);assert.equal(run('carreira.xp'),130);
+assert.equal(run("resgatarDesafio('producao')"),false);assert.equal(run("resgatarDesafio('invalido')"),false);
+run('carreira.totais.produzidas=150;');assert.equal(run("resgatarDesafio('producao')"),true);assert.equal(run("progressoDesafio('producao').atual"),0);
+run("E.produto='reforcada';avisar('caixa','bancada'); E.produto='personalizada';avisar('caixa','bancada');avaliarConquistas();");assert.ok(run('carreira.desbloqueadas.variedade'));
+run('vender(10,5);');assert.equal(run('carreira.totais.vendidas'),10);assert.equal(run('carreira.totais.faturamento'),50);
+run("E.estoque=5;E.pedido={qtd:5,cliente:'Teste',preco:7,tempo:90,produto:'personalizada'};entregarPedido();");assert.equal(run('carreira.totais.contratos'),1);
+run('avaliarConquistas();salvar();');const xp=run('carreira.xp'),produzidas=run('carreira.totais.produzidas');
+run('E=estadoInicial();inicializarConquistas();');assert.equal(run('carreira.xp'),xp);assert.equal(run('carreira.totais.produzidas'),produzidas);
+run('inicializarConquistas();');assert.equal(run('carreira.xp'),xp);
+run("mostrarConquistas('ganhas');");assert.ok(html.includes('Sua coleção'));assert.ok(html.includes('Desbloqueada'));
+run('carreira.xp=100;');assert.equal(run('nivelPrestigio().nivel'),2);assert.equal(run('nivelPrestigio().progresso'),0);
+fail=true;assert.equal(run('salvar()'),false);run("mostrarConquistas();");assert.ok(html.includes('Armazenamento indisponível'));fail=false;
+// Save antigo reconhece marcos uma vez e não fabrica histórico de produtos.
+storage.clear();run('E=estadoInicial();E.produzidas=1000;E.vendidas=500;inicializarConquistas();');
+const retro=run('carreira.xp');assert.ok(retro>0);run('inicializarConquistas();');assert.equal(run('carreira.xp'),retro);
+assert.equal(run('Object.keys(carreira.tipos).length'),0);
+console.log('OK: 20 conquistas, eventos reais, XP único, desafios progressivos sem resgate duplicado, persistência ao reiniciar, migração sem duplicar e falha de armazenamento.');

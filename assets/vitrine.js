@@ -69,6 +69,8 @@ function desenhar() {
   }
 
   const lista = filtrar();
+  const imperio = lista.find(j => j.vitrineImperio && j.status === "disponivel");
+  if (imperio) conteudo.append(criarVitrineImperio(imperio));
   const setor404 = lista.find((j) => j.cardSetor404 && j.status === "disponivel");
   if (setor404) conteudo.append(criarCardSetor404(setor404));
   const faisca = lista.find((j) => j.id === "faisca" && j.status === "disponivel");

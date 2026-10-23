@@ -11,6 +11,13 @@ const DISTANCIA_INTERACAO = 1.4;
 let ePressionado = false;   // E (ou Espaço) foi apertado neste quadro
 
 addEventListener('keydown', ev => {
+  if (ev.repeat && ['Escape', 'KeyP', 'KeyL', 'Tab', 'KeyQ'].includes(ev.code)) return;
+  if (pausado || janelaAberta()) {
+    if ((ev.code === 'Escape' || ev.code === 'KeyP') && !janelaAberta()) alternarPausa();
+    return; // Tab, Enter e Espaço continuam navegando e ativando os menus.
+  }
+  if (ev.code === 'KeyG') { mostrarConquistas(); return; }
+  if (ev.code === 'KeyQ' && !pausado) { coletarProximo(); return; }
   const interagir = ev.code === 'KeyE' || ev.code === 'Space';
   if (interagir || ev.code.startsWith('Arrow') || ev.code === 'Tab') ev.preventDefault();
   if (ev.code === 'Escape' || ev.code === 'KeyP') {
@@ -18,6 +25,7 @@ addEventListener('keydown', ev => {
     return;
   }
   if ((ev.code === 'KeyL' || ev.code === 'Tab') && !pausado) { alternarLoja(); return; }
+  if (pausado) return;
   if (interagir && !teclas.Interagir) ePressionado = true;
   if (interagir) teclas.Interagir = true;
   teclas[ev.code] = true;
@@ -28,7 +36,54 @@ addEventListener('keyup', ev => {
   teclas[ev.code] = false;
 });
 
-addEventListener('blur', () => { for (const k in teclas) teclas[k] = false; });
+function limparComandos() {
+  if (typeof zerarControle === 'function') zerarControle();
+  for (const k in teclas) teclas[k] = false;
+  document.querySelectorAll('[data-tecla]').forEach(b => b.classList.remove('pressionado'));
+  ePressionado = false;
+}
+function suspenderJogo() {
+  limparComandos();
+  salvar();
+  if (!pausado) alternarPausa();
+}
+addEventListener('blur', suspenderJogo);
+document.addEventListener('visibilitychange', () => { if (document.hidden) suspenderJogo(); });
+
+// Pointer capture mantém a soltura correta mesmo se o dedo sair do botão.
+for (const botao of document.querySelectorAll('[data-tecla]')) {
+  let ponteiro = null;
+  botao.addEventListener('pointerdown', ev => {
+    if (pausado || ponteiro !== null) return;
+    ev.preventDefault();
+    ponteiro = ev.pointerId;
+    botao.setPointerCapture(ev.pointerId);
+    const tecla = botao.dataset.tecla;
+    if (tecla === 'Interagir' && !teclas.Interagir) ePressionado = true;
+    teclas[tecla] = true;
+    botao.classList.add('pressionado');
+  });
+  const soltar = ev => {
+    if (ev.pointerId !== ponteiro) return;
+    ponteiro = null;
+    teclas[botao.dataset.tecla] = false;
+    botao.classList.remove('pressionado');
+  };
+  botao.addEventListener('pointerup', soltar);
+  botao.addEventListener('pointercancel', soltar);
+  botao.addEventListener('lostpointercapture', soltar);
+}
+document.querySelector('[data-coletar]').addEventListener('click', () => {
+  if (!pausado) coletarProximo();
+});
+
+function coletarProximo() {
+  const alvo = estacaoProxima();
+  if (alvo !== 'bancada' && !/^m\d+$/.test(alvo)) return;
+  if (jogadorPegarCaixas(alvo) > 0) tocar('pegar');
+  else aviso(E.cargaTipo === 'papelao' ? 'Deposite o papelão antes de retirar caixas.' : 'Sem caixas prontas ou carga cheia.');
+}
+
 
 // ---------------------------------------------------------------------
 // Interação com as estações
@@ -68,7 +123,7 @@ function acaoEm(alvo) {
       }
       return info(`Estoque: ${E.estoque}/${capEstoque()} caixas`);
     case 'expedicao':
-      if (E.cargaTipo === 'caixa') return { acao: 'vender_carga', texto: `E: vender ${E.cargaQtd} caixa(s) por ${reais(E.cargaQtd * PRECO_CAIXA)}` };
+      if (E.cargaTipo === 'caixa') return { acao: 'vender_carga', texto: `E: vender ${E.cargaQtd} caixa(s) por ${reais(E.cargaQtd * produtoAtual().preco)}` };
       if (podeEntregarPedido()) return { acao: 'pedido', texto: `E: entregar o pedido (${E.pedido.qtd} caixas)` };
       if (E.estoque > 0) return { acao: 'vender_estoque', texto: `E: vender o estoque (${E.estoque} caixas)` };
       return info('Guarde caixas no estoque para vender');
@@ -86,6 +141,7 @@ function acaoEm(alvo) {
   if (E.cargaTipo === 'caixa' && p.saida > 0 && livre > 0) return { acao: 'pegar_caixas', texto: `E: pegar caixas (${p.saida} prontas)` };
   if (alvo === 'bancada' && podeMontar()) return { acao: 'montar', texto: `Segure E: montar caixa (${p.entrada} papelão)` };
   if (p.saida > 0 && livre > 0) return { acao: 'pegar_caixas', texto: `E: pegar caixas (${p.saida} prontas)` };
+  if (p.entrada < produtoAtual().material) return info(`Traga papelão: ${produtoAtual().nome} precisa de ${produtoAtual().material} por caixa`);
   if (alvo === 'bancada') return info('Traga papelão do palete para a bancada');
   if (p.entrada > 0) return info(`Máquina trabalhando (${p.entrada} papelão)`);
   return info('Máquina parada: traga papelão');
@@ -119,7 +175,7 @@ function atualizarInteracao(dt) {
   const a = acaoEm(alvo);
   dica(a.texto, jogador);
   if (a.acao === 'montar') {
-    if (teclas.Interagir) {
+    if (teclas.Interagir || (typeof controleAgindo === 'function' && controleAgindo())) {
       jogador.trabalhando = true;
       avancarBancada(dt, ritmoJogador());
     }
@@ -152,6 +208,7 @@ ouvir('venceu', mostrarVitoria);
 // ---------------------------------------------------------------------
 function iniciar() {
   carregar();
+  inicializarConquistas();
   try {
     criarCena($('palco'));
   } catch (e) {
@@ -166,11 +223,13 @@ function iniciar() {
   if (!E.viuAjuda) mostrarAjuda();
   addEventListener('beforeunload', salvar);
 
-  let ultimo = performance.now(), timerLoja = 0;
+  let ultimo = performance.now(), timerLoja = 0, tempoVisual = 0;
   function quadro(agora) {
     const dt = Math.min(0.1, (agora - ultimo) / 1000);
+    atualizarControle(dt);
     ultimo = agora;
-    const t = agora / 1000;
+    if (!pausado) tempoVisual += dt;
+    const t = tempoVisual;
     if (!pausado) {
       atualizarSimulacao(dt);
       atualizarJogador(dt, t);
@@ -182,6 +241,7 @@ function iniciar() {
     }
     atualizarCena(t, pausado ? 0 : dt);
     atualizarHud();
+    atualizarNotificacoesConquistas(dt);
     timerLoja -= dt;
     if (lojaAberta() && timerLoja <= 0) { atualizarLoja(); timerLoja = 0.2; }
     requestAnimationFrame(quadro);

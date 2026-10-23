@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),test
 const root=path.resolve(__dirname,'..');
 function fixture(page='index.html',game='ultima-transmissao'){
  class Node{
-  constructor(tag='div'){this.tagName=tag;this.children=[];this.parent=null;this.attrs={};this.className='';this.style={setProperty(){}};this.handlers={};this._text='';this.hidden=false;this.disabled=false;this.classList={add:(...names)=>{this.className+=' '+names.join(' ');}};}
+  constructor(tag='div'){this.tagName=tag;this.children=[];this.parent=null;this.attrs={};this.dataset={};this.className='';this.style={setProperty(){}};this.handlers={};this._text='';this.hidden=false;this.disabled=false;this.classList={add:(...names)=>{this.className+=' '+names.join(' ');}};}
   append(...nodes){for(const n of nodes){this.children.push(n);n.parent=this;}}
   replaceChildren(...nodes){this.children=[];this.append(...nodes);}
   set textContent(t){this._text=String(t);this.children=[];}
@@ -21,8 +21,8 @@ function fixture(page='index.html',game='ultima-transmissao'){
  for(const match of html.matchAll(/id="([^"]+)"/g))nodes.set(match[1],new Node());
  const selectors=new Map(),storage=new Map();
  const document={getElementById:id=>{if(!nodes.has(id))throw Error('ID ausente: '+id);return nodes.get(id);},querySelector:s=>{if(!selectors.has(s))selectors.set(s,new Node());return selectors.get(s);},querySelectorAll:()=>[],createElement:tag=>new Node(tag),documentElement:new Node('html')};
- const context=vm.createContext({window:{},document,location:{search:'?id='+game},URLSearchParams,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},console});
- for(const script of ['jogos.js','assets/faisca.js','assets/comum.js','assets/setor404.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
+ const context=vm.createContext({window:{addEventListener(){}},document,location:{search:'?id='+game},URLSearchParams,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},console});
+ for(const script of ['jogos.js','assets/faisca.js','assets/imperio-industrial.js','assets/comum.js','assets/setor404.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
  return {context,document,run:file=>vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file}),storage};
 }
 function descendants(node,tag){return node.children.flatMap(n=>[...(n.tagName===tag?[n]:[]),...descendants(n,tag)]);}
@@ -98,3 +98,18 @@ test('página inicial renderiza destaque, filtros, busca e cartões antigos',()=
 test('página do jogo apresenta elenco e galeria e inicia um único iframe',()=>{const f=fixture('jogo.html');f.run('assets/pagina-jogo.js');const presentation=f.document.getElementById('apresentacao');assert.equal(presentation.hidden,false);const content=f.document.getElementById('conteudo-investigacao');assert.equal(descendants(content,'figure').length,7);assert.match(content.textContent,/Dicas sem perder pontos/);const stage=f.document.getElementById('palco');assert.equal(descendants(stage,'iframe').length,0);presentation.querySelector('button').click();assert.equal(presentation.hidden,true);assert.equal(descendants(stage,'iframe').length,1);assert.match(stage.querySelector('iframe').src,/ultima-transmissao\/index.html\?v=2\.0\.0/);assert.equal(f.document.getElementById('tela-cheia').disabled,false);assert.equal(stage.scrolled,true);});
 test('jogos sem apresentação continuam iniciando normalmente',()=>{const f=fixture('jogo.html','horda-eterna');f.run('assets/pagina-jogo.js');assert.equal(f.document.getElementById('apresentacao').children.length,0);const stage=f.document.getElementById('palco');stage.querySelector('button').click();assert.equal(descendants(stage,'iframe').length,1);assert.match(stage.querySelector('iframe').src,/horda-eterna/);});
 test('dados comerciais correspondem ao capítulo e todos os recursos existem',()=>{const f=fixture(),p=f.context.window.JOGOS.find(g=>g.id==='ultima-transmissao').apresentacao,chapter=require('../jogos/ultima-transmissao/chapter.js');assert.equal(Number(p.recursos[0].valor),Object.keys(chapter.rooms).length);assert.equal(Number(p.recursos[1].valor),Object.keys(chapter.clues).length);assert.equal(Number(p.recursos[2].valor),Object.keys(chapter.puzzles).length);for(const entry of [...p.personagens,...p.galeria])assert.ok(fs.existsSync(path.join(root,entry.imagem)),entry.imagem);assert.ok(!JSON.stringify(p).includes('2347'),'A apresentação não revela a senha');for(const file of ['index.html','jogo.html']){const html=fs.readFileSync(path.join(root,file),'utf8');for(const m of html.matchAll(/(?:href|src)="((?:assets\/|jogos\.js)[^"]*)"/g))assert.ok(fs.existsSync(path.join(root,m[1].split('?')[0])),m[1]);}for(const file of ['jogos.js','assets/comum.js','assets/vitrine.js','assets/pagina-jogo.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'));});
+
+
+test('Império Industrial apresenta história e seis etapas, com prévias locais e início único',()=>{
+ const f=fixture('jogo.html','imperio-industrial');f.run('assets/pagina-jogo.js');
+ const wrapper=f.document.getElementById('apresentacao-imperio');assert.equal(wrapper.hidden,false);
+ assert.match(wrapper.textContent,/primeira caixa/);assert.match(wrapper.textContent,/Império Industrial/);
+ const imagens=descendants(wrapper,'img');assert.equal(imagens.length,7);
+ for(const img of imagens){assert.ok(img.alt);assert.ok(fs.existsSync(path.join(root,img.dataset.fonteImperio.split('?')[0])));}
+ const botoes=descendants(wrapper,'button').filter(b=>b.textContent.includes('Construir meu império'));
+ assert.equal(botoes.length,1);botoes[0].click();
+ assert.equal(wrapper.hidden,true);assert.equal(descendants(f.document.getElementById('palco'),'iframe').length,1);
+ const h=fixture();h.run('assets/vitrine.js');assert.match(h.document.getElementById('conteudo').textContent,/Uma bancada/);
+ h.document.getElementById('busca').handlers.input({target:{value:'Última Transmissão'}});
+ assert.ok(!h.document.getElementById('conteudo').textContent.includes('Uma bancada'));
+});

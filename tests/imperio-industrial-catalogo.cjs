@@ -1,0 +1,32 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const base=path.resolve(__dirname,'../jogos/imperio-industrial/js');
+let saved=null;
+const ctx=vm.createContext({console,Math,JSON,localStorage:{getItem:()=>saved,setItem:(k,v)=>saved=v}});
+for(const f of ['jogo.js','catalogo.js']) vm.runInContext(fs.readFileSync(path.join(base,f),'utf8'),ctx);
+vm.runInContext('function tocar(){}',ctx);
+const run=s=>vm.runInContext(s,ctx);
+// Compatibilidade: partida antiga recebe os campos novos sem perder dinheiro.
+saved=JSON.stringify({dinheiro:321,estoque:4});assert.equal(run('carregar()'),true);
+assert.equal(run('E.dinheiro'),321);assert.equal(run('E.produto'),'simples');assert.equal(run('E.ofertas.length'),0);
+run('E=estadoInicial();');assert.equal(run("selecionarProduto('reforcada')"),false);
+run('E.melhorias.estilete=true;');assert.equal(run("selecionarProduto('reforcada')"),true);
+run('E.bancada.entrada=1; avancarBancada(10,1);');assert.equal(run('E.produzidas'),0);
+run('E.bancada.entrada=2; avancarBancada(2.5,1);');assert.equal(run('E.produzidas'),1);assert.equal(run('E.bancada.entrada'),0);
+assert.equal(run("selecionarProduto('simples')"),false);
+run('E.cargaTipo="caixa"; E.cargaQtd=1; E.bancada.saida=0; jogadorVenderCarga();');assert.equal(run('E.dinheiro'),109);
+run('E.bancada.entrada=3; E.bancada.progresso=.6;');assert.equal(run("selecionarProduto('simples')"),true);
+assert.equal(run('E.bancada.entrada'),3);assert.equal(run('E.bancada.progresso'),0);
+run('gerarOfertas();');assert.equal(run('E.ofertas.length'),3);assert.equal(run('E.pedido'),null);
+run('const primeiraOferta=E.ofertas[0]; aceitarContrato(primeiraOferta.id);');
+assert.equal(run('E.pedido.tempo'),90);assert.equal(run('E.ofertas.length'),0);
+assert.equal(run('aceitarContrato(9999)'),false);assert.equal(run("selecionarProduto('reforcada')"),false);
+run('E.estoque=E.pedido.qtd-1;');assert.equal(run('entregarPedido()'),false);
+const before=run('E.dinheiro'),valor=run('E.pedido.qtd * E.pedido.preco');
+run('E.estoque=E.pedido.qtd;');assert.equal(run('entregarPedido()'),true);
+assert.equal(run('E.dinheiro'),before+valor);assert.equal(run('E.contratosEntregues'),1);assert.equal(run('E.estoque'),0);
+run('gerarOfertas(); aceitarContrato(E.ofertas[0].id); E.pedido.tempo=.1;');
+const money=run('E.dinheiro');run('processarPedido(.2);');assert.equal(run('E.pedido'),null);assert.equal(run('E.dinheiro'),money);
+// Transportadora preserva estoque do pedido enquanto a quantidade não basta.
+run('gerarOfertas(); aceitarContrato(E.ofertas[0].id); E.melhorias.transportadora=true; E.estoque=E.pedido.qtd-1; E.timerTransportadora=0;');
+const stock=run('E.estoque');run('processarTransportadora(1);');assert.equal(run('E.estoque'),stock);
+console.log('OK: save antigo, desbloqueios, consumo e venda por produto, troca segura, escolha/entrega/expiração de contratos, reserva da transportadora.');

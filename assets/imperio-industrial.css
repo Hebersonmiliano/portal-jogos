@@ -1,0 +1,46 @@
+.imperio-vitrine { margin: 26px 0 34px; overflow: hidden; border: 1px solid #c6a26566; border-radius: 16px; color: #f7f0de; background: #102732; box-shadow: 0 16px 40px #0002; }
+.imperio-hero { display: grid; grid-template-columns: 1fr 1.15fr; gap: 32px; align-items: center; padding: 36px; background: radial-gradient(ellipse at 85% 30%, #35617b55, transparent 65%), #112b39; }
+.imperio-selo { color: #e6bd78; font-size: 10px; font-weight: 800; letter-spacing: 1.6px; }
+.imperio-titulo { font: 800 clamp(28px, 3.5vw, 46px)/1.12 'Nunito', system-ui, sans-serif; letter-spacing: -1px; margin: 14px 0 18px; }
+.imperio-titulo span { display: block; color: #f4cd83; }
+.imperio-chamada { font-size: 18px; font-weight: 800; line-height: 1.4; margin: 0 0 12px; }
+.imperio-resumo { font-size: 14px; line-height: 1.75; color: #c1d1d6; margin: 0; }
+.imperio-fatos { display: flex; flex-wrap: wrap; gap: 7px; margin: 20px 0; }
+.imperio-fatos span { font-size: 10px; font-weight: 800; color: #ebd1a1; padding: 6px 9px; border: 1px solid #e4b96c44; border-radius: 4px; background: #071e2a88; }
+.imperio-acoes { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+.imperio-jogar { color: #182c37; background: #f0c47b; border: 0; border-radius: 7px; box-shadow: 0 3px 0 #a67b3d; font-size: 14px; }
+.imperio-jogar:hover { background: #ffdaa0; }
+.imperio-conhecer { color: #d5e4e8; font-size: 12px; text-decoration: underline; text-underline-offset: 4px; }
+.imperio-dispositivos { font-size: 11px; color: #9eb9c4; margin: 17px 0 0; }
+.imperio-hero-foto { margin: 0; border: 1px solid #66869477; border-radius: 10px; overflow: hidden; background: #142e3b; transform: rotate(-1deg); box-shadow: 0 15px 40px #0005; }
+.imperio-ampliar { display: block; padding: 0; width: 100%; border: 0; cursor: zoom-in; background: #172c39; overflow: hidden; border-radius: 0; }
+.imperio-ampliar img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .2s; }
+.imperio-ampliar:hover img { transform: scale(1.025); }
+.imperio-ampliar:focus-visible, .imperio-jogar:focus-visible, .imperio-lightbox button:focus-visible { outline: 3px solid #ffdd9c; outline-offset: -4px; }
+.imperio-hero-foto > figcaption { padding: 12px; text-align: center; font-size: 10px; letter-spacing: 1.3px; color: #dfbd86; font-weight: 800; }
+.imperio-historia { padding: 28px 36px 8px; border-top: 1px solid #809ca026; }
+.imperio-historia h3 { margin: 9px 0; font-size: 25px; color: #f4d095; }
+.imperio-historia p { color: #c0d0d5; font-size: 14px; line-height: 1.85; max-width: 95ch; }
+.imperio-galeria-nota { margin: 12px 36px 18px; color: #9bb6c1; font-size: 11px; }
+.imperio-galeria { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 0 36px 32px; }
+.imperio-fase { margin: 0; border: 1px solid #42606d; border-radius: 9px; overflow: hidden; background: #15313e; }
+.imperio-fase figcaption { padding: 16px; }
+.imperio-fase small { color: #e0b474; letter-spacing: 2px; font-size: 9px; font-weight: 800; }
+.imperio-fase h3 { color: #f1d29b; font-size: 16px; margin: 7px 0; }
+.imperio-fase p { font-size: 12px; line-height: 1.7; color: #bbd0d6; margin: 0; }
+.imperio-final { padding: 0 36px 34px; display: flex; gap: 22px; justify-content: space-between; align-items: center; }
+.imperio-final p { color: #c0d0d5; font-size: 13px; }
+.imperio-lightbox { width: min(1250px, 96vw); max-height: 95dvh; padding: 16px; color: #f7e6c8; border: 1px solid #c2a26b; border-radius: 12px; background: #102834; }
+.imperio-lightbox::backdrop { background: #030c14e8; }
+.imperio-lightbox figure { margin: 12px 0; }
+.imperio-lightbox img { width: 100%; height: auto; max-height: 68dvh; object-fit: contain; display: block; }
+.imperio-lightbox figcaption { font-size: 13px; line-height: 1.6; margin-top: 12px; }
+.imperio-fechar { display: block; margin-left: auto; }
+.imperio-foto-nav { display: flex; justify-content: space-between; gap: 12px; }
+.imperio-lightbox button { border: 1px solid #7394a1; color: #f4d39d; border-radius: 6px; background: #234454; padding: 9px 14px; cursor: pointer; font: inherit; }
+.cartao-imperio { border-color: #cfac6b77; }
+.imperio-mini-resumo { font-size: 12px; line-height: 1.65; color: #bacad4; margin: 10px 0; }
+.imperio-mini-convite { color: #ecc78a; font-size: 12px; font-weight: 800; }
+@media (max-width: 900px) { .imperio-hero { grid-template-columns: 1fr; padding: 26px; gap: 26px; } .imperio-hero-foto { transform: none; } .imperio-galeria { grid-template-columns: repeat(2, minmax(0,1fr)); padding: 0 26px 26px; } .imperio-historia { padding: 26px 26px 8px; } .imperio-galeria-nota { margin-inline: 26px; } }
+@media (max-width: 540px) { .imperio-hero { padding: 23px 18px; } .imperio-selo { font-size: 9px; letter-spacing: 1px; } .imperio-titulo { font-size: 32px; } .imperio-galeria { grid-template-columns: 1fr; padding: 0 18px 24px; } .imperio-historia { padding: 23px 18px 8px; } .imperio-galeria-nota { margin-inline: 18px; } .imperio-jogar { width: 100%; justify-content: center; } .imperio-final { flex-direction: column; align-items: stretch; padding: 0 18px 26px; gap: 8px; } .imperio-lightbox { padding: 10px; } }
+@media (prefers-reduced-motion: reduce) { .imperio-ampliar img { transition: none; } }

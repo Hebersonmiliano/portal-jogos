@@ -32,7 +32,7 @@ const cacheMateriais = {};
 const geoCubo = new THREE.BoxGeometry(1, 1, 1);
 
 function mat(cor) {
-  return cacheMateriais[cor] || (cacheMateriais[cor] = new THREE.MeshStandardMaterial({ color: cor, roughness: 0.75, metalness: 0.05 }));
+  return cacheMateriais[cor] || (cacheMateriais[cor] = new THREE.MeshStandardMaterial({ color: new THREE.Color(cor).convertSRGBToLinear(), roughness: 0.75, metalness: 0.05 }));
 }
 
 // bloco com a base apoiada em y (como se fosse colocado no chão)
@@ -47,7 +47,8 @@ function bloco(w, h, d, cor, x, y, z, pai = cena) {
 
 function caixa(x, y, z, pai = cena) {
   const g = new THREE.Group();
-  bloco(0.9, 0.75, 0.9, '#c8954f', 0, 0, 0, g);
+  const corpo = bloco(0.9, 0.75, 0.9, produtoAtual().cor, 0, 0, 0, g);
+  corpo.userData.embalagem = true;
   bloco(0.2, 0.77, 0.92, '#8a5a2b', 0, 0, 0, g);
   g.position.set(x, y, z);
   pai.add(g);
@@ -114,17 +115,23 @@ function criarCena(container) {
   container.appendChild(renderer.domElement);
 
   cena = new THREE.Scene();
-  cena.background = new THREE.Color('#1b1a2b');
+  cena.background = new THREE.Color('#172b3a');
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
   camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
   camera.position.set(30, 32, 34);
   camera.lookAt(2, 0, -1.6);
 
-  cena.add(new THREE.HemisphereLight('#dfe6ff', '#4a4258', 0.75));
-  const sol = new THREE.DirectionalLight('#fff3dc', 0.85);
+  cena.add(new THREE.HemisphereLight('#d9efff', '#6b5340', 0.65));
+  const sol = new THREE.DirectionalLight('#ffe5b4', 0.95);
   sol.position.set(18, 30, 14);
   sol.castShadow = true;
-  sol.shadow.mapSize.set(2048, 2048);
-  Object.assign(sol.shadow.camera, { left: -26, right: 26, top: 26, bottom: -26 });
+  sol.shadow.bias = -0.001;
+  sol.shadow.normalBias = 0.05;
+  const mapaSombra = window.matchMedia('(pointer: coarse)').matches ? 1024 : 2048;
+  sol.shadow.mapSize.set(mapaSombra, mapaSombra);
+  Object.assign(sol.shadow.camera, { left: -26, right: 26, top: 26, bottom: -26, near: 1, far: 80 });
   cena.add(sol);
 
   construirGalpao();
@@ -140,55 +147,13 @@ function criarCena(container) {
 function ajustarTela() {
   const w = innerWidth, h = innerHeight, aspecto = w / h;
   renderer.setSize(w, h);
-  const zoom = Math.max(11.2, 11.2 * (16 / 9) / aspecto);
+  const zoom = Math.max(12.6, 12.6 * (16 / 9) / aspecto);
   Object.assign(camera, { left: -zoom * aspecto, right: zoom * aspecto, top: zoom, bottom: -zoom });
   camera.updateProjectionMatrix();
 }
 
 function construirGalpao() {
-  // piso quadriculado (textura desenhada num canvas)
-  const tex = document.createElement('canvas');
-  tex.width = tex.height = 64;
-  const c = tex.getContext('2d');
-  c.fillStyle = '#6f6a80'; c.fillRect(0, 0, 64, 64);
-  c.fillStyle = '#655f78'; c.fillRect(0, 0, 32, 32); c.fillRect(32, 32, 32, 32);
-  const textura = new THREE.CanvasTexture(tex);
-  textura.wrapS = textura.wrapT = THREE.RepeatWrapping;
-  textura.repeat.set(14, 9);
-  textura.magFilter = THREE.NearestFilter;
-  const piso = new THREE.Mesh(new THREE.PlaneGeometry(28.6, 18.4), new THREE.MeshStandardMaterial({ map: textura, roughness: 0.9 }));
-  piso.rotation.x = -Math.PI / 2;
-  piso.receiveShadow = true;
-  cena.add(piso);
-  bloco(17, 0.02, 0.12, '#f2c94c', -1, 0, 0.6);   // faixa de circulação
-
-  // paredes altas no fundo e à esquerda, muretas na frente e à direita
-  bloco(28.6, 5, 0.6, '#3a3656', 0, 0, -9.5);
-  bloco(0.6, 5, 18.6, '#34304f', -14.5, 0, 0);
-  bloco(0.3, 0.8, 4.8, '#3a3656', 14.15, 0, -6.9);
-  bloco(0.3, 0.8, 8.6, '#3a3656', 14.15, 0, 4.7);
-  bloco(28.9, 0.3, 0.3, '#3a3656', 0, 0, 9.35);
-  const vidro = new THREE.MeshBasicMaterial({ color: '#9fdcff' });
-  for (const x of [-7, 0, 7]) {
-    const j = new THREE.Mesh(new THREE.PlaneGeometry(4, 1.8), vidro);
-    j.position.set(x, 3.2, -9.18);
-    cena.add(j);
-    bloco(0.15, 1.8, 0.05, '#2a2740', x, 2.3, -9.15);
-  }
-  for (const z of [-4, 3]) {
-    const j = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 1.8), vidro);
-    j.rotation.y = Math.PI / 2;
-    j.position.set(-14.18, 3.2, z);
-    cena.add(j);
-  }
-
-  // pátio de caminhões do lado de fora
-  const asfalto = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 40), mat('#4a4d55'));
-  asfalto.rotation.x = -Math.PI / 2;
-  asfalto.position.set(17.6, -0.01, -2);
-  asfalto.receiveShadow = true;
-  cena.add(asfalto);
-  for (let z = -20; z < 18; z += 2.4) bloco(0.15, 0.01, 1.2, '#d9d9d9', 19.4, 0, z);
+  construirAmbienteEvolutivo();
 }
 
 function construirEstacoes() {
@@ -335,14 +300,14 @@ function criarMaquina(tipo, i) {
   cena.add(g);
   const m = { g, tipo, luz: bloco(0.2, 0.2, 0.05, luzMaterial('#5cf28a'), 1.0, 0.8, 0.98, g) };
   if (tipo === 'dobradeira') {
-    bloco(2.6, 1.3, 1.8, '#7d8696', 0, 0, 0, g);
+    bloco(2.6, 1.3, 1.8, '#287da1', 0, 0, 0, g);
     bloco(0.2, 2.4, 0.2, '#4b5260', -1.1, 1.3, 0, g);
     bloco(0.2, 2.4, 0.2, '#4b5260', 1.1, 1.3, 0, g);
     bloco(2.6, 0.25, 0.4, '#4b5260', 0, 3.6, 0, g);
     m.prensa = bloco(1.5, 0.25, 1.2, '#c0c6d0', 0, 2.2, 0, g);
     bloco(0.6, 0.4, 0.05, '#2a2f3a', -0.7, 0.5, 0.92, g);
   } else {
-    bloco(2.8, 1.1, 2, '#3f9a5a', 0, 0, 0, g);
+    bloco(2.8, 1.1, 2, '#236787', 0, 0, 0, g);
     bloco(0.5, 0.4, 0.5, '#2a2f3a', -0.8, 1.1, 0, g);
     m.ombro = new THREE.Group();
     m.ombro.position.set(-0.8, 1.5, 0);
@@ -355,11 +320,22 @@ function criarMaquina(tipo, i) {
     bloco(0.5, 0.15, 0.3, '#555555', 0, 1.1, 0, m.cotovelo);
     caixa(0.7, 1.1, 0, g);
   }
+  // Carenagem, frisos de segurança e painel de comando.
+  bloco(2.65, 0.16, 0.12, '#f0a532', 0, 1.02, 0.98, g);
+  bloco(0.45, 0.32, 0.08, '#152e40', 0.65, 0.55, 1.02, g);
+  bloco(0.32, 0.18, 0.02, luzMaterial('#71d9db'), 0.65, 0.63, 1.07, g);
+  for (const x of [-0.85, 0, 0.85]) bloco(0.4, 0.05, 0.08, '#172f40', x, 0.28, 1.02, g);
   return m;
 }
 
 function sincronizarEstrutura() {
-  for (const m of V.maquinas) cena.remove(m.g);
+  sincronizarAmbiente();
+  for (const m of V.maquinas) {
+    cena.remove(m.g);
+    m.g.traverse(o => {
+      if (o.isMesh && !Object.values(cacheMateriais).includes(o.material)) o.material.dispose();
+    });
+  }
   for (const r of V.rotulosMaquinas) removerRotulo(r);
   V.maquinas = E.maquinas.map((dados, i) => criarMaquina(dados.tipo, i));
   V.rotulosMaquinas = [];
@@ -423,6 +399,11 @@ function chamarCaminhao() {
 }
 
 function atualizarCena(t, dt) {
+  atualizarAmbiente(t, dt);
+  if (V.produtoVisual !== E.produto) {
+    V.produtoVisual = E.produto;
+    cena.traverse(o => { if (o.userData.embalagem) o.material = mat(produtoAtual().cor); });
+  }
   // pilhas e caixas visíveis
   const camadas = Math.min(14, Math.ceil(E.papelao / 4));
   V.camadasPalete.forEach((m, i) => { m.visible = i < camadas; });

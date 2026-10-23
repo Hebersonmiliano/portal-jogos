@@ -128,7 +128,8 @@ function criarJogador() {
 }
 
 function atualizarJogador(dt, t) {
-  let h = 0, v = 0;
+  const eixos = typeof eixosControle === 'function' ? eixosControle() : { h: 0, v: 0 };
+  let h = eixos.h, v = eixos.v;
   if (teclas.KeyA || teclas.ArrowLeft) h -= 1;
   if (teclas.KeyD || teclas.ArrowRight) h += 1;
   if (teclas.KeyW || teclas.ArrowUp) v += 1;

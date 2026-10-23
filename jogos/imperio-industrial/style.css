@@ -187,3 +187,152 @@ kbd {
   .sub { top: 64px; font-size: 14px; }
   .pedido { top: 110px; font-size: 13px; }
 }
+
+/* Orientação e acesso por mouse ou toque */
+.acoes-topo { position: fixed; right: 16px; bottom: 18px; display: flex; gap: 8px; }
+.guia { position: fixed; left: 18px; bottom: 20px; width: min(390px, calc(100% - 200px)); padding: 12px 16px; border: 1px solid var(--borda); border-radius: 10px; background: var(--painel); pointer-events: none; font-size: 14px; line-height: 1.45; }
+.guia small { color: var(--amarelo); letter-spacing: 1.5px; font-weight: 700; }
+#hud-carga { color: var(--azul); margin-top: 8px; }
+#producao-label { display: block; color: var(--apagado); font-size: 12px; margin-top: 6px; }
+#producao { width: 100%; height: 8px; accent-color: var(--amarelo); }
+.controles-toque { display: none; }
+button:focus-visible { outline: 3px solid var(--amarelo); outline-offset: 3px; }
+.janela { max-height: calc(100dvh - 32px); overflow-y: auto; }
+.modal { z-index: 30; }
+.menu { z-index: 25; }
+.loja { z-index: 20; }
+.aviso { z-index: 35; bottom: 180px; }
+@media (pointer: coarse), (max-width: 700px) {
+  .controles-toque { display: flex; position: fixed; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; right: 12px; justify-content: space-between; align-items: end; pointer-events: none; }
+  .controles-toque button { pointer-events: auto; touch-action: none; min-height: 48px; background: rgba(35, 33, 55, .9); }
+  .controles-toque button.pressionado { background: #6e5924; border-color: var(--amarelo); }
+  .direcional { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px); gap: 4px; }
+  .cima { grid-column: 2; } .esquerda { grid-column: 1; grid-row: 2; } .baixo { grid-column: 2; grid-row: 2; } .direita { grid-column: 3; grid-row: 2; }
+  .toque-acoes { display: flex; flex-direction: column; gap: 4px; }
+  .acoes-topo { bottom: 124px; right: 12px; }
+  .guia { bottom: 124px; left: 12px; width: calc(100% - 172px); font-size: 12px; padding: 8px; }
+  .guia small { font-size: 10px; } #producao-label { display: none; }
+  .hud { gap: 5px 12px; padding: 8px 12px; font-size: 12px; }
+  .sub { left: 12px; top: 72px; max-width: calc(100% - 24px); font-size: 12px; }
+  .pedido { top: 116px; right: 12px; left: 12px; font-size: 12px; }
+  .dica { left: 50% !important; top: auto !important; bottom: 230px; max-width: calc(100% - 24px); white-space: normal; text-align: center; font-size: 12px; }
+  .loja { top: 12px; bottom: 12px; }
+  .aviso { bottom: 240px; }
+}
+@media (max-height: 500px) and (pointer: coarse) {
+  .guia { left: 174px; bottom: 12px; width: calc(100% - 330px); }
+  .acoes-topo { bottom: 124px; }
+  .pedido { top: 86px; left: auto; max-width: 45%; }
+  .sub { top: 44px; } .dica { bottom: 130px; }
+}
+
+.acoes-topo { flex-wrap: wrap; justify-content: flex-end; max-width: 310px; }
+.reiniciar { border-color: var(--vermelho); }
+@media (pointer: coarse), (max-width: 700px) {
+  .acoes-topo { width: 148px; gap: 4px; }
+  .acoes-topo .reiniciar { width: 100%; font-size: 12px; }
+}
+
+/* Direção visual: aço azul, papelão e iluminação quente. */
+:root { --fundo: #132835; --painel: rgba(15, 34, 46, .96); --borda: #426175; --texto: #f7f1df; --apagado: #a4bdc6; --amarelo: #f3c665; --azul: #8dcedd; }
+.hud { background: linear-gradient(180deg, rgba(10, 27, 39, .97), rgba(10, 27, 39, .76)); border-bottom: 1px solid #456174; font-size: 16px; gap: 22px; padding: 12px 18px; }
+.sub { top: 60px; padding: 9px 13px; border-left: 3px solid var(--amarelo); background: rgba(12, 31, 42, .85); border-radius: 0 8px 8px 0; font-size: 14px; }
+button { background: #25485b; border-color: #547486; border-radius: 8px; }
+button:hover:not(:disabled) { background: #355e72; }
+.item { background: #19394b; border-color: #395a6c; }
+.item-desc { line-height: 1.5; }
+.item.comprado { opacity: .75; }
+.loja-topo { font-size: 15px; }
+.rotulo { font-size: 11px; letter-spacing: 1px; color: #fff0cf; }
+.rotulo.identidade-fabrica { font-size: 13px; padding: 5px 12px; border: 1px solid #e7c47b; border-radius: 4px; background: #183646; color: #ffdfa0; letter-spacing: 2px; }
+.evolucao-hud { position: fixed; right: 18px; top: 112px; width: 258px; padding: 14px 16px; border: 1px solid #486575; border-radius: 12px; background: linear-gradient(135deg, rgba(17,43,57,.96), rgba(13,30,41,.94)); pointer-events: none; box-shadow: 0 6px 24px #0003; }
+.evolucao-hud small { font-size: 10px; letter-spacing: 2px; color: var(--apagado); }
+.evolucao-titulo { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 9px 0 12px; }
+.evolucao-titulo strong { font-size: 17px; color: #ffdc8e; }
+#fase-numero { font-size: 11px; color: var(--apagado); white-space: nowrap; }
+.fase-etapas { display: flex; gap: 5px; }
+.fase-etapas span { flex: 1; height: 5px; border-radius: 3px; background: #38525e; }
+.fase-etapas span.atingida { background: linear-gradient(90deg, #d89342, #f3d184); }
+#fase-proxima { margin-top: 12px; font-size: 12px; color: #c9dadd; line-height: 1.5; }
+#fase-progresso { width: 100%; height: 5px; accent-color: #f3c665; margin-top: 9px; }
+.pedido { top: 57px; max-width: 46%; }
+.loja { top: 108px; }
+.guia { border-left: 3px solid #f3c665; box-shadow: 0 6px 24px #0003; }
+@media (max-width: 1100px) {
+  .hud { font-size: 13px; gap: 10px; }
+  .hud .atalhos { display: none; }
+  .evolucao-hud { width: 210px; padding: 10px 12px; }
+  .evolucao-titulo strong { font-size: 14px; }
+}
+@media (pointer: coarse), (max-width: 700px) {
+  .hud { font-size: 11px; gap: 4px 10px; padding: 8px 12px; }
+  .sub { top: 65px; font-size: 11px; padding: 5px 8px; max-width: calc(100% - 24px); }
+  .evolucao-hud { right: 12px; top: 117px; width: 170px; padding: 8px; }
+  .evolucao-hud small { font-size: 8px; letter-spacing: 1px; }
+  .evolucao-titulo { margin: 5px 0 7px; } .evolucao-titulo strong { font-size: 12px; }
+  #fase-proxima { font-size: 10px; margin-top: 6px; }
+  #fase-progresso { margin-top: 4px; }
+  .pedido { top: 117px; left: 12px; right: auto; max-width: calc(100% - 204px); font-size: 10px; padding: 6px; }
+  .loja { top: 12px; }
+  .rotulo { font-size: 9px; } .rotulo.fraco { font-size: 8px; }
+  .rotulo.identidade-fabrica { font-size: 9px; padding: 3px 6px; }
+}
+@media (max-height: 520px) {
+  .evolucao-hud { top: 50px; width: 170px; padding: 8px; }
+  .evolucao-hud small, #fase-proxima, #fase-progresso { display: none; }
+  .evolucao-titulo { margin: 0 0 6px; }
+  .pedido { top: 98px; left: auto; right: 12px; max-width: 35%; }
+}
+
+.gestao { font-size: 13px; }
+.gestao > p { color: var(--apagado); }
+.catalogo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.produto-card, .contrato-card { border: 1px solid var(--borda); border-radius: 9px; padding: 12px; background: #183647; }
+.produto-card.selecionado { border-color: var(--amarelo); }
+.produto-titulo { display: flex; flex-direction: column; gap: 4px; }
+.produto-titulo span { color: var(--verde); font-weight: 700; }
+.catalogo p { font-size: 12px; color: #c8d6d8; }
+.catalogo button { width: 100%; font-size: 12px; }
+.janela:has(.gestao) { max-width: 880px; }
+.acoes-topo { max-width: 460px; }
+@media (pointer: coarse), (max-width: 700px) {
+ .catalogo { grid-template-columns: 1fr; }
+ .acoes-topo { width: 148px; }
+ .acoes-topo [data-acao="gestao"] { width: 100%; font-size: 11px; padding: 6px; }
+ #hud-produto { color: var(--amarelo); }
+}
+
+.config-controles { font-size: 14px; line-height: 1.65; }
+.config-controles > button { display: block; width: 100%; text-align: left; margin: 7px 0; }
+.config-controles > button[aria-pressed="true"] { border-color: var(--amarelo); color: var(--amarelo); }
+.menu { max-height: calc(100dvh - 24px); overflow-y: auto; }
+
+/* Coleção local de conquistas e progressão de carreira. */
+#hud-prestigio { color: #eacb87; margin-top: 6px; font-size: 11px; }
+.conquista-toast { position: fixed; z-index: 45; right: 20px; bottom: 74px; width: min(360px, calc(100% - 32px)); padding: 16px 18px; border: 1px solid #a1b553; border-left: 5px solid #b9d66b; border-radius: 9px; background: linear-gradient(120deg, #233d32, #142a32); box-shadow: 0 12px 36px #0008; pointer-events: none; }
+.conquista-toast strong { display: block; font-size: 16px; color: #e5f4bf; }
+.conquista-toast span { display: block; margin-top: 6px; font-size: 12px; line-height: 1.5; color: #b9d2cd; }
+.janela:has(.colecao-conquistas) { max-width: 920px; }
+.colecao-conquistas { font-size: 13px; }
+.colecao-conquistas > p { color: var(--apagado); font-size: 12px; line-height: 1.6; }
+.prestigio { display: flex; gap: 18px; align-items: center; padding: 16px; border: 1px solid #9e864f; border-radius: 10px; background: linear-gradient(100deg, #28475a, #183343); }
+.prestigio-numero { display: grid; place-items: center; flex-shrink: 0; width: 64px; height: 64px; border-radius: 50%; border: 3px solid #eac779; color: #ffde96; font-size: 30px; font-weight: 800; }
+.prestigio > div { flex: 1; } .prestigio strong { font-size: 20px; color: #f3d18d; }
+.prestigio p { margin: 4px 0; } .prestigio small { color: var(--apagado); }
+.colecao-conquistas progress { width: 100%; height: 7px; accent-color: #b6d477; }
+.desafios-carreira { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.desafio-carreira { padding: 12px; border: 1px solid #4a6975; border-radius: 8px; background: #203d4b; }
+.desafio-carreira strong { color: #e4c88f; } .desafio-carreira p { font-size: 12px; }
+.desafio-carreira button { width: 100%; margin-top: 8px; font-size: 12px; }
+.filtros-conquistas { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.filtros-conquistas button { font-size: 12px; }
+.filtros-conquistas button[aria-pressed="true"] { color: #e6f2bb; border-color: #adc975; }
+.medalhas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.medalha { display: flex; gap: 12px; padding: 13px; background: #172f3e; border: 1px solid #415562; border-radius: 7px; }
+.medalha-icone { display: grid; place-items: center; flex-shrink: 0; width: 46px; height: 46px; font-size: 28px; border-radius: 7px; background: #263c46; filter: grayscale(1); opacity: .55; }
+.medalha.ganha { border-color: #7c9252; background: linear-gradient(110deg, #2c4138, #1b3540); }
+.medalha.ganha .medalha-icone { filter: none; opacity: 1; background: #526039; }
+.medalha > div { flex: 1; min-width: 0; } .medalha strong { color: #c1ccd0; }
+.medalha.ganha strong { color: #dcecba; } .medalha p { margin: 4px 0 6px; font-size: 12px; color: #a8bec6; line-height: 1.4; }
+.medalha small { color: #a5b6a1; font-size: 10px; }
+@media (max-width: 650px) { .medalhas, .desafios-carreira { grid-template-columns: 1fr; } .conquista-toast { bottom: 280px; right: 12px; padding: 12px; } .prestigio { padding: 12px; gap: 12px; } .prestigio strong { font-size: 17px; } }
