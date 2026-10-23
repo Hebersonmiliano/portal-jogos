@@ -3,7 +3,7 @@
 //  PRINCIPAL.JS — liga tudo: teclado, interação (tecla E) e laço do jogo
 // =====================================================================
 
-const DISTANCIA_INTERACAO = 1.4;
+const DISTANCIA_INTERACAO = 0.95; // distância até a borda do objeto, incluindo o raio do personagem
 
 // ---------------------------------------------------------------------
 // Teclado
@@ -88,13 +88,26 @@ function coletarProximo() {
 // ---------------------------------------------------------------------
 // Interação com as estações
 // ---------------------------------------------------------------------
+// Usa o mesmo retângulo da colisão: toda borda acessível aceita interação.
+// Os pontos de uso continuam servindo apenas às rotas dos funcionários.
+function distanciaDaEstacao(id, pos = jogador) {
+  let objeto = ESTACOES[id];
+  if (!objeto && /^m\d+$/.test(id)) {
+    const i = Number(id.slice(1));
+    if (E.maquinas[i] && VAGAS[i]) objeto = { ...VAGAS[i], ...TAM_VAGA };
+  }
+  if (!objeto) return Infinity;
+  const dx = Math.max(0, Math.abs(pos.x - objeto.x) - objeto.w / 2);
+  const dz = Math.max(0, Math.abs(pos.z - objeto.z) - objeto.d / 2);
+  return Math.hypot(dx, dz);
+}
+
 function estacaoProxima() {
   const candidatos = ['balcao', 'palete', 'bancada', 'copa', 'estoque', 'expedicao', ...E.maquinas.map((m, i) => 'm' + i)];
   let melhor = '', menor = DISTANCIA_INTERACAO;
   for (const id of candidatos) {
-    const p = pontoDe(id);
-    const d = Math.hypot(jogador.x - p.x, jogador.z - p.z);
-    if (d < menor) { menor = d; melhor = id; }
+    const d = distanciaDaEstacao(id);
+    if (d <= menor) { menor = d; melhor = id; }
   }
   return melhor;
 }
