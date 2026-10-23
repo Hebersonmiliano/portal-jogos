@@ -26,7 +26,7 @@ window.JOGOS = [
     descricao: "A fábrica parou. Assuma o papel de Maya Ferreira, técnica de manutenção, enfrente cinco robôs corrompidos e recupere os fusíveis. Reative os três painéis da Oficina, Montagem e Central de Energia para liberar a saída. Fase 1 jogável, com checkpoints e trilha industrial.",
     controles: "Computador com teclado: A/D ou setas andam; S agacha; S+A/D anda agachada; Shift+A/D corre; W/Espaço/cima pula; J/X ataca com a chave; K esquiva; segure E por 1 segundo para reparar um painel seguro com fusível. P/Esc pausa; M alterna o áudio. Clique em INICIAR FASE 1 para começar. O progresso dura apenas durante a partida; recarregar reinicia a fase.",
     url: "jogos/setor-404/index.html",
-    versao: "1.0.1-fase1",
+    versao: "1.1.0-energia",
     capa: "assets/setor-404/capa.png",
     cor: "#ffb42c",
     icone: "🔧",

@@ -75,12 +75,44 @@
     g.fillStyle='#02080e';g.fillRect(x-2,y-2,w+4,h+4);g.fillStyle=color;g.fillRect(x,y,w,h);
     g.strokeStyle='#657580';g.strokeRect(x+0.5,y+0.5,w-1,h-1);
   }
+  function drawPower(g,index,online,frame){
+    const base=index*1280,color=online?'#60ffc5':'#986b30';
+    // Decorative equipment only: never changes platforms, hazards or collisions.
+    g.save();
+    for(const offset of [440,760,1060]){
+      const x=base+offset;
+      g.fillStyle='#111c25';g.fillRect(x-24,127,48,7);
+      g.fillStyle=online?'#b6ffe0':'#61503a';g.fillRect(x-20,132,40,3);
+      if(online){const glow=g.createLinearGradient(x,135,x,280);glow.addColorStop(0,'#71ffd526');glow.addColorStop(1,'#71ffd500');g.fillStyle=glow;g.fillRect(x-42,135,84,145);}
+    }
+    panel(g,base+140,128,205,18);g.font='10px monospace';g.fillStyle=color;
+    g.fillText(online?'ENERGIA ONLINE • PRODUZINDO':'SEM ENERGIA • AGUARDE REPARO',base+148,141);
+    // Ceiling power cable lights travel only after the local panel is restored.
+    g.fillStyle=online?'#184d48':'#28313a';g.fillRect(base+380,103,740,2);
+    for(let x=0;x<740;x+=32){g.fillStyle=online?'#3aac8b':'#4b4030';g.fillRect(base+380+x,102,5,4);}
+    if(online){g.fillStyle='#c1ffe8';g.fillRect(base+380+(frame*2%730),102,9,4);}
+    const x=base+710,y=241;
+    panel(g,x,y,175,53,'#112631');
+    g.fillStyle=color;g.fillRect(x+8,y+8,7,7);g.fillRect(x+24,y+8,7,7);
+    g.fillStyle='#9cb7bd';g.font='9px monospace';g.fillText(['BOMBA / OFICINA','ESTEIRA / MONTAGEM','GERADOR / CENTRAL'][index],x+9,y+45);
+    if(index===1){
+      g.fillStyle='#09121c';g.fillRect(x+40,y+8,122,23);
+      for(let j=0;j<7;j++){const offset=online?(frame*0.65+j*19)%114:j*19;g.fillStyle=online?'#dbaf56':'#645c4a';g.fillRect(x+43+offset,y+12,10,11);}
+      g.fillStyle='#7695a1';g.fillRect(x+39,y+29,124,3);
+    }else{
+      const cx=x+77,cy=y+19;g.save();g.translate(cx,cy);g.rotate(online?frame*(index===2?0.075:0.04):0);
+      g.fillStyle=online?'#5bd4b2':'#556575';g.fillRect(-19,-3,38,6);g.fillRect(-3,-16,6,32);g.fillStyle='#c0d8d8';g.fillRect(-4,-4,8,8);g.restore();
+      for(let j=0;j<5;j++){g.fillStyle=online?'#53efbc':'#30434c';const h=online?6+Math.round((Math.sin(frame*0.08+j)+1)*6):4;g.fillRect(x+113+j*8,y+30-h,5,h);}
+    }
+    g.restore();
+  }
   function drawWorld(g,bg,level,frame) {
     for(let i=0;i<3;i++){
       g.drawImage(bg,i*1280,0,1280,426);
       g.fillStyle=i===1?'#07233016':i===2?'#351d0e18':'#00000000';g.fillRect(i*1280,0,1280,426);
       const label=i===0?'01 / OFICINA':i===1?'02 / MONTAGEM':'03 / CENTRAL';
       panel(g,125+i*1280,93,235,32);g.font='bold 15px monospace';g.fillStyle='#f6b83a';g.fillText(label,140+i*1280,115);
+      drawPower(g,i,level.stations[i].done,frame);
     }
     // The background's door bays are sealed service rooms; the last one is the exit.
     for(const x of [1155,2435]){panel(g,x-19,151,117,22);g.fillStyle='#88a4b4';g.font='11px monospace';g.fillText('ACESSO TÉCNICO',x-13,167);}

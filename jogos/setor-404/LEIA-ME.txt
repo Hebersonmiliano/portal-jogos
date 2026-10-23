@@ -39,6 +39,9 @@ reduz sua altura de colisão. A morte articula joelhos, braços, tronco e
 cabeça antes de mostrar a tela de derrota, após cerca de 1,6 segundo.
 Os inimigos patrulham, perseguem, avisam o ataque e se recuperam após o golpe.
 A câmera acompanha Maya pelos três trechos da fase.
+Cada painel reparado acende as luzes do seu setor e ativa equipamentos:
+bomba na Oficina, esteira na Montagem e gerador na Central. A sinalização
+muda para ENERGIA ONLINE. Esses efeitos não alteram os perigos ou colisões.
 
 ESQUIVA K
 A esquiva dura cerca de 0,47 segundo: preparação, impulso com troca de apoio
