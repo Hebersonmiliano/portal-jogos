@@ -180,7 +180,8 @@ function abrirJanela(titulo, html, botoes) {
   $('modal').classList.remove('oculto');
   limparComandos();
   pausado = true;
-  area.firstElementChild?.focus();
+  area.parentElement?.scrollTo?.({ top: 0 });
+  area.firstElementChild?.focus({ preventScroll: true });
 }
 
 function fecharJanela() {
