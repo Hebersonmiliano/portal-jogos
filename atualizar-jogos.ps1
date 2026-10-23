@@ -6,6 +6,7 @@
 # (Arquivo sem acentos de proposito: o PowerShell 5.1 nao le UTF-8 sem BOM.)
 
 $origens = @{
+  "faisca" = (Join-Path $PSScriptRoot "..\pulso-fatal\builds\web")
   "security-test" = (Join-Path $PSScriptRoot "..\teste-de-seguranca\builds\web")
   "crepusculo"    = "C:\Users\teste\crepusculo-dos-reinos"
   "reino-colonos" = "C:\Users\teste\reino-colonos"
