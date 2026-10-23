@@ -22,10 +22,24 @@ function fixture(page='index.html',game='ultima-transmissao'){
  const selectors=new Map(),storage=new Map();
  const document={getElementById:id=>{if(!nodes.has(id))throw Error('ID ausente: '+id);return nodes.get(id);},querySelector:s=>{if(!selectors.has(s))selectors.set(s,new Node());return selectors.get(s);},querySelectorAll:()=>[],createElement:tag=>new Node(tag),documentElement:new Node('html')};
  const context=vm.createContext({window:{},document,location:{search:'?id='+game},URLSearchParams,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},console});
- for(const script of ['jogos.js','assets/comum.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
+ for(const script of ['jogos.js','assets/faisca.js','assets/comum.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
  return {context,document,run:file=>vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file}),storage};
 }
 function descendants(node,tag){return node.children.flatMap(n=>[...(n.tagName===tag?[n]:[]),...descendants(n,tag)]);}
+test('FAÍSCA apresenta personagem, seis fases e inicia somente um jogador',()=>{
+ const f=fixture('jogo.html','faisca'); f.run('assets/pagina-jogo.js');
+ const card=f.document.getElementById('apresentacao-faisca');
+ assert.equal(card.hidden,false); assert.equal(descendants(card,'figure').length,7);
+ assert.match(card.textContent,/Ao pousar/); assert.match(card.textContent,/não há ranking online/);
+ for(const img of descendants(card,'img')) assert.ok(fs.existsSync(path.join(root,img.src)),img.src);
+ const stage=f.document.getElementById('palco'); assert.equal(descendants(stage,'iframe').length,0);
+ card.querySelector('button').click(); assert.equal(card.hidden,true);
+ assert.equal(descendants(stage,'iframe').length,1); assert.match(stage.querySelector('iframe').src,/faisca\/index.html/);
+ const home=fixture(); home.run('assets/vitrine.js');
+ assert.match(home.document.getElementById('conteudo').textContent,/Pequeno herói/);
+ home.document.getElementById('busca').handlers.input({target:{value:'Última Transmissão'}});
+ assert.ok(!home.document.getElementById('conteudo').textContent.includes('Pequeno herói'));
+});
 test('card e destaque mostram os quatro personagens e informações do capítulo',()=>{const f=fixture(),game=f.context.window.JOGOS.find(g=>g.id==='ultima-transmissao');const card=f.context.criarCartao(game);assert.ok(card.className.includes('cartao-investigacao'));assert.equal(card.href,'jogo.html?id=ultima-transmissao');assert.equal(descendants(card,'img').length,5);assert.match(card.textContent,/8 pistas/);assert.match(card.textContent,/Investigar o caso/);const hero=f.context.criarHeroInvestigacao(game);assert.equal(descendants(hero,'figure').length,4);assert.equal(descendants(hero,'a')[0].href,'jogo.html?id=ultima-transmissao');assert.match(hero.textContent,/Uma verdade/);for(const n of descendants(hero,'figure'))assert.ok(n.querySelector('img').alt.startsWith('Retrato de '));});
 test('página inicial renderiza destaque, filtros, busca e cartões antigos',()=>{const f=fixture();f.run('assets/vitrine.js');assert.ok(f.document.getElementById('destaque').className.includes('destaque-investigacao'));assert.match(f.document.getElementById('destaque').textContent,/Miguel Santos/);assert.ok(f.document.getElementById('filtros').children.length>1);const old=f.context.window.JOGOS.find(g=>!g.apresentacao);const card=f.context.criarCartao(old);assert.ok(!card.className.includes('cartao-investigacao'));f.document.getElementById('busca').handlers.input({target:{value:'Última Transmissão'}});assert.match(f.document.getElementById('conteudo').textContent,/Investigar o caso/);f.document.getElementById('busca').handlers.input({target:{value:'palavra-que-nao-existe-123'}});assert.match(f.document.getElementById('conteudo').textContent,/Nenhum jogo encontrado/);});
 test('página do jogo apresenta elenco e galeria e inicia um único iframe',()=>{const f=fixture('jogo.html');f.run('assets/pagina-jogo.js');const presentation=f.document.getElementById('apresentacao');assert.equal(presentation.hidden,false);const content=f.document.getElementById('conteudo-investigacao');assert.equal(descendants(content,'figure').length,7);assert.match(content.textContent,/Dicas sem perder pontos/);const stage=f.document.getElementById('palco');assert.equal(descendants(stage,'iframe').length,0);presentation.querySelector('button').click();assert.equal(presentation.hidden,true);assert.equal(descendants(stage,'iframe').length,1);assert.match(stage.querySelector('iframe').src,/ultima-transmissao\/index.html\?v=2\.0\.0/);assert.equal(f.document.getElementById('tela-cheia').disabled,false);assert.equal(stage.scrolled,true);});

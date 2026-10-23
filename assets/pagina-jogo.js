@@ -31,6 +31,11 @@ if (!jogo) {
     const capa = criarCapa(jogo);
     capa.append(iniciar);
     palco.replaceChildren(capa);
+    if (jogo.id === "faisca") {
+      const apresentacao = document.getElementById("apresentacao-faisca");
+      apresentacao.hidden = false;
+      apresentacao.append(criarApresentacaoFaisca(true, () => iniciar.click()));
+    }
     // O jogo só carrega quando a pessoa clica, para a página abrir rápido.
     iniciar.onclick = () => {
       const quadro = el("iframe");
@@ -40,6 +45,10 @@ if (!jogo) {
       quadro.allow = "fullscreen; autoplay; gamepad";
       quadro.allowFullscreen = true;
       palco.replaceChildren(quadro);
+      if (jogo.id === "faisca") {
+        document.getElementById("apresentacao-faisca").hidden = true;
+        palco.scrollIntoView({ block: "start", behavior: "auto" });
+      }
       quadro.focus();
       marcarJogado(jogo.id);
       document.getElementById("tela-cheia").disabled = false;

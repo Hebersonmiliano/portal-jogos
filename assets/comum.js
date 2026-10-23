@@ -61,6 +61,14 @@ function criarCapa(jogo) {
   else if (ehNovo(jogo)) selos.append(el("span", "selo selo-novo", "Novo"));
   if (jogo.mobile) selos.append(el("span", "selo selo-mobile", "📱 Celular"));
   capa.append(selos);
+  if (jogo.id === "faisca") {
+    capa.classList.add("capa-faisca");
+    const retrato = el("img", "faisca-mini");
+    retrato.src = "assets/faisca/personagem.png";
+    retrato.alt = "Faísca com capuz azul, olhos luminosos e lenço amarelo";
+    retrato.loading = "lazy";
+    capa.append(retrato);
+  }
   if (jogo.vitrineIndustrial) {
     capa.classList.add("capa-security");
     const robo = el("img", "security-mini-robo");
@@ -94,6 +102,7 @@ function criarCartao(jogo) {
   const info = el("div", "cartao-info");
   info.append(el("h3", null, jogo.titulo));
   info.append(el("p", "cartao-generos", jogo.genero.join(" · ")));
+  if (jogo.id === "faisca") info.append(el("p", "faisca-resumo", "20 fases de precisão. Salte, use o dash e encontre o intervalo entre as armadilhas."));
   if (jogo.vitrineIndustrial) {
     a.classList.add("cartao-security");
     info.append(el("p", "security-cartao-resumo", "14 fases. Armadilhas industriais. Um robô tentando escapar."), el("span", "security-cartao-convite", "Aceitar o desafio →"));

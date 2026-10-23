@@ -69,6 +69,8 @@ function desenhar() {
   }
 
   const lista = filtrar();
+  const faisca = lista.find((j) => j.id === "faisca" && j.status === "disponivel");
+  if (faisca) conteudo.append(criarApresentacaoFaisca(false));
   const industrial = lista.find((j) => j.vitrineIndustrial && j.status === "disponivel");
   if (industrial) conteudo.append(criarCardIndustrial(industrial));
   const disponiveis = lista.filter((j) => j.status === "disponivel")
