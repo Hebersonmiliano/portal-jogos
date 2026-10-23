@@ -40,6 +40,14 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ## Publicar
 
+### SETOR 404
+
+`SETOR 404` está disponível em `jogo.html?id=setor-404`, com a Fase 1 em `jogos/setor-404/` e capa em `assets/setor-404/capa.png`. É um jogo HTML5 para computador com teclado, sem instalação, compilação ou controles de toque. Os recursos são carregados por caminhos relativos para funcionar no subdiretório do GitHub Pages. Música e efeitos começam apenas após clicar em **INICIAR FASE 1**.
+
+O repositório principal do jogo permanece privado. Esta pasta é a cópia de distribuição pública necessária para jogar no portal: ela não contém credenciais nem metadados Git. O jogo conserva a movimentação, a esquiva e a Fase 1 da versão aprovada. Para atualizar, substitua somente os arquivos dessa pasta, aumente `versao` no catálogo e atualize a chave de cache de `jogos.js` nas duas páginas do portal.
+
+Verificação: `node --test tests/apresentacao.test.cjs`. Os testes incluem catálogo, busca, filtros, início do jogador, recursos locais e integridade da cópia distribuída.
+
 Cloudflare Pages ou Netlify: crie um projeto, aponte para esta pasta (ou para um repositório GitHub)
 e não configure comando de build. O domínio próprio (.com.br) pode ser ligado depois.
 

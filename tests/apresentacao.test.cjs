@@ -26,6 +26,46 @@ function fixture(page='index.html',game='ultima-transmissao'){
  return {context,document,run:file=>vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file}),storage};
 }
 function descendants(node,tag){return node.children.flatMap(n=>[...(n.tagName===tag?[n]:[]),...descendants(n,tag)]);}
+
+test('SETOR 404 aparece na busca e no filtro de ação, sem trocar o destaque existente',()=>{
+ const f=fixture(),game=f.context.window.JOGOS.find(g=>g.id==='setor-404');
+ assert.equal(game.status,'disponivel');assert.equal(game.mobile,false);assert.equal(game.destaque,false);
+ assert.equal(f.context.window.JOGOS.filter(g=>g.id==='setor-404').length,1);
+ const card=f.context.criarCartao(game);assert.equal(card.href,'jogo.html?id=setor-404');assert.equal(card.querySelector('img').src,game.capa);
+ f.run('assets/vitrine.js');assert.match(f.document.getElementById('destaque').textContent,/Miguel Santos/);
+ f.document.getElementById('busca').handlers.input({target:{value:'setor 404'}});
+ assert.match(f.document.getElementById('conteudo').textContent,/SETOR 404/);
+ f.document.getElementById('filtros').children.find(n=>n.textContent==='Ação').click();
+ assert.match(f.document.getElementById('conteudo').textContent,/SETOR 404/);
+});
+
+test('SETOR 404 inicia um único iframe e habilita tela cheia, favoritos e recentes',()=>{
+ const f=fixture('jogo.html','setor-404');f.run('assets/pagina-jogo.js');
+ const palco=f.document.getElementById('palco');assert.equal(descendants(palco,'iframe').length,0);
+ assert.equal(f.document.getElementById('celular').textContent,'Melhor no computador');
+ assert.match(f.document.getElementById('controles').textContent,/K esquiva/);
+ palco.querySelector('button').click();assert.equal(descendants(palco,'iframe').length,1);
+ assert.equal(palco.querySelector('iframe').src,'jogos/setor-404/index.html?v=1.0.0-fase1');
+ assert.equal(f.document.getElementById('tela-cheia').disabled,false);
+ f.document.getElementById('tela-cheia').click();assert.equal(palco.querySelector('iframe').fullscreen,true);
+ f.document.getElementById('favorito').click();assert.match(f.storage.get('portal.favoritos'),/setor-404/);
+ assert.match(f.storage.get('portal.recentes'),/setor-404/);
+});
+
+test('SETOR 404 contém scripts, imagens, capa e nomes de arquivo corretos para hospedagem',()=>{
+ const f=fixture(),game=f.context.window.JOGOS.find(g=>g.id==='setor-404'),dir=path.join(root,'jogos/setor-404');
+ assert.ok(fs.existsSync(path.join(root,game.capa)));
+ const html=fs.readFileSync(path.join(root,game.url),'utf8');
+ for(const m of html.matchAll(/(?:href|src)="([^"]+)"/g)){
+  const file=m[1].split('?')[0];assert.ok(!file.startsWith('/'),'Caminho absoluto: '+file);assert.ok(fs.existsSync(path.join(dir,file)),file);
+ }
+ for(const file of ['game.js','maya-rig.js','r04-rig.js','phase1-level.js','audio.js']){
+  const source=fs.readFileSync(path.join(dir,file),'utf8');new vm.Script(source,{filename:file});
+  assert.ok(!/(?:ghp_|github_pat_|sk-proj-|C:\\\\Users)/.test(source));
+ }
+ for(const m of fs.readFileSync(path.join(dir,'game.js'),'utf8').matchAll(/\.src='(assets\/[^']+)'/g))assert.ok(fs.existsSync(path.join(dir,m[1])),m[1]);
+ assert.equal(fs.existsSync(path.join(dir,'.git')),false);assert.equal(fs.existsSync(path.join(dir,'.openai')),false);
+});
 test('FAÍSCA apresenta personagem, sete fases e inicia somente um jogador',()=>{
  const f=fixture('jogo.html','faisca'); f.run('assets/pagina-jogo.js');
  const card=f.document.getElementById('apresentacao-faisca');

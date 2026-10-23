@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SETOR 404 — Fase 1</title>
+  <meta name="description" content="Fase 1 de SETOR 404: restaure a energia da fábrica e enfrente os robôs corrompidos.">
+  <link rel="stylesheet" href="style.css?v=7">
+</head>
+<body>
+  <main class="shell">
+    <header><h1>SETOR <span>404</span></h1><p>FASE 1 <span class="separator">/</span> SETOR DE MANUTENÇÃO</p></header>
+    <section class="game-wrap" aria-label="Fase 1 de Setor 404">
+      <canvas id="game" width="1280" height="426" tabindex="0" aria-label="Jogo de ação lateral. A e D: andar. S: agachar. Shift: correr. W: pular. J: atacar. K: esquivar. E: reparar."></canvas>
+      <div id="start" class="overlay">
+        <div class="mission-card"><p class="eyebrow">PROTOCOLO DE EMERGÊNCIA • 01</p><h2>A LINHA PAROU.<br>A MISSÃO COMEÇOU.</h2>
+          <p>Maya precisa restaurar a energia da fábrica.<br>Recupere fusíveis dos robôs e reative os três painéis.</p>
+          <p class="brief">Oficina → Montagem → Central de energia</p>
+          <button id="play">INICIAR FASE 1</button>
+          <small>Música e efeitos começam ao iniciar. Use M para silenciar.</small>
+        </div>
+      </div>
+      <div id="pause-overlay" class="overlay" hidden><div class="mission-card"><p class="eyebrow">SISTEMA EM ESPERA</p><h2>JOGO PAUSADO</h2><p>Sua missão continua daqui.</p><button id="resume">RETOMAR</button></div></div>
+      <div id="result" class="overlay" hidden><div class="mission-card"><p class="eyebrow">RELATÓRIO DE OPERAÇÃO</p><h2 id="result-title"></h2><p id="result-info"></p><div class="result-actions"><button id="retry">CONTINUAR DO CHECKPOINT</button><button id="again" class="secondary">JOGAR NOVAMENTE</button></div></div></div>
+    </section>
+    <section class="controls">
+      <div><kbd>A</kbd><kbd>D</kbd><span>Mover</span></div>
+      <div><kbd>S</kbd><span>Agachar</span></div>
+      <div><kbd>SHIFT</kbd><span>Correr</span></div>
+      <div><kbd>W</kbd><span>Pular</span></div>
+      <div><kbd>J</kbd><span>Atacar</span></div>
+      <div><kbd>K</kbd><span>Esquiva baixa</span></div>
+      <div><kbd>E</kbd><span>Segure para reparar</span></div>
+      <div><kbd>P</kbd><span>Pausa</span></div>
+    </section>
+    <section class="toolbar" aria-label="Opções do jogo">
+      <p>Recupere fusíveis. Repare os painéis. Alcance a saída.</p>
+      <div class="options"><button id="sound" class="secondary" aria-pressed="true">SOM: LIGADO</button><label for="volume">VOLUME <input id="volume" type="range" min="0" max="100" value="34" aria-label="Volume da música e efeitos"></label><button id="pause" class="secondary">PAUSAR</button><button id="restart" class="secondary">REINICIAR FASE</button></div>
+    </section>
+  </main>
+  <script src="maya-rig.js?v=7"></script>
+  <script src="r04-rig.js?v=7"></script>
+  <script src="phase1-level.js?v=7"></script>
+  <script src="audio.js?v=7"></script>
+  <script src="game.js?v=7"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+SETOR 404 — FASE 1: SETOR DE MANUTENÇÃO
+
+Abra o arquivo index.html dentro desta pasta. Mantenha a pasta assets junto
+dos arquivos do jogo. Se o jogo já estiver aberto, use Ctrl+F5 para recarregar.
+
+CONTROLES
+A / D ou setas: andar
+S / seta para baixo: agachar
+S + A / D: andar agachada
+Shift + A / D: correr
+W / seta para cima / Espaço: pular (solte para um salto curto)
+J ou X: atacar com a chave
+K: esquiva baixa (A / D escolhe a direção ao iniciar)
+E: segure por 1 segundo próximo a um painel para reparar
+P / Escape: pausar ou retomar
+M: ligar ou desligar a música e os efeitos
+REINICIAR FASE: começar novamente
+
+OBJETIVO
+Explore Oficina, Montagem e Central de Energia. Recupere fusíveis dos robôs,
+reative os três painéis e alcance a saída à direita. Cada painel precisa de
+um fusível e de uma área segura para o reparo. Há cinco robôs, incluindo
+um supervisor. Plataformas guardam itens opcionais de energia e peças.
+As descargas elétricas avisam em amarelo antes de disparar em azul.
+
+Cada painel ativa um checkpoint e recupera parte da vida. Após uma derrota,
+CONTINUAR DO CHECKPOINT mantém os painéis, os fusíveis e os robôs já derrotados.
+Esse progresso vale durante a partida; recarregar a página inicia uma nova fase.
+
+ÁUDIO
+A trilha original em chiptune e os efeitos são sintetizados no navegador.
+Clique em INICIAR FASE 1 para habilitar o som. Ajuste o volume abaixo do jogo
+ou pressione M para silenciar. Não é necessária conexão com a internet.
+
+Maya e os R-04 usam pernas articuladas, comprimentos fixos e passos ligados
+ao deslocamento. Maya tem poses distintas de agachar, caminhar agachada,
+correr, impulsionar o salto, subir, cair e absorver a aterrissagem. Agachar
+reduz sua altura de colisão. A morte articula joelhos, braços, tronco e
+cabeça antes de mostrar a tela de derrota, após cerca de 1,6 segundo.
+Os inimigos patrulham, perseguem, avisam o ataque e se recuperam após o golpe.
+A câmera acompanha Maya pelos três trechos da fase.
+
+ESQUIVA K
+A esquiva dura cerca de 0,47 segundo: preparação, impulso com troca de apoio
+das pernas e recuperação. Joelhos, tornozelos, quadril, braços e cabeça
+acompanham o movimento, sem girar o desenho inteiro. A altura de colisão
+diminui durante a pose baixa. A direção fica travada durante a esquiva.
+O trecho central protege contra golpes; preparação e recuperação são vulneráveis.
+Custa 1 de energia, tem intervalo de cerca de 0,93 segundo e exige um novo
+toque em K. No ar, conserva a gravidade e só pode ser usada uma vez até pousar.
+Rastros cianos, linhas de velocidade, poeira dos pés e um efeito sonoro curto
+acompanham o deslocamento. Pausar congela também esses efeitos.
