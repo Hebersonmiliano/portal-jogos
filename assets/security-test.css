@@ -1,0 +1,100 @@
+/* Apresentação de SECURITY TEST, com o personagem e a arte originais do jogo. */
+.security-card {
+  margin: 24px 0 30px;
+  border: 1px solid #d5a84b66;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #101c27;
+  color: #f3f1e7;
+}
+.security-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, .8fr);
+  gap: 28px;
+  align-items: center;
+  padding: 34px 38px 40px;
+}
+.security-fundo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .3;
+  z-index: -2;
+  image-rendering: pixelated;
+}
+.security-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #0c1726f5, #101e2dc9 55%, #0d20335c);
+  z-index: -1;
+}
+.security-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 7px;
+  background: repeating-linear-gradient(125deg, #edbd58 0 12px, #15222f 12px 25px);
+}
+.security-selo {
+  display: block;
+  color: #e9bc64;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+.security-titulo {
+  font: 400 clamp(22px, 3vw, 34px)/1.5 'Press Start 2P', monospace;
+  letter-spacing: -1.1px;
+  margin: 13px 0;
+}
+.security-titulo span { color: #edbd58; }
+.security-chamada { font-size: 23px; font-weight: 800; margin: 0 0 11px; line-height: 1.3; }
+.security-resumo { max-width: 59ch; color: #becbd5; font-size: 15px; line-height: 1.7; margin: 0; }
+.security-fatos { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 22px; }
+.security-fatos span { border: 1px solid #ebbe5a44; background: #0b1621a8; border-radius: 4px; padding: 5px 10px; font-size: 11px; font-weight: 800; color: #efd49d; }
+.security-jogar { background: #edbd58; border-radius: 6px; color: #132432; box-shadow: 0 4px 0 #8c6123; padding: 14px 20px; }
+.security-jogar:focus-visible { outline: 3px solid #eafaff; outline-offset: 5px; }
+.security-dispositivos { color: #a8bac7; font-size: 11px; margin: 15px 0 0; }
+.security-personagem { position: relative; margin: 0; text-align: center; align-self: stretch; display: flex; align-items: center; justify-content: flex-end; flex-direction: column; }
+.security-personagem::before { content: ''; position: absolute; width: 230px; height: 230px; border-radius: 50%; background: radial-gradient(circle, #29d7e12b, transparent 68%); top: 18%; z-index: -1; }
+.security-personagem > img { width: min(100%, 320px); height: 290px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 14px 8px #020811b0); }
+.security-personagem figcaption { max-width: 235px; margin-top: 6px; }
+.security-personagem figcaption > span { color: #ecbf65; font-size: 10px; letter-spacing: 1.4px; font-weight: 800; }
+.security-personagem figcaption p { color: #afc3cf; font-size: 12px; margin: 6px 0 0; }
+.security-comentarios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; padding: 24px 38px 27px; }
+.security-comentarios article + article { border-left: 1px solid #9eb7ca26; padding-left: 24px; }
+.security-comentarios h3 { font-size: 15px; color: #edc774; margin-bottom: 8px; }
+.security-comentarios p { font-size: 13px; line-height: 1.65; color: #aebfcd; margin: 0; }
+.cartao-security { border-color: #e8b95266; }
+.capa-security > img:first-child { opacity: .55; }
+.capa-security .security-mini-robo { inset: auto 2px -5px auto; width: 60%; height: 155%; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 6px 6px #07121c); }
+.security-capa-titulo { position: absolute; left: 12px; bottom: 15px; color: #ffe4a4; font: 400 11px/1.7 'Press Start 2P', monospace; white-space: pre-line; text-shadow: 0 2px 4px #000; }
+.capa-security .selos { z-index: 1; }
+.security-cartao-resumo { color: #bcc7d6; font-size: 12px; line-height: 1.6; margin: 12px 0; }
+.security-cartao-convite { font-size: 12px; font-weight: 800; color: #edc774; }
+@media (max-width: 760px) {
+  .security-hero { grid-template-columns: minmax(0, 1fr) 180px; padding: 26px 24px 31px; gap: 12px; }
+  .security-personagem > img { height: 230px; }
+  .security-titulo { font-size: 24px; }
+  .security-chamada { font-size: 20px; }
+  .security-comentarios { gap: 16px; padding: 22px 24px; }
+  .security-comentarios article + article { padding-left: 16px; }
+}
+@media (max-width: 540px) {
+  .security-hero { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 25px 22px 32px; }
+  .security-selo { font-size: 9px; letter-spacing: .9px; }
+  .security-titulo { font-size: clamp(18px, 5.4vw, 26px); letter-spacing: -1px; }
+  .security-chamada { font-size: 21px; }
+  .security-resumo { font-size: 14px; }
+  .security-personagem { grid-row: 1; }
+  .security-personagem > img { width: 190px; height: 170px; }
+  .security-personagem figcaption { display: none; }
+  .security-jogar { font-size: 14px; width: 100%; justify-content: center; padding-inline: 10px; }
+  .security-comentarios { grid-template-columns: 1fr; gap: 18px; padding: 24px 22px; }
+  .security-comentarios article + article { border-left: 0; border-top: 1px solid #9eb7ca26; padding: 17px 0 0; }
+}

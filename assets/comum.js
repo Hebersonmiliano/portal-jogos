@@ -61,6 +61,15 @@ function criarCapa(jogo) {
   else if (ehNovo(jogo)) selos.append(el("span", "selo selo-novo", "Novo"));
   if (jogo.mobile) selos.append(el("span", "selo selo-mobile", "📱 Celular"));
   capa.append(selos);
+  if (jogo.vitrineIndustrial) {
+    capa.classList.add("capa-security");
+    const robo = el("img", "security-mini-robo");
+    robo.src = jogo.vitrineIndustrial.personagem;
+    robo.alt = jogo.vitrineIndustrial.personagemAlt;
+    robo.loading = "lazy";
+    robo.decoding = "async";
+    capa.append(robo, el("span", "security-capa-titulo", "SECURITY\nTEST"));
+  }
   if (jogo.apresentacao) {
     capa.classList.add("capa-investigacao");
     const elenco = el("div", "elenco-mini");
@@ -85,6 +94,10 @@ function criarCartao(jogo) {
   const info = el("div", "cartao-info");
   info.append(el("h3", null, jogo.titulo));
   info.append(el("p", "cartao-generos", jogo.genero.join(" · ")));
+  if (jogo.vitrineIndustrial) {
+    a.classList.add("cartao-security");
+    info.append(el("p", "security-cartao-resumo", "14 fases. Armadilhas industriais. Um robô tentando escapar."), el("span", "security-cartao-convite", "Aceitar o desafio →"));
+  }
   if (jogo.apresentacao) {
     a.classList.add("cartao-investigacao");
     info.append(el("p", "cartao-chamada", jogo.apresentacao.card));
@@ -139,6 +152,49 @@ function criarHeroInvestigacao(jogo, iniciar) {
   texto.append(botao, el("p", "investigacao-nota", "Grátis · Sem instalação · Sem limite de tempo"));
   hero.append(fundo, texto, criarElenco(jogo));
   return hero;
+}
+
+function criarCardIndustrial(jogo, iniciar) {
+  const dados = jogo.vitrineIndustrial;
+  const card = el("section", "security-card");
+  card.setAttribute("aria-label", "Conheça SECURITY TEST");
+  const hero = el("div", "security-hero");
+  const fundo = el("img", "security-fundo");
+  fundo.src = jogo.capa;
+  fundo.alt = "";
+  fundo.loading = "lazy";
+  fundo.decoding = "async";
+  const texto = el("div", "security-texto");
+  const titulo = el("h2", "security-titulo", "SECURITY ");
+  titulo.append(el("span", null, "TEST"));
+  texto.append(el("span", "security-selo", dados.selo), titulo,
+    el("p", "security-chamada", dados.chamada), el("p", "security-resumo", dados.resumo));
+  const fatos = el("div", "security-fatos");
+  ["14 fases", "Pixel art", "Dificuldade extrema"].forEach((fato) => fatos.append(el("span", null, fato)));
+  const jogar = el(iniciar ? "button" : "a", "botao security-jogar", "▶ Jogar SECURITY TEST");
+  if (iniciar) { jogar.type = "button"; jogar.onclick = iniciar; }
+  else jogar.href = "jogo.html?id=" + encodeURIComponent(jogo.id);
+  texto.append(fatos, jogar, el("p", "security-dispositivos", "Teclado · Controle Xbox · Celular"));
+  const personagem = el("figure", "security-personagem");
+  const robo = el("img");
+  robo.src = dados.personagem;
+  robo.alt = dados.personagemAlt;
+  robo.loading = "lazy";
+  robo.decoding = "async";
+  robo.width = 96;
+  robo.height = 96;
+  const legenda = el("figcaption");
+  legenda.append(el("span", null, "CONHEÇA O ROBÔ"), el("p", null, dados.personagemLegenda));
+  personagem.append(robo, legenda);
+  hero.append(fundo, texto, personagem);
+  const comentarios = el("div", "security-comentarios");
+  dados.comentarios.forEach((comentario) => {
+    const nota = el("article");
+    nota.append(el("h3", null, comentario.titulo), el("p", null, comentario.texto));
+    comentarios.append(nota);
+  });
+  card.append(hero, comentarios);
+  return card;
 }
 
 function preencherMarca() {

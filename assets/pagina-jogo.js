@@ -48,12 +48,21 @@ if (!jogo) {
         palco.classList.add("palco-investigacao-ativo");
         palco.scrollIntoView({ block: "start", behavior: "auto" });
       }
+      if (jogo.vitrineIndustrial) {
+        document.getElementById("apresentacao-industrial").hidden = true;
+        palco.scrollIntoView({ block: "start", behavior: "auto" });
+      }
     };
     if (jogo.apresentacao) {
       const apresentacao = document.getElementById("apresentacao");
       apresentacao.hidden = false;
       apresentacao.append(criarHeroInvestigacao(jogo, () => iniciar.click()));
       preencherApresentacaoInvestigacao(jogo);
+    }
+    if (jogo.vitrineIndustrial) {
+      const card = document.getElementById("apresentacao-industrial");
+      card.hidden = false;
+      card.append(criarCardIndustrial(jogo, () => iniciar.click()));
     }
   } else {
     const capa = criarCapa(jogo);

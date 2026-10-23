@@ -69,6 +69,8 @@ function desenhar() {
   }
 
   const lista = filtrar();
+  const industrial = lista.find((j) => j.vitrineIndustrial && j.status === "disponivel");
+  if (industrial) conteudo.append(criarCardIndustrial(industrial));
   const disponiveis = lista.filter((j) => j.status === "disponivel")
     .sort((a, b) => (b.lancamento || "").localeCompare(a.lancamento || ""));
   const breve = lista.filter((j) => j.status === "em-breve");

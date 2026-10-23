@@ -24,6 +24,12 @@ _headers              cabeçalhos COOP/COEP (Cloudflare Pages / Netlify) para Go
 Campos úteis: `status: "em-breve"` mostra o jogo na seção "Em breve", sem botão de jogar;
 `destaque: true` permite que ele apareça no banner; o selo "Novo" aparece sozinho nos 30 dias após `lancamento`.
 
+## Card de SECURITY TEST
+
+O campo `vitrineIndustrial` no catálogo apresenta o robô original, uma chamada e três textos sobre o desafio. O card aparece na página inicial conforme a busca e o gênero selecionados, e na página do jogo antes de iniciar. O botão do card inicia o mesmo jogador existente. O cartão da grade também mostra o robô e um resumo. Os textos são de apresentação; não são avaliações de visitantes.
+
+Os estilos ficam em `assets/security-test.css`; `assets/security-test/` contém o sprite do robô e o fundo industrial, copiados dos recursos originais do projeto Godot. Esses arquivos de apresentação ficam fora da pasta da exportação para serem preservados quando ela for atualizada.
+
 ## Godot (FoxAventura)
 
 `SECURITY TEST` está integrado em `jogos/security-test/`, com a exportação Web sem threads do Godot 4.7.2. O catálogo oferece teclado, Xbox e toque, e usa uma capa capturada do jogo. A origem de desenvolvimento, na estrutura local, é `../teste-de-seguranca/builds/web/`; o atualizador copia essa exportação e conserva a capa. Para atualizar, reexporte, copie os arquivos Web, aumente `versao` no catálogo e atualize a chave de cache de `jogos.js` nas páginas.
