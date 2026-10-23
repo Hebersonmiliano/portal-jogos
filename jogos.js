@@ -45,7 +45,7 @@ window.JOGOS = [
     descricao: "Corra, salte e use o dash para sobreviver a 20 fases de armadilhas. Três espaços de salvamento e ranking local. Versão em desenvolvimento: 15 cenários já receberam o novo visual cartoon.",
     controles: "Teclado: A/D ou setas movem; Espaço/W/cima pula; Shift/X usa dash; R reinicia; Esc pausa; M alterna áudio. Controle: analógico/direcional move, A pula, X/RB usa dash, Y reinicia, Start pausa e B volta nos menus. Progresso e ranking ficam neste navegador. Recomendado para computador com teclado ou controle.",
     url: "jogos/faisca/index.html",
-    versao: "0.15.0",
+    versao: "0.15.1-audio",
     capa: "assets/faisca/capa.png",
     cor: "#ffb641",
     icone: "⚡",
