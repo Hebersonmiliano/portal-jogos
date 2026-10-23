@@ -98,9 +98,9 @@ function flutuar(texto, x, y, z, cor) {
 function montarLoja() {
   $('lista-loja').innerHTML = itensLoja().map(item => `
     <div class="item" id="item-${item.id}">
-      <div class="item-topo"><span class="item-nome"></span>
+      <div class="item-topo"><div class="item-dados"><span class="item-nome"></span><span class="item-preco"></span></div>
         <button data-acao="comprar" data-id="${item.id}"></button></div>
-      <div class="item-desc"></div>
+      <div class="item-desc"></div><div class="item-status"></div>
     </div>`).join('');
   atualizarLoja();
 }
@@ -111,10 +111,12 @@ function atualizarLoja() {
     const botao = el.querySelector('button');
     el.querySelector('.item-nome').textContent = item.nome;
     el.querySelector('.item-desc').textContent = item.desc;
+    el.querySelector('.item-preco').textContent = reais(item.preco);
+    el.querySelector('.item-status').textContent = item.comprado ? 'Concluído' : item.motivo || (E.dinheiro < item.preco ? `Faltam ${reais(item.preco - E.dinheiro)}` : 'Disponível para comprar');
     el.classList.toggle('comprado', item.comprado);
     el.classList.toggle('bloqueado', !item.comprado && !!item.motivo);
     if (item.comprado) { botao.textContent = 'Comprado'; botao.disabled = true; }
-    else if (item.motivo) { botao.textContent = item.motivo; botao.disabled = true; }
+    else if (item.motivo) { botao.textContent = 'Bloqueado'; botao.disabled = true; }
     else { botao.textContent = reais(item.preco); botao.disabled = E.dinheiro < item.preco; }
   }
 }

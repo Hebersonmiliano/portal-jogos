@@ -23,7 +23,10 @@ function proximaEvolucao() {
     for (const id of ['fornecedor_auto', 'transportadora']) {
       if (!tem(id)) return { nome: MELHORIAS[id].nome, preco: MELHORIAS[id].preco, dica: 'Prepare seu império' };
     }
-    if (!E.maquinas.some(m => m.tipo === 'montadora')) return { nome: MAQUINAS.montadora.nome, preco: MAQUINAS.montadora.preco, dica: 'Modernize a produção' };
+    if (!E.maquinas.some(m => m.tipo === 'montadora')) {
+      if (E.maquinas.length >= vagas()) return { nome: 'Modernizar dobradeira → montadora', preco: MAQUINAS.montadora.preco - MAQUINAS.dobradeira.preco, dica: 'Reutilize uma vaga ocupada' };
+      return { nome: MAQUINAS.montadora.nome, preco: MAQUINAS.montadora.preco, dica: 'Modernize a produção' };
+    }
     return { nome: MELHORIAS.automacao_total.nome, preco: MELHORIAS.automacao_total.preco, dica: 'Última evolução' };
   }
   return null;

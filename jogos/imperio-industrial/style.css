@@ -342,3 +342,9 @@ button:hover:not(:disabled) { background: #355e72; }
 #btn-ativar-audio { border-color: #91b9a5; color: #cae9d4; }
 .acoes-topo { max-width: 540px; }
 @media (pointer: coarse), (max-width: 700px) { .acoes-topo { width: 148px; } .acoes-topo #btn-ativar-audio { width: 100%; font-size: 11px; padding: 5px; } }
+
+.item-dados { display: flex; flex-direction: column; gap: 4px; }
+.item-preco { color: var(--amarelo); font-size: 14px; font-weight: 700; }
+.item-status { color: #d6c798; font-size: 12px; margin-top: 7px; line-height: 1.5; }
+.item-desc { white-space: pre-line; }
+.rotulo.nome-maquina { color: #ffe3a1; background: #183747df; padding: 3px 6px; border-radius: 4px; font-size: 10px; letter-spacing: .2px; }

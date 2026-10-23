@@ -40,7 +40,7 @@ const MELHORIAS = {
 };
 
 const ORDEM_LOJA = ['papelao', 'estilete', 'carrinho', 'dobradeira', 'bancada_pro', 'funcionario', 'cafe_equipe',
-  'fornecedor_auto', 'esteira', 'transportadora', 'montadora', 'expansao', 'automacao_total'];
+  'fornecedor_auto', 'esteira', 'transportadora', 'montadora', 'modernizar_dobradeira', 'expansao', 'automacao_total'];
 
 const NIVEIS = ['', 'Produção manual', 'Primeiros equipamentos', 'Funcionários', 'Automatização', 'Grande indústria'];
 
@@ -299,13 +299,21 @@ function novoPedido() {
 // ---------------------------------------------------------------------
 // LOJA
 // ---------------------------------------------------------------------
+function requisitosAutomacao() {
+  return [
+    { nome: 'Expansão do galpão', ok: tem('expansao') },
+    { nome: 'Contrato com fornecedor', ok: tem('fornecedor_auto') },
+    { nome: 'Transportadora contratada', ok: tem('transportadora') },
+    { nome: 'Montadora automática', ok: E.maquinas.some(m => m.tipo === 'montadora') },
+  ];
+}
+
 function requisitoFaltando(id) {
   if (id === 'esteira' && E.maquinas.length === 0) return 'Precisa de máquina';
   if (id === 'expansao' && !tem('esteira')) return 'Precisa de esteira';
   if (id === 'automacao_total') {
-    if (!tem('expansao')) return 'Precisa da expansão';
-    if (!tem('fornecedor_auto') || !tem('transportadora')) return 'Automatize tudo';
-    if (!E.maquinas.some(m => m.tipo === 'montadora')) return 'Precisa de montadora';
+    const falta = requisitosAutomacao().filter(r => !r.ok).map(r => r.nome);
+    if (falta.length) return 'Falta: ' + falta.join(', ');
   }
   return '';
 }
@@ -326,14 +334,20 @@ function itensLoja() {
         desc: `Funcionários ${Math.round((BONUS_CAFE - 1) * 100)}% mais rápidos por ${DURACAO_CAFE} s (${reais(PRECO_CAFE)} por pessoa).` });
       if (E.funcionarios === 0) item.motivo = 'Sem funcionários';
       else if (E.energiaEquipe > 0) item.motivo = `Energia: ${Math.ceil(E.energiaEquipe)} s`;
+    } else if (id === 'modernizar_dobradeira') {
+      Object.assign(item, { nome: 'Modernizar dobradeira → montadora', preco: MAQUINAS.montadora.preco - MAQUINAS.dobradeira.preco,
+        desc: 'Converte uma dobradeira em montadora automática na mesma vaga. Mantém papelão e caixas; reinicia apenas a montagem em andamento.' });
+      if (!tem('esteira')) item.motivo = 'Precisa de esteira';
+      else if (!E.maquinas.some(m => m.tipo === 'dobradeira')) item.motivo = 'Nenhuma dobradeira para modernizar';
     } else if (MAQUINAS[id]) {
       const d = MAQUINAS[id];
-      Object.assign(item, { nome: d.nome, preco: d.preco, desc: d.desc });
+      Object.assign(item, { nome: `${d.nome} · ${E.maquinas.filter(m => m.tipo === id).length} instalada(s)`, preco: d.preco, desc: d.desc });
       if (d.requer && !tem(d.requer)) item.motivo = 'Precisa de esteira';
       else if (E.maquinas.length >= vagas()) item.motivo = 'Sem vaga livre';
     } else {
       const m = MELHORIAS[id];
       Object.assign(item, { nome: m.nome, preco: m.preco, desc: m.desc, comprado: tem(id), motivo: requisitoFaltando(id) });
+      if (id === 'automacao_total') item.desc += '\n' + requisitosAutomacao().map(r => `${r.ok ? '✓' : '○'} ${r.nome}${r.ok ? ': concluído' : ': pendente'}`).join('\n');
     }
     return item;
   });
@@ -354,7 +368,10 @@ function comprar(id) {
     tocar('compra');
     return true;
   }
-  if (id === 'funcionario') E.funcionarios++;
+  if (id === 'modernizar_dobradeira') {
+    const maquina = E.maquinas.find(m => m.tipo === 'dobradeira');
+    maquina.tipo = 'montadora'; maquina.progresso = 0;
+  } else if (id === 'funcionario') E.funcionarios++;
   else if (MAQUINAS[id]) E.maquinas.push({ tipo: id, entrada: 0, saida: 0, progresso: 0 });
   else E.melhorias[id] = true;
   mensagem(`Comprado: ${item.nome}!`, 'bom');

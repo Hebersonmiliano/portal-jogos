@@ -341,6 +341,7 @@ function sincronizarEstrutura() {
   V.rotulosMaquinas = [];
   E.maquinas.forEach((dados, i) => {
     const v = VAGAS[i];
+    V.rotulosMaquinas.push(rotulo(v.x, 4.55, v.z, { classe: 'nome-maquina', texto: MAQUINAS[dados.tipo].nome }));
     V.rotulosMaquinas.push(rotulo(v.x, 0.2, v.z + 1.5, { classe: 'fraco', texto: () => {
       const m = E.maquinas[i];
       return m ? `papelão ${m.entrada} · caixas ${m.saida}` : '';

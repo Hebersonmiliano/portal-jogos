@@ -154,7 +154,7 @@ window.JOGOS = [
     descricao: "Com R$ 100, uma bancada e vontade de crescer, você começa uma fábrica de caixas de papelão. Produza, venda e reinvista: melhore ferramentas, forme sua equipe e conecte máquinas por esteiras. Escolha entre caixas simples, reforçadas e personalizadas, aceite contratos e transforme sua garagem em um império industrial. Desbloqueie 20 conquistas, ganhe XP e continue a carreira com desafios recorrentes.",
     controles: "WASD/setas movem; E interage e, segurado na bancada, fabrica; Q recolhe caixas; L abre a loja; Esc pausa. No celular, use os botões de toque. Controle Xbox/PlayStation e similares com mapeamento padrão: analógico/direcional move; A/× interage; X/□ recolhe; Y/△ abre a loja; View/Select abre produção; Start/Menu pausa. No menu, escolha Controles ou Salvar e sair do jogo. Produção e contratos permite escolher produtos e clientes. O progresso salva neste navegador; Reiniciar do zero começa uma nova partida após confirmação.",
     url: "jogos/imperio-industrial/index.html",
-    versao: "2.3.1-interacao",
+    versao: "2.3.2-missao8",
     capa: "assets/imperio-industrial/fase-1.png",
     vitrineImperio: {
       chamada: "Uma bancada. Cem reais. Um império para construir.",
