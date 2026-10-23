@@ -42,6 +42,8 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ### SETOR 404
 
+O card de apresentação aparece na vitrine e na página do SETOR 404. Usa `assets/setor404.js`, `assets/setor404.css`, o campo `cardSetor404` no catálogo e imagens em `assets/setor-404/`: retrato articulado de Maya e três capturas do renderizador do jogo. Informa missão, setores, robôs, reparos, checkpoints e requisitos de teclado sem apresentar avaliações fictícias. O botão da página reutiliza o jogador existente e recolhe a apresentação ao iniciar. Na vitrine, o card acompanha os filtros e a busca. Não modifica o destaque principal nem as regras do jogo.
+
 `SETOR 404` está disponível em `jogo.html?id=setor-404`, com a Fase 1 em `jogos/setor-404/` e capa em `assets/setor-404/capa.png`. É um jogo HTML5 para computador com teclado, sem instalação, compilação ou controles de toque. Os recursos são carregados por caminhos relativos para funcionar no subdiretório do GitHub Pages. Música e efeitos começam apenas após clicar em **INICIAR FASE 1**.
 
 O repositório principal do jogo permanece privado. Esta pasta é a cópia de distribuição pública necessária para jogar no portal: ela não contém credenciais nem metadados Git. O jogo conserva a movimentação, a esquiva e a Fase 1 da versão aprovada. Para atualizar, substitua somente os arquivos dessa pasta, aumente `versao` no catálogo e atualize a chave de cache de `jogos.js` nas duas páginas do portal.

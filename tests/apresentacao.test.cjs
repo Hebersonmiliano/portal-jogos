@@ -22,10 +22,23 @@ function fixture(page='index.html',game='ultima-transmissao'){
  const selectors=new Map(),storage=new Map();
  const document={getElementById:id=>{if(!nodes.has(id))throw Error('ID ausente: '+id);return nodes.get(id);},querySelector:s=>{if(!selectors.has(s))selectors.set(s,new Node());return selectors.get(s);},querySelectorAll:()=>[],createElement:tag=>new Node(tag),documentElement:new Node('html')};
  const context=vm.createContext({window:{},document,location:{search:'?id='+game},URLSearchParams,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},console});
- for(const script of ['jogos.js','assets/faisca.js','assets/comum.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
+ for(const script of ['jogos.js','assets/faisca.js','assets/comum.js','assets/setor404.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
  return {context,document,run:file=>vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file}),storage};
 }
 function descendants(node,tag){return node.children.flatMap(n=>[...(n.tagName===tag?[n]:[]),...descendants(n,tag)]);}
+
+test('card SETOR 404 mostra Maya, três imagens e inicia o jogador existente',()=>{
+ const f=fixture('jogo.html','setor-404');f.run('assets/pagina-jogo.js');
+ const wrapper=f.document.getElementById('apresentacao-setor404');assert.equal(wrapper.hidden,false);
+ assert.match(wrapper.textContent,/A fábrica parou/);assert.match(wrapper.textContent,/3 setores industriais/);
+ assert.equal(descendants(wrapper,'img').length,4);
+ for(const img of descendants(wrapper,'img')){assert.ok(fs.existsSync(path.join(root,img.src)),img.src);assert.ok(img.alt);assert.equal(img.loading,'lazy');}
+ const palco=f.document.getElementById('palco');assert.equal(descendants(palco,'iframe').length,0);
+ wrapper.querySelector('button').click();assert.equal(wrapper.hidden,true);assert.equal(descendants(palco,'iframe').length,1);assert.equal(palco.scrolled,true);
+ const h=fixture();h.run('assets/vitrine.js');assert.match(h.document.getElementById('conteudo').textContent,/A fábrica parou/);
+ h.document.getElementById('busca').handlers.input({target:{value:'Última Transmissão'}});assert.ok(!h.document.getElementById('conteudo').textContent.includes('A fábrica parou'));
+ for(const file of ['index.html','jogo.html']){const html=fs.readFileSync(path.join(root,file),'utf8');assert.match(html,/assets\/setor404\.css/);assert.match(html,/assets\/setor404\.js/);}
+});
 
 test('SETOR 404 aparece na busca e no filtro de ação, sem trocar o destaque existente',()=>{
  const f=fixture(),game=f.context.window.JOGOS.find(g=>g.id==='setor-404');

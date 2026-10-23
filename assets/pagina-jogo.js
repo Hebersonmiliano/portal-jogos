@@ -31,6 +31,10 @@ if (!jogo) {
     const capa = criarCapa(jogo);
     capa.append(iniciar);
     palco.replaceChildren(capa);
+    if (jogo.cardSetor404) {
+      const card=document.getElementById('apresentacao-setor404');card.hidden=false;
+      card.append(criarCardSetor404(jogo,()=>iniciar.click()));
+    }
     if (jogo.id === "faisca") {
       const apresentacao = document.getElementById("apresentacao-faisca");
       apresentacao.hidden = false;
@@ -45,6 +49,10 @@ if (!jogo) {
       quadro.allow = "fullscreen; autoplay; gamepad";
       quadro.allowFullscreen = true;
       palco.replaceChildren(quadro);
+      if (jogo.cardSetor404) {
+        document.getElementById('apresentacao-setor404').hidden=true;
+        palco.scrollIntoView({block:'start',behavior:'auto'});
+      }
       if (jogo.id === "faisca") {
         document.getElementById("apresentacao-faisca").hidden = true;
         palco.scrollIntoView({ block: "start", behavior: "auto" });

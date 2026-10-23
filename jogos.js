@@ -20,6 +20,7 @@ window.GENEROS = [
 window.JOGOS = [
   {
     id: "setor-404",
+    cardSetor404: true,
     titulo: "SETOR 404",
     genero: ["Ação", "RPG", "Plataforma"],
     tags: ["pixel art", "indústria", "manutenção", "Maya Ferreira", "SENAI", "fase 1"],
