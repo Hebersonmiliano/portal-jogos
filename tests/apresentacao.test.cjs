@@ -45,7 +45,7 @@ test('SETOR 404 inicia um único iframe e habilita tela cheia, favoritos e recen
  assert.equal(f.document.getElementById('celular').textContent,'Melhor no computador');
  assert.match(f.document.getElementById('controles').textContent,/K esquiva/);
  palco.querySelector('button').click();assert.equal(descendants(palco,'iframe').length,1);
- assert.equal(palco.querySelector('iframe').src,'jogos/setor-404/index.html?v=1.0.0-fase1');
+ assert.equal(palco.querySelector('iframe').src,'jogos/setor-404/index.html?v=1.0.1-fase1');
  assert.equal(f.document.getElementById('tela-cheia').disabled,false);
  f.document.getElementById('tela-cheia').click();assert.equal(palco.querySelector('iframe').fullscreen,true);
  f.document.getElementById('favorito').click();assert.match(f.storage.get('portal.favoritos'),/setor-404/);
