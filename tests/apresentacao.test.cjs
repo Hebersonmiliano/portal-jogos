@@ -26,10 +26,10 @@ function fixture(page='index.html',game='ultima-transmissao'){
  return {context,document,run:file=>vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file}),storage};
 }
 function descendants(node,tag){return node.children.flatMap(n=>[...(n.tagName===tag?[n]:[]),...descendants(n,tag)]);}
-test('FAÍSCA apresenta personagem, seis fases e inicia somente um jogador',()=>{
+test('FAÍSCA apresenta personagem, sete fases e inicia somente um jogador',()=>{
  const f=fixture('jogo.html','faisca'); f.run('assets/pagina-jogo.js');
  const card=f.document.getElementById('apresentacao-faisca');
- assert.equal(card.hidden,false); assert.equal(descendants(card,'figure').length,7);
+ assert.equal(card.hidden,false); assert.equal(descendants(card,'figure').length,8);
  assert.match(card.textContent,/Ao pousar/); assert.match(card.textContent,/não há ranking online/);
  for(const img of descendants(card,'img')) assert.ok(fs.existsSync(path.join(root,img.src)),img.src);
  const stage=f.document.getElementById('palco'); assert.equal(descendants(stage,'iframe').length,0);
