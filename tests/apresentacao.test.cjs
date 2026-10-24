@@ -79,10 +79,10 @@ test('SETOR 404 contém scripts, imagens, capa e nomes de arquivo corretos para 
  for(const m of fs.readFileSync(path.join(dir,'game.js'),'utf8').matchAll(/\.src='(assets\/[^']+)'/g))assert.ok(fs.existsSync(path.join(dir,m[1])),m[1]);
  assert.equal(fs.existsSync(path.join(dir,'.git')),false);assert.equal(fs.existsSync(path.join(dir,'.openai')),false);
 });
-test('FAÍSCA apresenta personagem, oito fases e inicia somente um jogador',()=>{
+test('FAÍSCA apresenta personagem, nove fases e inicia somente um jogador',()=>{
  const f=fixture('jogo.html','faisca'); f.run('assets/pagina-jogo.js');
  const card=f.document.getElementById('apresentacao-faisca');
- assert.equal(card.hidden,false); assert.equal(descendants(card,'figure').length,9);
+ assert.equal(card.hidden,false); assert.equal(descendants(card,'figure').length,10);
  assert.match(card.textContent,/Ao pousar/); assert.match(card.textContent,/não há ranking online/);
  for(const img of descendants(card,'img')) assert.ok(fs.existsSync(path.join(root,img.src)),img.src);
  const stage=f.document.getElementById('palco'); assert.equal(descendants(stage,'iframe').length,0);
