@@ -32,17 +32,20 @@ function criarApresentacaoFaisca(completa = false, iniciar) {
     ["10", "Vulcão", "Basalto, lava e apoios pequenos para planejar cada salto."],
     ["12", "Torre do Relógio", "Engrenagens, bronze e prensas para atravessar com precisão."],
     ["13", "Laboratório de Gravidade", "Gravidade reduzida e esferas de energia mudam o ritmo dos saltos."],
+    ["18", "Abismo Subterrâneo", "Arcos antigos, rochas luminosas e névoa. Localize os perigos pelo vermelho."],
+    ["19", "Estação Espacial", "Vista para a Terra e gravidade reduzida para saltos longos entre barreiras."],
+    ["20", "Núcleo do Colapso", "Reator, brasas e plataformas quebradiças no desafio final da campanha."],
     ["17", "Cidade Neon", "Prédios futuristas, chuva e barreiras de energia. Atravesse durante o intervalo entre os feixes."],
     ["16", "Trem Desgovernado", "Vagões quebradiços, serras e uma viagem pelo cânion ao pôr do sol."],
     ["15", "Fortaleza em Guerra", "Muralhas, tochas e bandeiras animadas. Cruze as prensas e serras entre os apoios de pedra."],
     ["14", "Floresta Carnívora", "Flores perigosas, esporos e cipós que alternam sua atividade."]
   ];
-  cenas.slice(0, completa ? 9 : 3).forEach(([n,titulo,corpo]) => {
+  cenas.slice(0, completa ? 12 : 3).forEach(([n,titulo,corpo]) => {
     const f=el("figure"); const foto=el("img"); foto.src="assets/faisca/fase-"+n+".png"; foto.alt="Captura da fase "+n+" — "+titulo; foto.loading="lazy"; foto.decoding="async"; foto.width=1280; foto.height=720;
     const legenda=el("figcaption"); legenda.append(el("h3",null,n+" · "+titulo),el("p",null,corpo)); f.append(foto,legenda); galeria.append(f);
   });
   card.append(el("h3", "faisca-galeria-titulo", "Um cenário diferente a cada fase"),galeria);
-  card.append(el("p", "faisca-nota", "Imagens capturadas no jogo. Campanha com 20 fases; 17 cenários já receberam o visual cartoon. Versão em desenvolvimento. Jogue no computador com teclado ou controle. Os três espaços de salvamento e o ranking ficam apenas neste navegador; não há ranking online."));
+  card.append(el("p", "faisca-nota", "Imagens capturadas no jogo. Campanha com 20 fases; 20 cenários já receberam o visual cartoon. Versão em desenvolvimento. Jogue no computador com teclado ou controle. Os três espaços de salvamento e o ranking ficam apenas neste navegador; não há ranking online."));
   return card;
 }
 
