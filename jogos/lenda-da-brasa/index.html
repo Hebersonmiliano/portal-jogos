@@ -1523,6 +1523,7 @@ const ICON_SRC={
  shell:["..........","....kk....","...kwwk...","..kwowwk..",".kwowowwk.","kwowowowwk","kowowowowk",".kkkkkkkk.","...kook...","....kk...."],
  sword:["........kk",".......kwk","......kwk.",".....kwk..","....kwk...","k..kwk....","kkkwk.....",".kok......","kokkk.....","kk........"],
  shield:["..kkkkkk..",".knnyynnk.","knnnyynnnk","knyyyyyynk","knnnyynnnk","knnnyynnnk",".knnyynnk.","..knnnnk..","...kkkk...",".........."],
+ shield2:["..kkkkkk..",".kssyyssk.","ksssyysssk","ksyyyyyysk","ksssyysssk","ksssyysssk",".kssyyssk.","..kssssk..","...kkkk...",".........."],
  tunic:["..kk..kk..",".kttkkttk.","kttttttttk","kkttttttkk","..kttttk..","..kooook..","..kttttk..","..kttttk..","..kkkkkk..",".........."],
  boots:["..kkkk....","..knnk....","..knnk....","..knnk....","..knnkkk..","..knnnnnk.",".knnnnnnk.",".kkkkkkkk.","..........",".........."],
  gloves:["...k.k.k..","..kykykyk.","..kykykyk.","..kyyyyyk.","kkkyyyyyk.","kyyyyyyyk.",".kyyyyyk..","..kyyyk...","..kkkkk...",".........."],
@@ -1772,8 +1773,8 @@ function drawMenu(){
   [['boots',g.boots],['gloves',g.gloves],['flippers',g.flippers],['feather',g.feather]].forEach(([k,ok],i)=>{const x=22+i*36;ctx.fillStyle='#10160f';ctx.fillRect(x-3,167,16,16);ctx.drawImage(ok?ICON[k]:SIL[k],x,170);});
   // EQUIPAMENTO
   panel(172,120,80,84,'#e8b04a','EQUIPAMENTO');
-  [['sword',player.sword],['shield',player.shield],['tunic',true]].forEach(([k,ok],i)=>{const x=181+i*22;ctx.fillStyle='#10160f';ctx.fillRect(x-3,131,16,16);ctx.drawImage(ok?ICON[k]:SIL[k],x,134);
-    if((k==='shield'&&player.shieldLv>=2)||(k==='tunic'&&player.tunicLv>=2)){ctx.fillStyle=k==='tunic'?'#e0402a':'#c8c8d8';ctx.fillRect(x-3,146,16,2);}});
+  [['sword',player.sword],[player.shieldLv>=2?'shield2':'shield',player.shield],['tunic',true]].forEach(([k,ok],i)=>{const x=181+i*22,kk=k==='shield2'?'shield':k;ctx.fillStyle='#10160f';ctx.fillRect(x-3,131,16,16);ctx.drawImage(ok?ICON[k]:SIL[kk],x,134);
+    if((kk==='shield'&&player.shieldLv>=2)||(kk==='tunic'&&player.tunicLv>=2)){ctx.fillStyle=kk==='tunic'?'#e0402a':'#c8c8d8';ctx.fillRect(x-3,146,16,2);}});
   txt(!player.sword?'SEM ESPADA':player.swordLevel>=2?'DOS REINOS':'APRENDIZ',212,151,player.swordLevel>=2?'#8ad4e8':'#a8968a',8,'center');
   txt('CORAÇÃO',212,162,'#a8968a',8,'center');
   drawHeartPieces(184,173,player.heartPieces||0);

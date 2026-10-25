@@ -211,7 +211,7 @@ window.JOGOS = [
     controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala (segure no abismo para o golpe de luz), K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som, F tela cheia, H mostra os controles. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
     url: "jogos/lenda-da-brasa/index.html",
     proporcao: "256 / 208",
-    versao: "2026-10-25-mapamundi",   // mude sempre que atualizar o jogo
+    versao: "2026-10-25-escudo",   // mude sempre que atualizar o jogo
     versaoJogo: "1.4",
     capa: "jogos/lenda-da-brasa/capa.png",
     cor: "#e0402a",
