@@ -1790,8 +1790,8 @@ function drawTitleBg(t){
   titleEmbers=titleEmbers.filter(q=>q.life>0);ctx.globalAlpha=1;
 }
 // ---------- VERSÃO E NOVIDADES ----------
-const VERSAO='1.4';
-const NOVIDADE_TITULO='NOVO v1.4: MAPA MUNDI! APERTE TAB';
+const VERSAO='1.5';
+const NOVIDADE_TITULO='v1.5: ESCUDO E PINOS CORRIGIDOS';
 let versaoVista=null;try{versaoVista=localStorage.getItem('lenda.versaoVista');}catch(e){}
 function marcarVersaoVista(){if(versaoVista===VERSAO)return;versaoVista=VERSAO;try{localStorage.setItem('lenda.versaoVista',VERSAO);}catch(e){}}
 function drawTitle(t){
@@ -2152,7 +2152,14 @@ function loop(now){
   requestAnimationFrame(loop);
 }
 // mostra o nome da área ao trocar de tela
-const _enter=enterScreen;enterScreen=function(...a){_enter(...a);stateT=0;saveSoon();};
+// rede de segurança: se você chega (escada/porta/save) num cercado de pinos sem orbe por perto, os pinos abaixam
+function freeCage(){if(!cur||!cur.tiles)return;const sx=Math.floor((player.x+8)/TS),sy=Math.floor((player.y+12)/TS);
+  const seen=new Set([sx+','+sy]),q=[[sx,sy]];let pin=false,orb=false;
+  while(q.length&&seen.size<=8){const [x,y]=q.shift();if(tileAt(x,y)==='k')orb=true;
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=COLS||ny>=ROWS)continue;const c=tileAt(nx,ny),key=nx+','+ny;
+      if(isSolid(c)){if(c==='1'||c==='2')pin=true;if(c==='k')orb=true;continue;}if(!seen.has(key)){seen.add(key);q.push([nx,ny]);}}}
+  if(seen.size<=8&&pin&&!orb){const k=KOF(cur.id);flags.orb=flags.orb||{};flags.orb[k]=!flags.orb[k];cur.dirty=true;tone(880,1320,.12,'square',.05);toast('Os pinos se abaixam para você passar.');}}
+const _enter=enterScreen;enterScreen=function(...a){_enter(...a);freeCage();stateT=0;saveSoon();};
 
 // ---------- SAVES: 3 espaços ----------
 const SAVE_KEY=n=>'lenda-brasa-save-'+n;
