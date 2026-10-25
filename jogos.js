@@ -9,6 +9,8 @@ window.SITE = {
   nome: "Portal Pixel",               // nome provisório
   slogan: "Jogos independentes, direto no navegador",
   autor: "Heberson Miliano",
+  // Jogos que aparecem no carrossel do topo, nesta ordem.
+  carrossel: ["lenda-da-brasa", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -28,6 +30,7 @@ window.GENEROS = [
 window.JOGOS = [
   {
     id: "setor-404",
+    chamada: "A fábrica parou. Você é a solução. Enfrente robôs corrompidos e devolva a energia, um setor de cada vez.",
     cardSetor404: true,
     titulo: "SETOR 404",
     genero: ["Ação", "RPG", "Plataforma"],
@@ -47,6 +50,7 @@ window.JOGOS = [
   },
   {
     id: "faisca",
+    chamada: "Pequeno herói. Saltos ousados. Um mundo de armadilhas em 20 fases de precisão.",
     titulo: "FAÍSCA",
     genero: ["Plataforma", "Ação"],
     tags: ["cartoon", "armadilhas", "20 fases", "difícil", "controle"],
@@ -65,6 +69,7 @@ window.JOGOS = [
   },
   {
     id: "ultima-transmissao",
+    chamada: "Um pedido de socorro. Três versões. Uma verdade. Investigue o desaparecimento do jornalista Miguel.",
     titulo: "A Última Transmissão",
     genero: ["Aventura", "Puzzle"],
     tags: ["investigação", "mistério", "pistas", "suspense"],
@@ -107,6 +112,7 @@ window.JOGOS = [
   },
   {
     id: "security-test",
+    chamada: "A fábrica promete segurança. Desconfie. 14 fases de lógica e reflexo com um pequeno robô.",
     titulo: "SECURITY TEST",
     genero: ["Plataforma", "Puzzle"],
     tags: ["pixel art", "indústria", "armadilhas", "14 fases", "Xbox", "Mundo SENAI"],
@@ -156,6 +162,7 @@ window.JOGOS = [
   },
   {
     id: "imperio-industrial",
+    chamada: "Uma bancada. Cem reais. Um império para construir, da garagem à automação total.",
     titulo: "Do Zero ao Império Industrial",
     genero: ["Simulação", "Estratégia"],
     tags: ["3D", "fábrica", "economia", "automação", "contratos", "6 evoluções", "conquistas", "prestígio"],
@@ -186,6 +193,7 @@ window.JOGOS = [
   },
   {
     id: "lenda-da-brasa",
+    chamada: "O Rei Umbra raptou a princesa. Só uma pequena brasa pode salvá-la: 5 capítulos, 3 castelos, 8 santuários e 13 chefes.",
     titulo: "Lenda da Brasa",
     genero: ["Ação", "Aventura", "RPG"],
     tags: ["pixel art", "aventura clássica", "masmorras", "quebra-cabeças", "completo"],
@@ -256,11 +264,11 @@ window.JOGOS = [
     genero: ["RPG", "Estratégia"],
     tags: ["tático", "pixel art", "história longa"],
     descricao:
-      "RPG tático em turnos no estilo Final Fantasy Tactics. Monte seu exército, evolua classes " +
+      "RPG tático em turnos, no estilo dos clássicos de estratégia. Monte seu exército, evolua classes " +
       "e atravesse reinos em uma saga sobre a Coroa e os Fragmentos da Aurora.",
     controles: "Mouse: clique nas unidades para mover, atacar e usar habilidades.",
     url: "jogos/crepusculo/index.html",
-    capa: "",                 // ex.: "jogos/crepusculo/capa.png" (vazio = capa automática)
+    capa: "jogos/crepusculo/capa.png", // vazio = capa automática
     cor: "#7b4bb3",           // cor da capa automática
     icone: "⚔️",
     engine: "HTML5",
@@ -279,7 +287,7 @@ window.JOGOS = [
       "e ferramentas. Expanda o território e enfrente o Reino de Morvane.",
     controles: "Mouse: escolha construções na barra de ferramentas e clique no mapa para construir.",
     url: "jogos/reino-colonos/index.html",
-    capa: "",
+    capa: "jogos/reino-colonos/capa.png",
     cor: "#3f8f4f",
     icone: "🏰",
     engine: "HTML5",

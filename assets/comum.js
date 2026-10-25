@@ -1,6 +1,6 @@
 // Funções compartilhadas entre a vitrine e a página do jogo.
 
-const DIAS_NOVO = 30;
+const DIAS_NOVO = 7;
 
 const Guardado = {
   ler(chave) {
@@ -35,6 +35,12 @@ function ehNovo(jogo) {
 }
 
 function jogoPorId(id) { return window.JOGOS.find((j) => j.id === id); }
+// Frase curta do jogo: usa "chamada" do catálogo ou a primeira frase da descrição.
+function resumoJogo(jogo) {
+  if (jogo.chamada) return jogo.chamada;
+  const d = (jogo.descricao || "").trim(), m = d.match(/^.{20,170}?[.!?](\s|$)/);
+  return m ? m[0].trim() : d.slice(0, 150) + (d.length > 150 ? "…" : "");
+}
 
 function el(tag, classe, texto) {
   const e = document.createElement(tag);
@@ -54,11 +60,13 @@ function criarCapa(jogo) {
     img.loading = "lazy";
     capa.append(img);
   } else {
-    capa.append(el("span", "capa-icone", jogo.icone || "🎮"));
+    capa.classList.add("capa-auto");
+    capa.append(el("span", "capa-icone", jogo.icone || "🎮"), el("span", "capa-titulo", jogo.titulo));
   }
   const selos = el("div", "selos");
   if (jogo.status === "em-breve") selos.append(el("span", "selo selo-breve", "Em breve"));
   else if (ehNovo(jogo)) selos.append(el("span", "selo selo-novo", "Novo"));
+  if ((jogo.tags || []).includes("completo")) selos.append(el("span", "selo selo-completo", "Completo"));
   if (jogo.mobile) selos.append(el("span", "selo selo-mobile", "📱 Celular"));
   capa.append(selos);
   if (jogo.id === "faisca") {
@@ -118,6 +126,8 @@ function criarCartao(jogo) {
     a.classList.add("cartao-imperio");
     info.append(el("p", "imperio-mini-resumo", "Da garagem à automação total: 6 evoluções, 3 produtos e contratos para escolher."), el("span", "imperio-mini-convite", "Construa seu império →"));
   }
+  if (info.children.length <= 2) info.append(el("p", "cartao-resumo", resumoJogo(jogo)));
+  if (jogo.status === "disponivel") a.children[0].append(el("span", "capa-jogar", "▶ Jogar"));
   a.append(info);
   return a;
 }

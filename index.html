@@ -5,18 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal Pixel</title>
   <meta name="description" content="Jogos independentes para jogar direto no navegador.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="assets/marca/icone.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/marca/icone-32.png">
+  <link rel="apple-touch-icon" href="assets/marca/icone-180.png">
+  <meta name="theme-color" content="#0f1020">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/estilo.css"><link rel="stylesheet" href="assets/investigacao.css?v=20261021">
   <link rel="stylesheet" href="assets/security-test.css?v=20261023-card">
   <link rel="stylesheet" href="assets/forja2d.css?v=20261023">
   <link rel="stylesheet" href="assets/setor404.css?v=20261023-card">
-<link rel="stylesheet" href="assets/faisca.css?v=20261023-fortaleza"><link rel="stylesheet" href="assets/lenda-da-brasa.css?v=20261025-vitrine"><link rel="stylesheet" href="assets/doacao.css?v=20261025"><link rel="stylesheet" href="assets/imperio-industrial.css?v=20261023-final">
+<link rel="stylesheet" href="assets/faisca.css?v=20261023-fortaleza"><link rel="stylesheet" href="assets/lenda-da-brasa.css?v=20261025-vitrine"><link rel="stylesheet" href="assets/doacao.css?v=20261025"><link rel="stylesheet" href="assets/portal.css?v=20261025b"><link rel="stylesheet" href="assets/imperio-industrial.css?v=20261023-final">
 </head>
 <body>
+  <a class="pular" href="#jogos">Pular para os jogos</a>
   <header class="topo">
-    <a class="marca" href="index.html"><span class="marca-icone">🎮</span><span data-site-nome></span></a>
+    <a class="marca" href="index.html"><img class="marca-icone" src="assets/marca/icone.svg" alt="" width="34" height="34"><span class="marca-nome" data-site-nome></span></a>
+    <nav class="menu" aria-label="Seções do site">
+      <a href="#jogos">Jogos</a>
+      <a href="#vitrines">Conheça</a>
+      <a href="#ferramentas">Ferramentas</a>
+    </nav>
     <label class="busca">
       <span class="sr">Buscar jogos</span>
       <input id="busca" type="search" placeholder="Buscar jogos, gêneros, tags…" autocomplete="off">
@@ -24,30 +33,55 @@
   </header>
 
   <main class="pagina">
-    <p class="slogan"><span data-site-slogan></span> · <strong id="contador"></strong></p>
-    <section id="destaque" class="destaque"></section>
-    <section class="forja-oficina" aria-labelledby="forja-titulo">
-      <div class="forja-simbolo" aria-hidden="true">◆</div>
-      <div class="forja-texto"><span class="forja-etiqueta">OFICINA DE CRIAÇÃO · NO NAVEGADOR</span><h2 id="forja-titulo">Crie seus personagens com o Forja2D</h2><p>Monte articulações, experimente poses e anime seu personagem. Salve seu projeto e exporte sprites para seus jogos.</p><span class="forja-detalhes">Sem instalação · Personagem de exemplo · Exportação PNG</span></div>
-      <a class="forja-abrir" href="ferramentas/forja2d/">Abrir Forja2D <span aria-hidden="true">↗</span></a>
+    <section id="destaque" class="carrossel" aria-roledescription="carrossel" aria-label="Jogos em destaque"></section>
+
+    <section id="jogos" class="bloco-jogos" aria-labelledby="jogos-titulo">
+      <div class="bloco-topo">
+        <h2 id="jogos-titulo">Todos os jogos <span id="contador" class="contador"></span></h2>
+        <p class="slogan"><span data-site-slogan></span></p>
+      </div>
+      <nav id="filtros" class="filtros" aria-label="Filtrar por gênero"></nav>
+      <div id="conteudo"></div>
     </section>
-    <nav id="filtros" class="filtros" aria-label="Filtrar por gênero"></nav>
-    <div id="conteudo"></div>
+
+    <section id="vitrines" class="vitrines" aria-labelledby="vitrines-titulo">
+      <div class="bloco-topo">
+        <h2 id="vitrines-titulo">Conheça de perto</h2>
+        <p class="slogan">Personagens, lugares e o que esperar de cada jogo.</p>
+      </div>
+      <div id="abas" class="abas" role="tablist" aria-label="Escolha um jogo"></div>
+      <div id="paineis"></div>
+    </section>
+
+    <section id="ferramentas" class="ferramentas" aria-labelledby="ferramentas-titulo">
+      <div class="bloco-topo"><h2 id="ferramentas-titulo">Ferramentas</h2><p class="slogan">Para quem quer criar os próprios jogos.</p></div>
+      <div class="forja-oficina">
+        <div class="forja-simbolo" aria-hidden="true">◆</div>
+        <div class="forja-texto"><span class="forja-etiqueta">OFICINA DE CRIAÇÃO · NO NAVEGADOR</span><h3 id="forja-titulo">Crie seus personagens com o Forja2D</h3><p>Monte articulações, experimente poses e anime seu personagem. Salve seu projeto e exporte sprites para seus jogos.</p><span class="forja-detalhes">Sem instalação · Personagem de exemplo · Exportação PNG</span></div>
+        <a class="forja-abrir" href="ferramentas/forja2d/">Abrir Forja2D <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
   </main>
 
   <footer class="rodape">
-    © <span data-ano></span> <span data-site-autor></span> · <span data-site-nome></span>
+    <div class="rodape-conteudo">
+      <div class="rodape-marca"><img src="assets/marca/icone.svg" alt="" width="40" height="40"><div><strong data-site-nome></strong><span data-site-slogan></span></div></div>
+      <nav class="rodape-links" aria-label="Rodapé">
+        <a href="#jogos">Jogos</a><a href="#vitrines">Conheça</a><a href="#ferramentas">Ferramentas</a><a href="#apoiar">❤ Apoiar</a>
+      </nav>
+    </div>
+    <p class="rodape-credito">© <span data-ano></span> <span data-site-autor></span> · Jogos feitos com carinho, grátis no navegador.</p>
   </footer>
 
-  <script src="jogos.js?v=20261025-pix"></script>
+  <script src="jogos.js?v=20261025-carrossel"></script>
   <script src="assets/vendor/qrcode.js?v=1.4.4"></script>
   <script src="assets/doacao.js?v=20261025"></script>
   <script src="assets/setor404.js?v=20261023-card"></script>
   <script src="assets/faisca.js?v=20261024-final20"></script>
   <script src="assets/lenda-da-brasa.js?v=20261025-semmarca"></script>
   <script src="assets/imperio-industrial.js?v=20261023-final"></script>
-  <script src="assets/comum.js?v=20261023-imperio-final"></script>
-  <script src="assets/vitrine.js?v=20261025-lenda"></script>
+  <script src="assets/comum.js?v=20261025-cards"></script>
+  <script src="assets/vitrine.js?v=20261025-carrossel"></script>
 
 </body>
 </html>

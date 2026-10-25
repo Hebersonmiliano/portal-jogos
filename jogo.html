@@ -4,17 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Jogo</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="assets/marca/icone.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/marca/icone-32.png">
+  <link rel="apple-touch-icon" href="assets/marca/icone-180.png">
+  <meta name="theme-color" content="#0f1020">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/estilo.css"><link rel="stylesheet" href="assets/investigacao.css?v=20261021">
   <link rel="stylesheet" href="assets/security-test.css?v=20261023-card">
   <link rel="stylesheet" href="assets/setor404.css?v=20261023-card">
-<link rel="stylesheet" href="assets/faisca.css?v=20261023-fortaleza"><link rel="stylesheet" href="assets/lenda-da-brasa.css?v=20261025-vitrine"><link rel="stylesheet" href="assets/doacao.css?v=20261025"><link rel="stylesheet" href="assets/imperio-industrial.css?v=20261023-final">
+<link rel="stylesheet" href="assets/faisca.css?v=20261023-fortaleza"><link rel="stylesheet" href="assets/lenda-da-brasa.css?v=20261025-vitrine"><link rel="stylesheet" href="assets/doacao.css?v=20261025"><link rel="stylesheet" href="assets/portal.css?v=20261025b"><link rel="stylesheet" href="assets/imperio-industrial.css?v=20261023-final">
 </head>
 <body>
   <header class="topo">
-    <a class="marca" href="index.html"><span class="marca-icone">🎮</span><span data-site-nome></span></a>
+    <a class="marca" href="index.html"><img class="marca-icone" src="assets/marca/icone.svg" alt="" width="34" height="34"><span class="marca-nome" data-site-nome></span></a>
     <a class="voltar" href="index.html">← Todos os jogos</a>
   </header>
 
@@ -62,17 +65,23 @@
   </main>
 
   <footer class="rodape">
-    © <span data-ano></span> <span data-site-autor></span> · <span data-site-nome></span>
+    <div class="rodape-conteudo">
+      <div class="rodape-marca"><img src="assets/marca/icone.svg" alt="" width="40" height="40"><div><strong data-site-nome></strong><span>Jogos independentes, direto no navegador</span></div></div>
+      <nav class="rodape-links" aria-label="Rodapé">
+        <a href="index.html#jogos">Jogos</a><a href="index.html#vitrines">Conheça</a><a href="index.html#ferramentas">Ferramentas</a><a href="#apoiar">❤ Apoiar</a>
+      </nav>
+    </div>
+    <p class="rodape-credito">© <span data-ano></span> <span data-site-autor></span> · Jogos feitos com carinho, grátis no navegador.</p>
   </footer>
 
-  <script src="jogos.js?v=20261025-pix"></script>
+  <script src="jogos.js?v=20261025-carrossel"></script>
   <script src="assets/vendor/qrcode.js?v=1.4.4"></script>
   <script src="assets/doacao.js?v=20261025"></script>
   <script src="assets/setor404.js?v=20261023-card"></script>
   <script src="assets/faisca.js?v=20261024-final20"></script>
   <script src="assets/lenda-da-brasa.js?v=20261025-semmarca"></script>
   <script src="assets/imperio-industrial.js?v=20261023-final"></script>
-  <script src="assets/comum.js?v=20261023-imperio-final"></script>
+  <script src="assets/comum.js?v=20261025-cards"></script>
   <script src="assets/pagina-jogo.js?v=20261025-lenda"></script>
 
 </body>
