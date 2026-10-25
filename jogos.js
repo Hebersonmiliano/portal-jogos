@@ -185,11 +185,12 @@ window.JOGOS = [
       "RPG de ação em pixel art no estilo Zelda clássico. O Rei Umbra raptou a Princesa Lírian: atravesse os reinos da Brasa, das Marés e dos Ventos, " +
       "explore castelos com vários andares, mapa e bússola, conquiste os 3 cristais da Espada dos Reinos e enfrente os 8 santuários dos Pendentes Celestiais, " +
       "com arco, bombas, lanterna, bastão de gelo e martelo. No fim, invada a Fortaleza Sombria, vença o Rei Umbra e desça ao Coração do Abismo " +
-      "para a batalha final contra a Sombra do Rei. Jogo completo, com créditos.",
+      "para a batalha final contra a Sombra do Rei. Gaste suas brasas em lojas, ferreira, garrafas de poção e fada, " +
+      "viagens de águia e altares. Jogo completo, com créditos.",
     controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala (segure no abismo para o golpe de luz), K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som, F tela cheia, H mostra os controles. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
     url: "jogos/lenda-da-brasa/index.html",
     proporcao: "256 / 208",
-    versao: "2026-10-25-telacheia",   // mude sempre que atualizar o jogo
+    versao: "2026-10-25-lojas",   // mude sempre que atualizar o jogo
     capa: "jogos/lenda-da-brasa/capa.png",
     cor: "#e0402a",
     icone: "🗡️",
