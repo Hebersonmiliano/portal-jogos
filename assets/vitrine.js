@@ -36,10 +36,16 @@ function desenharFiltros() {
 }
 
 function desenharDestaque() {
-  const jogo = window.JOGOS.find((j) => j.destaque && j.status === "disponivel");
+  const jogo = window.JOGOS.find((j) => j.destaqueTopo && j.status === "disponivel")
+    || window.JOGOS.find((j) => j.destaque && j.status === "disponivel");
   const caixa = document.getElementById("destaque");
   if (!jogo) { caixa.hidden = true; return; }
   caixa.replaceChildren();
+  if (jogo.vitrineLenda && typeof criarVitrineLenda === "function") {
+    caixa.classList.add("destaque-lenda");
+    caixa.append(criarVitrineLenda(jogo));
+    return;
+  }
   if (jogo.apresentacao) {
     caixa.classList.add("destaque-investigacao");
     caixa.append(criarHeroInvestigacao(jogo));
@@ -69,6 +75,14 @@ function desenhar() {
   }
 
   const lista = filtrar();
+  // A apresentação de investigação continua na página quando outro jogo ocupa o destaque do topo.
+  const topo = window.JOGOS.find((j) => j.destaqueTopo && j.status === "disponivel");
+  const investigacao = lista.find((j) => j.apresentacao && j.status === "disponivel");
+  if (topo && investigacao && investigacao !== topo) {
+    const caixa = el("section", "destaque destaque-investigacao");
+    caixa.append(criarHeroInvestigacao(investigacao));
+    conteudo.append(caixa);
+  }
   const imperio = lista.find(j => j.vitrineImperio && j.status === "disponivel");
   if (imperio) conteudo.append(criarVitrineImperio(imperio));
   const setor404 = lista.find((j) => j.cardSetor404 && j.status === "disponivel");

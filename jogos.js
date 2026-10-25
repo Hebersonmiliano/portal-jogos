@@ -199,6 +199,8 @@ window.JOGOS = [
     status: "disponivel",
     lancamento: "2026-10-25",
     destaque: true,
+    destaqueTopo: true,   // ocupa o destaque do topo da página inicial
+    vitrineLenda: true,   // card com herói, elenco e fotos dos lugares
   },
   {
     id: "brasa-eterna-2",

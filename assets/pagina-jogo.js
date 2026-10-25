@@ -43,6 +43,11 @@ if (!jogo) {
       const card=document.getElementById('apresentacao-setor404');card.hidden=false;
       card.append(criarCardSetor404(jogo,()=>iniciar.click()));
     }
+    if (jogo.vitrineLenda) {
+      const apresentacao = document.getElementById("apresentacao-lenda");
+      apresentacao.hidden = false;
+      apresentacao.append(criarVitrineLenda(jogo, () => iniciar.click()));
+    }
     if (jogo.id === "faisca") {
       const apresentacao = document.getElementById("apresentacao-faisca");
       apresentacao.hidden = false;
@@ -65,6 +70,10 @@ if (!jogo) {
       if (jogo.cardSetor404) {
         document.getElementById('apresentacao-setor404').hidden=true;
         palco.scrollIntoView({block:'start',behavior:'auto'});
+      }
+      if (jogo.vitrineLenda) {
+        document.getElementById("apresentacao-lenda").hidden = true;
+        palco.scrollIntoView({ block: "start", behavior: "auto" });
       }
       if (jogo.id === "faisca") {
         document.getElementById("apresentacao-faisca").hidden = true;
