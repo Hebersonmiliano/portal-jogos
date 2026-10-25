@@ -211,8 +211,8 @@ window.JOGOS = [
     controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala (segure no abismo para o golpe de luz), K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som, F tela cheia, H mostra os controles. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
     url: "jogos/lenda-da-brasa/index.html",
     proporcao: "256 / 208",
-    versao: "2026-10-25-pinos",   // mude sempre que atualizar o jogo
-    versaoJogo: "1.5",
+    versao: "2026-10-25-lua",   // mude sempre que atualizar o jogo
+    versaoJogo: "1.5.1",
     capa: "jogos/lenda-da-brasa/capa.png",
     cor: "#e0402a",
     icone: "🗡️",
@@ -224,6 +224,9 @@ window.JOGOS = [
     destaqueTopo: true,   // ocupa o destaque do topo da página inicial
     vitrineLenda: true,   // card com herói, elenco e fotos dos lugares
     novidades: [
+      { versao: "1.5.1", data: "2026-10-25", itens: [
+        "Ruínas da Lua, Câmara da Lua Cheia: quem pegava a Chave Mestra ficava preso atrás dos pinos laranja. Agora há um orbe do lado esquerdo para abrir o caminho.",
+      ] },
       { versao: "1.5", data: "2026-10-25", itens: [
         "O Escudo de Ferro agora aparece prateado no menu de equipamentos (antes ficava igual ao escudo comum).",
         "Câmara da Pena (Castelo dos Ventos): quem subia a escada com os pinos laranja levantados ficava preso no cercado. Agora os pinos abaixam sozinhos.",
