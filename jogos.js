@@ -12,7 +12,7 @@ window.SITE = {
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
-    pix: "",                    // chave Pix
+    pix: "hebersonmiliano@gmail.com", // chave Pix (e-mail)
     nome: "HEBERSON MILIANO",   // nome do recebedor (até 25 letras, sem acento)
     cidade: "",                 // cidade do recebedor (até 15 letras)
     link: "",                   // opcional: link do Ko-fi, Apoia.se etc.
