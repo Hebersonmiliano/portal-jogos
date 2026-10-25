@@ -177,6 +177,26 @@ window.JOGOS = [
     destaque: true,
   },
   {
+    id: "lenda-da-brasa",
+    titulo: "Lenda da Brasa",
+    genero: ["Ação", "Aventura", "RPG"],
+    tags: ["pixel art", "estilo Zelda", "masmorras", "quebra-cabeças", "em desenvolvimento"],
+    descricao:
+      "RPG de ação em pixel art no estilo Zelda clássico. O Rei Umbra raptou a Princesa Lírian: atravesse os reinos da Brasa, das Marés e dos Ventos, " +
+      "explore castelos com vários andares, mapa e bússola, resolva quebra-cabeças com orbes, marés e pisos que desabam, e conquiste os 3 cristais da Espada dos Reinos. Capítulos 1 a 3 e os primeiros santuários jogáveis.",
+    controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala, K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
+    url: "jogos/lenda-da-brasa/index.html",
+    versao: "2026-10-25-castelos",   // mude sempre que atualizar o jogo
+    capa: "jogos/lenda-da-brasa/capa.png",
+    cor: "#e0402a",
+    icone: "🗡️",
+    engine: "HTML5 · Canvas 2D",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-10-25",
+    destaque: true,
+  },
+  {
     id: "brasa-eterna-2",
     titulo: "Brasa Eterna 2: Novos Horizontes",
     genero: ["Ação", "Aventura", "RPG"],
