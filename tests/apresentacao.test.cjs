@@ -119,7 +119,7 @@ test('Lenda da Brasa ocupa o destaque do topo com herói, elenco e fotos dos lug
  assert.match(carrossel.children[0].children[0].textContent,/Lenda da Brasa/);
  const topo=h.document.getElementById('paineis').children[0];assert.equal(topo.hidden,false);
  assert.match(topo.textContent,/LUME/);assert.match(topo.textContent,/LUGARES DA JORNADA/);
- const imgs=descendants(topo,'img');assert.equal(imgs.length,10);
+ const imgs=descendants(topo,'img');assert.equal(imgs.length,11);
  h.document.getElementById('busca').handlers.input({target:{value:'lenda'}});assert.equal(h.document.getElementById('vitrines').hidden,true);
  for(const img of imgs){assert.ok(fs.existsSync(path.join(root,img.src)),img.src);assert.ok(img.alt);assert.equal(img.loading,'lazy');}
  const f=fixture('jogo.html','lenda-da-brasa');f.run('assets/pagina-jogo.js');const w=f.document.getElementById('apresentacao-lenda');

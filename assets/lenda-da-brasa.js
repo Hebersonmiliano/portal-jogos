@@ -38,7 +38,8 @@ function criarVitrineLenda(jogo, iniciar) {
 
   const gTitulo = el('h3', 'lenda-galeria-titulo', 'LUGARES DA JORNADA');
   const galeria = el('div', 'lenda-galeria');
-  [['vale.png', 'Vale de Lume', 'Onde a aventura começa.'],
+  [['mapa_mundi.png', 'Mapa Mundi', 'Aperte TAB e veja o nome de cada lugar dos 4 reinos.'],
+   ['vale.png', 'Vale de Lume', 'Onde a aventura começa.'],
    ['castelo_brasa.png', 'Castelo da Brasa', 'Orbes, pinos e o Guardião de Cinzas.'],
    ['kraken.png', 'Castelo das Marés', 'Puxe o Kraken com o gancho.'],
    ['santuario_gelo.png', 'Santuário do Gelo', 'Congele o lago para atravessar.'],
