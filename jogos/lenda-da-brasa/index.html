@@ -96,6 +96,7 @@ body.fit.show-help .goal{display:block;bottom:6vh}
     <li class="kb"><kbd>Enter</kbd> / <kbd>Esc</kbd> pausa (itens, som, salvar e sair) &nbsp; <kbd>M</kbd> som</li>
     <li><kbd>Controle</kbd> direcional ou analógico, <kbd>A</kbd> espada, <kbd>B</kbd>/<kbd>X</kbd> item, <kbd>Y</kbd> itens e equipamentos, <kbd>Start</kbd> pausa</li>
     <li class="kb"><kbd>I</kbd> abre direto os itens e equipamentos</li>
+    <li class="kb"><kbd>TAB</kbd> / <kbd>Select</kbd> mapa mundi ao ar livre, mapa do castelo lá dentro</li>
     <li class="kb"><kbd>F</kbd> tela cheia &nbsp; <kbd>H</kbd> mostra estes controles</li>
     <li>Com o coração cheio, a espada lança ondas de brasa.</li>
     <li>3 espaços de save. O jogo salva sozinho a cada tela e a cada item.</li>
@@ -926,7 +927,7 @@ function openChest(tx,ty){
   else if(what==='lantern'){player.getItem='lantern';player.items.lantern=true;player.bItem='lantern';showDialog(['Você obteve a LANTERNA DAS ALMAS!','Ela ilumina bem mais longe no escuro e revela PONTES FANTASMAS sobre os abismos.','Com ela no botão B, encoste num braseiro apagado e aperte para acendê-lo.']);}
   else if(what==='icerod'){player.getItem='icerod';player.items.icerod=true;player.bItem='icerod';showDialog(['Você obteve o BASTÃO DE GELO! Ele já está no botão B.','O raio gelado CONGELA A ÁGUA e cria chão firme, um bloco de cada vez. Também congela inimigos.']);}
   else if(what==='hammer'){player.getItem='hammer';player.items.hammer=true;player.bItem='hammer';showDialog(['Você obteve o MARTELO DA LUA! Ele já está no botão B.','Afunde ESTACAS de madeira e quebre ARMADURAS que a espada não atravessa.']);}
-  else if(what==='map'){player.getItem='mapa_masmorra';flags.dmap=flags.dmap||{};flags.dmap[KOF(cur.id)]=true;showDialog(['Você encontrou o MAPA DO CASTELO! Ele mostra todas as salas e andares.','Aperte TAB (ou SELECT no controle), ou escolha MAPA DO CASTELO no menu do START.']);}
+  else if(what==='map'){player.getItem='mapa_masmorra';flags.dmap=flags.dmap||{};flags.dmap[KOF(cur.id)]=true;showDialog(['Você encontrou o MAPA DO CASTELO! Ele mostra todas as salas e andares.','Aperte TAB (ou SELECT no controle), ou escolha MAPA DO CASTELO no menu do START.','Ao ar livre, o mesmo TAB abre o MAPA MUNDI, com o nome de todos os lugares dos 3 reinos.']);}
   else if(what==='compass'){player.getItem='bussola';flags.dcomp=flags.dcomp||{};flags.dcomp[KOF(cur.id)]=true;showDialog(['Você encontrou a BÚSSOLA! No mapa, ela mostra os baús que faltam e a sala do chefe.']);}
   else if(what==='embers50'){player.embers+=50;showDialog(['Um baú escondido cheio de tesouros: 50 BRASAS!']);}
   else if(what==='key'){player.getItem='chave';player.keys++;showDialog(['Você encontrou uma CHAVE PEQUENA! Ela abre uma porta comum deste castelo.','Pense bem antes de usar: cada porta trancada pede uma chave.']);}
@@ -975,7 +976,7 @@ function updatePlayer(dt){
   if(p.attack>0){p.attack-=dt;swordHits();return;}
   if(p.hammer>0){p.hammer-=dt;if(!p.hamDone&&p.hammer<.17){p.hamDone=true;hammerHit();}return;}
   if(pressed.items){openMenu();return;}
-  if(pressed.map&&DGRID[cur.id]){openDmap();return;}
+  if(pressed.map){if(DGRID[cur.id])openDmap();else openWmap();return;}
   if(pressed.start||pressed.esc){openPause();return;}
   if((pressed.a||pressed.b)&&aimVec())setFace(aimVec());
   if(pressed.b&&p.bItem==='boomerang'&&!shots.some(s=>s.boom)){const v=N8(p.face);
@@ -1572,7 +1573,7 @@ function drawHeartPieces(x,y,n){
 }
 // ---------- PAUSA (Start / Enter / Esc) ----------
 let pauseSel=0,pauseT=0;
-function pauseOpts(){return ['CONTINUAR','ITENS E EQUIPAMENTOS',...(cur&&DGRID[cur.id]?['MAPA DO CASTELO']:[]),'SOM: '+(muted?'DESLIGADO':'LIGADO'),'SALVAR E SAIR'];}
+function pauseOpts(){return ['CONTINUAR','ITENS E EQUIPAMENTOS','MAPA MUNDI',...(cur&&DGRID[cur.id]?['MAPA DO CASTELO']:[]),'SOM: '+(muted?'DESLIGADO':'LIGADO'),'SALVAR E SAIR'];}
 function openPause(){state='pause';pauseSel=0;pauseT=0;tone(700,500,.08,'square',.04);}
 function updatePause(){
   const n=pauseOpts().length;pauseT+=1/60;
@@ -1583,6 +1584,7 @@ function updatePause(){
     const lab=pauseOpts()[pauseSel];
     if(lab==='CONTINUAR'){state='play';tone(500,700,.08,'square',.04);}
     else if(lab==='ITENS E EQUIPAMENTOS')openMenu();
+    else if(lab==='MAPA MUNDI')openWmap();
     else if(lab==='MAPA DO CASTELO')openDmap();
     else if(lab.startsWith('SOM')){muted=!muted;if(mus.gain&&ac)mus.gain.gain.setTargetAtTime(muted?0:MUSIC_VOL,ac.currentTime,.05);tone(900,900,.05,'square',.04);}
     else if(lab==='SALVAR E SAIR'){state='play';saveNow();state='title';stateT=0;}
@@ -1642,6 +1644,103 @@ function drawDmap(){
   spr('chave',x,170);txt('x'+player.keys,x+16,174,'#efe2d0');
   txt('CIMA/BAIXO: ANDARES    B: VOLTAR',128,188,'#6a5a50',8,'center');
 }
+// ---------- MAPA MUNDI ----------
+const WORLD_TABS=['brasa','mares','ventos','sombrio'];
+const WORLD_TITLE={brasa:'REINO DA BRASA',mares:'REINO DAS MARÉS',ventos:'REINO DOS VENTOS',sombrio:'REINO SOMBRIO'};
+const WORLD_SHORT={brasa:'BRASA',mares:'MARÉS',ventos:'VENTOS',sombrio:'SOMBRIO'};
+const WORLD_COL={brasa:['#e0402a','#8a3a24','#43373a'],mares:['#4ac4d8','#2e5a78','#2a3a48'],ventos:['#8fc06a','#7a8a6a','#5a5a52'],sombrio:['#a87ac8','#3a3050','#2a2238']};
+// [id, nome, gx, gy, tipo?] — tipo: home (vila), castle (castelo), sanct (santuário/pendente)
+const WORLD_NODES={
+ brasa:[
+  ['vulcao','Vulcão Adormecido',1,0,'sanct'],
+  ['w00','Bosque Rubro',1,1],['w10','Castelo da Brasa',2,1,'castle'],['w20','Lago Sereno',3,1],
+  ['mata','Santuário da Floresta',0,2,'sanct'],['w01','Charco Antigo',1,2],['w11','Vale de Lume',2,2,'home'],['w21','Pedreira',3,2],['deserto','Templo do Sol',4,2,'sanct'],
+ ],
+ mares:[
+  ['pantano','Santuário da Sombra',0,0,'sanct'],['m00','Dunas',1,0],['m10','Enseada',2,0],['m20','Castelo das Marés',3,0,'castle'],
+  ['m01','Cais das Marés',1,1],['m11','Vila de Conchas',2,1,'home'],['m21','Recifes',3,1],
+  ['sm0','Gruta das Correntes',3,2,'sanct'],
+ ],
+ ventos:[
+  ['geleira','Santuário do Gelo',1,0,'sanct'],
+  ['pico','Pico Estelar',0,1,'sanct'],['v00','Campos de Flores',1,1],['v10','Ponte das Nuvens',2,1],['v20','Castelo dos Ventos',3,1,'castle'],
+  ['v01','Ninho da Águia',1,2],['v11','Aldeia dos Ventos',2,2,'home'],['v21','Penhasco',3,2],
+  ['ruinas','Ruínas da Lua',2,3,'sanct'],
+ ],
+ sombrio:[
+  ['ru0','Fortaleza Sombria',1,1,'castle'],['ab0','Coração do Abismo',3,1,'sanct'],
+ ],
+};
+const WORLD_K2TAB={brasa:'brasa',mares:'mares',ventos:'ventos',umbra:'sombrio',abismo:'sombrio',
+ sant_sol:'brasa',sant_floresta:'brasa',sant_sombra:'mares',santuario:'mares',sant_gelo:'ventos',sant_lua:'ventos',sant_estrela:'ventos'};
+function worldHereId(){
+  const id=cur.id;
+  if(/^d\d+$/.test(id))return 'w10';
+  if(/^c\d+$/.test(id))return 'm20';
+  if(/^e\d+$/.test(id))return 'v20';
+  if(/^sf\d+$/.test(id))return 'vulcao';
+  if(/^sl\d+$/.test(id))return 'mata';
+  if(/^ss\d+$/.test(id))return 'deserto';
+  if(/^sb\d+$/.test(id))return 'pantano';
+  if(/^sm\d+$/.test(id))return 'sm0';
+  if(/^sg\d+$/.test(id))return 'geleira';
+  if(/^su\d+$/.test(id))return 'ruinas';
+  if(/^se\d+$/.test(id))return 'pico';
+  if(/^ru\d+$/.test(id))return 'ru0';
+  if(/^a[bx]\d*$/.test(id))return 'ab0';
+  return id;
+}
+let wmapTab=0,wmapT=0;
+function openWmap(){state='wmap';wmapT=0;wmapTab=Math.max(0,WORLD_TABS.indexOf(WORLD_K2TAB[KOF(cur.id)]||'brasa'));tone(700,900,.08,'square',.04);}
+function updateWmap(){wmapT+=1/60;
+  if(pressed.left){wmapTab=(wmapTab+WORLD_TABS.length-1)%WORLD_TABS.length;tone(620,620,.03,'square',.03);}
+  if(pressed.right){wmapTab=(wmapTab+1)%WORLD_TABS.length;tone(620,620,.03,'square',.03);}
+  if(pressed.b||pressed.esc||pressed.start||pressed.map||pressed.a){state='play';tone(500,700,.08,'square',.04);}}
+function worldIcon(kind,x,y,col){
+  ctx.fillStyle=col;
+  if(kind==='home'){ctx.beginPath();ctx.moveTo(x+6,y);ctx.lineTo(x+12,y+6);ctx.lineTo(x+10,y+6);ctx.lineTo(x+10,y+12);ctx.lineTo(x+2,y+12);ctx.lineTo(x+2,y+6);ctx.lineTo(x,y+6);ctx.closePath();ctx.fill();}
+  else if(kind==='castle'){ctx.fillRect(x+1,y+4,10,8);ctx.fillRect(x+1,y+1,3,4);ctx.fillRect(x+5,y,2,5);ctx.fillRect(x+8,y+1,3,4);}
+  else if(kind==='sanct'){ctx.beginPath();ctx.moveTo(x+6,y);ctx.lineTo(x+12,y+6);ctx.lineTo(x+6,y+12);ctx.lineTo(x,y+6);ctx.closePath();ctx.fill();}
+  else{ctx.beginPath();ctx.arc(x+6,y+6,4,0,7);ctx.fill();}
+}
+function drawWmap(){
+  const k=WORLD_TABS[wmapTab],col=WORLD_COL[k],nodes=WORLD_NODES[k],here=worldHereId();
+  ctx.fillStyle='rgba(6,5,5,.92)';ctx.fillRect(0,0,W,H);
+  panel(4,4,248,198,col[0],'MAPA MUNDI');
+  WORLD_TABS.forEach((t,i)=>{const on=i===wmapTab,x=14+i*58;
+    ctx.fillStyle=on?WORLD_COL[t][1]:'#1d1514';ctx.fillRect(x,20,54,12);
+    if(on){ctx.fillStyle=WORLD_COL[t][0];ctx.fillRect(x,20,54,2);}
+    txt(WORLD_SHORT[t],x+27,23,on?'#ffd27a':'#6a5a50',8,'center');});
+  txt(WORLD_TITLE[k],128,37,col[0],8,'center');
+  // mini-mapa: só ícones nas posições relativas, numerados
+  const maxGx=Math.max(...nodes.map(n=>n[2])),maxGy=Math.max(...nodes.map(n=>n[3]));
+  const CW=Math.min(30,180/(maxGx+1)),CH=Math.min(20,66/(maxGy+1)),ox=128-(maxGx*CW)/2-6,oy=48;
+  nodes.forEach(([id,name,gx,gy,kind],i)=>{
+    const x=ox+gx*CW,y=oy+gy*CH,on=id===here;
+    if(on){ctx.fillStyle=Math.floor(wmapT*4)%2?'rgba(255,210,122,.4)':'rgba(240,138,44,.3)';ctx.beginPath();ctx.arc(x+6,y+6,9,0,7);ctx.fill();}
+    worldIcon(kind,x,y,on?'#ffd27a':col[0]);
+    ctx.fillStyle=on?'#ffd27a':'#efe2d0';ctx.font=`7px ${FONT}`;ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillStyle='#000';ctx.fillText(''+(i+1),x+13,y+5);ctx.fillStyle=on?'#ffd27a':'#efe2d0';ctx.fillText(''+(i+1),x+12,y+4);
+  });
+  // legenda numerada em duas colunas
+  let ly=oy+(maxGy+1)*CH+8;
+  ctx.fillStyle='#3a2a26';ctx.fillRect(14,ly-5,228,1);
+  if(k==='sombrio'){
+    txt('Pelo Portal Sombrio, no Vale de Lume,',128,ly+2,'#c8b8d8',8,'center');
+    txt('depois de reunir os 11 emblemas na Grande Porta.',128,ly+12,'#c8b8d8',8,'center');
+    ly+=22;
+  }
+  const colW=114;
+  nodes.forEach(([id,name,gx,gy,kind],i)=>{
+    const col2=i%2,row2=Math.floor(i/2),x=18+col2*colW,y=ly+row2*9,on=id===here;
+    txt((i+1)+'. '+name,x,y,on?'#ffd27a':'#cfc4b0',8,'left');
+  });
+  ctx.fillStyle='#3a2a26';ctx.fillRect(14,177,228,1);
+  worldIcon('home',16,180,'#efe2d0');txt('VILA',32,185,'#a8968a');
+  worldIcon('castle',66,180,'#efe2d0');txt('CASTELO',82,185,'#a8968a');
+  worldIcon('sanct',140,180,'#efe2d0');txt('SANTUÁRIO',156,185,'#a8968a');
+  txt('ESQ/DIR: REINO    B: VOLTAR',128,195,'#6a5a50',8,'center');
+}
 function drawMenu(){
   const e=Math.min(1,menu.t/.18),oy=Math.round(-(1-e)*(1-e)*H);
   ctx.fillStyle='rgba(6,5,5,.72)';ctx.fillRect(0,0,W,H);
@@ -1690,8 +1789,8 @@ function drawTitleBg(t){
   titleEmbers=titleEmbers.filter(q=>q.life>0);ctx.globalAlpha=1;
 }
 // ---------- VERSÃO E NOVIDADES ----------
-const VERSAO='1.3';
-const NOVIDADE_TITULO='NOVO v1.3: A FLOR AGORA SUGA AS BOMBAS!';
+const VERSAO='1.4';
+const NOVIDADE_TITULO='NOVO v1.4: MAPA MUNDI! APERTE TAB';
 let versaoVista=null;try{versaoVista=localStorage.getItem('lenda.versaoVista');}catch(e){}
 function marcarVersaoVista(){if(versaoVista===VERSAO)return;versaoVista=VERSAO;try{localStorage.setItem('lenda.versaoVista',VERSAO);}catch(e){}}
 function drawTitle(t){
@@ -2004,6 +2103,7 @@ function loop(now){
     else if(state==='menu'){updateMenu(dt);}
     else if(state==='pause'){updatePause();}
     else if(state==='dmap'){updateDmap();}
+    else if(state==='wmap'){updateWmap();}
     else if(state==='dialog'){const d=dialog,page=d.pages[d.i];const before=Math.floor(d.c);d.c=Math.min(page.length,d.c+dt*45);if(Math.floor(d.c)>before&&before%3===0)SFX.text();
       if(pressed.a||pressed.start){if(d.c<page.length)d.c=page.length;else if(d.i<d.pages.length-1){d.i++;d.c=0;}else{dialog=null;state='play';player.getItem=null;saveSoon();if(d.onDone)d.onDone();}}
       updateParts(dt);}
@@ -2034,6 +2134,7 @@ function loop(now){
     if(state==='shop'&&shop)drawShop();
     if(state==='pause')drawPause();
     if(state==='dmap')drawDmap();
+    if(state==='wmap')drawWmap();
     if(state==='fade'&&fade){ctx.fillStyle=`rgba(0,0,0,${1-Math.abs(fade.t*2-1)})`;ctx.fillRect(0,HUD,W,PH);}
     if(state==='slide'&&trans&&trans.t<.3){/* nome da área no início */}
     if(state==='play'&&stateT<1.6&&cur){const a=Math.min(1,(1.6-stateT)*2);ctx.globalAlpha=a;txt(cur.name.toUpperCase(),128,HUD+6,'#efe2d0',8,'center');ctx.globalAlpha=1;}

@@ -211,8 +211,8 @@ window.JOGOS = [
     controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala (segure no abismo para o golpe de luz), K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som, F tela cheia, H mostra os controles. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
     url: "jogos/lenda-da-brasa/index.html",
     proporcao: "256 / 208",
-    versao: "2026-10-25-flor",   // mude sempre que atualizar o jogo
-    versaoJogo: "1.3",
+    versao: "2026-10-25-mapamundi",   // mude sempre que atualizar o jogo
+    versaoJogo: "1.4",
     capa: "jogos/lenda-da-brasa/capa.png",
     cor: "#e0402a",
     icone: "🗡️",
@@ -224,6 +224,9 @@ window.JOGOS = [
     destaqueTopo: true,   // ocupa o destaque do topo da página inicial
     vitrineLenda: true,   // card com herói, elenco e fotos dos lugares
     novidades: [
+      { versao: "1.4", data: "2026-10-25", itens: [
+        "Novo Mapa Mundi: aperte TAB ao ar livre (ou escolha no menu de pausa) para ver os 4 reinos com o nome de cada vila, castelo e santuário, e onde você está agora.",
+      ] },
       { versao: "1.3", data: "2026-10-25", itens: [
         "A Flor Devoradora agora abre a boca e solta uma rajada de vento que suga tudo — jogue uma bomba perto dela para a rajada puxá-la para dentro.",
         "A tela de título mostra a versão do jogo e avisa quando há novidade.",
