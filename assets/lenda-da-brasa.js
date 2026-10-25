@@ -4,7 +4,7 @@ function criarVitrineLenda(jogo, iniciar) {
   const img = (arquivo, alt, w, h) => { const i = el('img'); i.src = base + arquivo; i.alt = alt; i.loading = 'lazy'; i.decoding = 'async'; if (w) { i.width = w; i.height = h; } return i; };
   const card = el('section', 'lenda-card'); card.setAttribute('aria-label', 'Conheça Lenda da Brasa');
   const hero = el('div', 'lenda-hero'), texto = el('div', 'lenda-texto');
-  texto.append(el('span', 'lenda-selo', 'AVENTURA ESTILO ZELDA · JOGO COMPLETO'));
+  texto.append(el('span', 'lenda-selo', 'AVENTURA CLÁSSICA DE AÇÃO · JOGO COMPLETO'));
   const titulo = el('h2', 'lenda-titulo', 'LENDA DA '); titulo.append(el('span', null, 'BRASA'));
   texto.append(titulo,
     el('p', 'lenda-chamada', 'O Rei Umbra raptou a princesa. Só uma pequena brasa pode salvá-la.'),

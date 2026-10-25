@@ -180,9 +180,9 @@ window.JOGOS = [
     id: "lenda-da-brasa",
     titulo: "Lenda da Brasa",
     genero: ["Ação", "Aventura", "RPG"],
-    tags: ["pixel art", "estilo Zelda", "masmorras", "quebra-cabeças", "completo"],
+    tags: ["pixel art", "aventura clássica", "masmorras", "quebra-cabeças", "completo"],
     descricao:
-      "RPG de ação em pixel art no estilo Zelda clássico. O Rei Umbra raptou a Princesa Lírian: atravesse os reinos da Brasa, das Marés e dos Ventos, " +
+      "Aventura clássica de ação em pixel art. O Rei Umbra raptou a Princesa Lírian: atravesse os reinos da Brasa, das Marés e dos Ventos, " +
       "explore castelos com vários andares, mapa e bússola, conquiste os 3 cristais da Espada dos Reinos e enfrente os 8 santuários dos Pendentes Celestiais, " +
       "com arco, bombas, lanterna, bastão de gelo e martelo. No fim, invada a Fortaleza Sombria, vença o Rei Umbra e desça ao Coração do Abismo " +
       "para a batalha final contra a Sombra do Rei. Gaste suas brasas em lojas, ferreira, garrafas de poção e fada, " +
@@ -226,9 +226,9 @@ window.JOGOS = [
     id: "brasa-eterna",
     titulo: "Brasa Eterna",
     genero: ["Ação", "Aventura", "RPG"],
-    tags: ["pixel art", "estilo Zelda", "elementos", "dois finais"],
+    tags: ["pixel art", "aventura clássica", "elementos", "dois finais"],
     descricao:
-      "RPG de ação em pixel art no estilo Zelda clássico. Kael e a Faísca atravessam cinco capítulos " +
+      "Aventura clássica de ação em pixel art. Kael e a Faísca atravessam cinco capítulos " +
       "para recuperar as brasas da Chama Sagrada, dominar fogo, gelo, trovão e vento e enfrentar Morvane.",
     controles: "Teclado: WASD/setas movem, J ataca (segure para o disparo elemental), K esquiva, I abre os equipamentos. Também funciona com controle e no celular.",
     url: "jogos/brasa-eterna/index.html",
