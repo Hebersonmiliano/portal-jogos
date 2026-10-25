@@ -25,6 +25,8 @@ if (!jogo) {
   (jogo.tags || []).forEach((t) => tags.append(el("span", "tag", t)));
 
   const palco = document.getElementById("palco");
+  // Jogos com tela mais "quadrada" (ex.: 256x208) pedem um palco do mesmo formato, para não sobrar faixa preta.
+  if (jogo.proporcao) { palco.style.aspectRatio = jogo.proporcao; palco.style.maxHeight = "86vh"; palco.style.width = "min(100%, calc(86vh * (" + jogo.proporcao + ")))"; palco.style.marginInline = "auto"; }
   window.addEventListener('message', evento => {
     const quadro = palco.querySelector('iframe');
     if (jogo.id === 'imperio-industrial' && quadro && evento.source === quadro.contentWindow && evento.data?.tipo === 'imperio-industrial:sair' && (location.protocol === 'file:' || evento.origin === location.origin)) {
