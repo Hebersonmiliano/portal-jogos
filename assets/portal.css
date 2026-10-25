@@ -111,3 +111,15 @@
   .rodape-conteudo { flex-direction: column; align-items: flex-start; }
 }
 .topo .voltar + .apoio-topo { margin-left: 14px; }
+
+/* Novidades (changelog) na página do jogo */
+.secao-novidades { margin: 28px 0; }
+.secao-novidades h2 { font-size: 20px; margin: 0 0 14px; }
+.novidades-lista { display: flex; flex-direction: column; gap: 12px; }
+.novidade { border: 1px solid var(--borda); background: var(--painel); border-radius: 14px; padding: 14px 16px; }
+.novidade-atual { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento) inset; }
+.novidade-cabecalho { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.novidade-versao { font: 800 13px "Nunito", sans-serif; color: #1a1400; background: var(--acento); padding: 3px 10px; border-radius: 999px; }
+.novidade-data { color: var(--suave); font-size: 13px; }
+.novidade ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.novidade li { color: var(--texto); font-size: 14px; line-height: 1.45; }

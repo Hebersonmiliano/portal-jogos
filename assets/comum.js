@@ -34,6 +34,16 @@ function ehNovo(jogo) {
   return dias >= 0 && dias <= DIAS_NOVO;
 }
 
+// Verdadeiro quando o jogo já foi lançado há mais de DIAS_NOVO dias mas ganhou uma
+// atualização (entrada em "novidades") recente — mostra "Atualizado" em vez de "Novo".
+function ehAtualizado(jogo) {
+  if (ehNovo(jogo) || jogo.status !== "disponivel") return false;
+  const ultima = (jogo.novidades || [])[0];
+  if (!ultima || !ultima.data) return false;
+  const dias = (Date.now() - new Date(ultima.data + "T00:00:00")) / 86400000;
+  return dias >= 0 && dias <= DIAS_NOVO;
+}
+
 function jogoPorId(id) { return window.JOGOS.find((j) => j.id === id); }
 // Frase curta do jogo: usa "chamada" do catálogo ou a primeira frase da descrição.
 function resumoJogo(jogo) {
@@ -66,6 +76,7 @@ function criarCapa(jogo) {
   const selos = el("div", "selos");
   if (jogo.status === "em-breve") selos.append(el("span", "selo selo-breve", "Em breve"));
   else if (ehNovo(jogo)) selos.append(el("span", "selo selo-novo", "Novo"));
+  else if (ehAtualizado(jogo)) selos.append(el("span", "selo selo-atualizado", "Atualizado" + (jogo.versaoJogo ? " v" + jogo.versaoJogo : "")));
   if ((jogo.tags || []).includes("completo")) selos.append(el("span", "selo selo-completo", "Completo"));
   if (jogo.mobile) selos.append(el("span", "selo selo-mobile", "📱 Celular"));
   capa.append(selos);

@@ -24,6 +24,22 @@ if (!jogo) {
   const tags = document.getElementById("tags");
   (jogo.tags || []).forEach((t) => tags.append(el("span", "tag", t)));
 
+  if (jogo.novidades && jogo.novidades.length) {
+    const secao = document.getElementById("novidades");
+    const lista = document.getElementById("novidades-lista");
+    secao.hidden = false;
+    jogo.novidades.forEach((n, i) => {
+      const bloco = el("article", "novidade" + (i === 0 ? " novidade-atual" : ""));
+      const cab = el("div", "novidade-cabecalho");
+      cab.append(el("span", "novidade-versao", "v" + n.versao));
+      if (n.data) cab.append(el("span", "novidade-data", new Date(n.data + "T00:00:00").toLocaleDateString("pt-BR")));
+      const ul = el("ul");
+      (n.itens || []).forEach((item) => ul.append(el("li", null, item)));
+      bloco.append(cab, ul);
+      lista.append(bloco);
+    });
+  }
+
   const palco = document.getElementById("palco");
   // Jogos com tela mais "quadrada" (ex.: 256x208) pedem um palco do mesmo formato, para não sobrar faixa preta.
   if (jogo.proporcao) { palco.style.aspectRatio = jogo.proporcao; palco.style.maxHeight = "86vh"; palco.style.width = "min(100%, calc(86vh * (" + jogo.proporcao + ")))"; palco.style.marginInline = "auto"; }

@@ -211,7 +211,8 @@ window.JOGOS = [
     controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala (segure no abismo para o golpe de luz), K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som, F tela cheia, H mostra os controles. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
     url: "jogos/lenda-da-brasa/index.html",
     proporcao: "256 / 208",
-    versao: "2026-10-25-apoio",   // mude sempre que atualizar o jogo
+    versao: "2026-10-25-flor",   // mude sempre que atualizar o jogo
+    versaoJogo: "1.3",
     capa: "jogos/lenda-da-brasa/capa.png",
     cor: "#e0402a",
     icone: "🗡️",
@@ -222,6 +223,23 @@ window.JOGOS = [
     destaque: true,
     destaqueTopo: true,   // ocupa o destaque do topo da página inicial
     vitrineLenda: true,   // card com herói, elenco e fotos dos lugares
+    novidades: [
+      { versao: "1.3", data: "2026-10-25", itens: [
+        "A Flor Devoradora agora abre a boca e solta uma rajada de vento que suga tudo — jogue uma bomba perto dela para a rajada puxá-la para dentro.",
+        "A tela de título mostra a versão do jogo e avisa quando há novidade.",
+      ] },
+      { versao: "1.2", data: "2026-10-25", itens: [
+        "Lojas: Mercador Pipo e Ferreira Brígida, com garrafas, poções, escudo, túnica e botas.",
+        "Pedras da Águia para viagem rápida, Altares de Oferenda e mercadores escondidos.",
+        "Os créditos agora convidam a apoiar o criador.",
+      ] },
+      { versao: "1.1", data: "2026-10-25", itens: [
+        "Tela cheia de verdade: o jogo ocupa o monitor inteiro.",
+      ] },
+      { versao: "1.0", data: "2026-10-25", itens: [
+        "Jogo completo: Fortaleza Sombria, Rei Umbra, Coração do Abismo e a batalha final contra a Sombra do Rei.",
+      ] },
+    ],
   },
   {
     id: "brasa-eterna-2",
