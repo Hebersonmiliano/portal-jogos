@@ -11,6 +11,9 @@ window.SITE = {
   slogan: "Jogos independentes, direto no navegador",
   autor: "Heberson Miliano",
   url: "https://hebersonmiliano.github.io/portal-jogos/", // endereço público (usado nas prévias de WhatsApp)
+  // Contador de visitas anônimo: crie uma conta grátis em goatcounter.com e coloque o código aqui
+  // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
+  estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
   carrossel: ["lenda-da-brasa", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)

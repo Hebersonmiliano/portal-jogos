@@ -20,6 +20,7 @@
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   let caixa = null;
   function abrir() {
+    if (typeof window.contarEvento === "function") window.contarEvento("apoiar/abriu", "Abriu a janela de apoio");
     if (!caixa) {
       caixa = mk('dialog', 'apoio-dialogo'); caixa.setAttribute('aria-label', 'Apoiar o ' + (window.SITE.nome || 'site'));
       const fechar = mk('button', 'apoio-fechar', '✕'); fechar.type = 'button'; fechar.setAttribute('aria-label', 'Fechar'); fechar.onclick = () => caixa.close();
@@ -32,7 +33,7 @@
         const rot = mk('p', 'apoio-rotulo', 'Abra o app do seu banco, escolha Pix e leia o QR Code — ou use o Pix copia e cola:');
         const linha = mk('div', 'apoio-copia'), campoTxt = mk('input'); campoTxt.readOnly = true; campoTxt.value = codigo; campoTxt.setAttribute('aria-label', 'Pix copia e cola');
         const copiar = mk('button', 'botao apoio-copiar', 'Copiar'); copiar.type = 'button';
-        copiar.onclick = async () => { try { await navigator.clipboard.writeText(codigo); } catch (e) { campoTxt.select(); document.execCommand && document.execCommand('copy'); } copiar.textContent = 'Copiado! ✓'; setTimeout(() => (copiar.textContent = 'Copiar'), 2200); };
+        copiar.onclick = async () => { if (typeof window.contarEvento === 'function') window.contarEvento('apoiar/copiou-pix', 'Copiou o Pix'); try { await navigator.clipboard.writeText(codigo); } catch (e) { campoTxt.select(); document.execCommand && document.execCommand('copy'); } copiar.textContent = 'Copiado! ✓'; setTimeout(() => (copiar.textContent = 'Copiar'), 2200); };
         linha.append(campoTxt, copiar);
         caixa.append(fig, rot, linha, mk('p', 'apoio-nome', 'Recebedor: ' + (cfg.nome || window.SITE.autor || '')));
       }

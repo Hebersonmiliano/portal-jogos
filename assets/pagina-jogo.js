@@ -85,6 +85,7 @@ if (!jogo) {
       }
       quadro.focus();
       marcarJogado(jogo.id);
+      if (typeof contarEvento === "function") contarEvento("jogar/" + jogo.id, "Jogou: " + jogo.titulo);
       document.getElementById("tela-cheia").disabled = false;
       if (jogo.apresentacao) {
         document.getElementById("apresentacao").hidden = true;
@@ -125,6 +126,7 @@ if (!jogo) {
     const link = base + "j/" + encodeURIComponent(jogo.id) + "/";
     const texto = jogo.titulo + " — " + (typeof resumoJogo === "function" ? resumoJogo(jogo) : "") + " Jogue grátis:";
     botaoComp.onclick = async () => {
+      if (typeof contarEvento === "function") contarEvento("compartilhar/" + jogo.id, "Compartilhou: " + jogo.titulo);
       const nav = typeof navigator !== "undefined" ? navigator : {};
       try {
         if (nav.share) { await nav.share({ title: jogo.titulo, text: texto, url: link }); return; }
