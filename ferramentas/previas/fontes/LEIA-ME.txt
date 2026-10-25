@@ -1,0 +1,4 @@
+Fontes usadas só para gerar as imagens de prévia (não são carregadas pelo site).
+- Press Start 2P (CodeMan38) — SIL Open Font License 1.1
+- Nunito (Vernon Adams e colaboradores) — SIL Open Font License 1.1
+Convertidas de @fontsource/press-start-2p e @fontsource/nunito.

@@ -118,6 +118,25 @@ if (!jogo) {
     if (quadro && quadro.requestFullscreen) quadro.requestFullscreen();
   };
 
+  // Compartilhar: usa o link curto j/<id>/, que mostra a prévia com imagem no WhatsApp.
+  const botaoComp = document.getElementById("compartilhar");
+  if (botaoComp) {
+    const base = (window.SITE.url || "").replace(/\/?$/, "/");
+    const link = base + "j/" + encodeURIComponent(jogo.id) + "/";
+    const texto = jogo.titulo + " — " + (typeof resumoJogo === "function" ? resumoJogo(jogo) : "") + " Jogue grátis:";
+    botaoComp.onclick = async () => {
+      const nav = typeof navigator !== "undefined" ? navigator : {};
+      try {
+        if (nav.share) { await nav.share({ title: jogo.titulo, text: texto, url: link }); return; }
+        await nav.clipboard.writeText(link);
+        botaoComp.textContent = "✓ Link copiado";
+      } catch (e) {
+        if (e && e.name === "AbortError") return;
+        window.open("https://wa.me/?text=" + encodeURIComponent(texto + " " + link), "_blank", "noopener");
+      }
+      setTimeout(() => (botaoComp.textContent = "↗ Compartilhar"), 2200);
+    };
+  }
   const botaoFav = document.getElementById("favorito");
   const pintarFav = () => {
     const sim = ehFavorito(jogo.id);

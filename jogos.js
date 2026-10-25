@@ -3,12 +3,14 @@
 //  para adicionar um jogo novo:
 //    1. copie a pasta do jogo para  jogos/<id>/
 //    2. adicione um bloco { ... } na lista JOGOS abaixo
+//    3. rode  python3 ferramentas/previas/gerar.py  (cria a prévia de WhatsApp)
 // ============================================================
 
 window.SITE = {
   nome: "Portal Pixel",               // nome provisório
   slogan: "Jogos independentes, direto no navegador",
   autor: "Heberson Miliano",
+  url: "https://hebersonmiliano.github.io/portal-jogos/", // endereço público (usado nas prévias de WhatsApp)
   // Jogos que aparecem no carrossel do topo, nesta ordem.
   carrossel: ["lenda-da-brasa", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)

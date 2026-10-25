@@ -127,3 +127,16 @@ test('Lenda da Brasa ocupa o destaque do topo com herói, elenco e fotos dos lug
  w.querySelector('button').click();assert.equal(w.hidden,true);assert.equal(descendants(palco,'iframe').length,1);
  for(const file of ['index.html','jogo.html']){const html=fs.readFileSync(path.join(root,file),'utf8');assert.match(html,/assets\/lenda-da-brasa\.css/);assert.match(html,/assets\/lenda-da-brasa\.js/);}
 });
+
+test('cada jogo tem prévia de compartilhamento (página curta + imagem) e a página inicial também',()=>{
+ const f=fixture();const versoes=JSON.parse(fs.readFileSync(path.join(root,'previas/versoes.json'),'utf8'));
+ for(const jogo of f.context.window.JOGOS){
+  const pg=path.join(root,'j',jogo.id,'index.html');assert.ok(fs.existsSync(pg),pg);
+  const html=fs.readFileSync(pg,'utf8');
+  assert.match(html,new RegExp('og:image" content="https://[^"]+/previas/'+jogo.id+'\\.jpg\\?v='+versoes[jogo.id]));
+  assert.match(html,new RegExp('jogo\\.html\\?id='+jogo.id));
+  assert.ok(fs.existsSync(path.join(root,'previas',jogo.id+'.jpg')));
+ }
+ for(const file of ['index.html','jogo.html'])assert.match(fs.readFileSync(path.join(root,file),'utf8'),/og:image" content="https:\/\/[^"]+previas\/portal\.jpg/);
+ assert.match(fs.readFileSync(path.join(root,'jogo.html'),'utf8'),/id="compartilhar"/);
+});
