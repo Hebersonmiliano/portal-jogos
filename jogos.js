@@ -9,6 +9,14 @@ window.SITE = {
   nome: "Portal Pixel",               // nome provisório
   slogan: "Jogos independentes, direto no navegador",
   autor: "Heberson Miliano",
+  // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
+  // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
+  doacao: {
+    pix: "",                    // chave Pix
+    nome: "HEBERSON MILIANO",   // nome do recebedor (até 25 letras, sem acento)
+    cidade: "",                 // cidade do recebedor (até 15 letras)
+    link: "",                   // opcional: link do Ko-fi, Apoia.se etc.
+  },
 };
 
 // Gêneros fixos (poucos e estáveis). Use "tags" para o resto.
@@ -190,7 +198,7 @@ window.JOGOS = [
     controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala (segure no abismo para o golpe de luz), K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som, F tela cheia, H mostra os controles. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
     url: "jogos/lenda-da-brasa/index.html",
     proporcao: "256 / 208",
-    versao: "2026-10-25-lojas",   // mude sempre que atualizar o jogo
+    versao: "2026-10-25-apoio",   // mude sempre que atualizar o jogo
     capa: "jogos/lenda-da-brasa/capa.png",
     cor: "#e0402a",
     icone: "🗡️",
