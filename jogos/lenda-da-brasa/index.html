@@ -1790,8 +1790,8 @@ function drawTitleBg(t){
   titleEmbers=titleEmbers.filter(q=>q.life>0);ctx.globalAlpha=1;
 }
 // ---------- VERSÃO E NOVIDADES ----------
-const VERSAO='1.5.1';
-const NOVIDADE_TITULO='v1.5.1: PINOS DA LUA CORRIGIDOS';
+const VERSAO='1.6';
+const NOVIDADE_TITULO='v1.6: CHEFE FINAL MAIS JUSTO';
 let versaoVista=null;try{versaoVista=localStorage.getItem('lenda.versaoVista');}catch(e){}
 function marcarVersaoVista(){if(versaoVista===VERSAO)return;versaoVista=VERSAO;try{localStorage.setItem('lenda.versaoVista',VERSAO);}catch(e){}}
 function drawTitle(t){
@@ -1915,6 +1915,9 @@ GATE_X.ru0=['w11',192,124,'down'];GATE_X.ax0=['w11',192,124,'down'];
 let cine=null,credY=0;
 const SK_FORMS=['gelo','pedra','voo','blindada','olho'],SK_NEED={gelo:'fire',pedra:'bomb',voo:'hook',blindada:'hammer',olho:'arrow'};
 const SK_HINT={gelo:'GELO... SÓ O FOGO O DERRETE',pedra:'PEDRA... ALGO QUE EXPLODA',voo:'ELE VOA LONGE... PUXE-O PARA BAIXO',blindada:'BLINDADO... UM GOLPE PESADO',olho:'UM OLHO ABERTO... ACERTE DE LONGE'};
+const SK_ITEM={gelo:'firerod',pedra:'bombs',voo:'hook',blindada:'hammer',olho:'bow'};
+// na fase 2 o item certo vai sozinho para o botão B
+function skItem(f){const it=SK_ITEM[f];if(it&&player.items&&player.items[it])player.bItem=it;}
 const SK_NAME={gelo:'FORMA DE GELO',pedra:'FORMA DE PEDRA',voo:'FORMA ALADA',blindada:'FORMA BLINDADA',olho:'FORMA DO OLHO'};
 const isAbyss=()=>cur&&DEF[cur.id]&&DEF[cur.id].k==='abismo';
 function startCine(dur,draw,done){cine={t:0,dur,draw,done,once:{}};state='cine';}
@@ -1991,7 +1994,7 @@ function finalBossUpdate(e,dt,p,fury,b){
     if(e.st==='show'){e.vt+=dt;if(e.vt>8||e.hits>=3){e.st='hide';for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(cur.tiles[y][x]==='F'){setTile(x,y,'J');burst(x*TS+8,y*TS+6,'#3a2a50',10);}tone(400,60,.7,'sawtooth',.06);toast('A SOMBRA ENGOLIU A LUZ!');}}
     if(e.ft<=0){e.ft=2.1;mbShot(e,aim(e,p),78,'shadow',7);tone(260,120,.2,'sawtooth',.04);}}
   else if(ph===2){
-    e.ct-=dt;if(e.ct<=0){e.ct=5;e.fi=(e.fi+1)%5;e.form=SK_FORMS[e.fi];burst(b.x+b.w/2,b.y+b.h/2,'#9a6ae8',18);tone(200,600,.3,'triangle',.05);toast(SK_NAME[e.form]);}
+    e.ct-=dt;if(e.ct<=0){e.ct=5;e.fi=(e.fi+1)%5;e.form=SK_FORMS[e.fi];skItem(e.form);burst(b.x+b.w/2,b.y+b.h/2,'#9a6ae8',18);tone(200,600,.3,'triangle',.05);toast(SK_NAME[e.form]);}
     if(e.ft<=0){const a=aim(e,p);
       if(e.form==='gelo'){e.ft=1.8;for(const o of [-.3,0,.3])mbShot(e,a+o,90,'snow',8);}
       else if(e.form==='pedra'){e.ft=2.4;waves.push({x:b.x+b.w/2,y:b.y+b.h,r:4,max:70,sp:90,dmg:1});tone(90,40,.3,'triangle',.08);}
@@ -2004,9 +2007,9 @@ function finalBossUpdate(e,dt,p,fury,b){
 }
 function skPhase(e){
   shots=shots.filter(s=>s.friendly);
-  if(e.phase===2){e.st='form';e.fi=0;e.form='gelo';e.ct=5;e.ft=1.5;for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(cur.tiles[y][x]==='F')setTile(x,y,'J');
-    SFX.boss();showDialog(['A SOMBRA DO REI se contorce... e assume as formas dos guardiões que você venceu!','Cada forma tem uma fraqueza. Use o item certo para desfazê-la e então ataque com a espada.']);toast(SK_NAME.gelo);}
-  if(e.phase===3){e.wt=2;e.ft=2.5;
+  if(e.phase===2){e.st='form';e.fi=0;e.form='gelo';e.ct=5;e.ft=1.5;skItem('gelo');for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++)if(cur.tiles[y][x]==='F')setTile(x,y,'J');
+    SFX.boss();showDialog(['A SOMBRA DO REI se contorce... e assume as formas dos guardiões que você venceu!','Cada forma tem uma fraqueza. O item certo vai sozinho para o botão B: use-o para desfazer a forma e então ataque com a espada.']);toast(SK_NAME.gelo);}
+  if(e.phase===3){e.wt=2;e.ft=2.5;if(player.items&&player.items.feather)player.bItem='feather';
     for(let y=1;y<10;y++)for(let x=1;x<15;x++)if((x===5||x===10||y===5)&&cur.tiles[y][x]===','){setTile(x,y,'o');if(Math.random()<.4)burst(x*TS+8,y*TS+8,'#3a2a50',6);}
     const p=player,cx=Math.floor((p.x+8)/TS),cy=Math.floor((p.y+12)/TS);if(tileAt(cx,cy)==='o'){if(cy===5)p.y+=16;else p.x+=cx===5?-16:16;}
     tone(60,30,1.5,'sawtooth',.09);SFX.boss();
