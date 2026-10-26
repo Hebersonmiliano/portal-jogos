@@ -872,7 +872,7 @@ const KMAP={Tab:'map',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowL
 addEventListener('keydown',e=>{ensureAudio();const k=KMAP[e.code];if(e.code==='KeyM'){muted=!muted;if(mus.gain&&ac)mus.gain.gain.setTargetAtTime(muted?0:MUSIC_VOL,ac.currentTime,.05);toast(muted?'SOM DESLIGADO (M)':'SOM LIGADO');soundMsgT=2;return;}if(!k)return;e.preventDefault();if(!keys[k])pressed[k]=true;keys[k]=true;});
 addEventListener('keyup',e=>{const k=KMAP[e.code];if(k)keys[k]=false;});
 document.querySelectorAll('.pad .btn').forEach(b=>{const k=b.dataset.k;
-  const on=e=>{e.preventDefault();ensureAudio();if(!keys[k])pressed[k]=true;keys[k]=true;b.classList.add('on');};
+  const on=e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(_){}ensureAudio();if(!keys[k])pressed[k]=true;keys[k]=true;b.classList.add('on');};
   const off=e=>{e.preventDefault();keys[k]=false;b.classList.remove('on');};
   b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off);});
 // controle (Xbox, PlayStation, genéricos): direcional/analógico, A=espada, B ou X=item, Start/Select=menu
@@ -1790,8 +1790,8 @@ function drawTitleBg(t){
   titleEmbers=titleEmbers.filter(q=>q.life>0);ctx.globalAlpha=1;
 }
 // ---------- VERSÃO E NOVIDADES ----------
-const VERSAO='1.6';
-const NOVIDADE_TITULO='v1.6: CHEFE FINAL MAIS JUSTO';
+const VERSAO='1.6.1';
+const NOVIDADE_TITULO='v1.6.1: LUZ CARREGADA MAIS FÁCIL';
 let versaoVista=null;try{versaoVista=localStorage.getItem('lenda.versaoVista');}catch(e){}
 function marcarVersaoVista(){if(versaoVista===VERSAO)return;versaoVista=VERSAO;try{localStorage.setItem('lenda.versaoVista',VERSAO);}catch(e){}}
 function drawTitle(t){
@@ -2051,8 +2051,10 @@ function finalBossDown(e){
 }
 function finalUpdate(dt){
   const p=player;if(!cur)return;if(p.embers>999)p.embers=999;
-  if(isAbyss()&&p.sword&&keys.a&&!p.pulling&&!p.jump){p.charge=(p.charge||0)+dt;if(p.charge>.8&&!p.chargeReady){p.chargeReady=true;tone(900,1800,.2,'triangle',.05);burst(p.x+8,p.y+8,'#fff0b0',10);}}
-  else{if(p.chargeReady&&state==='play'){for(let i=0;i<8;i++){const a=i*Math.PI/4,v=[Math.cos(a),Math.sin(a)];shots.push({friendly:true,light:true,x:p.x+3,y:p.y+4,w:10,h:10,vx:v[0]*165,vy:v[1]*165,dir:v,t:0});}
+  if(isAbyss()&&p.sword&&keys.a&&!p.pulling&&!p.jump){p.charge=(p.charge||0)+dt;if(p.charge>.8&&!p.chargeReady){p.chargeReady=true;tone(900,1800,.2,'triangle',.05);burst(p.x+8,p.y+8,'#fff0b0',18);toast('LUZ CARREGADA! SOLTE O BOTÃO');}}
+  else{if(p.chargeReady&&state==='play'){// a estrela gira para um dos raios sair mirando a Sombra do Rei
+      let off=0;const sk=enemies.find(m=>m.type==='shadowking'&&!m.dead);if(sk){const bb=hb(sk);off=Math.atan2(bb.y+bb.h/2-(p.y+9),bb.x+bb.w/2-(p.x+8));}
+      for(let i=0;i<8;i++){const a=off+i*Math.PI/4,v=[Math.cos(a),Math.sin(a)];shots.push({friendly:true,light:true,x:p.x+3,y:p.y+4,w:10,h:10,vx:v[0]*165,vy:v[1]*165,dir:v,t:0});}
       tone(600,1800,.35,'triangle',.06);burst(p.x+8,p.y+10,'#fff8d8',24);}
     p.charge=0;p.chargeReady=false;}
 }
@@ -2070,7 +2072,10 @@ function finalDrawOver(){
     // progresso dos ecos (11 emblemas)
     if(cur.id!=='ax0'){for(let i=0;i<11;i++){const x=72+i*10,y=HUD+PH-20,on=visited.has('ab'+(i+1)),here=DEF[cur.id].echo===i;
       ctx.fillStyle='#05030a';ctx.fillRect(x,y,8,8);ctx.fillStyle=here?(Math.floor(gameTime*4)%2?'#ffd27a':'#f08a2c'):on?'#a87ac8':'#2a1a3c';ctx.fillRect(x+1,y+1,6,6);}}}
-  const p=player;if(p.charge>.25){const k=Math.min(1,p.charge/.8);for(let i=0;i<6;i++){const a=gameTime*8+i*1.05,r=14-k*4;ctx.fillStyle=p.chargeReady?'#fff8d8':'#ffd27a';ctx.fillRect(Math.round(p.x+8+Math.cos(a)*r),Math.round(p.y+HUD+10+Math.sin(a)*r),k>.99?2:1,k>.99?2:1);}}
+  const p=player;if(p.charge>.15){const k=Math.min(1,p.charge/.8),cx=p.x+8,cy=p.y+HUD+10;
+    if(p.chargeReady){const f=Math.sin(gameTime*20)*.5+.5;ctx.fillStyle='rgba(255,240,180,'+(.25+f*.2)+')';ctx.beginPath();ctx.arc(cx,cy,13+f*3,0,7);ctx.fill();}
+    for(let i=0;i<8;i++){const a=gameTime*8+i*Math.PI/4,r=16-k*5;ctx.fillStyle=p.chargeReady?'#fff8d8':'#ffd27a';ctx.fillRect(Math.round(cx+Math.cos(a)*r)-1,Math.round(cy+Math.sin(a)*r)-1,2,2);}
+    if(!p.chargeReady){ctx.fillStyle='#1a1020';ctx.fillRect(cx-9,cy-19,18,4);ctx.fillStyle='#ffd27a';ctx.fillRect(cx-8,cy-18,Math.round(16*k),2);}}
 }
 const CREDITS=['LENDA DA BRASA','','~ FIM ~','','','CRIAÇÃO E DIREÇÃO','Heberson Miliano','','','DESENVOLVIDO COM A AJUDA DO','Claude (Anthropic)','','','O HERÓI','Lume, a pequena brasa','','A PRINCESA','Lírian do Reino da Brasa','','OS VILÕES','O Rei Umbra','A Sombra do Rei','','','OS LUGARES','Vale de Lume · Lago Sereno','Castelo da Brasa · Castelo das Marés','Castelo dos Ventos','Os Oito Santuários Celestiais','Fortaleza Sombria','Coração do Abismo','','','OS GUARDIÕES','Guardião de Cinzas · Kraken · Grifo','Salamandra · Caranguejo Rei','Escorpião Dourado · Flor Carnívora','Espectro · Yeti · Cavaleiro Lunar','Guardião Estelar','','','GOSTOU DO JOGO?','Apoie o criador no Portal Pixel','com o botão Apoiar','','OBRIGADO POR JOGAR!','','','',''];
 function updateCredits(dt){credY+=dt*(keys.a?60:20);const end=CREDITS.length*14+PH+40;
