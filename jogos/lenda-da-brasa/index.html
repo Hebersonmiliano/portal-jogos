@@ -1416,7 +1416,7 @@ function collect(k){
     showDialog(['Você obteve o PENDENTE '+names[k.idx]+'! ('+nP+'/8)',nP<8?'Faltam '+(8-nP)+' pendentes. Uma luz guia você de volta à entrada do santuário.':'Os 8 pendentes brilham juntos! Um PORTAL SOMBRIO se abriu no VALE DE LUME, a sudeste, perto do caminho do lago. O Reino Sombrio espera...'],()=>{if(SC)startFade(()=>enterScreen(...SC.exit));});}
   else if(k.kind==='crystal3'){player.getItem='cristal_ventos';flags.crystals[2]=true;SFX.secret();
     showDialog(['Você obteve o CRISTAL DOS VENTOS!','Os três cristais brilham juntos... e uma luz azul desce do céu.'],()=>{player.swordLevel=2;player.getItem='espada_reinos_cima';SFX.chest();
-      showDialog(['Você obteve a ESPADA DOS REINOS! Seus golpes agora causam o dobro de dano.','Agora busque os 8 PENDENTES CELESTIAIS, espalhados pelo mundo, para abrir o caminho até o Reino Sombrio.'],()=>{flags.lastChapter=3;state='victory';stateT=0;});});}
+      showDialog(['Você obteve a ESPADA DOS REINOS! Seus golpes agora causam o dobro de dano.','SEGURE o botão de ataque até a espada brilhar e SOLTE: oito raios de LUZ saem em todas as direções.','Agora busque os 8 PENDENTES CELESTIAIS, espalhados pelo mundo, para abrir o caminho até o Reino Sombrio.'],()=>{flags.lastChapter=3;state='victory';stateT=0;});});}
   else if(k.kind==='crystal2'){player.getItem='cristal_mares';flags.crystals[1]=true;SFX.secret();showDialog(['Você obteve o CRISTAL DAS MARÉS! Falta apenas o dos Ventos.','Dois cristais já brilham. A Espada dos Reinos está quase livre.'],()=>{flags.lastChapter=2;state='victory';stateT=0;});}
 }
 function burst(x,y,col,n){for(let i=0;i<n;i++){const a=rnd(0,6.28),s=rnd(20,70);parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rnd(.3,.7),max:.7,col,s:Math.random()<.3?2:1});}}
@@ -1790,8 +1790,8 @@ function drawTitleBg(t){
   titleEmbers=titleEmbers.filter(q=>q.life>0);ctx.globalAlpha=1;
 }
 // ---------- VERSÃO E NOVIDADES ----------
-const VERSAO='1.6.3';
-const NOVIDADE_TITULO='v1.6.3: A CARGA NÃO SE PERDE';
+const VERSAO='1.7';
+const NOVIDADE_TITULO='v1.7: LUZ DA ESPADA NO JOGO TODO';
 let versaoVista=null;try{versaoVista=localStorage.getItem('lenda.versaoVista');}catch(e){}
 function marcarVersaoVista(){if(versaoVista===VERSAO)return;versaoVista=VERSAO;try{localStorage.setItem('lenda.versaoVista',VERSAO);}catch(e){}}
 function drawTitle(t){
@@ -2050,16 +2050,19 @@ function finalBossDown(e){
       ()=>{flags.gameComplete=true;enterScreen('w11',120,96,'up');player.hp=player.maxHp;
         showDialog(['A luz da Espada dos Reinos atravessa o Coração do Abismo...','A SOMBRA DO REI se desfaz em mil brasas. Os onze emblemas sobem ao céu e voltam a brilhar sobre os reinos.','Quando a luz se apaga, você está de volta ao Vale de Lume. E alguém espera por você.','PRINCESA LÍRIAN: Você voltou, Lume! O Reino da Brasa está livre... graças à sua coragem.','E assim a lenda da brasa passou de boca em boca, por todos os reinos.'],()=>{saveNow();state='credits';stateT=0;credY=0;});});},700);}
 }
+// alvo da luz carregada: a Sombra do Rei ou o inimigo mais perto
+function lightTarget(p){const sk=enemies.find(m=>m.type==='shadowking'&&!m.dead);if(sk)return sk;let best=null,bd=1e9;
+  for(const e of enemies){if(e.dead)continue;const b=hb(e),d=Math.hypot(b.x+b.w/2-(p.x+8),b.y+b.h/2-(p.y+9));if(d<bd){bd=d;best=e;}}return best;}
 function finalUpdate(dt){
   const p=player;if(!cur)return;if(p.embers>999)p.embers=999;
-  if(isAbyss()&&p.sword&&keys.a&&state==='play'){if(!p.pulling&&!(p.jump>0)&&!(p.kbt>0))p.charge=(p.charge||0)+dt;else p.charge=Math.max(p.charge||0,.16);if(p.charge>.8&&!p.chargeReady){p.chargeReady=true;tone(900,1800,.2,'triangle',.05);burst(p.x+8,p.y+8,'#fff0b0',18);toast('LUZ CARREGADA! SOLTE O BOTÃO');}}
+  if((isAbyss()||p.swordLevel>=2)&&p.sword&&keys.a&&state==='play'){if(!p.pulling&&!(p.jump>0)&&!(p.kbt>0))p.charge=(p.charge||0)+dt;else p.charge=Math.max(p.charge||0,.16);if(p.charge>.8&&!p.chargeReady){p.chargeReady=true;tone(900,1800,.2,'triangle',.05);burst(p.x+8,p.y+8,'#fff0b0',18);toast('LUZ CARREGADA! SOLTE O BOTÃO');}}
   else{if(p.chargeReady&&state==='play'){// a estrela gira para um dos raios sair mirando a Sombra do Rei
-      let off=0;const sk=enemies.find(m=>m.type==='shadowking'&&!m.dead);if(sk){const bb=hb(sk);off=Math.atan2(bb.y+bb.h/2-(p.y+9),bb.x+bb.w/2-(p.x+8));}
-      for(let i=0;i<8;i++){const a=off+i*Math.PI/4,v=[Math.cos(a),Math.sin(a)];shots.push({friendly:true,light:true,home:!!sk&&i===0,x:p.x+3,y:p.y+4,w:10,h:10,vx:v[0]*165,vy:v[1]*165,dir:v,t:0});}
+      let off=0;const sk=lightTarget(p);if(sk){const bb=hb(sk);off=Math.atan2(bb.y+bb.h/2-(p.y+9),bb.x+bb.w/2-(p.x+8));}
+      for(let i=0;i<8;i++){const a=off+i*Math.PI/4,v=[Math.cos(a),Math.sin(a)];shots.push({friendly:true,light:true,home:i===0?sk:null,x:p.x+3,y:p.y+4,w:10,h:10,vx:v[0]*165,vy:v[1]*165,dir:v,t:0});}
       tone(600,1800,.35,'triangle',.06);burst(p.x+8,p.y+10,'#fff8d8',24);}
     p.charge=0;p.chargeReady=false;}
   // o raio que mira a Sombra do Rei a persegue de leve, para não errar quando ela se move
-  {const sk=enemies.find(m=>m.type==='shadowking'&&!m.dead);if(sk){const bb=hb(sk);for(const s of shots)if(s.home&&!s.dead){
+  {for(const s of shots)if(s.home&&!s.dead&&!s.home.dead){const bb=hb(s.home);{
     const a=Math.atan2(bb.y+bb.h/2-(s.y+5),bb.x+bb.w/2-(s.x+5)),c=Math.atan2(s.vy,s.vx);let d=a-c;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;
     const n=c+Math.max(-6*dt,Math.min(6*dt,d));s.vx=Math.cos(n)*165;s.vy=Math.sin(n)*165;s.dir=[Math.cos(n),Math.sin(n)];}}}
 }
