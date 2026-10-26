@@ -211,8 +211,8 @@ window.JOGOS = [
     controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala (segure no abismo para o golpe de luz), K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som, F tela cheia, H mostra os controles. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
     url: "jogos/lenda-da-brasa/index.html",
     proporcao: "256 / 208",
-    versao: "2026-10-26-menu",   // mude sempre que atualizar o jogo
-    versaoJogo: "1.7.1",
+    versao: "2026-10-26-acoes",   // mude sempre que atualizar o jogo
+    versaoJogo: "1.7.2",
     capa: "jogos/lenda-da-brasa/capa.png",
     cor: "#e0402a",
     icone: "🗡️",
@@ -224,6 +224,9 @@ window.JOGOS = [
     destaqueTopo: true,   // ocupa o destaque do topo da página inicial
     vitrineLenda: true,   // card com herói, elenco e fotos dos lugares
     novidades: [
+      { versao: "1.7.2", data: "2026-10-26", itens: [
+        "O quadro de Ações mostra só o que existe no jogo: LER, FALAR, PUXAR e CORRER (com as Botas Ligeiras).",
+      ] },
       { versao: "1.7.1", data: "2026-10-26", itens: [
         "O menu de itens mostra só os 12 itens que existem no jogo. Sem espaços cinza que nunca podiam ser pegos.",
       ] },

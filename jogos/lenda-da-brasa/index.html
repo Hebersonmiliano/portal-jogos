@@ -1767,9 +1767,9 @@ function drawMenu(){
   // AÇÕES
   panel(4,120,164,84,'#e0402a','AÇÕES');
   ctx.fillStyle='#000';ctx.fillRect(10,131,13,13);ctx.fillStyle='#e0402a';ctx.fillRect(11,132,11,11);txt('A',17,132,'#efe2d0',8,'center');
-  const g=player.gear,acts=[['ERGUER',g.gloves],['LER',true],['FALAR',true],['PUXAR',true],['CORRER',g.boots],['NADAR',g.flippers]];
+  const g=player.gear,acts=[['LER',true],['FALAR',true],['PUXAR',true],['CORRER',g.boots]];
   acts.forEach(([n,ok],i)=>txt(n,[28,74,118][i%3],132+Math.floor(i/3)*14,ok?'#efe2d0':'#5a504a'));
-  [['boots',g.boots],['gloves',g.gloves],['flippers',g.flippers],['feather',g.feather]].forEach(([k,ok],i)=>{const x=22+i*36;ctx.fillStyle='#10160f';ctx.fillRect(x-3,167,16,16);ctx.drawImage(ok?ICON[k]:SIL[k],x,170);});
+  [['boots',g.boots],['feather',g.feather]].forEach(([k,ok],i)=>{const x=58+i*44;ctx.fillStyle='#10160f';ctx.fillRect(x-3,167,16,16);ctx.drawImage(ok?ICON[k]:SIL[k],x,170);});
   // EQUIPAMENTO
   panel(172,120,80,84,'#e8b04a','EQUIPAMENTO');
   [['sword',player.sword],[player.shieldLv>=2?'shield2':'shield',player.shield],['tunic',true]].forEach(([k,ok],i)=>{const x=181+i*22,kk=k==='shield2'?'shield':k;ctx.fillStyle='#10160f';ctx.fillRect(x-3,131,16,16);ctx.drawImage(ok?ICON[k]:SIL[kk],x,134);
@@ -1789,8 +1789,8 @@ function drawTitleBg(t){
   titleEmbers=titleEmbers.filter(q=>q.life>0);ctx.globalAlpha=1;
 }
 // ---------- VERSÃO E NOVIDADES ----------
-const VERSAO='1.7.1';
-const NOVIDADE_TITULO='v1.7.1: MENU DE ITENS ARRUMADO';
+const VERSAO='1.7.2';
+const NOVIDADE_TITULO='v1.7.2: MENU SEM ESPAÇOS VAZIOS';
 let versaoVista=null;try{versaoVista=localStorage.getItem('lenda.versaoVista');}catch(e){}
 function marcarVersaoVista(){if(versaoVista===VERSAO)return;versaoVista=VERSAO;try{localStorage.setItem('lenda.versaoVista',VERSAO);}catch(e){}}
 function drawTitle(t){
