@@ -211,8 +211,8 @@ window.JOGOS = [
     controles: "Teclado: WASD/setas movem (8 direções), J/Espaço ataca e fala (segure no abismo para o golpe de luz), K/X usa o item, I abre os itens, Enter pausa, TAB abre o mapa do castelo, M liga/desliga o som, F tela cheia, H mostra os controles. Controle: A ataca, B/X usa o item, Y itens, Start pausa, Select mapa. Também funciona no celular. 3 espaços de salvamento neste navegador.",
     url: "jogos/lenda-da-brasa/index.html",
     proporcao: "256 / 208",
-    versao: "2026-10-26-luz2",   // mude sempre que atualizar o jogo
-    versaoJogo: "1.6.2",
+    versao: "2026-10-26-carga",   // mude sempre que atualizar o jogo
+    versaoJogo: "1.6.3",
     capa: "jogos/lenda-da-brasa/capa.png",
     cor: "#e0402a",
     icone: "🗡️",
@@ -224,6 +224,9 @@ window.JOGOS = [
     destaqueTopo: true,   // ocupa o destaque do topo da página inicial
     vitrineLenda: true,   // card com herói, elenco e fotos dos lugares
     novidades: [
+      { versao: "1.6.3", data: "2026-10-26", itens: [
+        "A luz carregada não se perde mais ao levar um golpe ou pular, e o raio que mira a Sombra do Rei a persegue de leve para não errar.",
+      ] },
       { versao: "1.6.2", data: "2026-10-26", itens: [
         "A luz carregada da espada agora fere a Sombra do Rei em qualquer fase da luta final.",
       ] },
