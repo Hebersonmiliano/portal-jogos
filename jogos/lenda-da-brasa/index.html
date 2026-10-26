@@ -238,10 +238,9 @@ const FIRE_IMMUNE=new Set(['slime','knight','boss','salamander']);
 // ---------- ITENS, CRISTAIS E PENDENTES ----------
 // [chave, nome, ícone]
 const ITEMS=[
- ['boomerang','BUMERANGUE','boomerang'],['bow','ARCO','bow'],['hook','GANCHO','hook'],['bombs','BOMBAS','bombs'],['powder','PÓ MÁGICO','powder'],
- ['firerod','BASTÃO DE BRASA','firerod'],['icerod','BASTÃO DE GELO','icerod'],['lantern','LANTERNA','lantern'],['hammer','MARTELO','hammer'],['flute','FLAUTA','flute'],
- ['feather','PENA','feather'],['book','LIVRO ANTIGO','book'],['bottle1','GARRAFA','bottle'],['bottle2','GARRAFA','bottle'],['bottle3','GARRAFA','bottle'],
- ['shovel','PÁ','shovel'],['cape','CAPA MÁGICA','cape'],['mirror','ESPELHO','mirror'],['cane','CAJADO','cane'],['shell','CONCHA','shell']
+ ['boomerang','BUMERANGUE','boomerang'],['bow','ARCO','bow'],['hook','GANCHO','hook'],['bombs','BOMBAS','bombs'],
+ ['firerod','BASTÃO DE BRASA','firerod'],['icerod','BASTÃO DE GELO','icerod'],['lantern','LANTERNA','lantern'],['hammer','MARTELO','hammer'],
+ ['feather','PENA','feather'],['bottle1','GARRAFA','bottle'],['bottle2','GARRAFA','bottle'],['bottle3','GARRAFA','bottle'],
 ];
 const CRYSTALS=[['BRASA','#e0402a'],['MARÉS','#4a8ac4'],['VENTOS','#6ec070']];
 const PENDANT_COLS=['#e8b04a','#c9461f','#4a8ac4','#6ec070','#8a5276','#8ad4e8','#efe2d0','#f08a2c'];
@@ -1550,9 +1549,9 @@ function drawPendant(x,y,col,lit){
 let menu=null;
 function openMenu(){const i=ITEMS.findIndex(it=>it[0]===player.bItem);menu={t:0,i:i<0?0:i};state='menu';tone(700,500,.08,'square',.04);}
 function updateMenu(dt){
-  menu.t+=dt;let cx=menu.i%5,cy=Math.floor(menu.i/5);
-  if(pressed.left)cx=(cx+4)%5;if(pressed.right)cx=(cx+1)%5;if(pressed.up)cy=(cy+3)%4;if(pressed.down)cy=(cy+1)%4;
-  const ni=cy*5+cx;if(ni!==menu.i){menu.i=ni;tone(620,620,.03,'square',.03);if(player.items[ITEMS[ni][0]])player.bItem=ITEMS[ni][0];}
+  menu.t+=dt;let cx=menu.i%4,cy=Math.floor(menu.i/4);
+  if(pressed.left)cx=(cx+3)%4;if(pressed.right)cx=(cx+1)%4;const RW=Math.ceil(ITEMS.length/4);if(pressed.up)cy=(cy+RW-1)%RW;if(pressed.down)cy=(cy+1)%RW;
+  const ni=Math.min(ITEMS.length-1,cy*4+cx);if(ni!==menu.i){menu.i=ni;tone(620,620,.03,'square',.03);if(player.items[ITEMS[ni][0]])player.bItem=ITEMS[ni][0];}
   if(pressed.a&&player.items[ITEMS[menu.i][0]]){player.bItem=ITEMS[menu.i][0];tone(900,900,.05,'square',.04);}
   if(pressed.start||pressed.b||pressed.esc||pressed.items){state='play';menu=null;tone(500,700,.08,'square',.04);}
 }
@@ -1749,10 +1748,10 @@ function drawMenu(){
   // ITENS
   panel(4,4,164,112,'#8fc06a','ITENS');
   if(curSlot)txt('JOGO '+curSlot,160,-2,'#a8968a',8,'right');
-  ITEMS.forEach((it,i)=>{const x=14+(i%5)*30,y=16+Math.floor(i/5)*24,own=player.items[it[0]];
+  ITEMS.forEach((it,i)=>{const x=27+(i%4)*32,y=20+Math.floor(i/4)*30,own=player.items[it[0]];
     ctx.fillStyle='#10160f';ctx.fillRect(x,y,16,16);ctx.drawImage(own?itemIcon(it):SIL[it[2]],x+3,y+3);
     if(own&&player.bItem===it[0]){ctx.fillStyle='#8fc06a';ctx.fillRect(x+2,y+15,12,1);}});
-  {const x=14+(menu.i%5)*30,y=16+Math.floor(menu.i/5)*24,on=Math.floor(menu.t*4)%2===0;ctx.fillStyle=on?'#ffd27a':'#f08a2c';
+  {const x=27+(menu.i%4)*32,y=20+Math.floor(menu.i/4)*30,on=Math.floor(menu.t*4)%2===0;ctx.fillStyle=on?'#ffd27a':'#f08a2c';
     for(const [a,b] of [[-3,-3],[15,-3],[-3,15],[15,15]]){ctx.fillRect(x+a,y+b,4,1);ctx.fillRect(x+a+(a>0?3:0),y+b,1,4);ctx.fillRect(x+a,y+b+(b>0?3:0),4,1);}}
   // ITEM SELECIONADO
   panel(172,4,80,44,'#efe2d0','');
@@ -1790,8 +1789,8 @@ function drawTitleBg(t){
   titleEmbers=titleEmbers.filter(q=>q.life>0);ctx.globalAlpha=1;
 }
 // ---------- VERSÃO E NOVIDADES ----------
-const VERSAO='1.7';
-const NOVIDADE_TITULO='v1.7: LUZ DA ESPADA NO JOGO TODO';
+const VERSAO='1.7.1';
+const NOVIDADE_TITULO='v1.7.1: MENU DE ITENS ARRUMADO';
 let versaoVista=null;try{versaoVista=localStorage.getItem('lenda.versaoVista');}catch(e){}
 function marcarVersaoVista(){if(versaoVista===VERSAO)return;versaoVista=VERSAO;try{localStorage.setItem('lenda.versaoVista',VERSAO);}catch(e){}}
 function drawTitle(t){
