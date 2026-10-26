@@ -1790,8 +1790,8 @@ function drawTitleBg(t){
   titleEmbers=titleEmbers.filter(q=>q.life>0);ctx.globalAlpha=1;
 }
 // ---------- VERSÃO E NOVIDADES ----------
-const VERSAO='1.6.1';
-const NOVIDADE_TITULO='v1.6.1: LUZ CARREGADA MAIS FÁCIL';
+const VERSAO='1.6.2';
+const NOVIDADE_TITULO='v1.6.2: A LUZ FERE O CHEFE FINAL';
 let versaoVista=null;try{versaoVista=localStorage.getItem('lenda.versaoVista');}catch(e){}
 function marcarVersaoVista(){if(versaoVista===VERSAO)return;versaoVista=VERSAO;try{localStorage.setItem('lenda.versaoVista',VERSAO);}catch(e){}}
 function drawTitle(t){
@@ -2017,6 +2017,7 @@ function skPhase(e){
 }
 function mbGateFinal(e,src){
   if(e.type==='umbra'){if(e.st==='dazed')return true;return block(e.st==='tele'?'':'UMA BARREIRA SOMBRIA O PROTEGE');}
+  if(src==='light')return true; // a luz carregada fere a Sombra em qualquer fase
   if(e.phase===1){if(e.st==='show'){e.hits=(e.hits||0)+1;return true;}return block('A ESPADA ATRAVESSA A ESCURIDÃO');}
   if(e.phase===2){if(e.stun>0)return true;if(src===SK_NEED[e.form]){e.stun=2.8;SFX.boss();const b=hb(e);burst(b.x+b.w/2,b.y+b.h/2,'#ffe08a',20);toast('A FORMA SE DESFEZ! ATAQUE!');return false;}return block(SK_HINT[e.form]);}
   return src==='light'?true:block('SÓ A LUZ CARREGADA O FERE');}
