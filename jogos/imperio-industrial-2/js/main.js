@@ -57,7 +57,6 @@ import {
   novoQuadro,
 } from './contratos.js';
 import { ROTAS, atualizarEntregas, despachar, exportarFrota, importarFrota, novaFrota } from './entregas.js';
-import { exportarConstrucao, importarConstrucao, melhorar, novaConstrucao, proximaMelhoria, temTerreno } from './construcao.js';
 import { criarFuncionario, atualizarFuncionario, ESTOQUE_PONTO } from './funcionarios.js';
 import {
   CUSTO_INSPETOR,
@@ -84,7 +83,6 @@ import { criarCameraJogo } from './visual/camera.js';
 import { criarRotulos } from './visual/rotulos.js';
 import { criarOficina } from './visual/oficina.js';
 import { criarCursor, criarTerreno } from './visual/terreno.js';
-import { criarExpansao } from './visual/expansao.js';
 import { criarCacamba, criarExpedicao, criarPrateleira, criarVan } from './visual/estacoes.js';
 import {
   CUSTO_ESTEIRA,
