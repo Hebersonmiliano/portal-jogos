@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>SETOR 404 — Fase 1</title>
-  <meta name="description" content="Fase 1 de SETOR 404: restaure a energia da fábrica e enfrente os robôs corrompidos.">
+  <title>SETOR 404 — Campanha</title>
+  <meta name="description" content="Três fases de SETOR 404: restaure a energia, recupere a linha de montagem e enfrente a Sentinela 404.">
   <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
   <main class="shell">
-    <header><h1>SETOR <span>404</span></h1><p>FASE 1 <span class="separator">/</span> SETOR DE MANUTENÇÃO</p></header>
-    <section class="game-wrap" aria-label="Fase 1 de Setor 404">
+    <header><h1>SETOR <span>404</span></h1><p id="stage-heading">CAMPANHA / 3 FASES INDUSTRIAIS</p></header>
+    <section class="game-wrap" aria-label="Campanha de três fases de Setor 404">
       <canvas id="game" width="1280" height="426" tabindex="0" aria-label="Jogo de ação lateral. A e D: andar. S: agachar. Shift: correr. W: pular. J: atacar. K: esquivar. E: reparar."></canvas>
       <div id="start" class="overlay">
         <div class="mission-card"><p class="eyebrow">PROTOCOLO DE EMERGÊNCIA • 01</p><h2>A LINHA PAROU.<br>A MISSÃO COMEÇOU.</h2>
@@ -34,6 +34,7 @@
       <div><kbd>P</kbd><span>Pausa</span></div>
     </section>
     <section class="toolbar" aria-label="Opções do jogo">
+      <div class="options" aria-label="Selecionar fase"><span>FASES:</span><button id="stage1" class="secondary">1 · MANUTENÇÃO</button><button id="stage2" class="secondary">2 · MONTAGEM</button><button id="stage3" class="secondary">3 · NÚCLEO 404</button></div>
       <p>Recupere fusíveis. Repare os painéis. Alcance a saída.</p>
       <div class="options"><button id="sound" class="secondary" aria-pressed="true">SOM: LIGADO</button><label for="volume">VOLUME <input id="volume" type="range" min="0" max="100" value="34" aria-label="Volume da música e efeitos"></label><button id="pause" class="secondary">PAUSAR</button><button id="restart" class="secondary">REINICIAR FASE</button></div>
     </section>
@@ -41,7 +42,8 @@
   <script src="maya-rig.js?v=7"></script>
   <script src="r04-rig.js?v=7"></script>
   <script src="phase1-level.js?v=9"></script>
+  <script src="campaign.js?v=20261028"></script>
   <script src="audio.js?v=7"></script>
-  <script src="game.js?v=7"></script>
+  <script src="game.js?v=20261028"></script>
 </body>
 </html>

@@ -30,7 +30,7 @@ function descendants(node,tag){return node.children.flatMap(n=>[...(n.tagName===
 test('card SETOR 404 mostra Maya, três imagens e inicia o jogador existente',()=>{
  const f=fixture('jogo.html','setor-404');f.run('assets/pagina-jogo.js');
  const wrapper=f.document.getElementById('apresentacao-setor404');assert.equal(wrapper.hidden,false);
- assert.match(wrapper.textContent,/A fábrica parou/);assert.match(wrapper.textContent,/3 setores industriais/);
+ assert.match(wrapper.textContent,/A fábrica parou/);assert.match(wrapper.textContent,/3 fases industriais/);
  assert.equal(descendants(wrapper,'img').length,4);
  for(const img of descendants(wrapper,'img')){assert.ok(fs.existsSync(path.join(root,img.src)),img.src);assert.ok(img.alt);assert.equal(img.loading,'lazy');}
  const palco=f.document.getElementById('palco');assert.equal(descendants(palco,'iframe').length,0);
@@ -58,7 +58,7 @@ test('SETOR 404 inicia um único iframe e habilita tela cheia, favoritos e recen
  assert.equal(f.document.getElementById('celular').textContent,'Melhor no computador');
  assert.match(f.document.getElementById('controles').textContent,/K esquiva/);
  palco.querySelector('button').click();assert.equal(descendants(palco,'iframe').length,1);
- assert.equal(palco.querySelector('iframe').src,'jogos/setor-404/index.html?v=1.1.0-energia');
+ assert.equal(palco.querySelector('iframe').src,'jogos/setor-404/index.html?v=2.0.0-campanha');
  assert.equal(f.document.getElementById('tela-cheia').disabled,false);
  f.document.getElementById('tela-cheia').click();assert.equal(palco.querySelector('iframe').fullscreen,true);
  f.document.getElementById('favorito').click();assert.match(f.storage.get('portal.favoritos'),/setor-404/);
@@ -72,7 +72,7 @@ test('SETOR 404 contém scripts, imagens, capa e nomes de arquivo corretos para 
  for(const m of html.matchAll(/(?:href|src)="([^"]+)"/g)){
   const file=m[1].split('?')[0];assert.ok(!file.startsWith('/'),'Caminho absoluto: '+file);assert.ok(fs.existsSync(path.join(dir,file)),file);
  }
- for(const file of ['game.js','maya-rig.js','r04-rig.js','phase1-level.js','audio.js']){
+ for(const file of ['game.js','maya-rig.js','r04-rig.js','phase1-level.js','campaign.js','audio.js']){
   const source=fs.readFileSync(path.join(dir,file),'utf8');new vm.Script(source,{filename:file});
   assert.ok(!/(?:ghp_|github_pat_|sk-proj-|C:\\\\Users)/.test(source));
  }

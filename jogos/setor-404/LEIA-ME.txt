@@ -1,4 +1,17 @@
-SETOR 404 — FASE 1: SETOR DE MANUTENÇÃO
+SETOR 404 — CAMPANHA: 3 FASES
+
+NOVIDADES DA CAMPANHA
+Fase 2: Linha Fora de Controle. Esteiras, prensas e robôs soldadores.
+Repare os módulos e ataque o Braço MX-02 quando o núcleo ficar exposto.
+Dois painéis removem o escudo; três painéis e o chefe liberam a saída.
+Fase 3: Núcleo 404. Isole circuitos para abrir portas e remover o escudo
+da Sentinela 404. Ataque durante sua recuperação. Ela acelera com pouca vida.
+Agache para evitar disparos altos; salte ou esquive das áreas de impacto.
+Após vencer, use CONTINUAR PARA FASE 2/3. Para apresentação, os botões FASES
+abaixo dos controles iniciam diretamente uma fase nova. Não há salvamento
+permanente. Reiniciar afeta a fase atual, não as regras de movimentação.
+
+FASE 1 — SETOR DE MANUTENÇÃO
 
 Abra o arquivo index.html dentro desta pasta. Mantenha a pasta assets junto
 dos arquivos do jogo. Se o jogo já estiver aberto, use Ctrl+F5 para recarregar.

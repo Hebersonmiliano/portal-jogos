@@ -6,7 +6,7 @@ bg.src='assets/cenario.png';mayaSource.src='assets/maya-rig-source.png';robotSou
 const FLOOR=Phase1.FLOOR,STEP=1000/60,WALK_SPEED=1.6,RUN_SPEED=2.9,CROUCH_SPEED=0.75,DEATH_TICKS=96,DODGE_TICKS=28;
 const keys=new Set(),pressed=new Set(),particles=[],dodgeTrails=[];
 const maya={},camera={x:0,previous:0};
-let level=Phase1.create(),ready=false,active=false,paused=false,won=false,mayaRig,robotRig;
+let stage=1,level=Campaign.create(stage),ready=false,active=false,paused=false,won=false,mayaRig,robotRig;
 let frame=0,lastTime=null,accumulator=0,toastTime=0,toastText='',fuses=0,score=0,defeated=0;
 const audio=SectorAudio;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -27,21 +27,23 @@ function placeMaya(x){
     crouch:0,previousCrouch:0,run:0,previousRun:0,takeoff:0,jumpFlight:false,landing:0,landingStrength:0,
     dead:false,deathTime:0,previousDeath:0});
 }
-function reset(){
-  level=Phase1.create();frame=0;fuses=0;score=0;defeated=0;particles.length=0;
+function reset(nextStage=stage){
+  stage=clamp(Number(nextStage)||1,1,3);level=Campaign.create(stage);frame=0;fuses=0;score=0;defeated=0;particles.length=0;
   placeMaya(125);dodgeTrails.length=0;camera.x=0;camera.previous=0;
-  begin();notify('OFICINA • Shift: correr | S: agachar | K: esquivar | J: atacar',420);
+  begin();notify(stage===1?'OFICINA • Shift: correr | S: agachar | K: esquivar | J: atacar':stage===2?'FASE 2 • Repare os módulos. Prensas avisam antes de descer. S evita disparos.':'FASE 3 • Isole os circuitos para abrir portas. O núcleo só recebe dano exposto.',480);
 }
 function begin(){
   releaseInput();active=true;won=false;paused=false;lastTime=null;accumulator=0;
   document.querySelector('#start').hidden=true;document.querySelector('#result').hidden=true;
   document.querySelector('#pause-overlay').hidden=true;document.querySelector('#pause').textContent='PAUSAR';
+  document.querySelector('#stage-heading').textContent='FASE '+stage+' / '+level.title;
   audio.setPaused(false);audio.setIntensity(0);audio.unlock();updateSoundButton();
 }
 function respawn(){
   placeMaya(level.checkpoint);dodgeTrails.length=0;particles.length=0;
   for(const e of level.enemies){if(!e.alive)continue;e.x=e.home;e.px=e.home;e.hp=e.maxHP;e.mode='patrol';e.timer=0;e.vx=0;}
   for(const s of level.stations)s.charge=0;
+  level.projectiles.length=0;if(level.boss&&level.boss.alive){level.boss.hp=level.boss.maxHP;level.boss.mode='idle';level.boss.timer=0;}
   camera.x=clamp(maya.x-420,0,Phase1.WIDTH-1280);camera.previous=camera.x;
   begin();notify('CHECKPOINT • Energia e vida restauradas.');
 }
@@ -59,7 +61,8 @@ function updateSoundButton(){
 document.querySelector('#play').onclick=()=>{if(ready)reset();};
 document.querySelector('#restart').onclick=()=>{if(ready)reset();};
 document.querySelector('#retry').onclick=()=>{if(ready)respawn();};
-document.querySelector('#again').onclick=()=>{if(ready)reset();};
+document.querySelector('#again').onclick=()=>{if(ready)reset(won&&stage<3?stage+1:won?1:stage);};
+for(const number of [1,2,3])document.querySelector('#stage'+number).onclick=()=>{if(ready)reset(number);};
 document.querySelector('#pause').onclick=()=>setPaused(!paused);
 document.querySelector('#resume').onclick=()=>setPaused(false);
 document.querySelector('#sound').onclick=()=>{audio.setEnabled(!audio.isEnabled());if(active&&!paused&&!maya.dead)audio.unlock();updateSoundButton();};
@@ -109,6 +112,9 @@ function mayaState(t=1){
 }
 function strike(){
   sound('attack');
+  const bossHit=Campaign.damageBoss(level,maya);
+  if(bossHit==='shield'){sound('robotHurt');notify('ESCUDO ATIVO • Repare os painéis e ataque na recuperação.',100);}
+  if(bossHit==='hit'||bossHit==='dead'){puff(level.boss.x,FLOOR-45,12,'#ffdf8b');sound(bossHit==='dead'?'explosion':'robotHurt');if(bossHit==='dead'){score+=500;notify(level.boss.name+' DESATIVADO • Termine os reparos e alcance a saída.',260);}}
   for(const e of level.enemies){
     const dx=e.x-(maya.x+32),dy=Math.abs(maya.y+maya.h-FLOOR);
     if(!e.alive||Math.sign(dx||maya.face)!==maya.face||Math.abs(dx)>105||dy>48)continue;
@@ -225,11 +231,12 @@ function updateObjectives(){
         s.done=true;fuses--;score+=200;level.checkpoint=s.x+70;
         maya.hp=Math.min(6,maya.hp+2);maya.energy=5;sound('repair');
         notify(s.name+' ONLINE • Checkpoint ativado.',230);
-        if(level.stations.every(panel=>panel.done)){level.gateOpen=true;notify('ENERGIA RESTAURADA • Alcance a saída à direita.',360);}
+        if(level.stations.every(panel=>panel.done))notify(level.boss&&level.boss.alive?'CIRCUITOS RECUPERADOS • Enfrente o chefe e ataque quando o núcleo estiver exposto.':'ENERGIA RESTAURADA • Alcance a saída à direita.',360);
       }
     }else{s.charge=Math.max(0,s.charge-3);
       if(nearby&&tap('e'))notify(danger?'ÁREA EM RISCO • Desative o robô antes do reparo.':fuses===0?'FALTA UM FUSÍVEL • Recupere-o dos robôs.':'SEGURE E POR 1 SEGUNDO PARA REPARAR.',130);}
   }
+  level.gateOpen=Campaign.gateReady(level);
   if(level.gateOpen&&maya.x+32>level.exit){won=true;active=false;releaseInput();audio.stop();audio.sfx('victory');showResult(true);}
 }
 function update(){
@@ -237,17 +244,20 @@ function update(){
   frame++;camera.previous=camera.x;if(toastTime>0)toastTime--;
   for(let i=dodgeTrails.length-1;i>=0;i--)if(--dodgeTrails[i].life<=0)dodgeTrails.splice(i,1);
   if(maya.dead){updateDeath();return;}
+  Campaign.preUpdate(level,maya,frame);
   updateMaya();
   for(const e of level.enemies){
     if(!active||maya.dead)break;
-    Phase1.stepEnemy(e,maya,level.enemies,enemy=>{
+    Campaign.stepEnemy(level,e,maya,level.enemies,enemy=>{
       if(Math.abs(maya.y+maya.h-FLOOR)<46)hurtMaya(enemy.x);
     },(name,x)=>{if(name!=='alert')sound(name,x);},R04Rig.STRIDE);
   }
   if(!active||maya.dead)return;
   for(const h of level.hazards){
-    if(Phase1.hazardMode(h,frame)==='on'&&maya.x+44>h.x&&maya.x+20<h.x+h.w&&Math.abs(maya.y+maya.h-FLOOR)<16)hurtMaya(h.x+h.w/2);
+    const heightHit=h.duck?maya.y<FLOOR-72&&maya.y+maya.h>FLOOR-80:Math.abs(maya.y+maya.h-FLOOR)<16;
+    if(Phase1.hazardMode(h,frame)==='on'&&maya.x+44>h.x&&maya.x+20<h.x+h.w&&heightHit)hurtMaya(h.x+h.w/2);
   }
+  Campaign.stepWorld(level,maya,frame,hurtMaya,sound);
   if(!active||maya.dead)return;
   updateObjectives();
   const target=clamp(maya.x+32-480+maya.vx*30,0,Phase1.WIDTH-1280);
@@ -259,13 +269,13 @@ function update(){
 
 function showResult(success){
   document.querySelector('#result').hidden=false;
-  document.querySelector('#result-title').textContent=success?'FASE 1 CONCLUÍDA':'SISTEMA CRÍTICO';
+  document.querySelector('#result-title').textContent=success?(stage===3?'FÁBRICA RECUPERADA!':'FASE '+stage+' CONCLUÍDA'):'SISTEMA CRÍTICO';
   const minutes=Math.floor(frame/3600),seconds=String(Math.floor(frame/60)%60).padStart(2,'0');
   document.querySelector('#result-info').textContent=success?
-    'Energia restaurada • '+defeated+'/5 robôs • '+score+' pontos • '+minutes+':'+seconds:
+    (stage===3?'Maya recuperou o controle da fábrica. Campanha concluída! • ':'Setor recuperado • ')+defeated+'/'+level.enemies.length+' robôs • '+score+' pontos • '+minutes+':'+seconds:
     'Maya precisa de manutenção. Continue do último painel ativado.';
   document.querySelector('#retry').hidden=success;
-  document.querySelector('#again').textContent=success?'JOGAR NOVAMENTE':'REINICIAR FASE';
+  document.querySelector('#again').textContent=success?(stage<3?'CONTINUAR PARA FASE '+(stage+1):'RECOMEÇAR CAMPANHA'):'REINICIAR FASE';
 }
 function drawEnemy(e,alpha){
   if(!e.alive&&e.timer>50)return;
@@ -290,10 +300,10 @@ function drawHUD(){
   for(let i=0;i<5;i++){ctx.fillStyle=i<maya.energy?'#24dcf6':'#23414c';ctx.fillRect(141+i*22,47,17,8);}
   const powered=level.stations.filter(s=>s.done).length;
   ctx.fillStyle='#07121eeb';ctx.fillRect(410,11,455,65);ctx.strokeStyle='#9a762c';ctx.strokeRect(410.5,11.5,454,64);
-  ctx.fillStyle='#ffc552';ctx.fillText(level.gateOpen?'OBJETIVO: ALCANCE A SAÍDA':'OBJETIVO: REATIVE OS 3 PAINÉIS',425,33);
-  ctx.fillStyle='#b9d8e5';ctx.font='12px monospace';ctx.fillText('FUSÍVEIS: '+fuses+'   PAINÉIS: '+powered+'/3   ROBÔS: '+defeated+'/5',425,58);
+  ctx.fillStyle='#ffc552';ctx.fillText(level.gateOpen?'OBJETIVO: ALCANCE A SAÍDA':Campaign.count(level)===3&&level.boss&&level.boss.alive?'OBJETIVO: DERROTE '+level.boss.name:'OBJETIVO: REATIVE OS 3 PAINÉIS',425,33);
+  ctx.fillStyle='#b9d8e5';ctx.font='12px monospace';ctx.fillText('FUSÍVEIS: '+fuses+'   PAINÉIS: '+powered+'/3   ROBÔS: '+defeated+'/'+level.enemies.length,425,58);
   ctx.fillStyle='#07121eeb';ctx.fillRect(1022,11,245,65);ctx.strokeStyle='#516c7a';ctx.strokeRect(1022.5,11.5,244,64);
-  ctx.font='bold 13px monospace';ctx.fillStyle='#b5eaf0';ctx.fillText('FASE 1 • MANUTENÇÃO',1035,33);
+  ctx.font='bold 13px monospace';ctx.fillStyle='#b5eaf0';ctx.fillText('FASE '+stage+' • '+['MANUTENÇÃO','MONTAGEM','NÚCLEO 404'][stage-1],1035,33);
   ctx.fillStyle='#213c4c';ctx.fillRect(1037,51,215,4);
   for(const s of level.stations){ctx.fillStyle=s.done?'#31ebb3':'#b1893f';ctx.fillRect(1037+s.x/Phase1.WIDTH*215-3,47,6,12);}
   ctx.fillStyle='#f9fcff';ctx.fillRect(1037+(maya.x+32)/Phase1.WIDTH*215-2,49,4,8);
@@ -303,7 +313,7 @@ function draw(alpha=1){
   ctx.clearRect(0,0,1280,426);
   if(!ready){ctx.fillStyle='#08131d';ctx.fillRect(0,0,1280,426);return;}
   const t=active&&!won&&!paused?alpha:1,cam=Math.round(lerp(camera.previous,camera.x,t));
-  ctx.save();ctx.translate(-cam,0);Phase1.drawWorld(ctx,bg,level,frame);
+  ctx.save();ctx.translate(-cam,0);Campaign.drawWorld(ctx,bg,level,frame,robotRig);
   for(const s of level.stations)Phase1.drawStation(ctx,s,frame);
   for(const p of level.pickups)if(p.x>cam-30&&p.x<cam+1310)Phase1.drawPickup(ctx,p,frame);
   for(const e of level.enemies)drawEnemy(e,t);

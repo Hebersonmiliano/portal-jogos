@@ -56,6 +56,8 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ### SETOR 404
 
+Atualização 2.0.0: campanha com três fases, seleção direta pelos botões FASES no jogo e continuação após cada vitória. `campaign.js` mantém as regras da Fase 1 e acrescenta esteiras, prensas, soldadores, portas de circuito, plataformas móveis, Braço MX-02 e Sentinela 404. Os arquivos de articulação da Maya não foram alterados. As imagens de Montagem e Núcleo são capturas do renderizador das novas fases. Recarregar reinicia a sessão; não há salvamento permanente. O jogo estático continua sem dependências ou build.
+
 O card de apresentação aparece na vitrine e na página do SETOR 404. Usa `assets/setor404.js`, `assets/setor404.css`, o campo `cardSetor404` no catálogo e imagens em `assets/setor-404/`: retrato articulado de Maya e três capturas do renderizador do jogo. Informa missão, setores, robôs, reparos, checkpoints e requisitos de teclado sem apresentar avaliações fictícias. O botão da página reutiliza o jogador existente e recolhe a apresentação ao iniciar. Na vitrine, o card acompanha os filtros e a busca. Não modifica o destaque principal nem as regras do jogo.
 
 `SETOR 404` está disponível em `jogo.html?id=setor-404`, com a Fase 1 em `jogos/setor-404/` e capa em `assets/setor-404/capa.png`. É um jogo HTML5 para computador com teclado, sem instalação, compilação ou controles de toque. Os recursos são carregados por caminhos relativos para funcionar no subdiretório do GitHub Pages. Música e efeitos começam apenas após clicar em **INICIAR FASE 1**.
