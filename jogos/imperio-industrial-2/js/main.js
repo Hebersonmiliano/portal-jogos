@@ -815,8 +815,53 @@ elBotaoJogar.focus();
 // Todas as formas de jogar passam por executarComando, com o mesmo código de tecla.
 
 const elMenu = document.getElementById('menu-comandos');
-const botoesMenu = [...elMenu.querySelectorAll('.menu-lista button')];
+let botoesMenu = [...elMenu.querySelectorAll('.menu-lista button')];
+const listaMenu = elMenu.querySelector('.menu-lista');
+const menuOriginal = listaMenu.innerHTML;
+let segurarInteracao = null;
+let abriuAoSegurar = false;
+let aguardandoConfirmacao = null;
+
+function iniciarInteracao() {
+  if (segurarInteracao !== null) return;
+  abriuAoSegurar = false;
+  segurarInteracao = setTimeout(() => {
+    abriuAoSegurar = true;
+    abrirMenu();
+  }, 500);
+}
+function soltarInteracao() {
+  if (segurarInteracao === null) return;
+  clearTimeout(segurarInteracao);
+  segurarInteracao = null;
+  if (!abriuAoSegurar && elMenu.hidden) interagir();
+}
+
+function montarCatalogoVisual() {
+  abrirMenu();
+  listaMenu.replaceChildren();
+  for (const [it, tamanho] of ['P', 'M', 'G'].entries()) {
+    for (let cor = 0; cor < 3; cor++) for (let material = 0; material < 2; material++) {
+      const produto = produtoPorChave(`${tamanho}-${cor}-${material}`);
+      const botao = document.createElement('button');
+      botao.dataset.comando = `Produto:${it}:${cor}:${material}`;
+      botao.innerHTML = '<i class="caixa-catalogo"></i><span></span>';
+      botao.querySelector('i').style.background = corCss(produto.cor);
+      botao.querySelector('i').style.width = `${22 + it * 8}px`;
+      botao.querySelector('i').style.borderWidth = material ? '4px' : '1px';
+      botao.querySelector('span').textContent = `${produto.nome} · venda ${reais(produto.valor)}`;
+      listaMenu.appendChild(botao);
+    }
+  }
+  const voltar = document.createElement('button');
+  voltar.textContent = 'Voltar'; voltar.dataset.comando = 'MenuPrincipal'; listaMenu.appendChild(voltar);
+  botoesMenu = [...listaMenu.querySelectorAll('button')];
+  selecionarMenu(0);
+}
 const dicaInteracao = document.createElement('button');
+const tutorialInicial = document.createElement('div');
+tutorialInicial.id = 'tutorial-inicial';
+document.body.appendChild(tutorialInicial);
 dicaInteracao.id = 'dica-interacao';
 dicaInteracao.dataset.comando = 'KeyE';
 document.body.appendChild(dicaInteracao);
@@ -848,10 +893,21 @@ function atualizarInteracao() {
   dicaInteracao.textContent = `${usandoControle ? 'A' : 'E'} — ${contexto.texto} · ${usandoControle ? 'Menu' : 'J'}: opções`;
   selecaoObjeto.visible = !!contexto.objeto && elMenu.hidden && elInicio.hidden;
   if (contexto.objeto) selecaoObjeto.setFromObject(contexto.objeto);
+  tutorialInicial.hidden = !elInicio.hidden || !elMenu.hidden || getVendido() > 0;
+  tutorialInicial.textContent = maquinas.length === 0
+    ? '1. Ande com WASD ou analógico. Abra J / Menu e construa sua primeira máquina no quadrado livre.'
+    : caixas === 0
+      ? '2. Aproxime-se da máquina destacada e toque E / A para fabricar sua primeira caixa.'
+      : totalNoEstoque() === 0
+        ? '3. Toque E / A perto da máquina para recolher as caixas. Elas vão para o estoque.'
+        : '4. Vá à expedição laranja e toque E / A para vender. Segure E / A para abrir opções. Depois experimente os contratos no menu.';
 }
 let selecaoMenu = 0;
 
 function abrirMenu() {
+  listaMenu.innerHTML = menuOriginal;
+  botoesMenu = [...listaMenu.querySelectorAll('button')];
+  aguardandoConfirmacao = null;
   elPainelCodigo.hidden = true;
   elMenu.querySelector('.menu-caixa').classList.remove('com-codigo');
   document.getElementById('menu-som').textContent = musica.ligado ? 'Desligar o som' : 'Ligar o som';
@@ -922,6 +978,20 @@ const comandosEspeciais = {
 
 function executarComando(codigo) {
   if (!elInicio.hidden) return;
+  if (codigo === 'CatalogoVisual') { montarCatalogoVisual(); return; }
+  if (codigo === 'MenuPrincipal') { abrirMenu(); return; }
+  if (codigo.startsWith('Produto:')) {
+    const [, tamanho, cor, material] = codigo.split(':').map(Number);
+    importarEscolha({ tamanho, cor, material });
+    atualizarPlacar(); fecharMenu(); return;
+  }
+  const custos = { KeyB: 60, KeyF: 80, KeyL: 40, KeyU: 100, KeyG: proximaMelhoria(construcao)?.custo, KeyK: custoManutencao(maquinaProxima(jogador.position, maquinas) ?? { desgaste: 0 }) };
+  if (!elMenu.hidden && custos[codigo] && aguardandoConfirmacao !== codigo) {
+    aguardandoConfirmacao = codigo;
+    const botao = botoesMenu.find((b) => b.dataset.comando === codigo);
+    if (botao) botao.textContent = `Confirmar ação · até R$ ${custos[codigo]} — aperte novamente`;
+    return;
+  }
   musica.desbloquear();
   const especial = comandosEspeciais[codigo];
   if (especial) {
@@ -967,10 +1037,11 @@ window.addEventListener('keydown', (e) => {
   }
   teclas.add(e.code);
   if (e.repeat) return;
+  if (e.code === 'KeyE') { e.preventDefault(); iniciarInteracao(); return; }
   teclasDeAcao[e.code]?.();
 });
-window.addEventListener('keyup', (e) => teclas.delete(e.code));
-window.addEventListener('blur', () => teclas.clear());
+window.addEventListener('keyup', (e) => { teclas.delete(e.code); if (e.code === 'KeyE') soltarInteracao(); });
+window.addEventListener('blur', () => { teclas.clear(); clearTimeout(segurarInteracao); segurarInteracao = null; });
 
 // Mouse: qualquer botão com data-comando (barra de ações, catálogo, menu) e as ofertas de contrato.
 // As ofertas são redesenhadas várias vezes por segundo, então reagem ao apertar do botão
@@ -1007,12 +1078,15 @@ function lerEntradaControle(dt) {
     for (const i of leitura.novos) {
       if (i === 13) selecionarMenu(selecaoMenu + 1);
       else if (i === 12) selecionarMenu(selecaoMenu - 1);
-      else if (i === 0) executarComando(botoesMenu[selecaoMenu].dataset.comando);
+      else if (i === 0 && !abriuAoSegurar) executarComando(botoesMenu[selecaoMenu].dataset.comando);
       else if (i === 1 || i === 9) fecharMenu();
     }
+    if (!leitura.apertados.has(0)) { soltarInteracao(); abriuAoSegurar = false; }
     return { x: 0, y: 0 };
   }
-  for (const codigo of leitura.acoes) executarComando(codigo);
+  if (leitura.novos.includes(0)) iniciarInteracao();
+  if (!leitura.apertados.has(0)) soltarInteracao();
+  for (const codigo of leitura.acoes) if (codigo !== 'KeyE') executarComando(codigo);
   if (leitura.camera.x) cameraJogo.girarContinuo(-leitura.camera.x * dt * 2.4);
   if (leitura.camera.y) cameraJogo.zoom(1 + leitura.camera.y * dt * 1.6);
   return leitura.mover;
