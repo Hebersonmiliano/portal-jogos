@@ -58,6 +58,11 @@ function criarVitrineImperio2(jogo, iniciar, completo = false) {
   if (iniciar) { jogar.type = 'button'; jogar.onclick = iniciar; }
   else jogar.href = 'jogo.html?id=' + encodeURIComponent(jogo.id);
   acoes.append(jogar);
+  if (jogo.guia) {
+    const guia = el('a', 'imp2-guia', 'Guia completo de como jogar');
+    guia.href = jogo.guia;
+    acoes.append(guia);
+  }
   if (!completo) {
     const conhecer = el('a', 'imp2-conhecer', 'Ver cenas e tudo sobre o jogo →');
     conhecer.href = 'jogo.html?id=' + encodeURIComponent(jogo.id);
@@ -95,9 +100,15 @@ function criarVitrineImperio2(jogo, iniciar, completo = false) {
       recursos.append(card);
     });
     const fim = el('div', 'imp2-final');
-    fim.append(el('p', null, 'A oficina está alugada e o primeiro cliente já está esperando.'));
+    const chamada = el('div');
+    chamada.append(el('p', null, 'A oficina está alugada e o primeiro cliente já está esperando.'));
+    if (jogo.guia) {
+      const guia = el('a', 'imp2-guia', 'Primeira vez? Leia o guia completo →');
+      guia.href = jogo.guia;
+      chamada.append(guia);
+    }
     const b = el('button', 'botao imp2-jogar', '▶ Começar com R$ 100'); b.type = 'button'; b.onclick = iniciar;
-    fim.append(b);
+    fim.append(chamada, b);
     secao.append(cab2, recursos, fim);
   }
   return secao;

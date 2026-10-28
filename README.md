@@ -34,6 +34,14 @@ Os estilos ficam em `assets/security-test.css`; `assets/security-test/` contém 
 
 A sequência fica em `jogos/imperio-industrial-2/` (cópia de distribuição do repositório `Do-Zero-ao-Imp-rio-Industrial-2`: `index.html`, `style.css` e `js/`, com o Three.js local). A apresentação usa o campo `vitrineImperio2` no catálogo, `assets/imperio-industrial-2.js` e `.css`, e sete capturas reais do jogo em `assets/imperio-industrial-2/`. Aparece na página do jogo (completa, com cenas, recursos e botão de jogar) e na vitrine da página inicial (resumida). Para atualizar, copie os três itens do repositório do jogo, aumente `versao` no catálogo e acrescente a versão em `novidades`.
 
+O guia completo fica em `guias/imperio-industrial-2.html` (campo `guia` no catálogo, com links no destaque e no fim da apresentação). Ele é gerado do `docs/GUIA.md` do repositório do jogo, para os dois ficarem iguais:
+
+```bash
+python3 ferramentas/guias/gerar.py ../Do-Zero-ao-Imp-rio-Industrial-2/docs/GUIA.md imperio-industrial-2
+```
+
+O estilo das páginas de guia está em `assets/guia.css`.
+
 Verificação: `node tests/imperio-industrial-2.cjs`.
 
 ## Godot (FoxAventura)

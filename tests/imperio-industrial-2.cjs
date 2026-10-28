@@ -28,4 +28,10 @@ for (const p of ['index.html', 'jogo.html']) {
   assert(s.includes('assets/imperio-industrial-2.js') && s.includes('assets/imperio-industrial-2.css'), p + ' carrega a apresentação');
 }
 assert(fs.readFileSync(path.join(raiz, 'jogo.html'), 'utf8').includes('id="apresentacao-imperio2"'));
+assert(jogo.guia && fs.existsSync(path.join(raiz, jogo.guia)), 'página do guia');
+const guia = fs.readFileSync(path.join(raiz, jogo.guia), 'utf8');
+const ids = new Set([...guia.matchAll(/id="([^"]+)"/g)].map((m) => m[1]));
+for (const [, alvo] of guia.matchAll(/href="#([^"]+)"/g)) assert(ids.has(alvo), 'link do índice: ' + alvo);
+for (const [, src] of guia.matchAll(/<img[^>]+src="\.\.\/([^"]+)"/g)) assert(fs.existsSync(path.join(raiz, src)), 'imagem do guia: ' + src);
+console.log('PASS: guia com índice e imagens válidos.');
 console.log('PASS: Império Industrial 2 no catálogo, com jogo, 7 cenas, recursos, capa e prévia de compartilhamento.');

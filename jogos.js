@@ -176,6 +176,7 @@ window.JOGOS = [
     url: "jogos/imperio-industrial-2/index.html",
     versao: "0.6.1",
     capa: "assets/imperio-industrial-2/capa.jpg",
+    guia: "guias/imperio-industrial-2.html",
     vitrineImperio2: {
       chamada: "Uma oficina alugada. Cem reais. Um distrito inteiro para conquistar.",
       resumo: "A sequência sai do galpão para um bairro industrial vivo. Monte caixas, automatize a linha, cumpra contratos com prazo e mantenha cada máquina funcionando, de dia e de noite.",

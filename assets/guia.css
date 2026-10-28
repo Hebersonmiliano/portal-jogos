@@ -1,0 +1,31 @@
+/* Página de guia de jogo: leitura confortável, índice fixo ao lado no computador. */
+.guia { width: min(1200px, 100%); margin: 0 auto; padding: 24px max(16px, 2vw) 60px; }
+.guia-cabecalho { display: grid; gap: 8px; margin-bottom: 26px; }
+.guia-selo { font-weight: 800; font-size: 12px; letter-spacing: 0.16em; color: #f28c28; }
+.guia-cabecalho h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; text-wrap: balance; }
+.guia-jogar { justify-self: start; background: linear-gradient(90deg, #f28c28, #ffb24e) !important; color: #10262d !important; font-weight: 800; }
+.guia-grade { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 32px; align-items: start; }
+.guia-indice { position: sticky; top: 76px; max-height: calc(100vh - 96px); overflow: auto; padding: 14px 16px; border: 1px solid var(--borda); border-radius: 12px; background: var(--painel); font-size: 14px; }
+.guia-indice strong { display: block; margin-bottom: 6px; color: var(--suave); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; }
+.guia-indice ol { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 4px; }
+.guia-indice a { color: var(--texto); text-decoration: none; }
+.guia-indice a:hover { color: #f28c28; }
+.guia-texto { min-width: 0; max-width: 78ch; font-size: 17px; line-height: 1.65; }
+.guia-texto h2 { margin: 38px 0 12px; padding-top: 12px; border-top: 1px solid var(--borda); font-size: 26px; scroll-margin-top: 80px; }
+.guia-texto h2:first-child { margin-top: 0; border-top: 0; padding-top: 0; }
+.guia-texto h3 { margin: 24px 0 8px; font-size: 20px; color: #ffb24e; scroll-margin-top: 80px; }
+.guia-texto p, .guia-texto li { color: #dcdcf5; }
+.guia-texto strong { color: #fff; }
+.guia-texto a { color: #ffcc33; }
+.guia-texto img { display: block; width: 100%; height: auto; margin: 14px 0; border: 1px solid var(--borda); border-radius: 10px; }
+.guia-texto blockquote { margin: 16px 0; padding: 10px 16px; border-left: 4px solid #f28c28; border-radius: 0 8px 8px 0; background: rgb(242 140 40 / 0.1); }
+.guia-texto blockquote p { margin: 0; }
+.guia-texto table { display: block; overflow-x: auto; width: 100%; margin: 14px 0; border-collapse: collapse; font-size: 15px; }
+.guia-texto th, .guia-texto td { padding: 8px 12px; border-bottom: 1px solid var(--borda); text-align: left; vertical-align: top; }
+.guia-texto th { background: var(--painel-2); white-space: nowrap; }
+.guia-texto code { padding: 1px 6px; border-radius: 4px; background: var(--painel-2); font-size: 0.9em; }
+.guia-texto hr { border: 0; border-top: 1px solid var(--borda); margin: 30px 0; }
+@media (max-width: 900px) {
+  .guia-grade { grid-template-columns: 1fr; }
+  .guia-indice { position: static; max-height: none; }
+}
