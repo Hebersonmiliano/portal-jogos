@@ -173,8 +173,8 @@ window.JOGOS = [
     tags: ["expansão", "construção", "3D", "controle Xbox", "sequência", "fábrica", "contratos", "automação", "dia e noite", "trilha original", "salva sozinho"],
     descricao: "A sequência de Do Zero ao Império Industrial leva a fábrica para fora do galpão: um terreno cercado num bairro industrial vivo, com rua, prédios vizinhos e clientes. Comece com R$ 100 numa oficina alugada, posicione máquinas na grade, escolha tamanho, cor e material de cada caixa e despache contratos de van por rotas com distância e trânsito para seis tipos de clientes. Compre o terreno vizinho, construa o escritório e renove a fachada. Contrate funcionários, ligue esteiras e automatize a linha. Cuide do desgaste das máquinas, inspecione a qualidade e pague a conta de luz, que muda com a hora do dia. A câmera gira e dá zoom, o dia vira noite e a trilha original cresce junto com a sua fábrica.",
     controles: "Teclado e mouse ou controle de Xbox/PlayStation (mapeamento padrão). Controle: analógico esquerdo anda; analógico direito gira a câmera e dá zoom; A produz; B leva a saída ao estoque; X despacha a van ou vende; Y coloca máquina; LB manutenção; RB inspeção; LT automatiza; RT esteira; direcional ↑ ← → troca tamanho, cor e material; ↓ aceita contrato; Menu abre os comandos; View mostra os controles. Teclado: G expande ou decora a propriedade; WASD anda; B máquina; E produz; R recolhe; V despacha; T, C e M catálogo; F funcionário; L esteira; U automatiza; K manutenção; I inspeção; 1, 2 e 3 contratos; Q e Z giram; + e − zoom; Esc menu; H controles; O som. Com o mouse, a barra de ações, o catálogo, as ofertas e o menu são clicáveis. O progresso salva sozinho neste navegador.",
-    url: "jogos/imperio-industrial-2/index.html?v=0.8",
-    versao: "0.8",
+    url: "jogos/imperio-industrial-2/index.html?v=0.8.1",
+    versao: "0.8.1",
     capa: "assets/imperio-industrial-2/capa.jpg",
     guia: "guias/imperio-industrial-2.html",
     vitrineImperio2: {
@@ -200,6 +200,7 @@ window.JOGOS = [
       ],
     },
     novidades: [
+      { versao: "0.8.1", data: "2026-10-28", itens: ["E no teclado e A no controle interagem conforme o objeto próximo", "Dica contextual e contorno na máquina selecionada", "Construção, catálogo e manutenção reunidos no menu"] },
       { versao: "0.8", data: "2026-10-28", itens: ["Terreno vizinho que amplia a área disponível para máquinas", "Escritório administrativo construído no novo lote", "Fachada corporativa iluminada e melhorias preservadas no save"] },
       { versao: "0.7", data: "2026-10-28", itens: ["Van para despachar contratos, com ida e volta à doca", "Rotas com distância e trânsito que consomem o prazo", "Mapa da entrega em tempo real e viagens incluídas no salvamento"] },
       { versao: "0.6.3", data: "2026-10-28", itens: ["Indicador de salvamento e aviso quando o navegador bloqueia o save", "Cópia de segurança do progresso", "Código do progresso para continuar em outro navegador"] },
