@@ -56,6 +56,8 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ### SETOR 404
 
+Versão 3.0.0: cinco fases, ferramentas conquistadas nas bancadas com E, secundária no L, troca no Q e pulso no R. A chave no J é gratuita. A Fundição acrescenta barreiras e blindagens para a marreta; o Controle Central encerra a campanha. Créditos de Thamyris Lopes e Maria Luiza, com orientação do Prof. Heberson, para a Semana da Indústria no SENAI: aparecem após a Fase 5 e no botão de apresentação do jogo. `weapons.js` concentra os recursos e efeitos; os movimentos das pernas são preservados. O card e as instruções públicas refletem os cinco estágios. Esta versão continua sem salvamento permanente.
+
 Atualização 2.0.0: campanha com três fases, seleção direta pelos botões FASES no jogo e continuação após cada vitória. `campaign.js` mantém as regras da Fase 1 e acrescenta esteiras, prensas, soldadores, portas de circuito, plataformas móveis, Braço MX-02 e Sentinela 404. Os arquivos de articulação da Maya não foram alterados. As imagens de Montagem e Núcleo são capturas do renderizador das novas fases. Recarregar reinicia a sessão; não há salvamento permanente. O jogo estático continua sem dependências ou build.
 
 O card de apresentação aparece na vitrine e na página do SETOR 404. Usa `assets/setor404.js`, `assets/setor404.css`, o campo `cardSetor404` no catálogo e imagens em `assets/setor-404/`: retrato articulado de Maya e três capturas do renderizador do jogo. Informa missão, setores, robôs, reparos, checkpoints e requisitos de teclado sem apresentar avaliações fictícias. O botão da página reutiliza o jogador existente e recolhe a apresentação ao iniciar. Na vitrine, o card acompanha os filtros e a busca. Não modifica o destaque principal nem as regras do jogo.

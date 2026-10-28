@@ -174,6 +174,10 @@
       case 'jump': n(56, 0, 0.12, 0.09, { to: midi(72), type: 'triangle' }); break;
       case 'dodge': noise(at+0.025, 0.19, 0.105, { track: 'effect', type: 'bandpass', frequency: 1350 }); n(0, 0.025, 0.16, 0.055, { frequency: 310, to: 95, type: 'triangle' }); break;
       case 'attack': noise(at, 0.11, 0.13, { track: 'effect', type: 'bandpass', frequency: 2400 }); n(0, 0, 0.1, 0.08, { frequency: 270, to: 90 }); break;
+      case 'rivet': noise(at,0.045,0.09,{track:'effect',type:'highpass',frequency:2600});n(0,0,0.06,0.06,{frequency:650,to:260,type:'triangle'});break;
+      case 'arc': n(0,0,0.16,0.07,{frequency:160,to:95,type:'sawtooth',lowpass:1800});noise(at,0.12,0.055,{track:'effect',type:'bandpass',frequency:1600});break;
+      case 'hammer': noise(at+0.44,0.16,0.12,{track:'effect',type:'lowpass',frequency:800});n(0,0.44,0.19,0.09,{frequency:95,to:35,type:'triangle'});break;
+      case 'emp': [45,52,57].forEach((note,i)=>n(note,i*0.035,0.28,0.055,{type:'triangle',to:midi(note-8)}));break;
       case 'hurt': n(43, 0, 0.19, 0.12, { to: midi(31), type: 'sawtooth', lowpass: 1700 }); break;
       case 'robotAttack': n(61, 0, 0.055, 0.065); n(55, 0.06, 0.1, 0.065); break;
       case 'robotHurt': noise(at, 0.065, 0.13, { track: 'effect', type: 'highpass', frequency: 2100 }); n(0, 0, 0.055, 0.09, { frequency: 510, to: 230 }); break;

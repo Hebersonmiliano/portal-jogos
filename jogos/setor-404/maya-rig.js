@@ -111,6 +111,14 @@
       else if(progress<0.58){const t=smooth((progress-0.25)/0.33);arms[0]={upper:lerp(-2.15,1.35,t),lower:lerp(-1.8,1.45,t)};weapon=lerp(-2.5,0.35,t);}
       else{const t=smooth((progress-0.58)/0.42);arms[0]={upper:lerp(1.35,0,t),lower:lerp(1.45,0.22,t)};weapon=lerp(0.35,0.95,t);}
     }
+    let secondaryAngle=0.55;
+    if(state.secondary>0&&!attacking&&!state.dead&&!state.dodge){
+      if(state.secondaryKind==='hammer'){
+        const t=clamp(1-state.secondary/48,0,1),u=t<0.45?smooth(t/0.45):t<0.62?smooth((t-0.45)/0.17):smooth((t-0.62)/0.38);
+        const a=t<0.45?[0,-2,0.22,-1.8,0.55,-2.4]:t<0.62?[-2,1.35,-1.8,1.5,-2.4,0.65]:[1.35,0,1.5,0.22,0.65,0.55];
+        arms[0]={upper:lerp(a[0],a[1],u),lower:lerp(a[2],a[3],u)};arms[1]={upper:-0.4,lower:-0.8};secondaryAngle=lerp(a[4],a[5],u);
+      }else{arms[0]={upper:1.38-torso,lower:1.5-torso};arms[1]={upper:0.8,lower:1.05};secondaryAngle=0;}
+    }
     if(state.dead){
       const t=clamp(state.deathProgress||0,0,1);
       const frames=[
@@ -134,8 +142,10 @@
     ankles.forEach((a,i)=>{const hipX=root.x+(i===1?1:0),dx=a.x-hipX;
       const maxVertical=Math.sqrt(Math.max(1,36.6**2-Math.min(36,Math.abs(dx))**2));
       root.y=Math.max(root.y,a.y-maxVertical-(i===1?1:0));});
-    return{root,ankles,arms,torso,head,attacking,weapon,attackProgress:progress,dead:!!state.dead,deathProgress:state.deathProgress||0};
+    return{root,ankles,arms,torso,head,attacking,weapon,secondaryAngle,attackProgress:progress,dead:!!state.dead,deathProgress:state.deathProgress||0};
   }
+
+  function muzzle(state){const p=pose(state),c=Math.cos(p.torso),s=Math.sin(p.torso),a=p.arms[0];return{x:p.root.x-2*c+18*s+Math.sin(a.upper+p.torso)*8.3+Math.sin(a.lower+p.torso)*7.6+24,y:p.root.y-2*s-18*c+Math.cos(a.upper+p.torso)*8.3+Math.cos(a.lower+p.torso)*7.6};}
 
   function create(image, makeCanvas) {
     makeCanvas = makeCanvas || ((w, h) => {
@@ -200,6 +210,16 @@
       g.fillStyle = '#aebfc5';g.fillRect(24,-6,8,4);g.fillRect(23,-3,6,8);g.fillRect(25,4,8,3);
       g.fillStyle = '#f3b02c';g.fillRect(22,-3,2,8);g.restore();
     }
+    function secondaryTool(hand,kind,angle){
+      g.save();g.translate(hand.x,hand.y);g.rotate(angle);
+      if(kind==='hammer'){
+        g.fillStyle='#111f2b';g.fillRect(-3,-3,39,6);g.fillStyle='#b1c5cb';g.fillRect(0,-1,32,2);g.fillStyle='#e8a630';g.fillRect(25,-13,15,26);g.fillStyle='#2d414d';g.fillRect(28,-10,10,20);g.fillStyle='#62eff4';g.fillRect(28,-3,10,4);
+      }else{
+        g.fillStyle='#101c28';g.fillRect(-5,-8,29,15);g.fillStyle='#efb23a';g.fillRect(-3,-6,23,10);g.fillStyle='#344b57';g.fillRect(10,-7,10,11);g.fillRect(20,-4,8,6);g.fillRect(-1,4,5,9);g.fillStyle=kind==='arc'?'#9bfbff':'#f9df92';g.fillRect(3,-4,7,2);
+        if(kind==='arc'){g.fillStyle='#9bf7ff';g.fillRect(21,-7,7,2);g.fillRect(21,3,7,2);}else{g.fillStyle='#adc0c8';g.fillRect(23,-3,6,4);}
+      }
+      g.restore();
+    }
 
     function render(ctx,centerX,ground,state={}) {
       const p=pose(state),face=state.face||1,root=p.root;
@@ -220,6 +240,7 @@
         if(p.attackProgress>0.31&&p.attackProgress<0.65){g.strokeStyle='#ffe287';g.lineWidth=2;g.beginPath();g.arc(nearShoulder.x,nearShoulder.y,38,-1.9+p.torso,0.6+p.torso);g.stroke();}
         wrench(hand,p.weapon+p.torso);
       }
+      if(!p.attacking&&!p.dead&&!state.dodge&&state.equipped)secondaryTool(hand,state.equipped,p.secondaryAngle+p.torso);
       if(p.dead&&p.deathProgress>0.2){const t=smooth(clamp((p.deathProgress-0.2)/0.55,0,1));wrench({x:lerp(hand.x,37,t),y:lerp(hand.y,-8,t)},lerp(1.5,0,t));}
       g.restore();
       if(state.tint){g.save();g.globalCompositeOperation='source-atop';g.fillStyle=state.tint;g.fillRect(0,0,192,160);g.restore();}
@@ -228,5 +249,5 @@
     }
     return { render };
   }
-  global.MayaRig = { create, foot, knee, gait, advance, pose, dodge, STRIDE };
+  global.MayaRig = { create, foot, knee, gait, advance, pose, dodge, muzzle, STRIDE };
 })(typeof window !== 'undefined' ? window : globalThis);

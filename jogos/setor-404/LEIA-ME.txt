@@ -1,4 +1,26 @@
-SETOR 404 — CAMPANHA: 3 FASES
+SETOR 404 — CAMPANHA: 5 FASES
+
+SEMANA DA INDÚSTRIA — SENAI
+Desenvolvimento: Thamyris Lopes e Maria Luiza.
+Orientação: Prof. Heberson.
+Os créditos aparecem no final da Fase 5 e também pelo botão
+CRÉDITOS / APRESENTAÇÃO. A partida é pausada enquanto os créditos estão abertos.
+
+FERRAMENTAS
+J/X: chave fixa, sem consumo de energia ou munição.
+L: usar a ferramenta secundária selecionada. Q: trocar a secundária.
+Fase 2: lançador de rebites, com munição limitada. Caixas dão +8 rebites.
+Fase 3: arco elétrico, 2 de energia, interrompe robôs próximos.
+Fase 4: marreta hidráulica, 2 de energia, rompe blindagens e barreiras.
+Fase 5: pulso eletromagnético no R, 3 de energia e recarga de 8 segundos.
+Recolha a ferramenta nova na bancada com E para poder concluir cada fase.
+Ao avançar, as ferramentas e a munição são conservadas. Iniciar uma fase
+diretamente fornece apenas as ferramentas anteriores, para demonstração.
+
+Fase 4 — Fundição: resfrie os setores, rompa obstáculos e enfrente o Forjador.
+Fase 5 — Controle Central: isole comandos e enfrente o Regente Industrial.
+Use J quando faltar munição ou energia. Chefes continuam protegidos até
+os reparos e só recebem dano durante a recuperação; o pulso não os elimina.
 
 NOVIDADES DA CAMPANHA
 Fase 2: Linha Fora de Controle. Esteiras, prensas e robôs soldadores.

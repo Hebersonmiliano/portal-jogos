@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SETOR 404 — Campanha</title>
-  <meta name="description" content="Três fases de SETOR 404: restaure a energia, recupere a linha de montagem e enfrente a Sentinela 404.">
-  <link rel="stylesheet" href="style.css?v=8">
+  <meta name="description" content="Cinco fases industriais e ferramentas de manutenção com Maya Ferreira. Projeto de Thamyris Lopes, Maria Luiza e Prof. Heberson para a Semana da Indústria no SENAI.">
+  <link rel="stylesheet" href="style.css?v=20261028-ferramentas">
 </head>
 <body>
   <main class="shell">
-    <header><h1>SETOR <span>404</span></h1><p id="stage-heading">CAMPANHA / 3 FASES INDUSTRIAIS</p></header>
-    <section class="game-wrap" aria-label="Campanha de três fases de Setor 404">
+    <header><h1>SETOR <span>404</span></h1><p id="stage-heading">CAMPANHA / 5 FASES INDUSTRIAIS</p></header>
+    <section class="game-wrap" aria-label="Campanha de cinco fases de Setor 404">
       <canvas id="game" width="1280" height="426" tabindex="0" aria-label="Jogo de ação lateral. A e D: andar. S: agachar. Shift: correr. W: pular. J: atacar. K: esquivar. E: reparar."></canvas>
       <div id="start" class="overlay">
         <div class="mission-card"><p class="eyebrow">PROTOCOLO DE EMERGÊNCIA • 01</p><h2>A LINHA PAROU.<br>A MISSÃO COMEÇOU.</h2>
@@ -30,20 +30,40 @@
       <div><kbd>W</kbd><span>Pular</span></div>
       <div><kbd>J</kbd><span>Atacar</span></div>
       <div><kbd>K</kbd><span>Esquiva baixa</span></div>
+      <div><kbd>L</kbd><span>Secundária</span></div>
+      <div><kbd>Q</kbd><span>Trocar ferramenta</span></div>
+      <div><kbd>R</kbd><span>Pulso especial</span></div>
       <div><kbd>E</kbd><span>Segure para reparar</span></div>
       <div><kbd>P</kbd><span>Pausa</span></div>
     </section>
     <section class="toolbar" aria-label="Opções do jogo">
-      <div class="options" aria-label="Selecionar fase"><span>FASES:</span><button id="stage1" class="secondary">1 · MANUTENÇÃO</button><button id="stage2" class="secondary">2 · MONTAGEM</button><button id="stage3" class="secondary">3 · NÚCLEO 404</button></div>
+      <div class="options" aria-label="Selecionar fase"><span>FASES:</span><button id="stage1" class="secondary">1 · MANUTENÇÃO</button><button id="stage2" class="secondary">2 · MONTAGEM</button><button id="stage3" class="secondary">3 · NÚCLEO 404</button><button id="stage4" class="secondary">4 · FUNDIÇÃO</button><button id="stage5" class="secondary">5 · CONTROLE CENTRAL</button></div>
+      <p id="weapon-status">J: chave fixa · L: ferramenta secundária · Q: trocar · R: pulso</p>
       <p>Recupere fusíveis. Repare os painéis. Alcance a saída.</p>
       <div class="options"><button id="sound" class="secondary" aria-pressed="true">SOM: LIGADO</button><label for="volume">VOLUME <input id="volume" type="range" min="0" max="100" value="34" aria-label="Volume da música e efeitos"></label><button id="pause" class="secondary">PAUSAR</button><button id="restart" class="secondary">REINICIAR FASE</button></div>
+      <button id="credits-open" class="secondary">CRÉDITOS / APRESENTAÇÃO</button>
     </section>
   </main>
-  <script src="maya-rig.js?v=7"></script>
+  <section id="credits-overlay" class="credits-overlay" role="dialog" aria-modal="true" aria-labelledby="credits-title" hidden>
+    <div class="credits-card">
+      <p class="credits-event">SEMANA DA INDÚSTRIA · SENAI</p>
+      <h2 id="credits-title">SETOR <span>404</span></h2>
+      <p id="credits-message">Uma missão de manutenção. Um projeto construído em equipe.</p>
+      <div class="credits-names">
+        <div><span>DESENVOLVIMENTO · ALUNA</span><strong>Thamyris Lopes</strong></div>
+        <div><span>DESENVOLVIMENTO · ALUNA</span><strong>Maria Luiza</strong></div>
+        <div><span>DESENVOLVIMENTO E ORIENTAÇÃO</span><strong>Prof. Heberson</strong></div>
+      </div>
+      <p class="credits-thanks">Criatividade, tecnologia e manutenção industrial em uma aventura feita para apresentar no SENAI.</p>
+      <button id="credits-close">VOLTAR AO JOGO</button>
+    </div>
+  </section>
+  <script src="maya-rig.js?v=20261028-ferramentas"></script>
   <script src="r04-rig.js?v=7"></script>
   <script src="phase1-level.js?v=9"></script>
-  <script src="campaign.js?v=20261028"></script>
-  <script src="audio.js?v=7"></script>
-  <script src="game.js?v=20261028"></script>
+  <script src="campaign.js?v=20261028-cinco"></script>
+  <script src="weapons.js?v=20261028"></script>
+  <script src="audio.js?v=20261028-ferramentas"></script>
+  <script src="game.js?v=20261028-ferramentas"></script>
 </body>
 </html>
