@@ -36,7 +36,15 @@ import {
   defeituosasNoEstoque,
   separarDefeituosas,
 } from './estoque.js';
-import { apagar, carregar, gravar, montarSave } from './salvamento.js';
+import {
+  apagar,
+  armazenamentoDisponivel,
+  carregar,
+  codigoDoSave,
+  gravar,
+  lerCodigo,
+  montarSave,
+} from './salvamento.js';
 import {
   MAX_ATIVOS,
   aceitar,
@@ -717,10 +725,12 @@ elBotaoJogar.focus();
 // Todas as formas de jogar passam por executarComando, com o mesmo código de tecla.
 
 const elMenu = document.getElementById('menu-comandos');
-const botoesMenu = [...elMenu.querySelectorAll('button')];
+const botoesMenu = [...elMenu.querySelectorAll('.menu-lista button')];
 let selecaoMenu = 0;
 
 function abrirMenu() {
+  elPainelCodigo.hidden = true;
+  elMenu.querySelector('.menu-caixa').classList.remove('com-codigo');
   document.getElementById('menu-som').textContent = musica.ligado ? 'Desligar o som' : 'Ligar o som';
   document.getElementById('menu-novo').textContent = 'Novo jogo (apaga o progresso)';
   elMenu.hidden = false;
@@ -737,7 +747,48 @@ function selecionarMenu(i) {
   if (!usandoControle) botoesMenu[selecaoMenu].focus();
 }
 
+// Código do progresso (v0.6.3): copiar a partida como texto ou carregar uma colada.
+const elPainelCodigo = document.getElementById('painel-codigo');
+const elCampoCodigo = document.getElementById('campo-codigo');
+const elAvisoCodigo = document.getElementById('aviso-codigo');
+function mostrarPainelCodigo(texto, aviso) {
+  elPainelCodigo.hidden = false;
+  elMenu.querySelector('.menu-caixa').classList.add('com-codigo');
+  elCampoCodigo.value = texto;
+  elAvisoCodigo.textContent = aviso;
+  elCampoCodigo.focus();
+  if (texto) elCampoCodigo.select();
+}
+function copiarCodigo() {
+  const codigo = codigoDoSave(montarSaveAtual());
+  mostrarPainelCodigo(codigo, 'Guarde este código. Para continuar em outro navegador, abra o menu e use “Carregar progresso de um código”.');
+  navigator.clipboard?.writeText(codigo).then(
+    () => (elAvisoCodigo.textContent = 'Código copiado. ' + elAvisoCodigo.textContent),
+    () => {},
+  );
+}
+function carregarCodigo() {
+  const save = lerCodigo(elCampoCodigo.value, { capacidade: CAPACIDADE_SAIDA, maxFuncionarios: LIMITE_FUNCIONARIOS });
+  if (!save) {
+    elAvisoCodigo.textContent = 'Código inválido. Confira se copiou o texto inteiro, começando por II2-.';
+    return;
+  }
+  salvarAoSair = false;
+  clearInterval(timerSalvamento);
+  gravar(save, undefined, { backup: true });
+  location.reload();
+}
+
 const comandosEspeciais = {
+  CopiarCodigo: copiarCodigo,
+  CarregarCodigo: () => {
+    mostrarPainelCodigo('', 'Cole o código do progresso abaixo e clique em Carregar. A partida atual será substituída.');
+  },
+  ConfirmarCodigo: carregarCodigo,
+  FecharCodigo: () => {
+    elPainelCodigo.hidden = true;
+    elMenu.querySelector('.menu-caixa').classList.remove('com-codigo');
+  },
   Menu: () => (elMenu.hidden ? abrirMenu() : fecharMenu()),
   Fechar: fecharMenu,
   NovoJogo: () => {
@@ -769,6 +820,7 @@ function modoControle(ativo) {
 }
 
 window.addEventListener('keydown', (e) => {
+  if (e.target.closest?.('textarea, input')) return; // digitando o código do progresso
   modoControle(false);
   if (!elInicio.hidden) {
     if (e.code === 'Enter' || e.code === 'Space') {
@@ -937,23 +989,59 @@ function animarCena(dt) {
 const relogio = new THREE.Timer();
 // ===== Salvamento =====
 
-function salvarJogo() {
-  return gravar(
-    montarSave({
-      economia: exportarEconomia(),
-      estoque: exportarEstoque(),
-      escolha: exportarEscolha(),
-      contratos: exportarQuadro(quadro),
-      caixas,
-      relogio: ambiente.exportar(),
-      energia: exportarEnergia(energia),
-      refugo,
-      jogador: jogador.position,
-      maquinas,
-      funcionarios: funcionarios.map((f) => f.malha.position),
-    }),
-  );
+function montarSaveAtual() {
+  return montarSave({
+    economia: exportarEconomia(),
+    estoque: exportarEstoque(),
+    escolha: exportarEscolha(),
+    contratos: exportarQuadro(quadro),
+    energia: exportarEnergia(energia),
+    refugo,
+    caixas,
+    relogio: ambiente.exportar(),
+    jogador: jogador.position,
+    maquinas,
+    funcionarios: funcionarios.map((f) => f.malha.position),
+  });
 }
+
+// Salva no navegador. A cada minuto também atualiza a cópia de segurança (v0.6.3).
+const elStatusSave = document.getElementById('status-save');
+let salvamentos = 0;
+let ultimoSalvamento = 0;
+let salvamentoFalhou = false;
+let persistenciaPedida = false;
+function salvarJogo() {
+  const ok = gravar(montarSaveAtual(), undefined, { backup: salvamentos % 12 === 0 });
+  salvamentos += 1;
+  if (ok) {
+    ultimoSalvamento = performance.now();
+    if (!persistenciaPedida) {
+      // Pede ao navegador para não apagar os dados do jogo sozinho quando faltar espaço.
+      persistenciaPedida = true;
+      navigator.storage?.persist?.().catch(() => {});
+    }
+  } else if (!salvamentoFalhou) {
+    mensagem('Este navegador não está deixando o jogo salvar. Use o código do progresso no menu (Esc) para guardar sua partida.');
+  }
+  salvamentoFalhou = !ok;
+  mostrarStatusSave();
+  return ok;
+}
+
+function mostrarStatusSave() {
+  if (salvamentoFalhou) {
+    elStatusSave.textContent = 'Não está salvando';
+    elStatusSave.className = 'alerta';
+    elStatusSave.title = 'O navegador está bloqueando o armazenamento (janela anônima ou dados do site bloqueados). Copie o código do progresso no menu.';
+    return;
+  }
+  const s = Math.round((performance.now() - ultimoSalvamento) / 1000);
+  elStatusSave.textContent = !ultimoSalvamento ? 'Salva sozinho' : s < 3 ? 'Salvo agora' : `Salvo há ${s} s`;
+  elStatusSave.className = '';
+  elStatusSave.title = 'O progresso é salvo neste navegador a cada 5 segundos.';
+}
+setInterval(mostrarStatusSave, 1000);
 
 // Recria a oficina a partir do save: máquinas com saída, esteira e automação, funcionários e jogador.
 function restaurarJogo() {
@@ -1026,6 +1114,11 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && salvarAoSair) salvarJogo();
 });
 
+if (!armazenamentoDisponivel()) {
+  salvamentoFalhou = true;
+  document.getElementById('inicio-save').textContent = 'Atenção: este navegador não está deixando o jogo salvar (janela anônima ou dados bloqueados). Use o código do progresso no menu para guardar a partida.';
+  mostrarStatusSave();
+}
 if (restaurarJogo()) {
   elBotaoJogar.textContent = 'Continuar';
   document.getElementById('inicio-save').textContent = `Partida salva: ${ambiente.texto()} · ${reais(getDinheiro())} em caixa.`;

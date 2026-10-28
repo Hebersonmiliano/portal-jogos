@@ -32,6 +32,7 @@
     <div class="dado"><small>Máquinas</small><strong id="maquinas">0</strong></div>
     <div class="dado"><small>Equipe</small><strong id="funcionarios">0</strong></div>
     <div class="relogio" id="relogio">Dia 1 · 07:00</div>
+    <span id="status-save" title="O progresso é salvo neste navegador a cada 5 segundos.">Salva sozinho</span>
     <button id="botao-som" type="button" aria-pressed="true" title="Ligar ou desligar o som (O)">Som ligado</button>
   </header>
 
@@ -126,8 +127,19 @@
         <button type="button" data-comando="Digit3">Aceitar oferta 3</button>
         <button type="button" data-comando="KeyO" id="menu-som">Desligar o som</button>
         <button type="button" data-comando="KeyH">Mostrar ou esconder os controles</button>
+        <button type="button" data-comando="CopiarCodigo">Copiar código do progresso</button>
+        <button type="button" data-comando="CarregarCodigo">Carregar progresso de um código</button>
         <button type="button" data-comando="NovoJogo" id="menu-novo">Novo jogo (apaga o progresso)</button>
         <button type="button" data-comando="Fechar">Voltar ao jogo</button>
+      </div>
+      <div id="painel-codigo" hidden>
+        <p id="aviso-codigo"></p>
+        <label for="campo-codigo" class="menu-dica">Código do progresso</label>
+        <textarea id="campo-codigo" rows="4" spellcheck="false"></textarea>
+        <div class="painel-codigo-botoes">
+          <button type="button" data-comando="ConfirmarCodigo">Carregar</button>
+          <button type="button" data-comando="FecharCodigo">Fechar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -142,7 +154,7 @@
       <p class="inicio-nota botao-controle-nota">No controle, aperte <b>A</b> ou <b>Menu</b> para começar.</p>
       <p id="inicio-save" class="inicio-nota">O progresso fica salvo neste navegador.</p>
       <p class="inicio-nota">Teclado e mouse ou controle de Xbox · <kbd>H</kbd> mostra os controles · <kbd>O</kbd> liga e desliga o som</p>
-      <p class="inicio-versao">v0.6.2</p>
+      <p class="inicio-versao">v0.6.3</p>
     </div>
   </section>
 

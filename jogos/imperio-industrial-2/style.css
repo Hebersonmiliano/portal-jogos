@@ -316,7 +316,7 @@ button:focus-visible { outline: 2px solid var(--laranja); outline-offset: 2px; }
 /* Menu de comandos. */
 #menu-comandos { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; padding: 20px; background: rgba(6, 18, 22, 0.7); }
 #menu-comandos[hidden] { display: none; }
-.menu-caixa { width: min(420px, 100%); padding: 18px; border: 1px solid var(--petroleo-borda); border-top: 4px solid var(--laranja); border-radius: 12px; background: #0f2a31; }
+.menu-caixa { max-height: calc(100vh - 40px); overflow: auto; width: min(420px, 100%); padding: 18px; border: 1px solid var(--petroleo-borda); border-top: 4px solid var(--laranja); border-radius: 12px; background: #0f2a31; }
 .menu-caixa h2 { margin: 0; font: 800 20px var(--titulo); letter-spacing: 0.06em; text-transform: uppercase; }
 .menu-dica { margin: 4px 0 12px; font-size: 13px; color: var(--apagado); }
 .menu-lista { display: grid; gap: 6px; }
@@ -324,3 +324,17 @@ button:focus-visible { outline: 2px solid var(--laranja); outline-offset: 2px; }
 .menu-lista button.selecionado { border-color: var(--laranja); background: rgba(242, 140, 40, 0.2); }
 
 @media (max-width: 1100px) { #acoes { max-width: calc(100vw - 40px); bottom: 70px; } #acoes button { min-width: 64px; font-size: 12px; } }
+
+/* Salvamento (v0.6.3): indicador na barra e painel do código do progresso. */
+#status-save { font: 600 12px var(--titulo); letter-spacing: 0.04em; color: var(--apagado); white-space: nowrap; }
+#status-save.alerta { color: var(--vermelho); }
+#painel-codigo { display: grid; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--petroleo-borda); }
+#painel-codigo[hidden] { display: none; }
+#aviso-codigo { margin: 0; font-size: 13px; line-height: 1.4; color: var(--texto); }
+#campo-codigo { width: 100%; padding: 8px; border: 1px solid var(--petroleo-borda); border-radius: 6px; background: #0a1e23; color: var(--texto); font: 12px/1.4 ui-monospace, Consolas, monospace; resize: vertical; user-select: text; }
+.painel-codigo-botoes { display: flex; gap: 6px; }
+.painel-codigo-botoes button { padding: 8px 14px; border: 1px solid var(--petroleo-borda); border-radius: 8px; background: rgba(255, 255, 255, 0.06); color: var(--texto); font: 700 14px var(--titulo); cursor: pointer; }
+.painel-codigo-botoes button:first-child { background: var(--laranja); color: #10262d; border-color: var(--laranja); }
+
+/* Com o painel do código aberto, a lista do menu sai para dar espaço. */
+.menu-caixa.com-codigo .menu-lista { display: none; }

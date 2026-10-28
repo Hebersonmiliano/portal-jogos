@@ -26,7 +26,7 @@
     <div class="guia-grade">
       <nav class="guia-indice" aria-label="Índice do guia"><strong>Índice</strong><ol><li><a href="#1-objetivo">1. Objetivo</a></li><li><a href="#2-começo-rápido-os-primeiros-10-minutos">2. Começo rápido: os primeiros 10 minutos</a></li><li><a href="#3-controles">3. Controles</a></li><li><a href="#4-a-tela-do-jogo">4. A tela do jogo</a></li><li><a href="#5-produzir-caixas">5. Produzir caixas</a></li><li><a href="#6-catálogo-e-preços">6. Catálogo e preços</a></li><li><a href="#7-estoque-e-vendas">7. Estoque e vendas</a></li><li><a href="#8-contratos-clientes-e-reputação">8. Contratos, clientes e reputação</a></li><li><a href="#9-funcionários">9. Funcionários</a></li><li><a href="#10-esteiras-e-máquinas-automáticas">10. Esteiras e máquinas automáticas</a></li><li><a href="#11-luz-das-máquinas">11. Luz das máquinas</a></li><li><a href="#12-desgaste-defeitos-e-manutenção">12. Desgaste, defeitos e manutenção</a></li><li><a href="#13-inspeção-e-refugo">13. Inspeção e refugo</a></li><li><a href="#14-energia">14. Energia</a></li><li><a href="#15-dia-noite-e-câmera">15. Dia, noite e câmera</a></li><li><a href="#16-som">16. Som</a></li><li><a href="#17-salvamento-e-novo-jogo">17. Salvamento e novo jogo</a></li><li><a href="#18-tabela-de-custos">18. Tabela de custos</a></li><li><a href="#19-estratégias-e-dicas">19. Estratégias e dicas</a></li><li><a href="#20-perguntas-frequentes">20. Perguntas frequentes</a></li></ol></nav>
       <article class="guia-texto">
-<p>Este guia explica tudo o que existe no jogo até a versão <strong>0.6.2</strong>: como começar, o que cada tecla faz, como funcionam contratos, automação, qualidade e energia, e estratégias para crescer rápido.</p>
+<p>Este guia explica tudo o que existe no jogo até a versão <strong>0.6.3</strong>: como começar, o que cada tecla faz, como funcionam contratos, automação, qualidade e energia, e estratégias para crescer rápido.</p>
 <p><strong>Jogue no navegador:</strong> <a href="https://hebersonmiliano.github.io/portal-jogos/jogo.html?id=imperio-industrial-2">Portal Pixel</a>. Funciona no computador com teclado e mouse ou com controle de Xbox, PlayStation e similares.</p>
 <p><img loading="lazy" decoding="async" alt="O Distrito Industrial com a fábrica em funcionamento" src="../assets/imperio-industrial-2/visao-geral.jpg" /></p>
 <h2 id="1-objetivo">1. Objetivo</h2>
@@ -438,10 +438,24 @@
 </ul>
 <h2 id="17-salvamento-e-novo-jogo">17. Salvamento e novo jogo</h2>
 <ul>
-<li>O jogo salva sozinho a cada 5 segundos e ao fechar ou trocar de aba. Na tela inicial aparece <strong>Continuar</strong> com o dia, a hora e o dinheiro da partida salva.</li>
+<li>O jogo salva sozinho a cada 5 segundos e ao fechar ou trocar de aba. O canto da barra superior mostra <strong>"Salvo há X s"</strong>.</li>
+<li>Na tela inicial aparece <strong>Continuar</strong> com o dia, a hora e o dinheiro da partida salva.</li>
 <li>O save fica <strong>no navegador</strong>. Outro navegador, outro computador ou uma janela anônima começam do zero. Limpar os dados do site apaga o progresso.</li>
-<li><strong>N duas vezes</strong> (em até 3 segundos) apaga o progresso e recomeça.</li>
+<li>A cada minuto o jogo guarda uma <strong>cópia de segurança</strong>, usada se o save principal estragar.</li>
+<li>Se a barra mostrar <strong>"Não está salvando"</strong> em vermelho, o navegador está bloqueando o armazenamento (janela anônima ou dados de sites bloqueados). A tela inicial também avisa. Nesse caso, use o código do progresso.</li>
 </ul>
+<h3 id="código-do-progresso">Código do progresso</h3>
+<p>Para guardar a partida fora do navegador ou continuar em outro computador:</p>
+<ol>
+<li>Abra o menu (<strong>Esc</strong>, botão <strong>Mais</strong> ou <strong>Menu</strong> no controle).</li>
+<li>Escolha <strong>Copiar código do progresso</strong>. Aparece um texto que começa com <code>II2-</code> e ele já vai para a área de transferência. Guarde num arquivo ou mande para você mesmo.</li>
+<li>No outro navegador, abra o menu, escolha <strong>Carregar progresso de um código</strong>, cole o texto e clique em <strong>Carregar</strong>. A partida atual daquele navegador é substituída.</li>
+</ol>
+<blockquote>
+<p>Dica: copie o código de vez em quando. É o seu backup, mesmo que alguém limpe o navegador.</p>
+</blockquote>
+<h3 id="novo-jogo">Novo jogo</h3>
+<p><strong>N</strong> duas vezes (em até 3 segundos), ou <strong>Novo jogo</strong> no menu confirmando duas vezes, apaga o progresso e a cópia de segurança e recomeça.</p>
 <h2 id="18-tabela-de-custos">18. Tabela de custos</h2>
 <table>
 <thead>
@@ -520,9 +534,10 @@
 <p><strong>Perdi reputação sem atrasar.</strong> Caixas com defeito foram devolvidas. Inspecione o estoque ou instale inspetores.</p>
 <p><strong>Não ouço a música.</strong> O som começa depois do primeiro clique ou tecla. Confira se o botão na barra está em "Som ligado" (tecla O).</p>
 <p><strong>Dá para jogar no celular?</strong> Ainda não: o jogo precisa de teclado, mouse ou controle.</p>
+<p><strong>Perdi meu progresso.</strong> O save fica no navegador em que você jogou. Confira se está no mesmo navegador, sem janela anônima, e se os dados do site não foram limpos. A versão de testes que abre dentro do Claude é separada do Portal Pixel e pode não guardar o save; jogue pelo portal. Para nunca mais perder, copie o código do progresso no menu de vez em quando.</p>
 <p><strong>Meu controle não funciona.</strong> Aperte qualquer botão com a página do jogo em foco; o navegador só mostra o controle ao site depois disso. Controles de Xbox e PlayStation funcionam por USB ou Bluetooth em navegadores como Chrome, Edge e Firefox.</p>
 <hr />
-<p><em>Guia da versão 0.6.2. Os números deste guia vêm direto das regras do jogo (<code>js/</code>). Se uma versão nova mudar algo, o guia é atualizado junto.</em></p></article>
+<p><em>Guia da versão 0.6.3. Os números deste guia vêm direto das regras do jogo (<code>js/</code>). Se uma versão nova mudar algo, o guia é atualizado junto.</em></p></article>
     </div>
   </main>
 </body>

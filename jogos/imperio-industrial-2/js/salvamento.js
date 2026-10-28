@@ -2,6 +2,8 @@
 // Cada versão nova do formato ganha uma entrada em MIGRACOES, para saves antigos continuarem abrindo.
 
 export const CHAVE_SAVE = 'imperio-industrial-2:save';
+export const CHAVE_BACKUP = 'imperio-industrial-2:save:backup'; // cópia de segurança (v0.6.3)
+const PREFIXO_CODIGO = 'II2-';
 export const VERSAO_SAVE = 3;
 
 // MIGRACOES[n] converte um save da versão n para n + 1.
@@ -118,28 +120,88 @@ export function lerSave(texto, { limite = 11.5, capacidade = 8, maxFuncionarios 
 }
 
 // Acesso ao armazenamento do navegador. Falhas (modo privado, armazenamento bloqueado) não quebram o jogo.
-export function gravar(save, armazenamento = globalThis.localStorage) {
+// Em alguns navegadores só ler window.localStorage já lança erro, por isso o acesso fica dentro de try.
+function padrao(armazenamento) {
+  if (armazenamento) return armazenamento;
   try {
-    armazenamento.setItem(CHAVE_SAVE, JSON.stringify(save));
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// Cada gravação também atualiza a cópia de segurança quando backup = true.
+export function gravar(save, armazenamento, { backup = false } = {}) {
+  try {
+    armazenamento = padrao(armazenamento);
+    const texto = JSON.stringify(save);
+    armazenamento.setItem(CHAVE_SAVE, texto);
+    if (backup) armazenamento.setItem(CHAVE_BACKUP, texto);
     return true;
   } catch {
     return false;
   }
 }
 
-export function carregar(armazenamento = globalThis.localStorage, opcoes) {
-  try {
-    const texto = armazenamento.getItem(CHAVE_SAVE);
-    return texto ? lerSave(texto, opcoes) : null;
-  } catch {
-    return null;
+// Lê o save principal; se ele faltar ou estiver estragado, tenta a cópia de segurança.
+export function carregar(armazenamento, opcoes) {
+  armazenamento = padrao(armazenamento);
+  if (!armazenamento) return null;
+  for (const chave of [CHAVE_SAVE, CHAVE_BACKUP]) {
+    try {
+      const texto = armazenamento.getItem(chave);
+      const save = texto ? lerSave(texto, opcoes) : null;
+      if (save) return save;
+    } catch {
+      /* tenta a próxima */
+    }
+  }
+  return null;
+}
+
+// Novo jogo: apaga o save e a cópia de segurança.
+export function apagar(armazenamento) {
+  armazenamento = padrao(armazenamento);
+  if (!armazenamento) return;
+  for (const chave of [CHAVE_SAVE, CHAVE_BACKUP]) {
+    try {
+      armazenamento.removeItem(chave);
+    } catch {
+      /* sem armazenamento: nada a apagar */
+    }
   }
 }
 
-export function apagar(armazenamento = globalThis.localStorage) {
+// Testa se o navegador deixa gravar (falha em alguns modos anônimos e com armazenamento bloqueado).
+export function armazenamentoDisponivel(armazenamento) {
   try {
-    armazenamento.removeItem(CHAVE_SAVE);
+    armazenamento = padrao(armazenamento);
+    const teste = 'imperio-industrial-2:teste';
+    armazenamento.setItem(teste, '1');
+    armazenamento.removeItem(teste);
+    return true;
   } catch {
-    /* sem armazenamento: nada a apagar */
+    return false;
+  }
+}
+
+// Código do progresso: o save em texto, para guardar ou levar a outro navegador.
+export function codigoDoSave(save) {
+  const bytes = new TextEncoder().encode(JSON.stringify(save));
+  let binario = '';
+  for (const b of bytes) binario += String.fromCharCode(b);
+  return PREFIXO_CODIGO + btoa(binario);
+}
+
+// Lê um código colado pelo jogador. Devolve o save validado ou null.
+export function lerCodigo(codigo, opcoes) {
+  try {
+    const limpo = String(codigo).replace(/\s+/g, '');
+    if (!limpo.startsWith(PREFIXO_CODIGO)) return null;
+    const binario = atob(limpo.slice(PREFIXO_CODIGO.length));
+    const texto = new TextDecoder().decode(Uint8Array.from(binario, (c) => c.charCodeAt(0)));
+    return lerSave(texto, opcoes) ? JSON.parse(texto) : null;
+  } catch {
+    return null;
   }
 }
