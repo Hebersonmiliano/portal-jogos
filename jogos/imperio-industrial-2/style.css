@@ -338,3 +338,15 @@ button:focus-visible { outline: 2px solid var(--laranja); outline-offset: 2px; }
 
 /* Com o painel do código aberto, a lista do menu sai para dar espaço. */
 .menu-caixa.com-codigo .menu-lista { display: none; }
+
+/* v0.7 — frota e mapa de entregas */
+#painel-frota { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--petroleo-borda); }
+#painel-frota h3 { margin-top: 0; }
+#frota { display: block; font: 600 12px/1.35 var(--titulo); color: var(--texto); }
+#mapa-rota { position: relative; height: 38px; margin-top: 6px; overflow: hidden; border-radius: 6px; background: #182d32; color: var(--apagado); font: 700 9px var(--titulo); }
+#mapa-rota .estrada { position: absolute; left: 12%; right: 12%; top: 18px; height: 4px; background: repeating-linear-gradient(90deg, #637378 0 10px, #d8b84f 10px 15px); }
+#mapa-rota .fabrica, #mapa-rota .cliente { position: absolute; top: 4px; }
+#mapa-rota .fabrica { left: 4px; } #mapa-rota .cliente { right: 4px; }
+#veiculo-mapa { position: absolute; left: 8%; top: 12px; z-index: 1; color: var(--laranja); font-size: 15px; transition: left 0.15s linear; }
+#mapa-rota:not(.ativa) #veiculo-mapa { left: 8% !important; }
+
