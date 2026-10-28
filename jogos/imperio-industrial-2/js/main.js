@@ -748,7 +748,8 @@ function trocarCatalogo(campo, rotulo) {
 
 const teclasDeAcao = {
   KeyB: posicionarMaquina,
-  KeyE: produzirCaixa,
+  KeyE: interagir,
+  KeyJ: abrirMenu,
   KeyR: recolherSaida,
   KeyV: venderNaExpedicao,
   KeyF: contratarFuncionario,
@@ -815,6 +816,39 @@ elBotaoJogar.focus();
 
 const elMenu = document.getElementById('menu-comandos');
 const botoesMenu = [...elMenu.querySelectorAll('.menu-lista button')];
+const dicaInteracao = document.createElement('button');
+dicaInteracao.id = 'dica-interacao';
+dicaInteracao.dataset.comando = 'KeyE';
+document.body.appendChild(dicaInteracao);
+const selecaoObjeto = new THREE.BoxHelper(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1)), 0xffb24e);
+selecaoObjeto.visible = false;
+cena.add(selecaoObjeto);
+
+function contextoInteracao() {
+  const p = jogador.position;
+  if (Math.hypot(p.x - EXPEDICAO.x, p.z - EXPEDICAO.z) <= 2.2)
+    return { texto: 'Carregar van / vender estoque', agir: venderNaExpedicao };
+  const m = maquinaProxima(p, maquinas);
+  if (m) {
+    if (m.quebrada) return { texto: `Consertar · R$ ${custoManutencao(m)}`, agir: manutencao, objeto: m.malha };
+    if (m.saida.length) return { texto: 'Recolher caixas para o estoque', agir: recolherSaida, objeto: m.malha };
+    if (m.automatica) return { texto: 'Opções da máquina', agir: abrirMenu, objeto: m.malha };
+    return { texto: 'Fabricar caixa · R$ 2', agir: produzirCaixa, objeto: m.malha };
+  }
+  if (Math.hypot(p.x - ESTOQUE_PONTO.x, p.z - ESTOQUE_PONTO.z) <= 2.2)
+    return { texto: 'Estoque e inspeção', agir: abrirMenu };
+  return { texto: 'Abrir construção e gestão', agir: abrirMenu };
+}
+
+function interagir() { contextoInteracao().agir(); }
+
+function atualizarInteracao() {
+  const contexto = contextoInteracao();
+  dicaInteracao.hidden = !elInicio.hidden || !elMenu.hidden;
+  dicaInteracao.textContent = `${usandoControle ? 'A' : 'E'} — ${contexto.texto} · ${usandoControle ? 'Menu' : 'J'}: opções`;
+  selecaoObjeto.visible = !!contexto.objeto && elMenu.hidden && elInicio.hidden;
+  if (contexto.objeto) selecaoObjeto.setFromObject(contexto.objeto);
+}
 let selecaoMenu = 0;
 
 function abrirMenu() {
@@ -1229,6 +1263,7 @@ renderer.setAnimationLoop(() => {
   avancarEntregas(dt);
   avancarEnergia(dt);
   atualizarLuzes();
+  atualizarInteracao();
   animarCena(dt);
   renderer.render(cena, camera);
 });
