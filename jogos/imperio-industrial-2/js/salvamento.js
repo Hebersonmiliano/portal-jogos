@@ -4,7 +4,7 @@
 export const CHAVE_SAVE = 'imperio-industrial-2:save';
 export const CHAVE_BACKUP = 'imperio-industrial-2:save:backup'; // cópia de segurança (v0.6.3)
 const PREFIXO_CODIGO = 'II2-';
-export const VERSAO_SAVE = 4;
+export const VERSAO_SAVE = 5;
 
 // MIGRACOES[n] converte um save da versão n para n + 1.
 const MIGRACOES = {
@@ -28,13 +28,17 @@ const MIGRACOES = {
   3(save) {
     return { ...save, versao: 4, frota: null };
   },
+  // v4 → v5 (construção avançada): partidas antigas começam na oficina original.
+  4(save) {
+    return { ...save, versao: 5, construcao: { nivel: 0 } };
+  },
 };
 
 const numero = (v, padrao = 0) => (Number.isFinite(v) ? v : padrao);
 const dentro = (v, limite) => Math.max(-limite, Math.min(limite, numero(v)));
 
 // Monta o objeto salvo a partir das partes do jogo.
-export function montarSave({ economia, estoque, escolha, contratos, energia = null, frota = null, refugo = 0, maquinas, funcionarios, jogador, caixas, relogio = 0 }) {
+export function montarSave({ economia, estoque, escolha, contratos, energia = null, frota = null, construcao = null, refugo = 0, maquinas, funcionarios, jogador, caixas, relogio = 0 }) {
   return {
     versao: VERSAO_SAVE,
     salvoEm: new Date().toISOString(),
@@ -44,6 +48,7 @@ export function montarSave({ economia, estoque, escolha, contratos, energia = nu
     contratos,
     energia,
     frota,
+    construcao,
     refugo,
     caixas,
     relogio,
@@ -82,11 +87,13 @@ export function lerSave(texto, { limite = 11.5, capacidade = 8, maxFuncionarios 
   }
 
   const lista = (v) => (Array.isArray(v) ? v : []);
+  const nivelConstrucao = Math.max(0, Math.min(3, Math.floor(numero(dados.construcao?.nivel))));
+  const dentroX = (v) => Math.max(-limite, Math.min(nivelConstrucao >= 1 ? 19.5 : limite, numero(v)));
   const vistas = new Set();
   const maquinas = [];
   for (const m of lista(dados.maquinas)) {
     if (!m || typeof m !== 'object') continue;
-    const x = Math.round(dentro(m.x, limite));
+    const x = Math.round(dentroX(m.x));
     const z = Math.round(dentro(m.z, limite));
     if (vistas.has(`${x},${z}`)) continue; // duas máquinas na mesma célula
     vistas.add(`${x},${z}`);
@@ -114,10 +121,11 @@ export function lerSave(texto, { limite = 11.5, capacidade = 8, maxFuncionarios 
     contratos: dados.contratos ?? null,
     energia: dados.energia ?? null,
     frota: dados.frota ?? null,
+    construcao: { nivel: nivelConstrucao },
     refugo: Math.max(0, Math.floor(numero(dados.refugo))),
     caixas: Math.max(0, Math.floor(numero(dados.caixas))),
     relogio: Math.max(0, numero(dados.relogio)), // segundos de jogo desde o início do dia 1
-    jogador: { x: dentro(dados.jogador?.x, limite), z: dentro(dados.jogador?.z ?? 4, limite) },
+    jogador: { x: dentroX(dados.jogador?.x), z: dentro(dados.jogador?.z ?? 4, limite) },
     maquinas,
     funcionarios: lista(dados.funcionarios)
       .slice(0, maxFuncionarios)
