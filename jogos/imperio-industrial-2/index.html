@@ -70,9 +70,13 @@
     <div class="cabecalho"><h2>Contratos</h2><span>Reputação <strong id="reputacao">20</strong></span></div>
     <h3>Ofertas <small class="tecla">clique ou 1, 2, 3 aceitam</small><small class="botao-controle">↓ aceita a primeira · Menu para as outras</small></h3>
     <ol id="ofertas"></ol>
-    <h3>Em andamento <small class="tecla">entregue na expedição com V</small><small class="botao-controle">entregue na expedição com X</small></h3>
+    <h3>Em andamento <small class="tecla">carregue a van com V</small><small class="botao-controle">carregue a van com X</small></h3>
     <ul id="ativos"></ul>
     <p id="historico-contratos" class="historico"></p>
+    <section id="painel-frota" aria-label="Frota e mapa de entregas">
+      <h3>Frota e rota</h3><strong id="frota">Van na doca · pronta para carregar</strong>
+      <div id="mapa-rota"><span class="fabrica">FÁBRICA</span><i class="estrada"></i><b id="veiculo-mapa">▰</b><span class="cliente">CLIENTE</span></div>
+    </section>
   </aside>
 
   <aside id="ajuda" aria-label="Controles">
@@ -84,7 +88,7 @@
         <tr><td>Colocar máquina · R$ 60</td><td><kbd>B</kbd></td><td><b>Y</b></td></tr>
         <tr><td>Produzir caixa · R$ 2</td><td><kbd>E</kbd></td><td><b>A</b></td></tr>
         <tr><td>Levar saída ao estoque</td><td><kbd>R</kbd></td><td><b>B</b></td></tr>
-        <tr><td>Entregar ou vender na expedição</td><td><kbd>V</kbd></td><td><b>X</b></td></tr>
+        <tr><td>Despachar van ou vender na expedição</td><td><kbd>V</kbd></td><td><b>X</b></td></tr>
         <tr><td>Tamanho, cor e material</td><td><kbd>T</kbd><kbd>C</kbd><kbd>M</kbd></td><td><b>↑</b><b>←</b><b>→</b></td></tr>
         <tr><td>Aceitar contrato</td><td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> ou clique</td><td><b>↓</b> (primeira oferta)</td></tr>
         <tr><td>Esteira · R$ 40</td><td><kbd>L</kbd></td><td><b>RT</b></td></tr>
@@ -154,10 +158,11 @@
       <p class="inicio-nota botao-controle-nota">No controle, aperte <b>A</b> ou <b>Menu</b> para começar.</p>
       <p id="inicio-save" class="inicio-nota">O progresso fica salvo neste navegador.</p>
       <p class="inicio-nota">Teclado e mouse ou controle de Xbox · <kbd>H</kbd> mostra os controles · <kbd>O</kbd> liga e desliga o som</p>
-      <p class="inicio-versao">v0.6.3</p>
+      <p class="inicio-versao">v0.7</p>
     </div>
   </section>
 
   <script type="module" src="js/main.js"></script>
 </body>
 </html>
+
