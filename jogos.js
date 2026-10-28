@@ -201,7 +201,7 @@ window.JOGOS = [
     },
     novidades: [
       { versao: "0.6.2", data: "2026-10-27", itens: ["Controle de Xbox, PlayStation e similares, com vibração", "Barra de ações, menu de comandos e ofertas clicáveis com o mouse", "Dicas na tela que mostram a tecla ou o botão do controle"] },
-      { versao: "0.6.2", data: "2026-10-27", itens: ["Trilha sonora original que cresce com a fábrica e muda à noite", "Efeitos sonoros novos: prensa, venda, contratos, quebra e conserto", "Tela inicial com Jogar e Continuar"] },
+      { versao: "0.6.1", data: "2026-10-27", itens: ["Trilha sonora original que cresce com a fábrica e muda à noite", "Efeitos sonoros novos: prensa, venda, contratos, quebra e conserto", "Tela inicial com Jogar e Continuar"] },
       { versao: "0.6", data: "2026-10-27", itens: ["Desgaste, defeitos e quebra das máquinas", "Manutenção, inspeção manual e inspetor automático na esteira", "Energia com tarifa por hora, conta diária e corte"] },
       { versao: "0.5.1", data: "2026-10-27", itens: ["Visual novo: oficina, terreno cercado, doca e van", "Ciclo de dia e noite e câmera com rotação e zoom", "HUD redesenhado e rótulos no mundo"] },
       { versao: "0.5", data: "2026-10-27", itens: ["Clientes, contratos com prazo e reputação", "Salvamento automático no navegador"] },
