@@ -118,7 +118,7 @@ kbd {
   top: 86px;
   right: 20px;
   width: min(340px, calc(100vw - 40px));
-  max-height: calc(100vh - 110px);
+  max-height: calc(100vh - 200px);
   overflow: auto;
   padding: 12px 14px;
   background: var(--petroleo-escuro);
@@ -151,8 +151,9 @@ kbd {
 /* ---------- Ajuda ---------- */
 #ajuda {
   position: fixed;
-  left: 20px;
+  right: 20px;
   bottom: 20px;
+  z-index: 3;
   width: min(330px, calc(100vw - 40px));
   padding: 10px 14px;
   background: var(--petroleo-escuro);
@@ -162,10 +163,13 @@ kbd {
   pointer-events: none;
 }
 #ajuda h2 { margin: 0; font: 700 13px var(--titulo); letter-spacing: 0.08em; text-transform: uppercase; color: var(--apagado); display: flex; justify-content: space-between; align-items: center; }
-#ajuda dl { display: none; grid-template-columns: auto 1fr; gap: 4px 10px; margin: 8px 0 0; align-items: center; }
-#ajuda dd { margin: 0; color: var(--texto); }
+#ajuda table { display: none; width: 100%; margin: 8px 0 0; border-collapse: collapse; }
+#ajuda th { padding: 4px 6px; font: 700 11px var(--titulo); letter-spacing: 0.08em; text-transform: uppercase; color: var(--apagado); text-align: left; }
+#ajuda td { padding: 4px 6px; border-top: 1px solid var(--petroleo-borda); vertical-align: top; }
+#ajuda td b { display: inline-block; min-width: 1.6em; margin-right: 2px; padding: 0 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); text-align: center; font: 700 11px/1.6 var(--titulo); }
 #ajuda p { display: none; margin: 8px 0 0; color: var(--apagado); }
-#ajuda.aberta dl { display: grid; }
+#ajuda.aberta { width: min(560px, calc(100vw - 40px)); max-height: calc(100vh - 120px); overflow: auto; pointer-events: auto; }
+#ajuda.aberta table { display: table; }
 #ajuda.aberta p { display: block; }
 
 /* ---------- Rótulos no mundo ---------- */
@@ -262,3 +266,61 @@ kbd {
 #botao-jogar:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .inicio-nota { margin: 0; font-size: 13px; color: var(--apagado); }
 .inicio-versao { margin: 8px 0 0; font: 600 12px var(--titulo); letter-spacing: 0.1em; color: var(--apagado); opacity: 0.7; }
+
+/* ===== Controle e mouse (v0.6.2) ===== */
+/* Dicas: teclado por padrão; com o controle em uso, o corpo ganha a classe usando-controle. */
+.botao-controle, .botao-controle-nota { display: none !important; }
+body.usando-controle .tecla { display: none !important; }
+body.usando-controle .botao-controle { display: inline-block !important; }
+body.usando-controle .botao-controle-nota { display: block !important; }
+kbd.botao-controle { border-radius: 999px; border-color: rgba(242, 140, 40, 0.6); color: #ffd0a0; }
+
+/* Botões do catálogo no painel de produção. */
+.catalogo-botoes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.catalogo-botoes button, #acoes button, .menu-lista button {
+  pointer-events: auto;
+  border: 1px solid var(--petroleo-borda);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--texto);
+  cursor: pointer;
+}
+.catalogo-botoes button { padding: 3px 8px; border-radius: 6px; font: 600 12px var(--titulo); display: inline-flex; align-items: center; gap: 4px; }
+.catalogo-botoes button:hover, #acoes button:hover, .menu-lista button:hover { border-color: var(--laranja); background: rgba(242, 140, 40, 0.14); }
+button:focus-visible { outline: 2px solid var(--laranja); outline-offset: 2px; }
+
+/* Barra de ações no rodapé. */
+#acoes {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: calc(100vw - 40px);
+  padding: 6px;
+  border: 1px solid var(--petroleo-borda);
+  border-radius: 12px;
+  background: var(--petroleo-escuro);
+  backdrop-filter: blur(4px);
+}
+#acoes button { display: grid; justify-items: center; gap: 2px; min-width: 70px; padding: 5px 7px; border-radius: 8px; font: 700 13px var(--titulo); }
+#acoes button span { display: flex; gap: 2px; }
+
+/* Ofertas clicáveis. */
+#ofertas li:not(.vazio) { pointer-events: auto; cursor: pointer; }
+#ofertas li:not(.vazio):hover { background: rgba(242, 140, 40, 0.14); }
+
+/* Menu de comandos. */
+#menu-comandos { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; padding: 20px; background: rgba(6, 18, 22, 0.7); }
+#menu-comandos[hidden] { display: none; }
+.menu-caixa { width: min(420px, 100%); padding: 18px; border: 1px solid var(--petroleo-borda); border-top: 4px solid var(--laranja); border-radius: 12px; background: #0f2a31; }
+.menu-caixa h2 { margin: 0; font: 800 20px var(--titulo); letter-spacing: 0.06em; text-transform: uppercase; }
+.menu-dica { margin: 4px 0 12px; font-size: 13px; color: var(--apagado); }
+.menu-lista { display: grid; gap: 6px; }
+.menu-lista button { padding: 10px 12px; border-radius: 8px; font: 600 15px var(--titulo); text-align: left; }
+.menu-lista button.selecionado { border-color: var(--laranja); background: rgba(242, 140, 40, 0.2); }
+
+@media (max-width: 1100px) { #acoes { max-width: calc(100vw - 40px); bottom: 70px; } #acoes button { min-width: 64px; font-size: 12px; } }

@@ -69,6 +69,7 @@ import {
 } from './energia.js';
 import { criarCenario } from './cenario.js';
 import { DURACAO_DIA, criarAmbiente, escuridao } from './visual/ambiente.js';
+import { lerControle, primeiroControle } from './entrada.js';
 import { criarMusica } from './audio/musica.js';
 import { criarCameraJogo } from './visual/camera.js';
 import { criarRotulos } from './visual/rotulos.js';
@@ -175,6 +176,7 @@ let timerMensagem = null;
 // Aviso de algo que não deu certo: mensagem com som de erro.
 function falha(texto) {
   musica.tocar('erro');
+  vibrar(0.3, 0, 80);
   mensagem(texto);
 }
 
@@ -252,7 +254,10 @@ function fabricar(maquina, produto) {
   const { defeito, quebrou } = registrarProducao(maquina);
   cena.add(criarCaixa(maquina, produto, defeito));
   caixas += 1;
-  if (quebrou) musica.tocar('quebra');
+  if (quebrou) {
+    musica.tocar('quebra');
+    vibrar(1, 0.6, 400);
+  }
   if (quebrou) mensagem(`Uma máquina quebrou! Chegue perto e aperte K para consertar (R$ ${custoManutencao(maquina)}).`);
   atualizarPlacar();
   return true;
@@ -521,6 +526,7 @@ function registrarVenda(valor, texto) {
   receber(valor);
   rotulos.flutuar({ x: EXPEDICAO.x, y: 2.2, z: EXPEDICAO.z }, `+${reais(valor)}`);
   musica.tocar('venda');
+  vibrar(0.2, 0.6, 180);
   atualizarPlacar();
   mensagem(
     !jaVencida && venceu()
@@ -583,6 +589,8 @@ function mostrarContratos() {
     ...quadro.ofertas.map((o, i) => {
       const li = document.createElement('li');
       li.innerHTML = `<kbd>${i + 1}</kbd> <b></b><span></span><small></small>`;
+      li.dataset.comando = `Digit${i + 1}`;
+      li.title = 'Clique para aceitar';
       li.querySelector('b').textContent = nomeCliente(o.cliente);
       li.querySelector('span').textContent = `${o.quantidade}× ${nomeProduto(o.chave)} · R$ ${o.pagamento}`;
       li.querySelector('small').textContent = `Prazo ${tempo(o.prazo)} · oferta some em ${tempo(o.validade)}`;
@@ -705,7 +713,63 @@ function comecar() {
 elBotaoJogar.addEventListener('click', comecar);
 elBotaoJogar.focus();
 
+// ===== Entrada: teclado, mouse e controle (v0.6.2) =====
+// Todas as formas de jogar passam por executarComando, com o mesmo código de tecla.
+
+const elMenu = document.getElementById('menu-comandos');
+const botoesMenu = [...elMenu.querySelectorAll('button')];
+let selecaoMenu = 0;
+
+function abrirMenu() {
+  document.getElementById('menu-som').textContent = musica.ligado ? 'Desligar o som' : 'Ligar o som';
+  document.getElementById('menu-novo').textContent = 'Novo jogo (apaga o progresso)';
+  elMenu.hidden = false;
+  teclas.clear();
+  selecionarMenu(0);
+}
+function fecharMenu() {
+  elMenu.hidden = true;
+  renderer.domElement.focus?.();
+}
+function selecionarMenu(i) {
+  selecaoMenu = (i + botoesMenu.length) % botoesMenu.length;
+  botoesMenu.forEach((b, k) => b.classList.toggle('selecionado', k === selecaoMenu));
+  if (!usandoControle) botoesMenu[selecaoMenu].focus();
+}
+
+const comandosEspeciais = {
+  Menu: () => (elMenu.hidden ? abrirMenu() : fecharMenu()),
+  Fechar: fecharMenu,
+  NovoJogo: () => {
+    document.getElementById('menu-novo').textContent = 'Confirme: apagar tudo e recomeçar';
+    novoJogo();
+  },
+};
+
+function executarComando(codigo) {
+  if (!elInicio.hidden) return;
+  musica.desbloquear();
+  const especial = comandosEspeciais[codigo];
+  if (especial) {
+    especial();
+    return;
+  }
+  // Comandos do menu fecham o menu antes de agir (exceto alternar controles e som, que ficam visíveis).
+  if (!elMenu.hidden && !['KeyH', 'KeyO'].includes(codigo)) fecharMenu();
+  teclasDeAcao[codigo]?.();
+  if (!elMenu.hidden && codigo === 'KeyO') document.getElementById('menu-som').textContent = musica.ligado ? 'Desligar o som' : 'Ligar o som';
+}
+
+// Dicas na tela: mostra teclas ou botões do controle conforme o que foi usado por último.
+let usandoControle = false;
+function modoControle(ativo) {
+  if (ativo === usandoControle) return;
+  usandoControle = ativo;
+  document.body.classList.toggle('usando-controle', ativo);
+}
+
 window.addEventListener('keydown', (e) => {
+  modoControle(false);
   if (!elInicio.hidden) {
     if (e.code === 'Enter' || e.code === 'Space') {
       e.preventDefault();
@@ -713,13 +777,78 @@ window.addEventListener('keydown', (e) => {
     }
     return;
   }
+  if (!elMenu.hidden) {
+    if (e.code === 'Escape') fecharMenu();
+    else if (e.code === 'ArrowDown' || e.code === 'KeyS') selecionarMenu(selecaoMenu + 1);
+    else if (e.code === 'ArrowUp' || e.code === 'KeyW') selecionarMenu(selecaoMenu - 1);
+    else return; // Enter e espaço ativam o botão focado normalmente.
+    e.preventDefault();
+    return;
+  }
   musica.desbloquear();
+  if (e.code === 'Escape') {
+    abrirMenu();
+    return;
+  }
   teclas.add(e.code);
   if (e.repeat) return;
   teclasDeAcao[e.code]?.();
 });
 window.addEventListener('keyup', (e) => teclas.delete(e.code));
 window.addEventListener('blur', () => teclas.clear());
+
+// Mouse: qualquer botão com data-comando (barra de ações, catálogo, menu) e as ofertas de contrato.
+// As ofertas são redesenhadas várias vezes por segundo, então reagem ao apertar do botão
+// (um clique completo poderia cair entre dois redesenhos e se perder).
+document.addEventListener('pointerdown', (e) => {
+  const oferta = e.target.closest('#ofertas li[data-comando]');
+  if (!oferta) return;
+  e.preventDefault();
+  modoControle(false);
+  executarComando(oferta.dataset.comando);
+});
+document.addEventListener('click', (e) => {
+  const alvo = e.target.closest('[data-comando]');
+  if (!alvo || alvo.closest('#ofertas')) return;
+  modoControle(false);
+  executarComando(alvo.dataset.comando);
+  alvo.blur(); // devolve as teclas ao jogo (espaço e Enter não repetem o botão)
+});
+window.addEventListener('mousemove', () => modoControle(false), { passive: true });
+
+// Controle: lido a cada quadro. Devolve o analógico esquerdo para o movimento.
+let botoesAnteriores = new Set();
+function lerEntradaControle(dt) {
+  const leitura = lerControle(primeiroControle(navigator.getGamepads?.() ?? []), botoesAnteriores);
+  botoesAnteriores = leitura.apertados;
+  if (!leitura.ativo) return { x: 0, y: 0 };
+  modoControle(true);
+  if (!elInicio.hidden) {
+    if (leitura.novos.includes(0) || leitura.novos.includes(9)) comecar();
+    return { x: 0, y: 0 };
+  }
+  if (!elMenu.hidden) {
+    // No menu: direcional escolhe, A confirma, B ou Menu fecham.
+    for (const i of leitura.novos) {
+      if (i === 13) selecionarMenu(selecaoMenu + 1);
+      else if (i === 12) selecionarMenu(selecaoMenu - 1);
+      else if (i === 0) executarComando(botoesMenu[selecaoMenu].dataset.comando);
+      else if (i === 1 || i === 9) fecharMenu();
+    }
+    return { x: 0, y: 0 };
+  }
+  for (const codigo of leitura.acoes) executarComando(codigo);
+  if (leitura.camera.x) cameraJogo.girarContinuo(-leitura.camera.x * dt * 2.4);
+  if (leitura.camera.y) cameraJogo.zoom(1 + leitura.camera.y * dt * 1.6);
+  return leitura.mover;
+}
+
+// Vibração do controle em momentos marcantes (venda, quebra, erro), quando o controle suporta.
+function vibrar(forte, fraco, duracao) {
+  const g = primeiroControle(navigator.getGamepads?.() ?? []);
+  if (!usandoControle || !g?.vibrationActuator) return;
+  g.vibrationActuator.playEffect?.('dual-rumble', { duration: duracao, strongMagnitude: forte, weakMagnitude: fraco })?.catch?.(() => {});
+}
 
 function ajustarTamanho() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -905,7 +1034,8 @@ if (restaurarJogo()) {
 renderer.setAnimationLoop(() => {
   relogio.update();
   const dt = Math.min(relogio.getDelta(), 0.05);
-  atualizarJogador(jogador, teclas, dt, cameraJogo.giro);
+  const analogico = lerEntradaControle(dt);
+  atualizarJogador(jogador, teclas, dt, cameraJogo.giro, analogico);
   for (const f of funcionarios) atualizarFuncionario(f, dt, maquinas, acoesFuncionario);
   atualizarAutomacao(maquinas, dt, acoesLinha);
   avancarContratos(dt);

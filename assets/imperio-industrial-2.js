@@ -68,7 +68,7 @@ function criarVitrineImperio2(jogo, iniciar, completo = false) {
     conhecer.href = 'jogo.html?id=' + encodeURIComponent(jogo.id);
     acoes.append(conhecer);
   }
-  texto.append(fatos, acoes, el('p', 'imp2-dispositivos', 'Computador com teclado e mouse · Progresso salvo no navegador · Versão ' + jogo.versao));
+  texto.append(fatos, acoes, el('p', 'imp2-dispositivos', 'Teclado e mouse ou controle de Xbox · Progresso salvo no navegador · Versão ' + jogo.versao));
   const capa = el('figure', 'imp2-hero-foto');
   capa.append(fotoImperio2(jogo, 0, 'imp2-ampliar', true), el('figcaption', null, 'O DISTRITO INDUSTRIAL · CENA REAL DO JOGO'));
   hero.append(texto, capa);

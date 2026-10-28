@@ -1,5 +1,6 @@
 // Câmera que acompanha o jogador, gira em volta dele e dá zoom.
 // Arrastar com o mouse gira, a roda aproxima e afasta. Teclas: Q e Z giram 45°, + e - fazem zoom.
+// No controle, o analógico direito gira (esquerda e direita) e aproxima ou afasta (cima e baixo).
 const ZOOM_MIN = 10;
 const ZOOM_MAX = 42;
 const INCLINACAO_MIN = 0.45;
@@ -42,6 +43,10 @@ export function criarCameraJogo(camera, elemento, alvoInicial) {
   return {
     girar(sentido) {
       estado.giroAlvo += sentido * (Math.PI / 4);
+    },
+    // Giro contínuo, usado pelo analógico direito do controle (radianos).
+    girarContinuo(angulo) {
+      estado.giroAlvo += angulo;
     },
     zoom,
     // Ângulo usado para converter WASD em direções relativas à câmera.

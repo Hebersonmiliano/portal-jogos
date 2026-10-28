@@ -15,13 +15,20 @@ export function criarJogador(x, z) {
 }
 
 // giro: ângulo da câmera em volta do jogador. W anda para longe da câmera, D para a direita da tela.
-export function atualizarJogador(jogador, teclas, dt, giro = 0) {
+// analogico: analógico do controle ({x, y} de -1 a 1); inclinar pouco anda devagar.
+export function atualizarJogador(jogador, teclas, dt, giro = 0, analogico = { x: 0, y: 0 }) {
   let ex = 0;
   let ez = 0;
   if (teclas.has('KeyA') || teclas.has('ArrowLeft')) ex -= 1;
   if (teclas.has('KeyD') || teclas.has('ArrowRight')) ex += 1;
   if (teclas.has('KeyW') || teclas.has('ArrowUp')) ez -= 1;
   if (teclas.has('KeyS') || teclas.has('ArrowDown')) ez += 1;
+  let intensidade = 1;
+  if (ex === 0 && ez === 0 && (analogico.x || analogico.y)) {
+    ex = analogico.x;
+    ez = analogico.y;
+    intensidade = Math.min(1, Math.hypot(ex, ez));
+  }
   if (ex === 0 && ez === 0) {
     animarPessoa(jogador, dt, false);
     return;
@@ -39,7 +46,7 @@ export function atualizarJogador(jogador, teclas, dt, giro = 0) {
 
   // Normaliza a diagonal para não andar mais rápido.
   const tamanho = Math.hypot(dx, dz);
-  const passo = (VELOCIDADE * dt) / tamanho;
+  const passo = (VELOCIDADE * intensidade * dt) / tamanho;
   dx *= passo;
   dz *= passo;
 

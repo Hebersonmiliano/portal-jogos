@@ -37,8 +37,13 @@
 
   <section id="producao" aria-label="Produção">
     <div class="linha-info">
-      <small>Próxima caixa <kbd>T</kbd><kbd>C</kbd><kbd>M</kbd></small>
+      <small>Próxima caixa</small>
       <strong><i id="cor-produto" class="amostra"></i><span id="produto"></span></strong>
+      <span class="catalogo-botoes">
+        <button type="button" data-comando="KeyT">Tamanho <kbd class="tecla">T</kbd><kbd class="botao-controle">↑</kbd></button>
+        <button type="button" data-comando="KeyC">Cor <kbd class="tecla">C</kbd><kbd class="botao-controle">←</kbd></button>
+        <button type="button" data-comando="KeyM">Material <kbd class="tecla">M</kbd><kbd class="botao-controle">→</kbd></button>
+      </span>
     </div>
     <div class="linha-info">
       <small>Linha</small>
@@ -62,35 +67,70 @@
 
   <aside id="painel-contratos" aria-label="Contratos">
     <div class="cabecalho"><h2>Contratos</h2><span>Reputação <strong id="reputacao">20</strong></span></div>
-    <h3>Ofertas <small>teclas 1, 2, 3 aceitam</small></h3>
+    <h3>Ofertas <small class="tecla">clique ou 1, 2, 3 aceitam</small><small class="botao-controle">↓ aceita a primeira · Menu para as outras</small></h3>
     <ol id="ofertas"></ol>
-    <h3>Em andamento <small>entregue na expedição com V</small></h3>
+    <h3>Em andamento <small class="tecla">entregue na expedição com V</small><small class="botao-controle">entregue na expedição com X</small></h3>
     <ul id="ativos"></ul>
     <p id="historico-contratos" class="historico"></p>
   </aside>
 
   <aside id="ajuda" aria-label="Controles">
-    <h2>Controles <span><kbd>H</kbd> mostrar</span></h2>
-    <dl>
-      <dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Andar</dd>
-      <dt><kbd>B</kbd></dt><dd>Máquina na célula marcada · R$ 60</dd>
-      <dt><kbd>E</kbd></dt><dd>Produzir caixa · R$ 2</dd>
-      <dt><kbd>R</kbd></dt><dd>Levar saída ao estoque</dd>
-      <dt><kbd>V</kbd></dt><dd>Entregar contratos ou vender na expedição</dd>
-      <dt><kbd>T</kbd><kbd>C</kbd><kbd>M</kbd></dt><dd>Tamanho, cor e material</dd>
-      <dt><kbd>F</kbd></dt><dd>Contratar funcionário · R$ 80</dd>
-      <dt><kbd>L</kbd></dt><dd>Esteira até o estoque · R$ 40</dd>
-      <dt><kbd>U</kbd></dt><dd>Automatizar ou reprogramar · R$ 100</dd>
-      <dt><kbd>K</kbd></dt><dd>Manutenção (até R$ 30) ou conserto (R$ 60)</dd>
-      <dt><kbd>I</kbd></dt><dd>Inspecionar estoque ou instalar inspetor · R$ 80</dd>
-      <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></dt><dd>Aceitar contrato</dd>
-      <dt><kbd>Q</kbd><kbd>Z</kbd></dt><dd>Girar câmera (ou arraste o mouse)</dd>
-      <dt><kbd>+</kbd><kbd>−</kbd></dt><dd>Zoom (ou roda do mouse)</dd>
-      <dt><kbd>O</kbd></dt><dd>Ligar ou desligar o som</dd>
-      <dt><kbd>N</kbd><kbd>N</kbd></dt><dd>Novo jogo</dd>
-    </dl>
-    <p>O jogo salva sozinho a cada 5 segundos.</p>
+    <h2>Controles <span><kbd class="tecla">H</kbd><kbd class="botao-controle">View</kbd> mostrar</span></h2>
+    <table>
+      <thead><tr><th>Ação</th><th>Teclado e mouse</th><th>Controle</th></tr></thead>
+      <tbody>
+        <tr><td>Andar</td><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></td><td>Analógico esquerdo</td></tr>
+        <tr><td>Colocar máquina · R$ 60</td><td><kbd>B</kbd></td><td><b>Y</b></td></tr>
+        <tr><td>Produzir caixa · R$ 2</td><td><kbd>E</kbd></td><td><b>A</b></td></tr>
+        <tr><td>Levar saída ao estoque</td><td><kbd>R</kbd></td><td><b>B</b></td></tr>
+        <tr><td>Entregar ou vender na expedição</td><td><kbd>V</kbd></td><td><b>X</b></td></tr>
+        <tr><td>Tamanho, cor e material</td><td><kbd>T</kbd><kbd>C</kbd><kbd>M</kbd></td><td><b>↑</b><b>←</b><b>→</b></td></tr>
+        <tr><td>Aceitar contrato</td><td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> ou clique</td><td><b>↓</b> (primeira oferta)</td></tr>
+        <tr><td>Esteira · R$ 40</td><td><kbd>L</kbd></td><td><b>RT</b></td></tr>
+        <tr><td>Automatizar ou reprogramar · R$ 100</td><td><kbd>U</kbd></td><td><b>LT</b></td></tr>
+        <tr><td>Manutenção ou conserto</td><td><kbd>K</kbd></td><td><b>LB</b></td></tr>
+        <tr><td>Inspecionar ou instalar inspetor</td><td><kbd>I</kbd></td><td><b>RB</b></td></tr>
+        <tr><td>Contratar funcionário · R$ 80</td><td><kbd>F</kbd></td><td>Menu</td></tr>
+        <tr><td>Girar câmera</td><td><kbd>Q</kbd><kbd>Z</kbd> ou arraste</td><td>Analógico direito ↔</td></tr>
+        <tr><td>Zoom</td><td><kbd>+</kbd><kbd>−</kbd> ou roda</td><td>Analógico direito ↕</td></tr>
+        <tr><td>Menu de comandos</td><td><kbd>Esc</kbd> ou botão Mais</td><td><b>Menu</b></td></tr>
+        <tr><td>Mostrar controles</td><td><kbd>H</kbd></td><td><b>View</b></td></tr>
+        <tr><td>Som</td><td><kbd>O</kbd></td><td>Menu</td></tr>
+        <tr><td>Novo jogo</td><td><kbd>N</kbd><kbd>N</kbd></td><td>Menu</td></tr>
+      </tbody>
+    </table>
+    <p>O jogo salva sozinho a cada 5 segundos. Controles de Xbox, PlayStation e similares funcionam assim que um botão é apertado.</p>
   </aside>
+
+  <nav id="acoes" aria-label="Ações">
+    <button type="button" data-comando="KeyB">Máquina<span><kbd class="tecla">B</kbd><kbd class="botao-controle">Y</kbd></span></button>
+    <button type="button" data-comando="KeyE">Produzir<span><kbd class="tecla">E</kbd><kbd class="botao-controle">A</kbd></span></button>
+    <button type="button" data-comando="KeyR">Recolher<span><kbd class="tecla">R</kbd><kbd class="botao-controle">B</kbd></span></button>
+    <button type="button" data-comando="KeyV">Entregar<span><kbd class="tecla">V</kbd><kbd class="botao-controle">X</kbd></span></button>
+    <button type="button" data-comando="KeyL">Esteira<span><kbd class="tecla">L</kbd><kbd class="botao-controle">RT</kbd></span></button>
+    <button type="button" data-comando="KeyU">Automatizar<span><kbd class="tecla">U</kbd><kbd class="botao-controle">LT</kbd></span></button>
+    <button type="button" data-comando="KeyK">Manutenção<span><kbd class="tecla">K</kbd><kbd class="botao-controle">LB</kbd></span></button>
+    <button type="button" data-comando="KeyI">Inspecionar<span><kbd class="tecla">I</kbd><kbd class="botao-controle">RB</kbd></span></button>
+    <button type="button" data-comando="KeyF">Funcionário<span><kbd class="tecla">F</kbd><kbd class="botao-controle">Menu</kbd></span></button>
+    <button type="button" data-comando="Menu">Mais<span><kbd class="tecla">Esc</kbd><kbd class="botao-controle">Menu</kbd></span></button>
+  </nav>
+
+  <div id="menu-comandos" role="dialog" aria-modal="true" aria-labelledby="menu-titulo" hidden>
+    <div class="menu-caixa">
+      <h2 id="menu-titulo">Comandos</h2>
+      <p class="menu-dica"><span class="tecla">Clique, ou use as setas e Enter. Esc fecha.</span><span class="botao-controle">↑ ↓ escolhe · A confirma · B fecha</span></p>
+      <div class="menu-lista">
+        <button type="button" data-comando="KeyF">Contratar funcionário · R$ 80</button>
+        <button type="button" data-comando="Digit1">Aceitar oferta 1</button>
+        <button type="button" data-comando="Digit2">Aceitar oferta 2</button>
+        <button type="button" data-comando="Digit3">Aceitar oferta 3</button>
+        <button type="button" data-comando="KeyO" id="menu-som">Desligar o som</button>
+        <button type="button" data-comando="KeyH">Mostrar ou esconder os controles</button>
+        <button type="button" data-comando="NovoJogo" id="menu-novo">Novo jogo (apaga o progresso)</button>
+        <button type="button" data-comando="Fechar">Voltar ao jogo</button>
+      </div>
+    </div>
+  </div>
 
   <section id="inicio" aria-label="Tela inicial">
     <div class="inicio-caixa">
@@ -99,9 +139,10 @@
       <p class="inicio-sub">Distrito Industrial</p>
       <p class="inicio-texto">Uma oficina alugada, R$ 100 e um bairro inteiro de clientes. Monte caixas, automatize a linha, cumpra contratos e cuide de cada máquina.</p>
       <button id="botao-jogar" type="button">Jogar</button>
+      <p class="inicio-nota botao-controle-nota">No controle, aperte <b>A</b> ou <b>Menu</b> para começar.</p>
       <p id="inicio-save" class="inicio-nota">O progresso fica salvo neste navegador.</p>
-      <p class="inicio-nota">Teclado e mouse · <kbd>H</kbd> mostra os controles · <kbd>O</kbd> liga e desliga o som</p>
-      <p class="inicio-versao">v0.6.1</p>
+      <p class="inicio-nota">Teclado e mouse ou controle de Xbox · <kbd>H</kbd> mostra os controles · <kbd>O</kbd> liga e desliga o som</p>
+      <p class="inicio-versao">v0.6.2</p>
     </div>
   </section>
 
