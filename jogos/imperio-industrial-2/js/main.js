@@ -50,13 +50,13 @@ import {
   aceitar,
   atualizarContratos,
   chavesReservadas,
-  entregar,
   exportarQuadro,
   importarQuadro,
   nivel,
   nomeCliente,
   novoQuadro,
 } from './contratos.js';
+import { ROTAS, atualizarEntregas, despachar, exportarFrota, importarFrota, novaFrota } from './entregas.js';
 import { criarFuncionario, atualizarFuncionario, ESTOQUE_PONTO } from './funcionarios.js';
 import {
   CUSTO_INSPETOR,
@@ -122,6 +122,9 @@ const elAjuda = document.getElementById('ajuda');
 const elEnergia = document.getElementById('energia');
 const elQualidade = document.getElementById('qualidade');
 const elBotaoSom = document.getElementById('botao-som');
+const elFrota = document.getElementById('frota');
+const elMapaRota = document.getElementById('mapa-rota');
+const elVeiculoMapa = document.getElementById('veiculo-mapa');
 
 // Trilha sonora e efeitos (v0.6.1). O áudio só começa depois do primeiro clique ou tecla.
 const musica = criarMusica();
@@ -144,11 +147,11 @@ const cursor = criarCursor(cena);
 criarOficina(cena);
 registrarObstaculo(-2.5, 2.5, -1.5, 1.5);
 
-// Expedição: doca onde contratos são entregues e o estoque livre é vendido (tecla V, perto do ponto).
+// Expedição: doca onde contratos são carregados na van e o estoque livre é vendido (tecla V, perto do ponto).
 const EXPEDICAO = { x: -8, z: 4 };
 criarExpedicao(cena, EXPEDICAO.x, EXPEDICAO.z);
 registrarObstaculo(EXPEDICAO.x - 1, EXPEDICAO.x + 1, EXPEDICAO.z - 1, EXPEDICAO.z + 1);
-criarVan(cena, EXPEDICAO.x, 9.4);
+const van = criarVan(cena, EXPEDICAO.x, 9.4);
 registrarObstaculo(EXPEDICAO.x - 0.9, EXPEDICAO.x + 0.9, 7.85, 12.2);
 
 // Prateleira do estoque: onde os funcionários e as esteiras deixam as caixas.
@@ -161,6 +164,7 @@ const cacamba = criarCacamba(cena, CACAMBA.x, CACAMBA.z);
 registrarObstaculo(CACAMBA.x - 0.45, CACAMBA.x + 0.45, CACAMBA.z - 0.45, CACAMBA.z + 0.45);
 let refugo = 0;
 let energia = novaEnergia();
+let frota = novaFrota();
 
 const rotulos = criarRotulos(document.getElementById('rotulos'), camera);
 rotulos.adicionar({ x: ESTOQUE_PONTO.x, y: 2.8, z: ESTOQUE_PONTO.z }, { texto: () => `ESTOQUE · ${totalNoEstoque()}`, classe: 'estacao' });
@@ -216,6 +220,7 @@ function atualizarPlacar() {
     ? `${defeitos} caixa(s) com defeito no estoque · I no estoque inspeciona`
     : `Estoque sem defeitos · refugo: ${refugo}`;
   elQualidade.className = defeitos ? 'alerta' : '';
+  atualizarPainelFrota();
   prateleira.atualizar(
     exportarEstoque().map(([chave, quantidade]) => ({ cor: produtoPorChave(chave)?.cor ?? 0xc89b5a, quantidade })),
   );
@@ -543,40 +548,64 @@ function registrarVenda(valor, texto) {
   );
 }
 
-// Na expedição: entrega os contratos que o estoque cobre. Sem contrato pronto, vende o estoque
-// que nenhum contrato pediu (as caixas reservadas ficam guardadas).
+// Na expedição: carrega na van o contrato pronto. O pagamento acontece na chegada.
 function venderNaExpedicao() {
   const p = jogador.position;
   if (Math.hypot(p.x - EXPEDICAO.x, p.z - EXPEDICAO.z) > 2.2) {
-    mensagem('Leve o estoque à expedição (laranja) para vender.');
+    mensagem('Leve o estoque à expedição (laranja) para carregar a van.');
     return;
   }
-  const entregues = entregar(quadro, { quantidade: quantidadeDe, retirar });
-  if (entregues.length > 0) {
-    const total = entregues.reduce((t, c) => t + c.recebido, 0);
-    const devolvidas = entregues.reduce((t, c) => t + c.devolvidas, 0);
-    const nomes = entregues.map((c) => nomeCliente(c.cliente)).join(', ');
-    registrarVenda(
-      total,
-      devolvidas
-        ? `Contrato entregue (${nomes}), mas ${devolvidas} caixa(s) com defeito voltaram: R$ ${total}. Reputação ${quadro.reputacao}.`
-        : `Contrato entregue (${nomes}): R$ ${total}. Reputação ${quadro.reputacao}.`,
-    );
-    mostrarContratos();
+  const prontos = quadro.ativos.some((c) => quantidadeDe(c.chave) >= c.quantidade);
+  if (prontos) {
+    const { viagem, erro } = despachar(quadro, { quantidade: quantidadeDe, retirar }, frota);
+    if (erro) { falha(erro); return; }
+    const rota = ROTAS[viagem.rota];
+    musica.tocar('contrato');
+    mensagem('Van despachada para ' + rota.nome + ' · ' + rota.distancia + ' km · trânsito ' + viagem.transito + '.');
+    atualizarPlacar(); mostrarContratos();
     return;
   }
   const valor = venderTudo(chavesReservadas(quadro));
   if (valor === 0) {
-    mensagem(
-      totalNoEstoque() > 0
-        ? 'O estoque está reservado para contratos que ainda não fecharam a quantidade.'
-        : 'Nada no estoque para vender.',
-    );
+    mensagem(totalNoEstoque() > 0 ? 'O estoque está reservado para contratos ainda incompletos.' : 'Nada no estoque para vender.');
     return;
   }
-  registrarVenda(valor, `Venda avulsa: R$ ${valor}.`);
+  registrarVenda(valor, 'Venda avulsa: R$ ' + valor + '.');
 }
 
+function atualizarPainelFrota() {
+  if (!elFrota) return;
+  const viagem = frota.viagens[0];
+  if (!viagem) {
+    elFrota.textContent = 'Van na doca · pronta para carregar';
+    elMapaRota?.classList.remove('ativa');
+    van.visible = true; van.position.set(EXPEDICAO.x, 0, 9.4);
+    return;
+  }
+  const rota = ROTAS[viagem.rota];
+  const acao = viagem.fase === 'ida' ? 'indo para' : 'voltando de';
+  elFrota.textContent = 'Van ' + acao + ' ' + rota.nome + ' · trânsito ' + viagem.transito + ' · ' + tempo(viagem.restante);
+  elMapaRota?.classList.add('ativa');
+  if (elVeiculoMapa) elVeiculoMapa.style.left = (8 + viagem.progresso * 82) + '%';
+  van.visible = viagem.progresso < 0.35;
+  van.position.z = 9.4 + viagem.progresso * 18;
+}
+
+function avancarEntregas(dt) {
+  const eventos = atualizarEntregas(frota, quadro, dt);
+  for (const c of eventos.chegadas) {
+    registrarVenda(c.recebido, c.devolvidas
+      ? 'Entrega chegou, mas ' + c.devolvidas + ' caixa(s) voltaram: R$ ' + c.recebido + '. Reputação ' + quadro.reputacao + '.'
+      : 'Entrega chegou a ' + ROTAS[c.rota].nome + ': R$ ' + c.recebido + '. Reputação ' + quadro.reputacao + '.');
+  }
+  for (const { contrato, multa } of eventos.vencidos) {
+    const cobrado = cobrarMulta(multa);
+    mensagem('A van atrasou a entrega de ' + nomeCliente(contrato.cliente) + ': multa de R$ ' + cobrado + '.');
+  }
+  if (eventos.retornos.length) mensagem('A van voltou à doca e está pronta para outra entrega.');
+  if (eventos.chegadas.length || eventos.vencidos.length || eventos.retornos.length) { mostrarContratos(); atualizarPlacar(); }
+  atualizarPainelFrota();
+}
 // ===== Contratos =====
 
 let quadro = novoQuadro();
@@ -615,7 +644,7 @@ function mostrarContratos() {
       li.querySelector('b').textContent = nomeCliente(c.cliente);
       li.querySelector('span').textContent = `${tem}/${c.quantidade} ${nomeProduto(c.chave)} · R$ ${c.pagamento}`;
       li.querySelector('small').textContent =
-        tem >= c.quantidade ? `Pronto: entregue na expedição (V) · ${tempo(c.restante)}` : `Faltam ${tempo(c.restante)}`;
+        tem >= c.quantidade ? `Pronto: carregue na van (V) · ${tempo(c.restante)}` : `Faltam ${tempo(c.restante)}`;
       return li;
     }),
   );
@@ -995,6 +1024,7 @@ function montarSaveAtual() {
     estoque: exportarEstoque(),
     escolha: exportarEscolha(),
     contratos: exportarQuadro(quadro),
+    frota: exportarFrota(frota),
     energia: exportarEnergia(energia),
     refugo,
     caixas,
@@ -1051,6 +1081,7 @@ function restaurarJogo() {
   importarEstoque(save.estoque, produtoPorChave);
   importarEscolha(save.escolha);
   quadro = importarQuadro(save.contratos, produtoPorChave);
+  frota = importarFrota(save.frota);
   caixas = save.caixas;
   ambiente.importar(save.relogio);
   energia = importarEnergia(save.energia);
@@ -1132,6 +1163,7 @@ renderer.setAnimationLoop(() => {
   for (const f of funcionarios) atualizarFuncionario(f, dt, maquinas, acoesFuncionario);
   atualizarAutomacao(maquinas, dt, acoesLinha);
   avancarContratos(dt);
+  avancarEntregas(dt);
   avancarEnergia(dt);
   atualizarLuzes();
   animarCena(dt);
@@ -1140,3 +1172,4 @@ renderer.setAnimationLoop(() => {
 
 atualizarPlacar();
 mostrarContratos();
+
