@@ -102,6 +102,33 @@ import {
   venceu,
 } from './economia.js';
 
+// v0.8 incorporada no portal para manter a publicação em um único módulo.
+const MELHORIAS_PROPRIEDADE = [
+  { id: 'terreno', nome: 'Terreno vizinho', custo: 350 },
+  { id: 'escritorio', nome: 'Escritório administrativo', custo: 180 },
+  { id: 'fachada', nome: 'Fachada corporativa', custo: 120 },
+];
+const novaConstrucao = () => ({ nivel: 0 });
+const proximaMelhoria = (e) => MELHORIAS_PROPRIEDADE[e.nivel] ?? null;
+const temTerreno = (e) => e.nivel >= 1;
+const exportarConstrucao = (e) => ({ nivel: e.nivel });
+const importarConstrucao = (d) => ({ nivel: Math.max(0, Math.min(3, Math.floor(Number(d?.nivel) || 0))) });
+function melhorar(estado, pagarValor) {
+  const melhoria = proximaMelhoria(estado);
+  if (!melhoria) return { erro: 'Todas as melhorias já foram construídas.' };
+  if (!pagarValor(melhoria.custo)) return { erro: melhoria.nome + ' custa R$ ' + melhoria.custo + '.' };
+  estado.nivel += 1; return { melhoria };
+}
+function criarExpansao(cena) {
+  const material = (cor) => new THREE.MeshStandardMaterial({ color: cor, roughness: 0.8 });
+  const caixa = (g, w, h, d, cor, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), material(cor)); m.position.set(x,y+h/2,z); m.castShadow=true; m.receiveShadow=true; g.add(m); return m; };
+  const terreno = new THREE.Group(); terreno.position.x=16;
+  const piso = new THREE.Mesh(new THREE.PlaneGeometry(8,24), material('#9ca3a5')); piso.rotation.x=-Math.PI/2; piso.receiveShadow=true; terreno.add(piso); caixa(terreno,8,.12,.18,'#d8d1c5',0,0,11.9); cena.add(terreno);
+  const escritorio = new THREE.Group(); escritorio.position.set(16,0,-7.5); caixa(escritorio,5.5,.15,4.5,'#4b5559',0,0,0); caixa(escritorio,5.2,2.8,4.2,'#d8d1c5',0,.12,0); caixa(escritorio,5.4,.18,4.4,'#12343d',0,3,0); caixa(escritorio,1,2.1,.08,'#1f5966',-1.7,.12,2.12); caixa(escritorio,1.35,1.1,.05,'#79aeba',-.25,1,2.13); caixa(escritorio,1.35,1.1,.05,'#79aeba',1.5,1,2.13); cena.add(escritorio);
+  const fachada = new THREE.Group(); caixa(fachada,.22,3.8,.22,'#f28c28',-2.35,0,1.72); caixa(fachada,.22,3.8,.22,'#f28c28',2.35,0,1.72); caixa(fachada,4.8,.75,.12,'#f28c28',0,3.2,1.75); cena.add(fachada);
+  return { atualizar(nivel) { terreno.visible=nivel>=1; escritorio.visible=nivel>=2; fachada.visible=nivel>=3; } };
+}
+
 const palco = document.getElementById('palco');
 const elCaixas = document.getElementById('caixas');
 const elMaquinas = document.getElementById('maquinas');
