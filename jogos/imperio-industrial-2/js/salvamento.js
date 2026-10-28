@@ -4,7 +4,7 @@
 export const CHAVE_SAVE = 'imperio-industrial-2:save';
 export const CHAVE_BACKUP = 'imperio-industrial-2:save:backup'; // cópia de segurança (v0.6.3)
 const PREFIXO_CODIGO = 'II2-';
-export const VERSAO_SAVE = 3;
+export const VERSAO_SAVE = 4;
 
 // MIGRACOES[n] converte um save da versão n para n + 1.
 const MIGRACOES = {
@@ -24,13 +24,17 @@ const MIGRACOES = {
   2(save) {
     return { ...save, versao: 3, refugo: 0, energia: null };
   },
+  // v3 → v4 (veículos): começa com uma van livre na doca.
+  3(save) {
+    return { ...save, versao: 4, frota: null };
+  },
 };
 
 const numero = (v, padrao = 0) => (Number.isFinite(v) ? v : padrao);
 const dentro = (v, limite) => Math.max(-limite, Math.min(limite, numero(v)));
 
 // Monta o objeto salvo a partir das partes do jogo.
-export function montarSave({ economia, estoque, escolha, contratos, energia = null, refugo = 0, maquinas, funcionarios, jogador, caixas, relogio = 0 }) {
+export function montarSave({ economia, estoque, escolha, contratos, energia = null, frota = null, refugo = 0, maquinas, funcionarios, jogador, caixas, relogio = 0 }) {
   return {
     versao: VERSAO_SAVE,
     salvoEm: new Date().toISOString(),
@@ -39,6 +43,7 @@ export function montarSave({ economia, estoque, escolha, contratos, energia = nu
     escolha,
     contratos,
     energia,
+    frota,
     refugo,
     caixas,
     relogio,
@@ -108,6 +113,7 @@ export function lerSave(texto, { limite = 11.5, capacidade = 8, maxFuncionarios 
     escolha: dados.escolha ?? {},
     contratos: dados.contratos ?? null,
     energia: dados.energia ?? null,
+    frota: dados.frota ?? null,
     refugo: Math.max(0, Math.floor(numero(dados.refugo))),
     caixas: Math.max(0, Math.floor(numero(dados.caixas))),
     relogio: Math.max(0, numero(dados.relogio)), // segundos de jogo desde o início do dia 1
@@ -205,3 +211,4 @@ export function lerCodigo(codigo, opcoes) {
     return null;
   }
 }
+
