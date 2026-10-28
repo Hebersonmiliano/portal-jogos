@@ -15,7 +15,7 @@ window.SITE = {
   // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
   estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
-  carrossel: ["lenda-da-brasa", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
+  carrossel: ["lenda-da-brasa", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -163,6 +163,53 @@ window.JOGOS = [
     mobile: false,
     status: "disponivel",
     lancamento: "2026-10-21",
+    destaque: true,
+  },
+  {
+    id: "imperio-industrial-2",
+    chamada: "Uma oficina alugada, R$ 100 e um bairro inteiro de clientes. Do zero ao império, agora no Distrito Industrial.",
+    titulo: "Do Zero ao Império Industrial 2",
+    genero: ["Simulação", "Estratégia"],
+    tags: ["3D", "sequência", "fábrica", "contratos", "automação", "dia e noite", "trilha original", "salva sozinho"],
+    descricao: "A sequência de Do Zero ao Império Industrial leva a fábrica para fora do galpão: um terreno cercado num bairro industrial vivo, com rua, prédios vizinhos e clientes. Comece com R$ 100 numa oficina alugada, posicione máquinas na grade, escolha tamanho, cor e material de cada caixa e entregue contratos com prazo para seis tipos de clientes. Contrate funcionários, ligue esteiras e automatize a linha. Cuide do desgaste das máquinas, inspecione a qualidade e pague a conta de luz, que muda com a hora do dia. A câmera gira e dá zoom, o dia vira noite e a trilha original cresce junto com a sua fábrica.",
+    controles: "WASD/setas andam (relativo à câmera); B coloca máquina na célula marcada; E produz; R leva a saída ao estoque; V entrega contratos ou vende na expedição; T, C e M trocam tamanho, cor e material; F contrata funcionário; L liga esteira; U automatiza ou reprograma; K faz manutenção ou conserta; I inspeciona o estoque ou instala inspetor na esteira; 1, 2 e 3 aceitam contratos; Q e Z (ou arrastar o mouse) giram a câmera; + e − (ou a roda) dão zoom; H mostra os controles; O liga e desliga o som. O progresso salva sozinho neste navegador.",
+    url: "jogos/imperio-industrial-2/index.html",
+    versao: "0.6.1",
+    capa: "assets/imperio-industrial-2/capa.jpg",
+    vitrineImperio2: {
+      chamada: "Uma oficina alugada. Cem reais. Um distrito inteiro para conquistar.",
+      resumo: "A sequência sai do galpão para um bairro industrial vivo. Monte caixas, automatize a linha, cumpra contratos com prazo e mantenha cada máquina funcionando, de dia e de noite.",
+      fatos: ["R$ 100 para começar", "6 tipos de clientes", "18 caixas diferentes", "Dia e noite", "Trilha que cresce com a fábrica"],
+      cenas: [
+        { titulo: "O Distrito Industrial", imagem: "assets/imperio-industrial-2/visao-geral.jpg", texto: "Um terreno cercado num bairro de verdade: oficina alugada, doca de expedição, van de entregas, prédios vizinhos e a rua passando na frente." },
+        { titulo: "A linha automática", imagem: "assets/imperio-industrial-2/linha-automatica.jpg", texto: "Máquinas com braço robótico fabricam sozinhas e as esteiras levam cada caixa até o estoque, contornando a oficina." },
+        { titulo: "Quando a noite cai", imagem: "assets/imperio-industrial-2/noite.jpg", texto: "Um dia dura seis minutos. À noite acendem janelas, letreiros e postes, a energia fica mais barata e a música muda de clima." },
+        { titulo: "Contratos com prazo", imagem: "assets/imperio-industrial-2/jogando.jpg", texto: "Clientes pedem a caixa exata, a quantidade e o prazo. Entregue a tempo para ganhar reputação e liberar clientes maiores." },
+        { titulo: "Máquina quebrada", imagem: "assets/imperio-industrial-2/maquina-quebrada.jpg", texto: "Cada caixa desgasta a máquina. Gasta, ela faz mais defeitos e pode quebrar: luz laranja, fumaça e linha parada até o conserto." },
+        { titulo: "Estoque e refugo", imagem: "assets/imperio-industrial-2/estoque-e-refugo.jpg", texto: "A prateleira mostra o que está guardado. A inspeção manda as caixas com defeito para a caçamba antes que voltem como devolução." },
+        { titulo: "Fim de tarde", imagem: "assets/imperio-industrial-2/fim-de-tarde.jpg", texto: "A luz muda ao longo do dia. A câmera gira em volta do personagem e aproxima para ver cada detalhe da fábrica." },
+      ],
+      recursos: [
+        { titulo: "Contratos e reputação", texto: "Mercadinho, loja de presentes, confeitaria, transportadora, loja virtual e rede de varejo. Atrasos custam multa; caixas com defeito voltam." },
+        { titulo: "Catálogo de caixas", texto: "Três tamanhos, três cores e dois materiais. Reprograme as máquinas automáticas para o que cada cliente pede." },
+        { titulo: "Equipe e automação", texto: "Funcionários produzem e transportam sozinhos. Esteiras e máquinas automáticas fazem a linha rodar sem você." },
+        { titulo: "Qualidade e manutenção", texto: "Desgaste, defeitos, quebras, conserto e inspeção. Uma máquina bem cuidada vale mais que uma máquina nova." },
+        { titulo: "Energia", texto: "Cada máquina consome. A tarifa é mais barata de madrugada e mais cara no fim da tarde. Conta atrasada corta a luz." },
+        { titulo: "Trilha original", texto: "Música composta para o jogo e gerada no navegador: começa no piano e ganha baixo, bateria e melodia conforme a fábrica cresce." },
+      ],
+    },
+    novidades: [
+      { versao: "0.6.1", data: "2026-10-27", itens: ["Trilha sonora original que cresce com a fábrica e muda à noite", "Efeitos sonoros novos: prensa, venda, contratos, quebra e conserto", "Tela inicial com Jogar e Continuar"] },
+      { versao: "0.6", data: "2026-10-27", itens: ["Desgaste, defeitos e quebra das máquinas", "Manutenção, inspeção manual e inspetor automático na esteira", "Energia com tarifa por hora, conta diária e corte"] },
+      { versao: "0.5.1", data: "2026-10-27", itens: ["Visual novo: oficina, terreno cercado, doca e van", "Ciclo de dia e noite e câmera com rotação e zoom", "HUD redesenhado e rótulos no mundo"] },
+      { versao: "0.5", data: "2026-10-27", itens: ["Clientes, contratos com prazo e reputação", "Salvamento automático no navegador"] },
+    ],
+    cor: "#f28c28",
+    icone: "🏭",
+    engine: "Three.js · WebGL 3D",
+    mobile: false,
+    status: "disponivel",
+    lancamento: "2026-10-27",
     destaque: true,
   },
   {

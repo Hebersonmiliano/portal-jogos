@@ -30,6 +30,12 @@ O campo `vitrineIndustrial` no catálogo apresenta o robô original, uma chamada
 
 Os estilos ficam em `assets/security-test.css`; `assets/security-test/` contém o sprite do robô e o fundo industrial, copiados dos recursos originais do projeto Godot. Esses arquivos de apresentação ficam fora da pasta da exportação para serem preservados quando ela for atualizada.
 
+## Do Zero ao Império Industrial 2
+
+A sequência fica em `jogos/imperio-industrial-2/` (cópia de distribuição do repositório `Do-Zero-ao-Imp-rio-Industrial-2`: `index.html`, `style.css` e `js/`, com o Three.js local). A apresentação usa o campo `vitrineImperio2` no catálogo, `assets/imperio-industrial-2.js` e `.css`, e sete capturas reais do jogo em `assets/imperio-industrial-2/`. Aparece na página do jogo (completa, com cenas, recursos e botão de jogar) e na vitrine da página inicial (resumida). Para atualizar, copie os três itens do repositório do jogo, aumente `versao` no catálogo e acrescente a versão em `novidades`.
+
+Verificação: `node tests/imperio-industrial-2.cjs`.
+
 ## Godot (FoxAventura)
 
 `SECURITY TEST` está integrado em `jogos/security-test/`, com a exportação Web sem threads do Godot 4.7.2. O catálogo oferece teclado, Xbox e toque, e usa uma capa capturada do jogo. A origem de desenvolvimento, na estrutura local, é `../teste-de-seguranca/builds/web/`; o atualizador copia essa exportação e conserva a capa. Para atualizar, reexporte, copie os arquivos Web, aumente `versao` no catálogo e atualize a chave de cache de `jogos.js` nas páginas.

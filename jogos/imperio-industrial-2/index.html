@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Do Zero ao Império Industrial 2 — Distrito Industrial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./js/vendor/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="palco"></div>
+  <div id="rotulos"></div>
+
+  <header id="barra">
+    <div class="marca"><b>IMPÉRIO</b> INDUSTRIAL 2<small>Distrito Industrial</small></div>
+    <div class="dado dinheiro"><small>Caixa</small><strong id="dinheiro">R$ 100</strong></div>
+    <div class="dado meta">
+      <small>Vendas · meta da campanha</small>
+      <strong id="meta">R$ 0 de R$ 1.000</strong>
+      <span class="progresso"><i id="barra-meta"></i></span>
+    </div>
+    <div class="dado"><small>Estoque</small><strong id="estoque">0</strong></div>
+    <div class="dado"><small>Produzidas</small><strong id="caixas">0</strong></div>
+    <div class="dado"><small>Máquinas</small><strong id="maquinas">0</strong></div>
+    <div class="dado"><small>Equipe</small><strong id="funcionarios">0</strong></div>
+    <div class="relogio" id="relogio">Dia 1 · 07:00</div>
+    <button id="botao-som" type="button" aria-pressed="true" title="Ligar ou desligar o som (O)">Som ligado</button>
+  </header>
+
+  <section id="producao" aria-label="Produção">
+    <div class="linha-info">
+      <small>Próxima caixa <kbd>T</kbd><kbd>C</kbd><kbd>M</kbd></small>
+      <strong><i id="cor-produto" class="amostra"></i><span id="produto"></span></strong>
+    </div>
+    <div class="linha-info">
+      <small>Linha</small>
+      <strong id="linha">sem máquinas</strong>
+    </div>
+    <div class="linha-info">
+      <small>Energia</small>
+      <strong id="energia">R$ 0,00 hoje · tarifa normal</strong>
+    </div>
+    <div class="linha-info estoque-detalhe">
+      <small>Qualidade</small>
+      <span id="qualidade">Estoque sem defeitos · refugo: 0</span>
+    </div>
+    <div class="linha-info estoque-detalhe">
+      <small>No estoque</small>
+      <span id="detalhe-estoque">vazio</span>
+    </div>
+  </section>
+
+  <div id="mensagem" role="status"></div>
+
+  <aside id="painel-contratos" aria-label="Contratos">
+    <div class="cabecalho"><h2>Contratos</h2><span>Reputação <strong id="reputacao">20</strong></span></div>
+    <h3>Ofertas <small>teclas 1, 2, 3 aceitam</small></h3>
+    <ol id="ofertas"></ol>
+    <h3>Em andamento <small>entregue na expedição com V</small></h3>
+    <ul id="ativos"></ul>
+    <p id="historico-contratos" class="historico"></p>
+  </aside>
+
+  <aside id="ajuda" aria-label="Controles">
+    <h2>Controles <span><kbd>H</kbd> mostrar</span></h2>
+    <dl>
+      <dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Andar</dd>
+      <dt><kbd>B</kbd></dt><dd>Máquina na célula marcada · R$ 60</dd>
+      <dt><kbd>E</kbd></dt><dd>Produzir caixa · R$ 2</dd>
+      <dt><kbd>R</kbd></dt><dd>Levar saída ao estoque</dd>
+      <dt><kbd>V</kbd></dt><dd>Entregar contratos ou vender na expedição</dd>
+      <dt><kbd>T</kbd><kbd>C</kbd><kbd>M</kbd></dt><dd>Tamanho, cor e material</dd>
+      <dt><kbd>F</kbd></dt><dd>Contratar funcionário · R$ 80</dd>
+      <dt><kbd>L</kbd></dt><dd>Esteira até o estoque · R$ 40</dd>
+      <dt><kbd>U</kbd></dt><dd>Automatizar ou reprogramar · R$ 100</dd>
+      <dt><kbd>K</kbd></dt><dd>Manutenção (até R$ 30) ou conserto (R$ 60)</dd>
+      <dt><kbd>I</kbd></dt><dd>Inspecionar estoque ou instalar inspetor · R$ 80</dd>
+      <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></dt><dd>Aceitar contrato</dd>
+      <dt><kbd>Q</kbd><kbd>Z</kbd></dt><dd>Girar câmera (ou arraste o mouse)</dd>
+      <dt><kbd>+</kbd><kbd>−</kbd></dt><dd>Zoom (ou roda do mouse)</dd>
+      <dt><kbd>O</kbd></dt><dd>Ligar ou desligar o som</dd>
+      <dt><kbd>N</kbd><kbd>N</kbd></dt><dd>Novo jogo</dd>
+    </dl>
+    <p>O jogo salva sozinho a cada 5 segundos.</p>
+  </aside>
+
+  <section id="inicio" aria-label="Tela inicial">
+    <div class="inicio-caixa">
+      <p class="inicio-selo">Gestão de fábrica · 3D no navegador</p>
+      <h1>Do Zero ao <span>Império Industrial 2</span></h1>
+      <p class="inicio-sub">Distrito Industrial</p>
+      <p class="inicio-texto">Uma oficina alugada, R$ 100 e um bairro inteiro de clientes. Monte caixas, automatize a linha, cumpra contratos e cuide de cada máquina.</p>
+      <button id="botao-jogar" type="button">Jogar</button>
+      <p id="inicio-save" class="inicio-nota">O progresso fica salvo neste navegador.</p>
+      <p class="inicio-nota">Teclado e mouse · <kbd>H</kbd> mostra os controles · <kbd>O</kbd> liga e desliga o som</p>
+      <p class="inicio-versao">v0.6.1</p>
+    </div>
+  </section>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

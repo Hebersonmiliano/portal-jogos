@@ -69,6 +69,11 @@ if (!jogo) {
       apresentacao.hidden = false;
       apresentacao.append(criarApresentacaoFaisca(true, () => iniciar.click()));
     }
+    if (jogo.vitrineImperio2) {
+      const apresentacao = document.getElementById("apresentacao-imperio2");
+      apresentacao.hidden = false;
+      apresentacao.append(criarVitrineImperio2(jogo, () => iniciar.click(), true));
+    }
     if (jogo.vitrineImperio) {
       const apresentacao = document.getElementById("apresentacao-imperio");
       apresentacao.hidden = false;
@@ -93,6 +98,10 @@ if (!jogo) {
       }
       if (jogo.id === "faisca") {
         document.getElementById("apresentacao-faisca").hidden = true;
+        palco.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+      if (jogo.vitrineImperio2) {
+        document.getElementById("apresentacao-imperio2").hidden = true;
         palco.scrollIntoView({ block: "start", behavior: "auto" });
       }
       if (jogo.vitrineImperio) {

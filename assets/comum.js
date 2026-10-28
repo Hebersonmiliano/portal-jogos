@@ -133,6 +133,10 @@ function criarCartao(jogo) {
     jogo.apresentacao.recursos.forEach((r) => fatos.append(el("span", null, r.valor + " " + r.rotulo.split(" ")[0])));
     info.append(fatos, el("span", "cartao-convite", "Investigar o caso →"));
   }
+  if (jogo.vitrineImperio2) {
+    a.classList.add("cartao-imp2");
+    info.append(el("p", "imp2-mini-resumo", "A sequência: contratos com prazo, linha automática, manutenção, energia, dia e noite."), el("span", "imp2-mini-convite", "Abrir a oficina →"));
+  }
   if (jogo.vitrineImperio) {
     a.classList.add("cartao-imperio");
     info.append(el("p", "imperio-mini-resumo", "Da garagem à automação total: 6 evoluções, 3 produtos e contratos para escolher."), el("span", "imperio-mini-convite", "Construa seu império →"));

@@ -1,0 +1,70 @@
+/* Apresentação de Do Zero ao Império Industrial 2: azul-petróleo, laranja industrial e concreto, como no jogo. */
+.imp2 {
+  --imp2-fundo: #0d2228;
+  --imp2-painel: #12313a;
+  --imp2-borda: rgba(126, 186, 196, 0.22);
+  --imp2-laranja: #f28c28;
+  --imp2-amarelo: #f2c230;
+  --imp2-texto: #eef3f2;
+  --imp2-apagado: #a7bec1;
+  display: grid;
+  gap: 22px;
+  margin: 18px 0 26px;
+  padding: clamp(16px, 3vw, 30px);
+  border: 1px solid var(--imp2-borda);
+  border-top: 4px solid var(--imp2-laranja);
+  border-radius: 14px;
+  background: radial-gradient(ellipse at 15% 0%, rgba(242, 140, 40, 0.14), transparent 55%), var(--imp2-fundo);
+  color: var(--imp2-texto);
+}
+.imp2-hero { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr); gap: clamp(16px, 3vw, 30px); align-items: center; }
+.imp2-hero-texto { display: grid; gap: 10px; min-width: 0; }
+.imp2-selo { font: 800 11px/1.4 "Nunito", system-ui, sans-serif; letter-spacing: 0.16em; color: var(--imp2-laranja); }
+.imp2-titulo { margin: 0; font: 800 clamp(30px, 4.2vw, 50px)/0.98 "Nunito", system-ui, sans-serif; text-wrap: balance; }
+.imp2-titulo span { display: block; color: var(--imp2-laranja); }
+.imp2-chamada { margin: 4px 0 0; font-size: 18px; font-weight: 800; line-height: 1.35; }
+.imp2-resumo { margin: 0; color: var(--imp2-apagado); line-height: 1.55; max-width: 60ch; }
+.imp2-fatos { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0; padding: 0; list-style: none; }
+.imp2-fatos li { padding: 4px 10px; border: 1px solid var(--imp2-borda); border-radius: 999px; background: rgba(255, 255, 255, 0.05); font-size: 13px; font-weight: 700; }
+.imp2-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 6px; }
+.imp2-jogar { background: linear-gradient(90deg, var(--imp2-laranja), #ffb24e) !important; color: #10262d !important; font-weight: 800; }
+.imp2-conhecer { color: var(--imp2-amarelo); font-weight: 800; text-decoration: none; }
+.imp2-conhecer:hover { text-decoration: underline; }
+.imp2-dispositivos { margin: 0; font-size: 13px; color: var(--imp2-apagado); }
+.imp2-hero-foto { margin: 0; display: grid; gap: 6px; min-width: 0; }
+.imp2-hero-foto figcaption { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; color: var(--imp2-apagado); }
+.imp2-ampliar { display: block; width: 100%; padding: 0; border: 1px solid var(--imp2-borda); border-radius: 10px; overflow: hidden; background: #000; cursor: zoom-in; }
+.imp2-ampliar img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; transition: transform 0.35s; }
+.imp2-ampliar:hover img { transform: scale(1.03); }
+.imp2-ampliar:focus-visible { outline: 3px solid var(--imp2-laranja); outline-offset: 2px; }
+.imp2-cabecalho { display: grid; gap: 4px; }
+.imp2-cabecalho h3 { margin: 0; font-size: 22px; font-weight: 800; }
+.imp2-galeria { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.imp2-cena { margin: 0; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.imp2-cena h4 { margin: 0; font-size: 16px; font-weight: 800; }
+.imp2-cena p { margin: 2px 0 0; font-size: 14px; line-height: 1.45; color: var(--imp2-apagado); }
+.imp2-recursos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.imp2-recurso { padding: 14px 16px; border: 1px solid var(--imp2-borda); border-left: 3px solid var(--imp2-laranja); border-radius: 8px; background: var(--imp2-painel); }
+.imp2-recurso h4 { margin: 0 0 4px; font-size: 16px; font-weight: 800; }
+.imp2-recurso p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--imp2-apagado); }
+.imp2-final { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-radius: 10px; background: rgba(242, 140, 40, 0.1); border: 1px solid rgba(242, 140, 40, 0.35); }
+.imp2-final p { margin: 0; font-weight: 800; }
+.imp2-lightbox { width: min(1200px, 94vw); padding: 14px; border: 1px solid #2f6f7d; border-radius: 12px; background: #0d2228; color: #eef3f2; }
+.imp2-lightbox::backdrop { background: rgba(5, 14, 17, 0.85); }
+.imp2-lightbox figure { margin: 0; display: grid; gap: 10px; }
+.imp2-lightbox img { width: 100%; height: auto; border-radius: 8px; }
+.imp2-lightbox figcaption { font-size: 14px; line-height: 1.45; color: #c8d7d9; }
+.imp2-fechar { justify-self: end; display: block; margin: 0 0 10px auto; }
+.imp2-nav { display: flex; justify-content: space-between; margin-top: 10px; }
+.imp2-lightbox button { padding: 7px 14px; border: 1px solid #2f6f7d; border-radius: 6px; background: #12313a; color: #eef3f2; font-weight: 700; cursor: pointer; }
+.cartao-imp2 .imp2-mini-resumo { margin: 4px 0 0; font-size: 13px; line-height: 1.4; }
+.cartao-imp2 .imp2-mini-convite { display: inline-block; margin-top: 6px; color: #f28c28; font-weight: 800; font-size: 13px; }
+@media (max-width: 860px) {
+  .imp2-hero { grid-template-columns: 1fr; }
+  .imp2-hero-foto { order: -1; }
+  .imp2-galeria, .imp2-recursos { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .imp2-galeria, .imp2-recursos { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .imp2-ampliar img { transition: none; } }
