@@ -1,7 +1,7 @@
 // Cena do Distrito Industrial: terreno, oficina, jogador, máquinas, funcionários, linha automática e contratos.
 // O visual (modelos, luz, câmera e rótulos) fica em js/visual/; aqui ficam as regras ligadas à cena.
 import * as THREE from 'three';
-import { registrarObstaculo, cabeAqui } from './grade.js';
+import { registrarObstaculo, cabeAqui, definirTerrenoExpandido } from './grade.js';
 import { criarJogador, atualizarJogador } from './jogador.js';
 import {
   criarMaquina,
@@ -57,6 +57,7 @@ import {
   novoQuadro,
 } from './contratos.js';
 import { ROTAS, atualizarEntregas, despachar, exportarFrota, importarFrota, novaFrota } from './entregas.js';
+import { exportarConstrucao, importarConstrucao, melhorar, novaConstrucao, proximaMelhoria, temTerreno } from './construcao.js';
 import { criarFuncionario, atualizarFuncionario, ESTOQUE_PONTO } from './funcionarios.js';
 import {
   CUSTO_INSPETOR,
@@ -83,6 +84,7 @@ import { criarCameraJogo } from './visual/camera.js';
 import { criarRotulos } from './visual/rotulos.js';
 import { criarOficina } from './visual/oficina.js';
 import { criarCursor, criarTerreno } from './visual/terreno.js';
+import { criarExpansao } from './visual/expansao.js';
 import { criarCacamba, criarExpedicao, criarPrateleira, criarVan } from './visual/estacoes.js';
 import {
   CUSTO_ESTEIRA,
@@ -125,6 +127,7 @@ const elBotaoSom = document.getElementById('botao-som');
 const elFrota = document.getElementById('frota');
 const elMapaRota = document.getElementById('mapa-rota');
 const elVeiculoMapa = document.getElementById('veiculo-mapa');
+const elPropriedade = document.getElementById('propriedade');
 
 // Trilha sonora e efeitos (v0.6.1). O áudio só começa depois do primeiro clique ou tecla.
 const musica = criarMusica();
@@ -141,6 +144,7 @@ const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerH
 
 criarCenario(cena);
 criarTerreno(cena);
+const visualExpansao = criarExpansao(cena);
 const cursor = criarCursor(cena);
 
 // Oficina alugada no centro do terreno (5 x 3 células).
@@ -165,6 +169,18 @@ registrarObstaculo(CACAMBA.x - 0.45, CACAMBA.x + 0.45, CACAMBA.z - 0.45, CACAMBA
 let refugo = 0;
 let energia = novaEnergia();
 let frota = novaFrota();
+let construcao = novaConstrucao();
+visualExpansao.atualizar(construcao.nivel);
+let escritorioRegistrado = false;
+
+function sincronizarConstrucaoVisual() {
+  definirTerrenoExpandido(temTerreno(construcao));
+  visualExpansao.atualizar(construcao.nivel);
+  if (construcao.nivel >= 2 && !escritorioRegistrado) {
+    registrarObstaculo(13.25, 18.75, -9.75, -5.25);
+    escritorioRegistrado = true;
+  }
+}
 
 const rotulos = criarRotulos(document.getElementById('rotulos'), camera);
 rotulos.adicionar({ x: ESTOQUE_PONTO.x, y: 2.8, z: ESTOQUE_PONTO.z }, { texto: () => `ESTOQUE · ${totalNoEstoque()}`, classe: 'estacao' });
@@ -220,10 +236,28 @@ function atualizarPlacar() {
     ? `${defeitos} caixa(s) com defeito no estoque · I no estoque inspeciona`
     : `Estoque sem defeitos · refugo: ${refugo}`;
   elQualidade.className = defeitos ? 'alerta' : '';
+  const proxima = proximaMelhoria(construcao);
+  elPropriedade.textContent = proxima
+    ? `Nível ${construcao.nivel}/3 · próxima: ${proxima.nome} (R$ ${proxima.custo})`
+    : 'Nível 3/3 · complexo industrial concluído';
   atualizarPainelFrota();
   prateleira.atualizar(
     exportarEstoque().map(([chave, quantidade]) => ({ cor: produtoPorChave(chave)?.cor ?? 0xc89b5a, quantidade })),
   );
+}
+
+function melhorarPropriedade() {
+  const proxima = proximaMelhoria(construcao);
+  if (proxima?.id === 'escritorio') {
+    const ocupado = maquinas.some((m) => m.x > 13.25 && m.x < 18.75 && m.z > -9.75 && m.z < -5.25);
+    if (ocupado) { falha('Retire as máquinas da área marcada do escritório antes de construir.'); return; }
+  }
+  const { melhoria, erro } = melhorar(construcao, pagar);
+  if (erro) { falha(erro); return; }
+  sincronizarConstrucaoVisual();
+  musica.tocar('compra');
+  atualizarPlacar();
+  mensagem(`${melhoria.nome} construído. Propriedade nível ${construcao.nivel}/3.`);
 }
 
 // Resumo da linha para o HUD: quantas máquinas são automáticas e onde a produção travou.
@@ -693,6 +727,7 @@ const teclasDeAcao = {
   KeyR: recolherSaida,
   KeyV: venderNaExpedicao,
   KeyF: contratarFuncionario,
+  KeyG: melhorarPropriedade,
   KeyL: ligarEsteira,
   KeyU: automatizarMaquina,
   KeyK: manutencao,
@@ -1025,6 +1060,7 @@ function montarSaveAtual() {
     escolha: exportarEscolha(),
     contratos: exportarQuadro(quadro),
     frota: exportarFrota(frota),
+    construcao: exportarConstrucao(construcao),
     energia: exportarEnergia(energia),
     refugo,
     caixas,
@@ -1082,6 +1118,8 @@ function restaurarJogo() {
   importarEscolha(save.escolha);
   quadro = importarQuadro(save.contratos, produtoPorChave);
   frota = importarFrota(save.frota);
+  construcao = importarConstrucao(save.construcao);
+  sincronizarConstrucaoVisual();
   caixas = save.caixas;
   ambiente.importar(save.relogio);
   energia = importarEnergia(save.energia);
