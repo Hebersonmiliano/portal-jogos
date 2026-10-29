@@ -202,7 +202,7 @@ registrarObstaculo(-2.5, 2.5, -1.5, 1.5);
 
 // Expedição: doca onde contratos são carregados na van e o estoque livre é vendido (tecla V, perto do ponto).
 const EXPEDICAO = { x: -8, z: 4 };
-criarExpedicao(cena, EXPEDICAO.x, EXPEDICAO.z);
+const docaMouse = criarExpedicao(cena, EXPEDICAO.x, EXPEDICAO.z);
 registrarObstaculo(EXPEDICAO.x - 1, EXPEDICAO.x + 1, EXPEDICAO.z - 1, EXPEDICAO.z + 1);
 const van = criarVan(cena, EXPEDICAO.x, 9.4);
 registrarObstaculo(EXPEDICAO.x - 0.9, EXPEDICAO.x + 0.9, 7.85, 12.2);
@@ -561,11 +561,11 @@ function rotularMaquina(maquina) {
 }
 
 // Coloca uma máquina na célula à frente do jogador (1,5 célula), se a célula estiver livre.
-function posicionarMaquina() {
+function posicionarMaquina(celula = null) {
   const p = jogador.position;
   const f = jogador.userData.frente;
-  const cx = Math.round(p.x + f.x * 1.5);
-  const cz = Math.round(p.z + f.z * 1.5);
+  const cx = celula?.x ?? Math.round(p.x + f.x * 1.5);
+  const cz = celula?.z ?? Math.round(p.z + f.z * 1.5);
   if (!cabeAqui(cx, cz)) {
     falha('Sem espaço aqui.');
     return;
@@ -849,6 +849,57 @@ elBotaoJogar.focus();
 // Todas as formas de jogar passam por executarComando, com o mesmo código de tecla.
 
 const elMenu = document.getElementById('menu-comandos');
+// Clique esquerdo seleciona; o direito fica reservado à câmera.
+let construirComMouse = false;
+const raioMouse = new THREE.Raycaster();
+const planoMouse = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const pontoMouse = new THREE.Vector3();
+const painelMouse = document.createElement('section');
+painelMouse.id = 'painel-mouse'; painelMouse.hidden = true;
+document.body.appendChild(painelMouse);
+function fecharPainelMouse() { painelMouse.hidden = true; }
+function mostrarAcoesMouse(titulo, acoes) {
+  painelMouse.replaceChildren();
+  const h = document.createElement('strong'); h.textContent = titulo; painelMouse.appendChild(h);
+  for (const [texto, agir] of [...acoes, ['Fechar', fecharPainelMouse]]) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = texto;
+    b.addEventListener('click', () => { agir(); b.blur(); }); painelMouse.appendChild(b);
+  }
+  painelMouse.hidden = false;
+}
+renderer.domElement.addEventListener('click', (e) => {
+  if (e.button !== 0 || !elInicio.hidden || !elMenu.hidden) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  raioMouse.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1, -(e.clientY-r.top)/r.height*2+1), camera);
+  if (construirComMouse) {
+    if (!raioMouse.ray.intersectPlane(planoMouse, pontoMouse)) return;
+    const celula = { x: Math.round(pontoMouse.x), z: Math.round(pontoMouse.z) };
+    if (Math.hypot(celula.x-jogador.position.x, celula.z-jogador.position.z) > 3) { mensagem('Aproxime-se da célula para construir (até 3 m).'); return; }
+    posicionarMaquina(celula); construirComMouse = false; return;
+  }
+  const objetos = [...maquinas.map((m) => ({ malha: m.malha, maquina: m })), { malha: docaMouse, tipo: 'doca' }];
+  const hits = raioMouse.intersectObjects(objetos.map((o) => o.malha), true);
+  const alvo = hits.length && objetos.find((o) => { let n = hits[0].object; while(n) { if(n === o.malha) return true; n=n.parent; } return false; });
+  if (alvo?.maquina) {
+    const m = alvo.maquina;
+    const perto = (acao) => () => {
+      if (maquinaProxima(jogador.position, maquinas) !== m) { mensagem('Aproxime-se da máquina selecionada.'); return; }
+      acao();
+    };
+    mostrarAcoesMouse('Máquina selecionada', [
+      ['Fabricar · R$ 2', perto(produzirCaixa)], ['Recolher caixas', perto(recolherSaida)],
+      ['Manutenção / conserto', perto(manutencao)], ['Esteira · R$ 40', perto(ligarEsteira)],
+      ['Automatizar · R$ 100 / reprogramar', perto(automatizarMaquina)], ['Inspetor · R$ 80', perto(inspecionar)],
+    ]); return;
+  }
+  if (alvo?.tipo === 'doca') { mostrarAcoesMouse('Expedição', [['Vender / carregar van', venderNaExpedicao]]); return; }
+  if (raioMouse.ray.intersectPlane(planoMouse, pontoMouse) && Math.hypot(pontoMouse.x-ESTOQUE_PONTO.x, pontoMouse.z-ESTOQUE_PONTO.z) < 2) {
+    mostrarAcoesMouse('Estoque: ' + resumoEstoque(), [['Inspecionar estoque', () => {
+      if (Math.hypot(jogador.position.x-ESTOQUE_PONTO.x,jogador.position.z-ESTOQUE_PONTO.z)>2.2) { mensagem('Aproxime-se do estoque.'); return; } inspecionar();
+    }]]); return;
+  }
+  fecharPainelMouse();
+});
 const botoesMenu = [...elMenu.querySelectorAll('.menu-lista button')];
 let selecaoMenu = 0;
 
@@ -986,11 +1037,16 @@ document.addEventListener('pointerdown', (e) => {
 document.addEventListener('click', (e) => {
   const alvo = e.target.closest('[data-comando]');
   if (!alvo || alvo.closest('#ofertas')) return;
+  if (alvo.dataset.comando === 'KeyB') {
+    fecharMenu(); fecharPainelMouse(); construirComMouse = true;
+    mensagem('Clique numa célula livre perto do personagem para construir. Botão direito cancela.'); return;
+  }
   modoControle(false);
   executarComando(alvo.dataset.comando);
   alvo.blur(); // devolve as teclas ao jogo (espaço e Enter não repetem o botão)
 });
 window.addEventListener('mousemove', () => modoControle(false), { passive: true });
+renderer.domElement.addEventListener('contextmenu', () => { construirComMouse = false; fecharPainelMouse(); });
 
 // Controle: lido a cada quadro. Devolve o analógico esquerdo para o movimento.
 let botoesAnteriores = new Set();
