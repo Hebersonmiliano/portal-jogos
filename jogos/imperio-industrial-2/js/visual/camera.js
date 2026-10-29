@@ -18,6 +18,7 @@ export function criarCameraJogo(camera, elemento, alvoInicial) {
 
   let arrastando = null;
   elemento.addEventListener('pointerdown', (e) => {
+    if (e.button !== 2) return;
     arrastando = { x: e.clientX, y: e.clientY };
     elemento.setPointerCapture?.(e.pointerId);
   });
@@ -69,3 +70,4 @@ export function criarCameraJogo(camera, elemento, alvoInicial) {
     },
   };
 }
+
