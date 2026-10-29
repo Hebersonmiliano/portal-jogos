@@ -80,7 +80,7 @@ export function atualizarJogador(jogador, teclas, dt, giro = 0, analogico = { x:
 
   // Normaliza a diagonal para não andar mais rápido.
   const tamanho = Math.hypot(dx, dz);
-  const passo = (VELOCIDADE * intensidade * dt) / tamanho;
+  const passo = Math.min(VELOCIDADE * intensidade * dt * (jogador.userData.bonusVelocidade ?? 1), manual ? Infinity : Math.hypot(rota[0]?.x-jogador.position.x,rota[0]?.z-jogador.position.z)) / tamanho;
   dx *= passo;
   dz *= passo;
 
