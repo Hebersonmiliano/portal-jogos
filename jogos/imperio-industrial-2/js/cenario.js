@@ -19,14 +19,14 @@ const PREDIOS = [
   { x: -17, z: -15, w: 7, h: 8, d: 6, cor: '#c9b99a', nome: 'GRÁFICA CENTRAL' },
   { x: 15, z: -17, w: 8, h: 6, d: 7, cor: '#9fb3c2', nome: 'METALÚRGICA AURORA' },
   { x: -19, z: 5, w: 6, h: 11, d: 6, cor: '#d6c7a8', nome: '' },
-  { x: 18, z: 6, w: 7, h: 7, d: 7, cor: '#a9b8a0', nome: 'PAPELARIA SUL' },
+  { x: 27, z: 6, w: 7, h: 7, d: 7, cor: '#a9b8a0', nome: 'PAPELARIA SUL' },
   { x: 0, z: -19, w: 9, h: 5, d: 5, cor: '#b7a59a', nome: 'FORNECEDOR DISTRITAL' },
   { x: -6, z: 23, w: 8, h: 6, d: 6, cor: '#c2b6a0', nome: 'LOJA BOM PRESENTE' },
   { x: 10, z: 23, w: 7, h: 9, d: 6, cor: '#a3b2b8', nome: '' },
 ];
 
 const ARVORES = [
-  [-14, -4], [-14.5, 1.5], [13.8, -9], [13.5, 1], [-24, 14], [24, -2], [6, 20], [-14, 20],
+  [-14, -4], [-14.5, 1.5], [23.8, -9], [23.5, 1], [-24, 14], [24, -2], [6, 20], [-14, 20],
   [21, 19], [-25, -6], [6, -15], [-8, -16],
 ];
 
@@ -146,3 +146,4 @@ export function criarCenario(cena) {
     bloco(w, 0.04, d, COR.gramaEscura, x, -0.02, z, cena).castShadow = false;
   }
 }
+
