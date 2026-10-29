@@ -341,6 +341,13 @@ function atualizarPlacar() {
   elPropriedade.textContent = proxima
     ? `Nível ${construcao.nivel}/3 · próxima: ${proxima.nome} (R$ ${proxima.custo})`
     : 'Terreno, escritório e fachada prontos · equipe até 10 (F contrata)';
+  document.getElementById('compras-propriedade').textContent =
+    `Terreno: ${construcao.nivel >= 1 ? 'COMPRADO — chão livre para suas máquinas, à direita da oficina' : 'NÃO COMPRADO'}. ` +
+    `Escritório: ${construcao.nivel >= 2 ? 'CONSTRUÍDO — prédio no fundo do terreno à direita' : 'NÃO COMPRADO'}. ` +
+    `Fachada: ${construcao.nivel >= 3 ? 'CONSTRUÍDA na oficina inicial' : 'NÃO COMPRADA'}.`;
+  const botaoCompra = document.getElementById('comprar-propriedade');
+  botaoCompra.disabled = !proxima;
+  botaoCompra.textContent = proxima ? `${proxima.id === 'terreno' ? 'Comprar' : 'Construir'} ${proxima.nome} · R$ ${proxima.custo}` : 'Todas as construções concluídas';
   atualizarPainelFrota();
   prateleira.atualizar(
     exportarEstoque().map(([chave, quantidade]) => ({ cor: produtoPorChave(chave)?.cor ?? 0xc89b5a, quantidade })),
