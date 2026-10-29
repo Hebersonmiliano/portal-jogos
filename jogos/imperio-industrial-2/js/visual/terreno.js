@@ -71,7 +71,10 @@ export function criarTerreno(cena) {
   const L = MEIO + 0.35;
   trecho(-L, -L, L, -L);
   trecho(-L, -L, -L, L);
+  const inicioCercaLeste = g.children.length;
   trecho(L, -L, L, L);
+  const cercaLeste = g.children.slice(inicioCercaLeste);
+  g.userData.expandir = (ativo) => cercaLeste.forEach((objeto) => { objeto.visible = !ativo; });
   trecho(-L, L, -10.2, L);
   trecho(-5.8, L, L, L);
   // Portão: dois pilares com placa.
@@ -124,3 +127,4 @@ export function criarCursor(cena) {
     },
   };
 }
+
