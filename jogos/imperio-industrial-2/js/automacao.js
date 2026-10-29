@@ -4,6 +4,7 @@
 export const CUSTO_AUTOMACAO = 100; // R$ para tornar uma máquina automática
 export const CAPACIDADE_SAIDA = 8; // caixas que cabem na saída de uma máquina
 export const TEMPO_AUTOMATICO = 3; // segundos por caixa numa máquina automática
+export const tempoMaquina = (m) => m.tipo === 'prensa' ? 1.5 : TEMPO_AUTOMATICO;
 export const INTERVALO_ESTEIRA = 1.2; // segundos entre duas caixas colocadas na esteira
 export const VELOCIDADE_ESTEIRA = 1.5; // unidades por segundo
 
@@ -43,7 +44,7 @@ export function atualizarAutomacao(maquinas, dt, acoes) {
         m.cronometroProducao = Math.min(m.cronometroProducao ?? 0, TEMPO_AUTOMATICO);
       } else {
         m.cronometroProducao = (m.cronometroProducao ?? 0) + dt;
-        if (m.cronometroProducao >= TEMPO_AUTOMATICO) {
+        if (m.cronometroProducao >= tempoMaquina(m)) {
           m.cronometroProducao = 0;
           acoes.produzir(m, m.produto);
         }
@@ -82,3 +83,4 @@ export function atualizarAutomacao(maquinas, dt, acoes) {
     }
   }
 }
+
