@@ -32,11 +32,25 @@ export function criarPrateleira(cena, x, z) {
   cena.add(g);
 
   let assinatura = '';
+  let nivelAtual = 0;
+  const ampliacao = new THREE.Group();
+  g.add(ampliacao);
   return {
-    melhorar(nivel) { g.scale.set(1 + nivel * 0.25, 1 + nivel * 0.25, 1 + nivel * 0.25); },
+    melhorar(nivel) {
+      if (nivel === nivelAtual) return;
+      nivelAtual = nivel; assinatura = '';
+      ampliacao.clear();
+      // Expansão vertical preserva o corredor, as máquinas e as rotas existentes.
+      for (let andar = 3; andar < 3 + nivel * 2; andar++) {
+        const y = 0.15 + andar * 0.7;
+        for (const px of [-0.97, 0.97]) for (const pz of [-0.45, 0.45]) bloco(0.07, 0.7, 0.07, laranja, px, y - 0.6, pz, ampliacao);
+        bloco(2, 0.05, 0.95, aco(), 0, y, 0, ampliacao);
+        bloco(2, 0.08, 0.05, laranja, 0, y - 0.03, 0.47, ampliacao);
+      }
+    },
     atualizar(lista) {
       const cores = [];
-      for (const { cor, quantidade } of lista) for (let i = 0; i < quantidade && cores.length < 24; i++) cores.push(cor);
+      for (const { cor, quantidade } of lista) for (let i = 0; i < quantidade && cores.length < (3 + nivelAtual * 2) * 8; i++) cores.push(cor);
       const nova = cores.join(',');
       if (nova === assinatura) return;
       assinatura = nova;
@@ -45,7 +59,7 @@ export function criarPrateleira(cena, x, z) {
         const nivel = Math.floor(i / 8);
         const pos = i % 8;
         const c = modeloCaixa(0.4, 0.3, 0.38, cor);
-        c.position.set(-0.75 + (pos % 4) * 0.5, niveis[nivel] + 0.2, pos < 4 ? -0.22 : 0.22);
+        c.position.set(-0.75 + (pos % 4) * 0.5, 0.35 + nivel * 0.7, pos < 4 ? -0.22 : 0.22);
         c.rotation.y = ((i * 37) % 7 - 3) * 0.02;
         caixas.add(c);
       });
