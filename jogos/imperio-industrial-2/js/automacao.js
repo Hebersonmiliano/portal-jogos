@@ -9,7 +9,7 @@ export const INTERVALO_ESTEIRA = 1.2; // segundos entre duas caixas colocadas na
 export const VELOCIDADE_ESTEIRA = 1.5; // unidades por segundo
 
 export function saidaCheia(maquina) {
-  return maquina.saida.length >= CAPACIDADE_SAIDA;
+  return maquina.saida.length >= (maquina.capacidadeSaida ?? CAPACIDADE_SAIDA);
 }
 
 // Situação da máquina, usada na luz do topo e no HUD.
