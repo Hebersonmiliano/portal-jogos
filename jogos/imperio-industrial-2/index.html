@@ -41,6 +41,7 @@
     <button type="button" data-comando="Menu">LOJA / COMPRAR E MELHORAR · J</button>
     <small id="nivel-estoque"></small>
     <small id="status-servicos"></small>
+    <small id="status-pcs"></small>
     <div class="linha-info">
       <small>Comprar máquinas — escolha e clique no chão</small>
       <button type="button" data-tipo-maquina="bancada">▰ Bancada · R$ 60 · manual / automatizável</button>
@@ -143,7 +144,19 @@
       <h2 id="menu-titulo">Loja · Compras e melhorias</h2>
       <p class="menu-dica"><span class="tecla">Clique, ou use as setas e Enter. Esc fecha.</span><span class="botao-controle">↑ ↓ escolhe · A confirma · B fecha</span></p>
       <div class="menu-lista">
+        <h3>Informática · montagem de PCs</h3>
+        <button type="button" data-comando="BancadaPC">Bancada de montagem de PCs · R$ 300</button>
+        <button type="button" data-comando="PecaCPU">Comprar processador · R$ 80</button>
+        <button type="button" data-comando="PecaMae">Comprar placa-mãe · R$ 70</button>
+        <button type="button" data-comando="PecaMemoria">Comprar memória RAM · R$ 40</button>
+        <button type="button" data-comando="PecaHD">Comprar HD · R$ 30</button>
+        <button type="button" data-comando="PecaGabinete">Comprar gabinete · R$ 35</button>
+        <button type="button" data-comando="PecaGPU">Comprar placa de vídeo · R$ 100</button>
+        <button type="button" data-comando="MontarPC">Montar PC · usa uma de cada peça · 30 s · peças R$ 355</button>
+        <button type="button" data-comando="VenderPC">Vender PCs na expedição · R$ 550 cada</button>
         <h3>Frota · até 6 veículos · transporte de contratos</h3>
+        <button type="button" data-comando="ComprarBicicleta">Entregador de bicicleta · R$ 60 · até 8 caixas · viagem 20% maior</button>
+        <button type="button" data-comando="ComprarMoto">Entregador de moto · R$ 120 · até 16 caixas · viagem 35% menor</button>
         <button type="button" data-comando="ComprarVan">Van · R$ 200 · 32 caixas por contrato</button>
         <button type="button" data-comando="ComprarCaminhao">Caminhão · R$ 500 · 60 caixas · viagem 15% menor</button>
         <button type="button" data-comando="ComprarCarreta">Carreta · R$ 900 · 120 caixas · viagem 30% menor</button>
@@ -214,7 +227,7 @@
       <p class="inicio-nota">WASD anda · clique esquerdo seleciona máquinas e estações · botão direito arrasta a câmera · roda dá zoom.</p>
       <p class="inicio-nota">Equipe: 3 na oficina, 6 com terreno e 10 com escritório. F contrata por R$ 80.</p>
       <p class="inicio-nota">Clique no chão para andar. WASD ou analógico cancelam o caminho. Clique em máquinas para ações.</p>
-      <p class="inicio-versao">v0.9.6</p>
+      <p class="inicio-versao">v0.9.7</p>
     </div>
   </section>
 
