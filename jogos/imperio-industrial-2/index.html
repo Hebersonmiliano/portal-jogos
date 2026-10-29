@@ -40,6 +40,7 @@
   <section id="producao" aria-label="Produção">
     <button type="button" data-comando="Menu">LOJA / COMPRAR E MELHORAR · J</button>
     <small id="nivel-estoque"></small>
+    <small id="status-servicos"></small>
     <div class="linha-info">
       <small>Comprar máquinas — escolha e clique no chão</small>
       <button type="button" data-tipo-maquina="bancada">▰ Bancada · R$ 60 · manual / automatizável</button>
@@ -142,6 +143,30 @@
       <h2 id="menu-titulo">Loja · Compras e melhorias</h2>
       <p class="menu-dica"><span class="tecla">Clique, ou use as setas e Enter. Esc fecha.</span><span class="botao-controle">↑ ↓ escolhe · A confirma · B fecha</span></p>
       <div class="menu-lista">
+        <h3>Frota · até 6 veículos · transporte de contratos</h3>
+        <button type="button" data-comando="ComprarVan">Van · R$ 200 · 32 caixas por contrato</button>
+        <button type="button" data-comando="ComprarCaminhao">Caminhão · R$ 500 · 60 caixas · viagem 15% menor</button>
+        <button type="button" data-comando="ComprarCarreta">Carreta · R$ 900 · 120 caixas · viagem 30% menor</button>
+        <button type="button" data-comando="Transportadora">Transportadora automática · R$ 300 · despacha contratos prontos</button>
+        <h3>Serviços da empresa</h3>
+        <button type="button" data-comando="Datacenter">Datacenter · R$ 600 · construção para instalar servidores</button>
+        <button type="button" data-comando="Servidores">Servidores · R$ 350 · requer datacenter · IA passa de +10% para +20%</button>
+        <button type="button" data-comando="IA">Computadores com IA · R$ 250 · linha automática +10% de velocidade</button>
+        <button type="button" data-comando="RH">Escritório de RH · R$ 250 · construção visual no terreno expandido</button>
+        <button type="button" data-comando="Gerente">Escritório do gerente · R$ 350 · construção visual no terreno expandido</button>
+        <button type="button" data-comando="Androide">Androide de produção · R$ 400 · produz e transporta · até 4</button>
+        <button type="button" data-comando="RoboLimpeza">Robô auxiliar de limpeza · R$ 200 · com equipe: refugo a cada 10 s</button>
+        <button type="button" data-comando="Limpeza">Equipe de limpeza · R$ 100 · esvazia refugo a cada 30 s</button>
+        <button type="button" data-comando="Cafe">Cafezinho · R$ 10 · personagem +25% de velocidade por 120 s</button>
+        <h3>Segurança · visual · ainda sem invasões</h3>
+        <button type="button" data-comando="Drone">Drone de monitoramento · R$ 250 · ronda visual</button>
+        <button type="button" data-comando="Guarita">Guarita · R$ 180</button>
+        <button type="button" data-comando="Seguranca">Segurança · R$ 120 · requer guarita</button>
+        <button type="button" data-comando="Pastor">Pastor-alemão para o segurança · R$ 100 · requer guarda</button>
+        <button type="button" data-comando="Eletrica">Cerca elétrica · R$ 150 · visual</button>
+        <button type="button" data-comando="Concertina">Concertina · R$ 100 · visual</button>
+        <button type="button" data-comando="Portao">Pórtico do portão eletrônico · R$ 200 · visual</button>
+        <button type="button" data-comando="Alarme">Alarme da guarita · R$ 80 · visual</button>
         <h3>Máquinas</h3>
         <button type="button" data-comando="ComprarBancada">Comprar bancada · R$ 60</button>
         <button type="button" data-comando="ComprarPrensa">Comprar prensa automática · R$ 250</button>
@@ -189,7 +214,7 @@
       <p class="inicio-nota">WASD anda · clique esquerdo seleciona máquinas e estações · botão direito arrasta a câmera · roda dá zoom.</p>
       <p class="inicio-nota">Equipe: 3 na oficina, 6 com terreno e 10 com escritório. F contrata por R$ 80.</p>
       <p class="inicio-nota">Clique no chão para andar. WASD ou analógico cancelam o caminho. Clique em máquinas para ações.</p>
-      <p class="inicio-versao">v0.9.5</p>
+      <p class="inicio-versao">v0.9.6</p>
     </div>
   </section>
 
