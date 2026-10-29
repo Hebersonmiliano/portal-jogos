@@ -39,11 +39,19 @@ const dentro = (v, limite) => Math.max(-limite, Math.min(limite, numero(v)));
 
 // Monta o objeto salvo a partir das partes do jogo.
 export function montarSave({ economia, estoque, escolha, contratos, energia = null, frota = null, construcao = null, servicos = null, hardware = null, campanha = 0, nivelEstoque = 0, refugo = 0, maquinas, funcionarios, jogador, caixas, relogio = 0 }) {
+  // Cargas em mãos voltam ao estoque no save, sem alterar a partida em andamento.
+  const estoqueSeguro = new Map((estoque ?? []).map(([chave,q,d=0]) => [chave,[chave,q,d]]));
+  for (const f of funcionarios) for (const item of f.carga ?? []) {
+    const produto = item.produto ?? item;
+    if (!produto?.chave) continue;
+    const linha = estoqueSeguro.get(produto.chave) ?? [produto.chave,0,0];
+    linha[1]++; linha[2] += item.defeito ? 1 : 0; estoqueSeguro.set(produto.chave,linha);
+  }
   return {
     versao: VERSAO_SAVE,
     salvoEm: new Date().toISOString(),
     economia,
-    estoque,
+    estoque: [...estoqueSeguro.values()],
     escolha,
     contratos,
     energia,
@@ -71,7 +79,7 @@ export function montarSave({ economia, estoque, escolha, contratos, energia = nu
       quebrada: !!m.quebrada,
       produto: m.produto?.chave ?? null,
     })),
-    funcionarios: funcionarios.map((f) => ({ x: f.x, z: f.z, ...(f.genero ? { genero:f.genero } : {}) })),
+    funcionarios: funcionarios.filter((f) => !f.androide).map((f) => ({ x: f.x, z: f.z, ...(f.genero ? { genero:f.genero } : {}) })),
   };
 }
 
