@@ -13,7 +13,7 @@ export const TRANSITOS = [
   { nome: 'livre', fator: 0.8 }, { nome: 'normal', fator: 1 }, { nome: 'intenso', fator: 1.35 },
 ];
 const limitar = (v) => Math.max(0, Math.min(100, v));
-export const VEICULOS = { van: { nome: 'Van', custo: 200, capacidade: 32, fator: 1 }, caminhao: { nome: 'Caminhão', custo: 500, capacidade: 60, fator: 0.85 }, carreta: { nome: 'Carreta', custo: 900, capacidade: 120, fator: 0.7 } };
+export const VEICULOS = { bicicleta: { nome:'Entregador de bicicleta', custo:60, capacidade:8, fator:1.2 }, moto: { nome:'Entregador de moto', custo:120, capacidade:16, fator:.65 }, van: { nome: 'Van', custo: 200, capacidade: 32, fator: 1 }, caminhao: { nome: 'Caminhão', custo: 500, capacidade: 60, fator: 0.85 }, carreta: { nome: 'Carreta', custo: 900, capacidade: 120, fator: 0.7 } };
 export function comprarVeiculo(frota, tipo, pagar) {
   const modelo = VEICULOS[tipo];
   if (!modelo || frota.veiculos.length >= 6) return { erro: 'Limite de 6 veículos na frota.' };
