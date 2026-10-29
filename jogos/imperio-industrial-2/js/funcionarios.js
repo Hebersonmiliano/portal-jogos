@@ -8,10 +8,10 @@ const PAUSA = 1; // segundos entre ações
 export const ESTOQUE_PONTO = { x: -8, z: -6 }; // prateleira de estoque, na cena
 
 // Funcionário: macacão azul-petróleo e capacete amarelo. Mostra nas mãos as caixas que carrega.
-export function criarFuncionario(x, z) {
-  const grupo = criarPessoa({ tronco: PALETA.petroleoClaro, calca: PALETA.petroleoEscuro, capacete: PALETA.amarelo });
+export function criarFuncionario(x, z, genero = 'homem') {
+  const grupo = criarPessoa({ tronco: PALETA.petroleoClaro, calca: PALETA.petroleoEscuro, capacete: PALETA.amarelo, genero });
   grupo.position.set(x, 0, z);
-  return { malha: grupo, fase: null, alvo: null, espera: 0, carga: [] };
+  return { malha: grupo, genero, fase: null, alvo: null, espera: 0, carga: [] };
 }
 
 // Escolhe a próxima tarefa: recolher a saída de uma máquina sem esteira, ou produzir numa máquina manual com espaço.
@@ -92,3 +92,4 @@ export function atualizarFuncionario(f, dt, maquinas, acoes) {
   animarPessoa(f.malha, dt, !chegou);
   if (chegou) executar(f, acoes);
 }
+
