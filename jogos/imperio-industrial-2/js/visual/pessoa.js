@@ -6,7 +6,7 @@ import { modeloCaixa } from './estacoes.js';
 
 const PELE = '#e0b08a';
 
-export function criarPessoa({ tronco, calca = '#2b2b3a', capacete = '#ffffff', faixa = null }) {
+export function criarPessoa({ tronco, calca = '#2b2b3a', capacete = '#ffffff', faixa = null, genero = 'homem' }) {
   const g = new THREE.Group();
   const corpo = new THREE.Group();
   g.add(corpo);
@@ -36,6 +36,12 @@ export function criarPessoa({ tronco, calca = '#2b2b3a', capacete = '#ffffff', f
   cabeca.position.y = 1.55;
   cabeca.castShadow = true;
   corpo.add(cabeca);
+  if (genero === 'mulher') {
+    // Cabelo preso abaixo do capacete, mantendo o mesmo uniforme e proteção.
+    const cabelo = new THREE.Mesh(new THREE.SphereGeometry(.14,10,8),mat('#422b22'));
+    cabelo.scale.set(.8,1.3,1); cabelo.position.set(0,1.4,-.22); corpo.add(cabelo);
+    bloco(.38,.13,.12,'#422b22',0,1.49,-.16,corpo);
+  }
   for (const s of [-1, 1]) bloco(0.04, 0.05, 0.02, '#2a2422', s * 0.08, 1.56, 0.2, corpo);
   const casco = new THREE.Mesh(
     new THREE.SphereGeometry(0.235, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2),
@@ -80,3 +86,4 @@ export function mostrarCarga(pessoa, produtos) {
     u.carga.add(c);
   });
 }
+
