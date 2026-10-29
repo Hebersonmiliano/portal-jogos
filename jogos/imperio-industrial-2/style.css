@@ -354,5 +354,6 @@ button:focus-visible { outline: 2px solid var(--laranja); outline-offset: 2px; }
 #compras-propriedade { margin: 4px 0; max-width: 290px; font-size: 12px; line-height: 1.4; }
 #comprar-propriedade { pointer-events: auto; padding: 8px; border: 1px solid #f28c28; border-radius: 6px; background: #21434c; color: white; cursor: pointer; }
 #comprar-propriedade:disabled { opacity: .6; cursor: default; }
+[data-tipo-maquina] { pointer-events: auto; padding: 9px; margin: 3px 0; border: 1px solid #f28c28; border-radius: 6px; background: #21434c; color: white; text-align: left; cursor: pointer; }
 #painel-mouse button { padding: 9px; border: 1px solid #54747b; border-radius: 5px; background: #21434c; color: white; cursor: pointer; }
 
