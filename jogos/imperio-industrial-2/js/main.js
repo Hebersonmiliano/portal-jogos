@@ -56,7 +56,7 @@ import {
   nomeCliente,
   novoQuadro,
 } from './contratos.js';
-import { ROTAS, atualizarEntregas, despachar, exportarFrota, importarFrota, novaFrota } from './entregas.js';
+import { ROTAS, VEICULOS, comprarVeiculo, atualizarEntregas, despachar, exportarFrota, importarFrota, novaFrota } from './entregas.js';
 import { criarFuncionario, atualizarFuncionario, ESTOQUE_PONTO } from './funcionarios.js';
 import {
   CUSTO_INSPETOR,
@@ -255,6 +255,8 @@ registrarObstaculo(CACAMBA.x - 0.45, CACAMBA.x + 0.45, CACAMBA.z - 0.45, CACAMBA
 let refugo = 0;
 let energia = novaEnergia();
 let frota = novaFrota();
+let servicos = { guarita:false, guarda:false, cao:false, limpeza:false, transportadora:false, eletrica:false, concertina:false, portao:false, alarme:false, drone:false, roboLimpeza:false, rh:false, gerente:false, androides:0, cafe:0, tempoLimpeza:0 };
+Object.assign(servicos,{datacenter:false,servidores:false,ia:false});
 let construcao = novaConstrucao();
 visualExpansao.atualizar(construcao.nivel);
 let escritorioRegistrado = false;
@@ -270,6 +272,8 @@ function sincronizarConstrucaoVisual() {
 }
 
 const rotulos = criarRotulos(document.getElementById('rotulos'), camera);
+rotulos.adicionar({x:16,y:3.5,z:-1},{texto:()=>servicos.rh?'RECURSOS HUMANOS':'',classe:'estacao'});
+rotulos.adicionar({x:16,y:3.5,z:5},{texto:()=>servicos.gerente?'GERÊNCIA':'',classe:'estacao'});
 rotulos.adicionar({ x: 0, y: 4, z: 0 }, { texto: () => 'OFICINA · produção', classe: 'estacao' });
 rotulos.adicionar({ x: 16, y: 1, z: 2 }, { texto: () => construcao.nivel >= 1 ? 'SEU TERRENO · área de expansão' : 'TERRENO À VENDA · G · R$ 350', classe: 'estacao' });
 rotulos.adicionar({ x: 16, y: 4.2, z: -7.5 }, { texto: () => construcao.nivel >= 2 ? 'SEU ESCRITÓRIO · equipe até 10' : 'ÁREA DO FUTURO ESCRITÓRIO', classe: 'estacao' });
@@ -282,6 +286,100 @@ rotulos.adicionar({ x: EXPEDICAO.x, y: 3.1, z: EXPEDICAO.z }, {
 const jogador = criarJogador(0, 4);
 cena.add(jogador);
 const cameraJogo = criarCameraJogo(camera, renderer.domElement, jogador.position);
+const visualServicos = new THREE.Group(); cena.add(visualServicos);
+let assinaturaServicos = '';
+const modelosFrota = new Map();
+const androides = [];
+let droneVisual = null;
+let faseDrone = 0;
+const prediosServicosRegistrados = new Set();
+function atualizarVisualServicos() {
+  for(const [id,x,z,w,d] of [['guarita',-4.8,10.4,1.5,1.5],['rh',16,-1,4,3],['gerente',16,5,4,3]]) if(servicos[id] && !prediosServicosRegistrados.has(id)) {
+    registrarObstaculo(x-w/2,x+w/2,z-d/2,z+d/2); prediosServicosRegistrados.add(id);
+  }
+  while(androides.length < servicos.androides) {
+    const androide=criarFuncionario(-2+androides.length,4);
+    androide.malha.traverse((o) => { if(o.isMesh && o.material) { o.material=o.material.clone(); o.material.color?.set('#8da6b5'); if('metalness' in o.material) o.material.metalness=.8; } });
+    cena.add(androide.malha); androides.push(androide);
+  }
+  const assinatura = ['guarita','guarda','cao','limpeza','eletrica','concertina','portao','alarme','drone','roboLimpeza','rh','gerente','datacenter','servidores','ia'].map((k) => servicos[k]).join();
+  if (assinatura !== assinaturaServicos) {
+    assinaturaServicos = assinatura; visualServicos.clear();
+    const blocoServico = (x,y,z,w,h,d,cor) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color:cor})); m.position.set(x,y+h/2,z); m.castShadow=true; visualServicos.add(m); return m; };
+    if (servicos.guarita) {
+      blocoServico(-4.8,0,10.4,1.5,2.2,1.5,'#a8b6b9'); blocoServico(-4.8,2.2,10.4,1.8,.2,1.8,'#183d49'); blocoServico(-4.8,1,11.16,1,.7,.04,'#4b8aa0');
+    }
+    if (servicos.guarda) { const guarda = criarJogador(-4.8,11.7); visualServicos.add(guarda); }
+    if(servicos.datacenter) { blocoServico(6,0,-9,3.5,2.8,3,'#526a7a'); blocoServico(6,2.8,-9,3.7,.2,3.2,'#18333f'); }
+    if(servicos.servidores) for(const x of [5,6,7]) { blocoServico(x,.2,-7.4,.65,1.9,.5,'#192b32'); for(const y of [.6,1,1.4,1.8]) blocoServico(x,y,-7.12,.5,.04,.04,'#51e4ba'); }
+    if(servicos.ia) { blocoServico(3.5,.8,2.5,.8,.1,.5,'#947451'); blocoServico(3.5,1,2.5,.6,.45,.08,'#53c3d0'); }
+    for(const [id,z,cor] of [['rh',-1,'#4792a4'],['gerente',5,'#b98b43']]) if(servicos[id]) {
+      blocoServico(16,0,z,4,2.8,3,cor); blocoServico(16,2.8,z,4.2,.2,3.2,'#203d48');
+      blocoServico(15,0,z+1.52,.8,2,.05,'#203d48'); blocoServico(16.8,1,z+1.52,1.5,.9,.05,'#b9dfdf');
+    }
+    if (servicos.cao) {
+      blocoServico(-3.8,.25,11.4,.35,.4,.85,'#a77438'); blocoServico(-3.8,.48,11.8,.3,.3,.35,'#282421');
+      for(const dx of [-.12,.12]) for(const dz of [-.27,.27]) blocoServico(-3.8+dx,0,11.4+dz,.09,.3,.09,'#a77438');
+      for(const dx of [-.1,.1]) { const ear = new THREE.Mesh(new THREE.ConeGeometry(.09,.25,3),new THREE.MeshStandardMaterial({color:'#282421'})); ear.position.set(-3.8+dx,.9,11.8); visualServicos.add(ear); }
+    }
+    if (servicos.limpeza) { const pessoa = criarJogador(-10, -4); visualServicos.add(pessoa); blocoServico(-9.6,.1,-4,.1,1.5,.1,'#b68b4d'); blocoServico(-9.6,.03,-4,.5,.1,.2,'#5ca1b3'); }
+    if (servicos.eletrica) for(const y of [1.7,1.9,2.1]) blocoServico(0,y,-12.35,24,.025,.025,'#f4c449');
+    if (servicos.concertina) for(let x=-11;x<=11;x++) { const aro=new THREE.Mesh(new THREE.TorusGeometry(.2,.025,5,12),new THREE.MeshStandardMaterial({color:'#b8bcc0'})); aro.position.set(x,1.65,-12.35); visualServicos.add(aro); }
+    if (servicos.portao) blocoServico(-8,2.5,12.35,4.4,.25,.2,'#f28c28');
+    if (servicos.alarme) { const sirene=blocoServico(-4.8,2.45,10.4,.25,.25,.25,'#ff3535'); sirene.material.emissive.set('#a82222'); }
+    if (servicos.roboLimpeza) { blocoServico(-10.1,.05,-5,.6,.35,.6,'#4e9eae'); blocoServico(-10.1,.4,-5,.25,.1,.25,'#d5e3e5'); }
+    if(servicos.drone && !droneVisual) {
+      droneVisual=new THREE.Group();
+      for(const [x,z] of [[0,0],[-.45,-.45],[.45,-.45],[-.45,.45],[.45,.45]]) {
+        const rotor=new THREE.Mesh(new THREE.BoxGeometry(.45,.08,.16),new THREE.MeshStandardMaterial({color:'#334c58'})); rotor.position.set(x,0,z); droneVisual.add(rotor);
+      }
+      cena.add(droneVisual);
+    }
+  }
+  for(const v of frota.veiculos.filter((v) => v.id !== 1)) {
+    if(!modelosFrota.has(v.id)) { const modelo=criarVan(cena,-8,9.4); if(v.tipo === 'caminhao') modelo.scale.set(1.15,1.3,1.25); if(v.tipo === 'carreta') modelo.scale.set(1.15,1.3,1.7); modelosFrota.set(v.id,modelo); }
+    const modelo=modelosFrota.get(v.id), viagem=frota.viagens.find((x)=>x.veiculo===v.id);
+    modelo.visible=!!viagem && viagem.progresso < .35;
+    if(viagem) modelo.position.z=9.4+viagem.progresso*18;
+  }
+}
+function comprarServico(id, custo) {
+  if(servicos[id]) { mensagem('Esta melhoria já está contratada ou instalada.'); return; }
+  if(['guarda','cao','alarme'].includes(id) && !servicos.guarita) { falha('Compre a guarita primeiro.'); return; }
+  if(id==='cao' && !servicos.guarda) { falha('Contrate o segurança primeiro.'); return; }
+  if(id==='servidores' && !servicos.datacenter) { falha('Construa o datacenter primeiro.'); return; }
+  if(id==='datacenter' && maquinas.some((m)=>Math.abs(m.x-6)<2.3 && Math.abs(m.z+9)<2)) { falha('Área do datacenter ocupada por máquinas (x 6, fundo do terreno). Não foi cobrado.'); return; }
+  if(['rh','gerente'].includes(id)) {
+    if(construcao.nivel<1) { falha('Compre primeiro o terreno expandido.'); return; }
+    const z=id==='rh'?-1:5;
+    if(maquinas.some((m)=>Math.abs(m.x-16)<2.5 && Math.abs(m.z-z)<2)) { falha('Área ocupada por máquinas. Não foi cobrado.'); return; }
+  }
+  if(!pagar(custo)) { falha(`Custo: R$ ${custo}. Saldo insuficiente.`); return; }
+  servicos[id]=true; atualizarVisualServicos(); atualizarPlacar(); mensagem('Compra concluída. Confira os serviços no painel.');
+}
+function comprarFrota(tipo) {
+  const r=comprarVeiculo(frota,tipo,pagar); if(r.erro) { falha(r.erro); return; }
+  atualizarVisualServicos(); atualizarPlacar(); mensagem(`${r.nome} comprado. Frota com ${frota.veiculos.length} veículos.`);
+}
+function tomarCafe() {
+  if(servicos.cafe>0) { mensagem('O café ainda está ativo. Aguarde o efeito terminar.'); return; }
+  if(!pagar(10)) { falha('Cafezinho custa R$ 10.'); return; }
+  servicos.cafe=120; atualizarPlacar(); mensagem('Cafezinho: personagem 25% mais rápido por 2 minutos de jogo.');
+}
+function comprarAndroide() {
+  if(servicos.androides>=4) { falha('Limite de 4 androides de produção.'); return; }
+  if(!pagar(400)) { falha('Androide custa R$ 400.'); return; }
+  servicos.androides++; atualizarVisualServicos(); atualizarPlacar(); mensagem('Androide contratado: produz em máquinas manuais e transporta caixas.');
+}
+function atualizarServicos(dt) {
+  servicos.cafe=Math.max(0,servicos.cafe-dt); jogador.userData.bonusVelocidade=servicos.cafe>0?1.25:1;
+  if(servicos.limpeza) { servicos.tempoLimpeza+=dt; if(servicos.tempoLimpeza>=(servicos.roboLimpeza?10:30)) { servicos.tempoLimpeza=0; if(refugo>0) { refugo=0; atualizarPlacar(); } } }
+  for(const androide of androides) atualizarFuncionario(androide,dt,maquinas,acoesFuncionario);
+  if(droneVisual) { faseDrone+=dt*.35; droneVisual.position.set(Math.cos(faseDrone)*8,6,Math.sin(faseDrone)*8); droneVisual.rotation.y=faseDrone; }
+  if(servicos.transportadora) for(let i=0;i<frota.veiculos.length;i++) { if(!despachar(quadro,{quantidade:quantidadeDe,retirar},frota).viagem) break; atualizarPlacar(); }
+  document.getElementById('status-servicos').textContent=`Frota: ${frota.veiculos.length}/6 · ${frota.viagens.length} em viagem · transportadora ${servicos.transportadora?'ativa':'não contratada'} · limpeza ${servicos.limpeza?'ativa':'não contratada'} · androides ${servicos.androides}/4 · café ${Math.ceil(servicos.cafe)} s. Segurança: instalações visuais (sem invasões no jogo).`;
+  atualizarVisualServicos();
+}
 
 const maquinas = [];
 const funcionarios = [];
@@ -847,6 +945,27 @@ function trocarCatalogo(campo, rotulo) {
 }
 
 const teclasDeAcao = {
+  Datacenter: () => comprarServico('datacenter',600),
+  Servidores: () => comprarServico('servidores',350),
+  IA: () => comprarServico('ia',250),
+  RH: () => comprarServico('rh',250),
+  Gerente: () => comprarServico('gerente',350),
+  Drone: () => comprarServico('drone',250),
+  RoboLimpeza: () => comprarServico('roboLimpeza',200),
+  Androide: comprarAndroide,
+  ComprarVan: () => comprarFrota('van'),
+  ComprarCaminhao: () => comprarFrota('caminhao'),
+  ComprarCarreta: () => comprarFrota('carreta'),
+  Transportadora: () => comprarServico('transportadora',300),
+  Guarita: () => comprarServico('guarita',180),
+  Seguranca: () => comprarServico('guarda',120),
+  Pastor: () => comprarServico('cao',100),
+  Limpeza: () => comprarServico('limpeza',100),
+  Eletrica: () => comprarServico('eletrica',150),
+  Concertina: () => comprarServico('concertina',100),
+  Portao: () => comprarServico('portao',200),
+  Alarme: () => comprarServico('alarme',80),
+  Cafe: tomarCafe,
   KeyJ: abrirMenu,
   MelhorarEstoque: melhorarEstoque,
   ComprarBancada: () => { tipoCompraMaquina = 'bancada'; construirComMouse = true; mensagem('Bancada · R$ 60: clique no chão perto do personagem ou aperte B.'); },
@@ -1258,6 +1377,7 @@ function montarSaveAtual() {
     construcao: exportarConstrucao(construcao),
     campanha: etapasConcluidas,
     nivelEstoque,
+    servicos,
     energia: exportarEnergia(energia),
     refugo,
     caixas,
@@ -1320,6 +1440,11 @@ function restaurarJogo() {
   caixas = save.caixas;
   etapasConcluidas = save.campanha ?? 0;
   nivelEstoque = save.nivelEstoque ?? 0;
+  if(save.servicos) {
+    for(const k of ['guarita','guarda','cao','limpeza','transportadora','eletrica','concertina','portao','alarme','drone','roboLimpeza','rh','gerente','datacenter','servidores','ia']) servicos[k]=save.servicos[k]===true;
+    servicos.androides=Math.min(4,Math.max(0,Math.floor(Number(save.servicos.androides)||0)));
+    servicos.cafe=Math.min(120,Math.max(0,Number(save.servicos.cafe)||0));
+  }
   ambiente.importar(save.relogio);
   energia = importarEnergia(save.energia);
   refugo = save.refugo;
@@ -1402,8 +1527,9 @@ renderer.setAnimationLoop(() => {
   while (acumuladorSimulacao >= 1 / 60) {
   const dt = 1 / 60;
   atualizarJogador(jogador, teclas, dt, cameraJogo.giro, analogico);
+  atualizarServicos(dt);
   for (const f of funcionarios) atualizarFuncionario(f, dt, maquinas, acoesFuncionario);
-  atualizarAutomacao(maquinas, dt, acoesLinha);
+  atualizarAutomacao(maquinas, dt * (servicos.ia ? servicos.servidores ? 1.2 : 1.1 : 1), acoesLinha);
   avancarContratos(dt);
   avancarEntregas(dt);
   avancarEnergia(dt);
