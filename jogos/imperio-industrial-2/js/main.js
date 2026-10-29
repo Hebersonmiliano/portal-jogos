@@ -100,6 +100,7 @@ import {
   venceu,
 } from './economia.js';
 
+import { PALETA, bloco, lampada, mat, texturaConcreto, texturaPlaca, vidroJanela } from './visual/materiais.js';
 const limiteEquipe = (estado) => estado.nivel >= 2 ? 10 : estado.nivel >= 1 ? 6 : 3;
 // v0.8 incorporada no portal para manter a publicação em um único módulo.
 const MELHORIAS_PROPRIEDADE = [
@@ -118,15 +119,50 @@ function melhorar(estado, pagarValor) {
   if (!pagarValor(melhoria.custo)) return { erro: melhoria.nome + ' custa R$ ' + melhoria.custo + '.' };
   estado.nivel += 1; return { melhoria };
 }
+// Evolução visual da propriedade (v0.8): lote vizinho, escritório e fachada.
+
 function criarExpansao(cena) {
-  const material = (cor) => new THREE.MeshStandardMaterial({ color: cor, roughness: 0.8 });
-  const caixa = (g, w, h, d, cor, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), material(cor)); m.position.set(x,y+h/2,z); m.castShadow=true; m.receiveShadow=true; g.add(m); return m; };
-  const terreno = new THREE.Group(); terreno.position.x=16;
-  const piso = new THREE.Mesh(new THREE.PlaneGeometry(8,24), material('#9ca3a5')); piso.rotation.x=-Math.PI/2; piso.receiveShadow=true; terreno.add(piso); caixa(terreno,8,.12,.18,'#d8d1c5',0,0,11.9); cena.add(terreno);
-  const escritorio = new THREE.Group(); escritorio.position.set(16,0,-7.5); caixa(escritorio,5.5,.15,4.5,'#4b5559',0,0,0); caixa(escritorio,5.2,2.8,4.2,'#d8d1c5',0,.12,0); caixa(escritorio,5.4,.18,4.4,'#12343d',0,3,0); caixa(escritorio,1,2.1,.08,'#1f5966',-1.7,.12,2.12); caixa(escritorio,1.35,1.1,.05,'#79aeba',-.25,1,2.13); caixa(escritorio,1.35,1.1,.05,'#79aeba',1.5,1,2.13); cena.add(escritorio);
-  const fachada = new THREE.Group(); caixa(fachada,.22,3.8,.22,'#f28c28',-2.35,0,1.72); caixa(fachada,.22,3.8,.22,'#f28c28',2.35,0,1.72); caixa(fachada,4.8,.75,.12,'#f28c28',0,3.2,1.75); cena.add(fachada);
-  return { atualizar(nivel) { terreno.visible=nivel>=1; escritorio.visible=nivel>=2; fachada.visible=nivel>=3; } };
+  const terreno = new THREE.Group();
+  terreno.position.x = 16;
+  const piso = new THREE.Mesh(new THREE.PlaneGeometry(8, 24), new THREE.MeshStandardMaterial({ map: texturaConcreto(8), roughness: 0.92 }));
+  piso.rotation.x = -Math.PI / 2; piso.receiveShadow = true; terreno.add(piso);
+  const grade = new THREE.GridHelper(24, 24, PALETA.petroleo, PALETA.petroleo);
+  grade.scale.x = 1 / 3; grade.material.transparent = true; grade.material.opacity = 0.1; grade.position.y = 0.008; terreno.add(grade);
+  bloco(0.18, 0.1, 24, PALETA.concretoClaro, 4.05, 0, 0, terreno);
+  const placaLote = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 0.55), new THREE.MeshStandardMaterial({ map: texturaPlaca('LOTE 02 · IMPÉRIO', { fonte: 58 }), roughness: 0.6 }));
+  placaLote.position.set(0, 2.4, -10.8); terreno.add(placaLote);
+  for (const x of [-3.5, 3.5]) lampada(x, 3.8, -9.5, terreno, { alcance: 11, intensidade: 22, raio: 0.1 });
+  cena.add(terreno);
+
+  const escritorio = new THREE.Group();
+  escritorio.position.set(16, 0, -7.5);
+  bloco(5.5, 0.15, 4.5, PALETA.concretoEscuro, 0, 0, 0, escritorio);
+  bloco(5.2, 2.8, 4.2, mat(PALETA.concretoClaro, { aspereza: 0.85 }), 0, 0.12, 0, escritorio);
+  bloco(5.4, 0.18, 4.4, PALETA.petroleoEscuro, 0, 3.0, 0, escritorio);
+  bloco(1, 2.1, 0.08, PALETA.petroleoClaro, -1.7, 0.12, 2.12, escritorio);
+  for (const x of [-0.25, 1.5]) bloco(1.35, 1.1, 0.05, vidroJanela, x, 1.0, 2.13, escritorio);
+  const placa = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.55), new THREE.MeshStandardMaterial({ map: texturaPlaca('ADMINISTRAÇÃO', { fonte: 62 }), roughness: 0.55 }));
+  placa.position.set(0, 2.55, 2.15); escritorio.add(placa);
+  cena.add(escritorio);
+
+  const fachada = new THREE.Group();
+  fachada.position.set(0, 0, 0);
+  for (const x of [-2.35, 2.35]) bloco(0.22, 3.8, 0.22, PALETA.laranja, x, 0, 1.72, fachada);
+  const letreiro = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 0.75), new THREE.MeshStandardMaterial({ map: texturaPlaca('IMPÉRIO INDUSTRIAL', { fundo: PALETA.laranja, cor: PALETA.petroleoEscuro, fonte: 62 }), roughness: 0.45 }));
+  letreiro.position.set(0, 3.45, 1.75); fachada.add(letreiro);
+  lampada(-2, 3.3, 1.9, fachada, { alcance: 8, intensidade: 16, raio: 0.09 });
+  lampada(2, 3.3, 1.9, fachada, { alcance: 8, intensidade: 16, raio: 0.09 });
+  cena.add(fachada);
+
+  return {
+    atualizar(nivel) {
+      terreno.visible = nivel >= 1;
+      escritorio.visible = nivel >= 2;
+      fachada.visible = nivel >= 3;
+    },
+  };
 }
+
 
 // Campanha do Distrito: oito marcos cumulativos usando os sistemas jogáveis.
 const ETAPAS = [
@@ -193,7 +229,7 @@ const ambiente = criarAmbiente(cena, renderer);
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 400);
 
 criarCenario(cena);
-criarTerreno(cena);
+const terrenoPrincipal = criarTerreno(cena);
 const visualExpansao = criarExpansao(cena);
 const cursor = criarCursor(cena);
 
@@ -225,6 +261,7 @@ let escritorioRegistrado = false;
 
 function sincronizarConstrucaoVisual() {
   definirTerrenoExpandido(temTerreno(construcao));
+  terrenoPrincipal.userData.expandir(temTerreno(construcao));
   visualExpansao.atualizar(construcao.nivel);
   if (construcao.nivel >= 2 && !escritorioRegistrado) {
     registrarObstaculo(13.25, 18.75, -9.75, -5.25);
@@ -233,6 +270,9 @@ function sincronizarConstrucaoVisual() {
 }
 
 const rotulos = criarRotulos(document.getElementById('rotulos'), camera);
+rotulos.adicionar({ x: 0, y: 4, z: 0 }, { texto: () => 'OFICINA · produção', classe: 'estacao' });
+rotulos.adicionar({ x: 16, y: 1, z: 2 }, { texto: () => construcao.nivel >= 1 ? 'SEU TERRENO · área de expansão' : 'TERRENO À VENDA · G · R$ 350', classe: 'estacao' });
+rotulos.adicionar({ x: 16, y: 4.2, z: -7.5 }, { texto: () => construcao.nivel >= 2 ? 'SEU ESCRITÓRIO · equipe até 10' : 'ÁREA DO FUTURO ESCRITÓRIO', classe: 'estacao' });
 rotulos.adicionar({ x: ESTOQUE_PONTO.x, y: 2.8, z: ESTOQUE_PONTO.z }, { texto: () => `ESTOQUE · ${totalNoEstoque()}`, classe: 'estacao' });
 rotulos.adicionar({ x: EXPEDICAO.x, y: 3.1, z: EXPEDICAO.z }, {
   texto: () => (quadro.ativos.some((c) => quantidadeDe(c.chave) >= c.quantidade) ? 'EXPEDIÇÃO · contrato pronto!' : 'EXPEDIÇÃO'),
