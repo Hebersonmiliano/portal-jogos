@@ -339,7 +339,7 @@ function atualizarPlacar() {
   elEstoque.textContent = totalNoEstoque();
   prateleira.melhorar(nivelEstoque);
   document.getElementById('nivel-estoque').textContent = `Estoque nível ${nivelEstoque}/2 · central sem limite · saída das máquinas: ${nivelEstoque === 0 ? 8 : nivelEstoque === 1 ? 16 : 32} caixas`;
-  document.getElementById('compra-estoque').textContent = nivelEstoque >= 2 ? 'Estoque no máximo · saídas de 32 caixas' : `Melhorar estoque · R$ ${nivelEstoque === 0 ? 150 : 300} · saídas de ${nivelEstoque === 0 ? 16 : 32} caixas`;
+  document.getElementById('compra-estoque').textContent = nivelEstoque >= 2 ? 'Prateleira máxima · 7 níveis · saídas de 32 caixas' : `Ampliar prateleira · R$ ${nivelEstoque === 0 ? 150 : 300} · ${nivelEstoque === 0 ? 5 : 7} níveis e saídas de ${nivelEstoque === 0 ? 16 : 32} caixas`;
   elDetalheEstoque.textContent = resumoEstoque();
   elDinheiro.textContent = reais(getDinheiro());
   elFuncionarios.textContent = `${funcionarios.length}/${limiteEquipe(construcao)}`;
