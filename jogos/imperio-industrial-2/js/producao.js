@@ -20,7 +20,7 @@ export const CORES_LUZ = {
 
 // Máquina de montar caixas: gabinete com painel, mesa de aço, prensa com cabeçote laranja
 // e torre de luz. Ocupa uma célula (0,9 m).
-export function criarMaquina(x, z) {
+export function criarMaquina(x, z, tipo = 'bancada') {
   const malha = new THREE.Group();
   malha.position.set(x, 0, z);
   const aco = mat(PALETA.aco, { aspereza: 0.35, metal: 0.75 });
@@ -75,10 +75,15 @@ export function criarMaquina(x, z) {
     fumaca.push(bola);
   }
   malha.userData.fumaca = fumaca;
+  if (tipo === 'prensa') {
+    bloco(0.12, 1.4, 0.14, PALETA.laranja, -0.36, 0.8, -0.32, malha);
+    bloco(0.12, 1.4, 0.14, PALETA.laranja, 0.36, 0.8, -0.32, malha);
+    bloco(0.9, 0.22, 0.7, PALETA.laranja, 0, 2.05, -0.1, malha);
+  } else bloco(0.95, 0.06, 0.95, PALETA.madeira, 0, 0.8, 0, malha);
 
   // saída: caixas prontas, ainda não levadas ao estoque; esteira: transporte automático até o estoque
   return {
-    x, z, malha, luz, saida: [], esteira: null, comprimentoEsteira: 0, transito: [],
+    x, z, tipo, malha, luz, saida: [], esteira: null, comprimentoEsteira: 0, transito: [],
     automatica: false, produto: null, cronometroProducao: 0, cronometroEsteira: 0, batida: 0,
     desgaste: 0, quebrada: false, inspecao: false,
   };
@@ -251,3 +256,4 @@ export function maquinaProxima(posicao, maquinas) {
   }
   return melhor;
 }
+
