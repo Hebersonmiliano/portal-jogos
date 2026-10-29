@@ -100,6 +100,7 @@ import {
   venceu,
 } from './economia.js';
 
+const limiteEquipe = (estado) => estado.nivel >= 2 ? 10 : estado.nivel >= 1 ? 6 : 3;
 // v0.8 incorporada no portal para manter a publicação em um único módulo.
 const MELHORIAS_PROPRIEDADE = [
   { id: 'terreno', nome: 'Terreno vizinho', custo: 350 },
@@ -113,7 +114,7 @@ const exportarConstrucao = (e) => ({ nivel: e.nivel });
 const importarConstrucao = (d) => ({ nivel: Math.max(0, Math.min(3, Math.floor(Number(d?.nivel) || 0))) });
 function melhorar(estado, pagarValor) {
   const melhoria = proximaMelhoria(estado);
-  if (!melhoria) return { erro: 'Todas as melhorias já foram construídas.' };
+  if (!melhoria) return { erro: 'Terreno, escritório e fachada concluídos. Use F para contratar até 10 funcionários.' };
   if (!pagarValor(melhoria.custo)) return { erro: melhoria.nome + ' custa R$ ' + melhoria.custo + '.' };
   estado.nivel += 1; return { melhoria };
 }
@@ -244,7 +245,7 @@ const cameraJogo = criarCameraJogo(camera, renderer.domElement, jogador.position
 
 const maquinas = [];
 const funcionarios = [];
-const LIMITE_FUNCIONARIOS = 3;
+const LIMITE_FUNCIONARIOS = 10; // teto para importação; contratação depende da propriedade
 let caixas = 0;
 let etapasConcluidas = 0;
 let painelCampanhaTimer = 0;
@@ -288,7 +289,7 @@ function atualizarPlacar() {
   elEstoque.textContent = totalNoEstoque();
   elDetalheEstoque.textContent = resumoEstoque();
   elDinheiro.textContent = reais(getDinheiro());
-  elFuncionarios.textContent = funcionarios.length;
+  elFuncionarios.textContent = `${funcionarios.length}/${limiteEquipe(construcao)}`;
   elLinha.textContent = resumoLinha();
   cacamba.atualizar(refugo);
   const defeitos = defeituosasNoEstoque();
@@ -299,7 +300,7 @@ function atualizarPlacar() {
   const proxima = proximaMelhoria(construcao);
   elPropriedade.textContent = proxima
     ? `Nível ${construcao.nivel}/3 · próxima: ${proxima.nome} (R$ ${proxima.custo})`
-    : 'Nível 3/3 · complexo industrial concluído';
+    : 'Terreno, escritório e fachada prontos · equipe até 10 (F contrata)';
   atualizarPainelFrota();
   prateleira.atualizar(
     exportarEstoque().map(([chave, quantidade]) => ({ cor: produtoPorChave(chave)?.cor ?? 0xc89b5a, quantidade })),
@@ -460,8 +461,8 @@ function automatizarMaquina() {
 
 // Contrata um funcionário que aparece perto da oficina e trabalha sozinho.
 function contratarFuncionario() {
-  if (funcionarios.length >= LIMITE_FUNCIONARIOS) {
-    falha(`Limite de ${LIMITE_FUNCIONARIOS} funcionários.`);
+  if (funcionarios.length >= limiteEquipe(construcao)) {
+    falha(`Limite de ${limiteEquipe(construcao)} funcionários. ${construcao.nivel === 0 ? 'Compre o terreno com G para liberar 6.' : construcao.nivel === 1 ? 'Construa o escritório com G para liberar 10.' : 'Equipe completa.'}`);
     return;
   }
   if (!pagar(CUSTO_FUNCIONARIO)) {
