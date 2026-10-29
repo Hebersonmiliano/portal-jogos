@@ -678,7 +678,7 @@ function automatizarMaquina() {
 }
 
 // Contrata um funcionário que aparece perto da oficina e trabalha sozinho.
-function contratarFuncionario() {
+function contratarFuncionario(genero = funcionarios.length % 2 === 0 ? 'mulher' : 'homem') {
   if (funcionarios.length >= limiteEquipe(construcao)) {
     falha(`Limite de ${limiteEquipe(construcao)} funcionários. ${construcao.nivel === 0 ? 'Compre o terreno com G para liberar 6.' : construcao.nivel === 1 ? 'Construa o escritório com G para liberar 10.' : 'Equipe completa.'}`);
     return;
@@ -687,7 +687,7 @@ function contratarFuncionario() {
     falha(`Funcionário custa R$ ${CUSTO_FUNCIONARIO}. Você tem R$ ${getDinheiro()}.`);
     return;
   }
-  const f = criarFuncionario(-3 + funcionarios.length, 3.5);
+  const f = criarFuncionario(-3 + funcionarios.length, 3.5, genero);
   cena.add(f.malha);
   funcionarios.push(f);
   atualizarPlacar();
@@ -1005,6 +1005,7 @@ function trocarCatalogo(campo, rotulo) {
 }
 
 const teclasDeAcao = {
+  ContratarMulher: () => contratarFuncionario('mulher'),
   ComprarBicicleta: () => comprarFrota('bicicleta'),
   ComprarMoto: () => comprarFrota('moto'),
   BancadaPC: comprarBancadaPC,
@@ -1456,7 +1457,7 @@ function montarSaveAtual() {
     relogio: ambiente.exportar(),
     jogador: jogador.position,
     maquinas,
-    funcionarios: funcionarios.map((f) => f.malha.position),
+    funcionarios: funcionarios.map((f) => ({ x:f.malha.position.x, z:f.malha.position.z, genero:f.genero })),
   });
 }
 
@@ -1550,7 +1551,7 @@ function restaurarJogo() {
     }
   }
   for (const pos of save.funcionarios) {
-    const f = criarFuncionario(pos.x, pos.z);
+    const f = criarFuncionario(pos.x, pos.z, pos.genero ?? 'homem');
     cena.add(f.malha);
     funcionarios.push(f);
   }
