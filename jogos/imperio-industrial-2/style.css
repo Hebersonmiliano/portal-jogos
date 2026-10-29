@@ -349,4 +349,7 @@ button:focus-visible { outline: 2px solid var(--laranja); outline-offset: 2px; }
 #mapa-rota .fabrica { left: 4px; } #mapa-rota .cliente { right: 4px; }
 #veiculo-mapa { position: absolute; left: 8%; top: 12px; z-index: 1; color: var(--laranja); font-size: 15px; transition: left 0.15s linear; }
 #mapa-rota:not(.ativa) #veiculo-mapa { left: 8% !important; }
+#painel-mouse { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%); z-index: 15; display: grid; gap: 6px; padding: 14px; max-width: 90vw; border: 1px solid #f28c28; border-radius: 10px; background: #102c34; color: white; }
+#painel-mouse[hidden] { display: none; }
+#painel-mouse button { padding: 9px; border: 1px solid #54747b; border-radius: 5px; background: #21434c; color: white; cursor: pointer; }
 
