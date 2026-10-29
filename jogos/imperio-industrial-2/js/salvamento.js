@@ -71,7 +71,7 @@ export function montarSave({ economia, estoque, escolha, contratos, energia = nu
       quebrada: !!m.quebrada,
       produto: m.produto?.chave ?? null,
     })),
-    funcionarios: funcionarios.map((f) => ({ x: f.x, z: f.z })),
+    funcionarios: funcionarios.map((f) => ({ x: f.x, z: f.z, ...(f.genero ? { genero:f.genero } : {}) })),
   };
 }
 
@@ -139,7 +139,7 @@ export function lerSave(texto, { limite = 11.5, capacidade = 8, maxFuncionarios 
     maquinas,
     funcionarios: lista(dados.funcionarios)
       .slice(0, Math.min(maxFuncionarios, nivelConstrucao >= 2 ? 10 : nivelConstrucao >= 1 ? 6 : 3))
-      .map((f) => ({ x: dentroX(f?.x), z: dentro(f?.z, limite) })),
+      .map((f) => ({ x: dentroX(f?.x), z: dentro(f?.z, limite), ...(f?.genero === 'mulher' || f?.genero === 'homem' ? {genero:f.genero} : {}) })),
   };
 }
 
