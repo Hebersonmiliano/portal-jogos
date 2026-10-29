@@ -13,6 +13,15 @@ export const TRANSITOS = [
   { nome: 'livre', fator: 0.8 }, { nome: 'normal', fator: 1 }, { nome: 'intenso', fator: 1.35 },
 ];
 const limitar = (v) => Math.max(0, Math.min(100, v));
+export const VEICULOS = { van: { nome: 'Van', custo: 200, capacidade: 32, fator: 1 }, caminhao: { nome: 'Caminhão', custo: 500, capacidade: 60, fator: 0.85 }, carreta: { nome: 'Carreta', custo: 900, capacidade: 120, fator: 0.7 } };
+export function comprarVeiculo(frota, tipo, pagar) {
+  const modelo = VEICULOS[tipo];
+  if (!modelo || frota.veiculos.length >= 6) return { erro: 'Limite de 6 veículos na frota.' };
+  if (!pagar(modelo.custo)) return { erro: `${modelo.nome} custa R$ ${modelo.custo}.` };
+  const id = Math.max(0, ...frota.veiculos.map((v) => v.id)) + 1;
+  frota.veiculos.push({ id, tipo, estado: 'doca' });
+  return { nome: modelo.nome };
+}
 
 export function novaFrota() {
   return { veiculos: [{ id: 1, tipo: 'van', estado: 'doca' }], viagens: [], concluidas: 0, km: 0 };
@@ -20,14 +29,13 @@ export function novaFrota() {
 export function veiculoLivre(frota) { return frota.veiculos.find((v) => v.estado === 'doca') ?? null; }
 
 export function despachar(quadro, estoque, frota, rng = Math.random) {
-  const veiculo = veiculoLivre(frota);
-  if (!veiculo) return { erro: 'A van ainda está em uma entrega.' };
-  const contrato = [...quadro.ativos].filter((c) => estoque.quantidade(c.chave) >= c.quantidade).sort((a, b) => a.restante - b.restante)[0];
+  const contrato = [...quadro.ativos].filter((c) => estoque.quantidade(c.chave) >= c.quantidade && frota.veiculos.some((v) => v.estado === 'doca' && VEICULOS[v.tipo].capacidade >= c.quantidade)).sort((a, b) => a.restante - b.restante)[0];
   if (!contrato) return { erro: 'Nenhum contrato está pronto para carregar.' };
+  const veiculo = frota.veiculos.find((v) => v.estado === 'doca' && VEICULOS[v.tipo].capacidade >= contrato.quantidade);
   const retirada = estoque.retirar(contrato.chave, contrato.quantidade);
   const rota = ROTAS[contrato.cliente] ?? ROTAS.mercadinho;
   const transito = TRANSITOS[Math.min(TRANSITOS.length - 1, Math.floor(rng() * TRANSITOS.length))];
-  const duracaoIda = Math.max(1, Math.round(rota.tempo * transito.fator));
+  const duracaoIda = Math.max(1, Math.round(rota.tempo * transito.fator * VEICULOS[veiculo.tipo].fator));
   const viagem = { id: contrato.id, veiculo: veiculo.id, contrato: { ...contrato }, devolvidas: retirada?.defeituosas ?? 0,
     rota: contrato.cliente, transito: transito.nome, distancia: rota.distancia, fase: 'ida', duracaoIda, restante: duracaoIda, progresso: 0 };
   quadro.ativos.splice(quadro.ativos.indexOf(contrato), 1);
@@ -75,8 +83,15 @@ export function importarFrota(d) {
   const f = novaFrota(); if (!d || typeof d !== 'object') return f;
   f.concluidas = Math.max(0, Math.floor(Number(d.concluidas) || 0)); f.km = Math.max(0, Number(d.km) || 0);
   const viagens = Array.isArray(d.viagens) ? d.viagens : [];
-  f.viagens = viagens.filter((v) => v && ROTAS[v.rota] && v.contrato && Number.isFinite(v.restante)).slice(0, 1)
+  if (Array.isArray(d.veiculos)) {
+    const ids = new Set();
+    const validos = d.veiculos.filter((v) => v && VEICULOS[v.tipo] && Number.isInteger(v.id) && v.id > 0 && !ids.has(v.id) && ids.add(v.id)).slice(0,6);
+    if (validos.length) f.veiculos = validos.map((v) => ({ id:v.id, tipo:v.tipo, estado:'doca' }));
+  }
+  const ocupados = new Set();
+  f.viagens = viagens.filter((v) => v && ROTAS[v.rota] && v.contrato && Number.isFinite(v.restante) && f.veiculos.some((x) => x.id === v.veiculo) && !ocupados.has(v.veiculo) && ocupados.add(v.veiculo)).slice(0, 6)
     .map((v) => ({ ...v, fase: v.fase === 'volta' ? 'volta' : 'ida', restante: Math.max(0.1, v.restante), duracaoIda: Math.max(1, Number(v.duracaoIda) || ROTAS[v.rota].tempo), progresso: Math.max(0, Math.min(1, Number(v.progresso) || 0)) }));
-  f.veiculos[0].estado = f.viagens[0]?.fase === 'volta' ? 'retorno' : f.viagens.length ? 'entrega' : 'doca'; return f;
+  for (const v of f.veiculos) { const viagem = f.viagens.find((x) => x.veiculo === v.id); v.estado = viagem ? viagem.fase === 'volta' ? 'retorno' : 'entrega' : 'doca'; }
+  return f;
 }
 
