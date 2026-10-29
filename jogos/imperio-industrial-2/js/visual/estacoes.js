@@ -33,6 +33,7 @@ export function criarPrateleira(cena, x, z) {
 
   let assinatura = '';
   return {
+    melhorar(nivel) { g.scale.set(1 + nivel * 0.25, 1 + nivel * 0.25, 1 + nivel * 0.25); },
     atualizar(lista) {
       const cores = [];
       for (const { cor, quantidade } of lista) for (let i = 0; i < quantidade && cores.length < 24; i++) cores.push(cor);
@@ -167,3 +168,4 @@ export function criarCacamba(cena, x, z) {
     },
   };
 }
+
