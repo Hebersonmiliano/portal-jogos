@@ -44,7 +44,7 @@ import {
   gravar,
   lerCodigo,
   montarSave,
-} from './salvamento.js';
+} from './salvamento.js?v=0.9.9';
 import {
   MAX_ATIVOS,
   aceitar,
