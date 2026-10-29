@@ -288,6 +288,16 @@ const funcionarios = [];
 const LIMITE_FUNCIONARIOS = 10; // teto para importação; contratação depende da propriedade
 let caixas = 0;
 let etapasConcluidas = 0;
+let nivelEstoque = 0;
+function melhorarEstoque() {
+  if (nivelEstoque >= 2) { mensagem('Estoque no nível máximo. Saídas com 32 caixas; estoque central sem limite.'); return; }
+  const custo = nivelEstoque === 0 ? 150 : 300;
+  if (!pagar(custo)) { falha(`Melhoria do estoque custa R$ ${custo}.`); return; }
+  nivelEstoque++;
+  maquinas.forEach((m) => { m.capacidadeSaida = nivelEstoque === 1 ? 16 : 32; });
+  atualizarPlacar();
+  mensagem(`Estoque melhorado: saída de cada máquina ampliada para ${nivelEstoque === 1 ? 16 : 32} caixas.`);
+}
 let painelCampanhaTimer = 0;
 
 function atualizarCampanha() {
@@ -327,6 +337,9 @@ function atualizarPlacar() {
   elProduto.textContent = produto.nome;
   elCorProduto.style.background = corCss(produto.cor);
   elEstoque.textContent = totalNoEstoque();
+  prateleira.melhorar(nivelEstoque);
+  document.getElementById('nivel-estoque').textContent = `Estoque nível ${nivelEstoque}/2 · central sem limite · saída das máquinas: ${nivelEstoque === 0 ? 8 : nivelEstoque === 1 ? 16 : 32} caixas`;
+  document.getElementById('compra-estoque').textContent = nivelEstoque >= 2 ? 'Estoque no máximo · saídas de 32 caixas' : `Melhorar estoque · R$ ${nivelEstoque === 0 ? 150 : 300} · saídas de ${nivelEstoque === 0 ? 16 : 32} caixas`;
   elDetalheEstoque.textContent = resumoEstoque();
   elDinheiro.textContent = reais(getDinheiro());
   elFuncionarios.textContent = `${funcionarios.length}/${limiteEquipe(construcao)}`;
@@ -600,7 +613,7 @@ function rotularMaquina(maquina) {
     texto: () => {
       if (maquina.quebrada) return `QUEBRADA · K conserta (R$ ${custoManutencao(maquina)})`;
       const partes = [];
-      if (maquina.saida.length) partes.push(`${maquina.saida.length}/${CAPACIDADE_SAIDA}`);
+      if (maquina.saida.length) partes.push(`${maquina.saida.length}/${maquina.capacidadeSaida ?? CAPACIDADE_SAIDA}`);
       if (maquina.desgaste >= 50) partes.push(`desgaste ${Math.round(maquina.desgaste)}%`);
       return partes.join(' · ');
     },
@@ -625,6 +638,7 @@ function posicionarMaquina(celula = null) {
     return;
   }
   const maquina = criarMaquina(cx, cz, tipoCompraMaquina);
+  maquina.capacidadeSaida = nivelEstoque === 0 ? 8 : nivelEstoque === 1 ? 16 : 32;
   if (tipoCompraMaquina === 'prensa') { programar(maquina, produtoAtual()); marcarAutomatica(maquina); }
   cena.add(maquina.malha);
   maquinas.push(maquina);
@@ -647,7 +661,7 @@ function produzirCaixa() {
     return;
   }
   if (saidaCheia(maquina)) {
-    falha(`Saída cheia (${CAPACIDADE_SAIDA} caixas). Recolha com R ou ligue uma esteira.`);
+    falha(`Saída cheia (${maquina.capacidadeSaida ?? CAPACIDADE_SAIDA} caixas). Recolha com R, ligue uma esteira ou melhore o estoque na Loja.`);
     return;
   }
   if (getDinheiro() < CUSTO_PRODUCAO) {
@@ -833,6 +847,10 @@ function trocarCatalogo(campo, rotulo) {
 }
 
 const teclasDeAcao = {
+  KeyJ: abrirMenu,
+  MelhorarEstoque: melhorarEstoque,
+  ComprarBancada: () => { tipoCompraMaquina = 'bancada'; construirComMouse = true; mensagem('Bancada · R$ 60: clique no chão perto do personagem ou aperte B.'); },
+  ComprarPrensa: () => { tipoCompraMaquina = 'prensa'; construirComMouse = true; mensagem('Prensa · R$ 250: clique no chão perto do personagem ou aperte B.'); },
   KeyB: posicionarMaquina,
   KeyE: produzirCaixa,
   KeyR: recolherSaida,
@@ -1236,6 +1254,7 @@ function montarSaveAtual() {
     frota: exportarFrota(frota),
     construcao: exportarConstrucao(construcao),
     campanha: etapasConcluidas,
+    nivelEstoque,
     energia: exportarEnergia(energia),
     refugo,
     caixas,
@@ -1297,12 +1316,14 @@ function restaurarJogo() {
   sincronizarConstrucaoVisual();
   caixas = save.caixas;
   etapasConcluidas = save.campanha ?? 0;
+  nivelEstoque = save.nivelEstoque ?? 0;
   ambiente.importar(save.relogio);
   energia = importarEnergia(save.energia);
   refugo = save.refugo;
   for (const dados of save.maquinas) {
     if (!cabeAqui(dados.x, dados.z)) continue;
     const maquina = criarMaquina(dados.x, dados.z, dados.tipo);
+    maquina.capacidadeSaida = nivelEstoque === 0 ? 8 : nivelEstoque === 1 ? 16 : 32;
     cena.add(maquina.malha);
     maquinas.push(maquina);
     rotularMaquina(maquina);
