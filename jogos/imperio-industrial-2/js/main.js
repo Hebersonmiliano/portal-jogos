@@ -340,7 +340,7 @@ let droneVisual = null;
 let faseDrone = 0;
 const prediosServicosRegistrados = new Set();
 function atualizarVisualServicos() {
-  for(const [id,x,z,w,d] of [['guarita',-4.8,10.4,1.5,1.5],['rh',16,-1,4,3],['gerente',16,5,4,3]]) if(servicos[id] && !prediosServicosRegistrados.has(id)) {
+  for(const [id,x,z,w,d] of [['guarita',-4.8,10.4,1.5,1.5],['rh',16,-1,4,3],['gerente',16,5,4,3],['datacenter',6,-9,3.5,3]]) if(servicos[id] && !prediosServicosRegistrados.has(id)) {
     registrarObstaculo(x-w/2,x+w/2,z-d/2,z+d/2); prediosServicosRegistrados.add(id);
   }
   while(androides.length < servicos.androides) {
@@ -397,8 +397,9 @@ function atualizarVisualServicos() {
       modelosFrota.set(v.id,modelo);
     }
     const modelo=modelosFrota.get(v.id), viagem=frota.viagens.find((x)=>x.veiculo===v.id);
-    modelo.visible=!!viagem && viagem.progresso < .35;
-    if(viagem) modelo.position.z=9.4+viagem.progresso*18;
+    modelo.visible=!viagem || viagem.progresso < .35;
+    if(viagem) modelo.position.set(-8,0,9.4+viagem.progresso*18);
+    else modelo.position.set(-22+(v.id-2)*4,0,22);
   }
 }
 function comprarServico(id, custo) {
@@ -894,14 +895,15 @@ function atualizarPainelFrota() {
   if (!elFrota) return;
   const viagem = frota.viagens[0];
   if (!viagem) {
-    elFrota.textContent = 'Van na doca · pronta para carregar';
+    elFrota.textContent = `${frota.veiculos.length} veículo(s) na doca · ${frota.veiculos.map((v) => VEICULOS[v.tipo].nome).join(', ')}`;
     elMapaRota?.classList.remove('ativa');
     van.visible = true; van.position.set(EXPEDICAO.x, 0, 9.4);
     return;
   }
   const rota = ROTAS[viagem.rota];
   const acao = viagem.fase === 'ida' ? 'indo para' : 'voltando de';
-  elFrota.textContent = 'Van ' + acao + ' ' + rota.nome + ' · trânsito ' + viagem.transito + ' · ' + tempo(viagem.restante);
+  const veiculoAtual=frota.veiculos.find((v)=>v.id===viagem.veiculo);
+  elFrota.textContent = `${frota.viagens.length} viagem(ns) · ${VEICULOS[veiculoAtual?.tipo ?? 'van'].nome} ${acao} ${rota.nome} · trânsito ${viagem.transito} · ${tempo(viagem.restante)}`;
   elMapaRota?.classList.add('ativa');
   if (elVeiculoMapa) elVeiculoMapa.style.left = (8 + viagem.progresso * 82) + '%';
   van.visible = viagem.progresso < 0.35;
@@ -1182,6 +1184,7 @@ function fecharMenu() {
 function selecionarMenu(i) {
   selecaoMenu = (i + botoesMenu.length) % botoesMenu.length;
   botoesMenu.forEach((b, k) => b.classList.toggle('selecionado', k === selecaoMenu));
+  botoesMenu[selecaoMenu].scrollIntoView({ block: 'nearest' });
   if (!usandoControle) botoesMenu[selecaoMenu].focus();
 }
 
@@ -1268,7 +1271,7 @@ window.addEventListener('keydown', (e) => {
     return;
   }
   if (!elMenu.hidden) {
-    if (e.code === 'Escape') fecharMenu();
+    if (e.code === 'Escape' || e.code === 'KeyJ') fecharMenu();
     else if (e.code === 'ArrowDown' || e.code === 'KeyS') selecionarMenu(selecaoMenu + 1);
     else if (e.code === 'ArrowUp' || e.code === 'KeyW') selecionarMenu(selecaoMenu - 1);
     else return; // Enter e espaço ativam o botão focado normalmente.
@@ -1426,7 +1429,7 @@ function animarCena(dt) {
   const f = jogador.userData.frente;
   const cx = Math.round(jogador.position.x + f.x * 1.5);
   const cz = Math.round(jogador.position.z + f.z * 1.5);
-  if (Math.abs(cx) <= 11 && Math.abs(cz) <= 11) cursor.mostrar(cx, cz, cabeAqui(cx, cz));
+  if (cabeAqui(cx, cz)) cursor.mostrar(cx, cz, true);
   else cursor.esconder();
   rotulos.atualizar();
   const texto = ambiente.texto();
@@ -1457,7 +1460,7 @@ function montarSaveAtual() {
     relogio: ambiente.exportar(),
     jogador: jogador.position,
     maquinas,
-    funcionarios: funcionarios.map((f) => ({ x:f.malha.position.x, z:f.malha.position.z, genero:f.genero })),
+    funcionarios: [...funcionarios.map((f) => ({ x:f.malha.position.x, z:f.malha.position.z, genero:f.genero, carga:f.carga })), ...androides.map((f) => ({ x:f.malha.position.x, z:f.malha.position.z, androide:true, carga:f.carga }))],
   });
 }
 
