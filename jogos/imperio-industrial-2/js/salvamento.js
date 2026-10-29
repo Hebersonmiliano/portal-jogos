@@ -57,6 +57,7 @@ export function montarSave({ economia, estoque, escolha, contratos, energia = nu
     // Caixas em trânsito na esteira voltam para a saída: assim nenhuma se perde ao recarregar.
     maquinas: maquinas.map((m) => ({
       x: m.x,
+      tipo: m.tipo === 'prensa' ? 'prensa' : 'bancada',
       z: m.z,
       // Caixa com defeito ganha um * no fim da chave (ex.: "M-1-0*").
       saida: [...m.saida, ...(m.transito ?? [])].map((item) => item.produto.chave + (item.defeito ? '*' : '')),
@@ -99,6 +100,7 @@ export function lerSave(texto, { limite = 11.5, capacidade = 8, maxFuncionarios 
     if (vistas.has(`${x},${z}`)) continue; // duas máquinas na mesma célula
     vistas.add(`${x},${z}`);
     maquinas.push({
+      tipo: m.tipo === 'prensa' ? 'prensa' : 'bancada',
       x,
       z,
       saida: lista(m.saida)
