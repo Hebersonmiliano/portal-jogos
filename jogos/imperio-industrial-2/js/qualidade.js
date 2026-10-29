@@ -1,10 +1,10 @@
 // Qualidade e manutenção (v0.6): desgaste das máquinas, defeitos, quebras, conserto e inspeção.
 // Só regras: não importa o Three.js. O sorteio vem de fora (rng) para os testes serem previsíveis.
 
-export const DESGASTE_POR_CAIXA = 2; // % de desgaste a cada caixa produzida
+export const DESGASTE_POR_CAIXA = 0.5; // 200 caixas até desgaste total
 export const DEFEITO_BASE = 0.03; // chance de defeito com a máquina nova
 export const DEFEITO_POR_DESGASTE = 0.0025; // chance extra por ponto de desgaste (100% → 28%)
-export const LIMIAR_QUEBRA = 70; // a partir deste desgaste a máquina pode quebrar
+export const LIMIAR_QUEBRA = 90; // só pode quebrar após 180 caixas desde a manutenção
 export const CUSTO_CONSERTO = 60; // R$ para consertar uma máquina quebrada
 export const CUSTO_INSPETOR = 80; // R$ para instalar o inspetor automático numa esteira
 export const CAIXAS_POR_REAL = 5; // inspeção manual: R$ 1 a cada 5 caixas
@@ -14,11 +14,11 @@ export function chanceDefeito(desgaste) {
   return DEFEITO_BASE + DEFEITO_POR_DESGASTE * Math.max(0, Math.min(100, desgaste));
 }
 
-// Chance de quebrar a cada caixa: zero abaixo de 70%, sobe 1 ponto por % e é certa em 100%.
+// Zero abaixo de 90%; risco gradual de até 2%, e quebra certa em 100%.
 export function chanceQuebra(desgaste) {
   if (desgaste >= 100) return 1;
   if (desgaste < LIMIAR_QUEBRA) return 0;
-  return (desgaste - LIMIAR_QUEBRA) / 100;
+  return (desgaste - LIMIAR_QUEBRA) / 500;
 }
 
 // Registra uma caixa produzida: desgasta a máquina, sorteia defeito e quebra.
@@ -44,3 +44,4 @@ export function fazerManutencao(maquina) {
 export function custoInspecaoManual(caixas) {
   return Math.ceil(caixas / CAIXAS_POR_REAL);
 }
+
