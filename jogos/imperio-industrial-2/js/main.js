@@ -609,6 +609,7 @@ function rotularMaquina(maquina) {
 }
 
 // Coloca uma máquina na célula à frente do jogador (1,5 célula), se a célula estiver livre.
+let tipoCompraMaquina = 'bancada';
 function posicionarMaquina(celula = null) {
   const p = jogador.position;
   const f = jogador.userData.frente;
@@ -618,11 +619,13 @@ function posicionarMaquina(celula = null) {
     falha('Sem espaço aqui.');
     return;
   }
-  if (!pagar(CUSTO_MAQUINA)) {
-    falha(`Máquina custa R$ ${CUSTO_MAQUINA}. Você tem R$ ${getDinheiro()}.`);
+  const custoCompra = tipoCompraMaquina === 'prensa' ? 250 : CUSTO_MAQUINA;
+  if (!pagar(custoCompra)) {
+    falha(`Máquina custa R$ ${custoCompra}. Você tem R$ ${getDinheiro()}.`);
     return;
   }
-  const maquina = criarMaquina(cx, cz);
+  const maquina = criarMaquina(cx, cz, tipoCompraMaquina);
+  if (tipoCompraMaquina === 'prensa') { programar(maquina, produtoAtual()); marcarAutomatica(maquina); }
   cena.add(maquina.malha);
   maquinas.push(maquina);
   rotularMaquina(maquina);
@@ -1083,6 +1086,13 @@ document.addEventListener('pointerdown', (e) => {
   executarComando(oferta.dataset.comando);
 });
 document.addEventListener('click', (e) => {
+  const tipoBotao = e.target.closest('[data-tipo-maquina]');
+  if (tipoBotao) {
+    tipoCompraMaquina = tipoBotao.dataset.tipoMaquina;
+    construirComMouse = true;
+    mensagem('Clique no chão livre perto do personagem para comprar e construir; B também posiciona.');
+    tipoBotao.blur(); return;
+  }
   const alvo = e.target.closest('[data-comando]');
   if (!alvo || alvo.closest('#ofertas')) return;
   if (alvo.dataset.comando === 'KeyB') {
@@ -1292,7 +1302,7 @@ function restaurarJogo() {
   refugo = save.refugo;
   for (const dados of save.maquinas) {
     if (!cabeAqui(dados.x, dados.z)) continue;
-    const maquina = criarMaquina(dados.x, dados.z);
+    const maquina = criarMaquina(dados.x, dados.z, dados.tipo);
     cena.add(maquina.malha);
     maquinas.push(maquina);
     rotularMaquina(maquina);
