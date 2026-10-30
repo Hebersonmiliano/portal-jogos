@@ -54,6 +54,14 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ## Publicar
 
+### Café com Patas
+
+Disponível em `jogo.html?id=cafe-com-patas`, com a exportação Godot 4.7.2 sem threads em `jogos/cafe-com-patas/`. Versão 1.3: bandeja com dois produtos, oito clientes em três minutos, música com contrabaixo e controle de graves na tecla B. Computador com teclado; esta versão não tem controles por toque.
+
+O catálogo inclui capa, carrossel, busca e guia. A apresentação `assets/cafe-com-patas.js` e `.css` usa capturas e sprites locais em `assets/cafe-com-patas/`. O guia imprimível fica em `guias/cafe-com-patas.html`; o link de compartilhamento fica em `j/cafe-com-patas/`. Equipe: Emilly Lima, Ana Júlia Rodrigues e Prof. Heberson Miliano, 2º ano técnico de Programação de Jogos Digitais, para o Mundo SENAI.
+
+Fonte do jogo: https://github.com/Hebersonmiliano/cafe-com-patas . Para atualizar, exporte Web sem threads, substitua os arquivos em `jogos/cafe-com-patas/`, preserve os links para Portal Pixel/guia, aumente `versao` no catálogo e a chave de cache de `jogos.js` nas duas páginas. O motor Web é o mesmo já distribuído por outros jogos do portal. Testes: `node --test tests/apresentacao.test.cjs`.
+
 ### SETOR 404
 
 Versão 3.0.0: cinco fases, ferramentas conquistadas nas bancadas com E, secundária no L, troca no Q e pulso no R. A chave no J é gratuita. A Fundição acrescenta barreiras e blindagens para a marreta; o Controle Central encerra a campanha. Créditos de Thamyris Lopes e Maria Luiza, com orientação do Prof. Heberson, para a Semana da Indústria no SENAI: aparecem após a Fase 5 e no botão de apresentação do jogo. `weapons.js` concentra os recursos e efeitos; os movimentos das pernas são preservados. O card e as instruções públicas refletem os cinco estágios. Esta versão continua sem salvamento permanente.

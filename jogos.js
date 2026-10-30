@@ -15,7 +15,7 @@ window.SITE = {
   // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
   estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
-  carrossel: ["lenda-da-brasa", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
+  carrossel: ["lenda-da-brasa", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -33,6 +33,28 @@ window.GENEROS = [
 ];
 
 window.JOGOS = [
+  {
+    id: "cafe-com-patas",
+    titulo: "Café com Patas",
+    chamada: "Um café. Muitas patas. Vista o avental da raposa e cuide da cafeteria mais acolhedora da vizinhança.",
+    genero: ["Simulação", "Estratégia"],
+    tags: ["cafeteria", "animais", "pixel art", "raposa", "Mundo SENAI", "Emilly Lima", "Ana Júlia Rodrigues"],
+    descricao: "Controle a raposa barista, prepare café na cafeteira, bolo na vitrine e suco na geladeira. Leve até dois produtos na bandeja e atenda oito clientes em três minutos. Gato, coelho e capivara aguardam nas mesas: observe a paciência, combine os pedidos e reponha os ingredientes. Projeto de Emilly Lima e Ana Júlia Rodrigues, com orientação do Prof. Heberson Miliano, do 2º ano técnico de Programação de Jogos Digitais para o Mundo SENAI.",
+    controles: "Computador com teclado: clique em Jogar e pressione Enter. WASD/setas movem; E prepara ou serve em volta da mesa; R repõe ingredientes próximo das estações com bandeja vazia; Q descarta o último produto; Esc pausa. M liga a música, B alterna os graves, F alterna efeitos e +/− ajustam volume. L alterna iluminação. Bandeja para dois produtos; pedidos duplos recebem 24 segundos adicionais. Sem controles por toque nesta versão.",
+    url: "jogos/cafe-com-patas/index.html",
+    versao: "1.3.0",
+    capa: "assets/cafe-com-patas/pedidos.png",
+    guia: "guias/cafe-com-patas.html",
+    cor: "#dca759",
+    icone: "☕",
+    engine: "Godot 4.7.2 · HTML5",
+    mobile: false,
+    status: "disponivel",
+    lancamento: "2026-10-30",
+    destaque: true,
+    vitrineCafe: true,
+    novidades: [{ versao: "1.3", data: "2026-10-30", itens: ["Música com contrabaixo, mais volume e controle de graves na tecla B", "Bandeja com dois itens e tempo adicional em pedidos duplos", "Três mesas com clientes sentados, corredor da geladeira e colisões corrigidos"] }],
+  },
   {
     id: "setor-404",
     chamada: "A fábrica parou. Você é a solução. Enfrente robôs corrompidos e devolva a energia, um setor de cada vez.",

@@ -22,10 +22,35 @@ function fixture(page='index.html',game='ultima-transmissao'){
  const selectors=new Map(),storage=new Map();
  const document={getElementById:id=>{if(!nodes.has(id))throw Error('ID ausente: '+id);return nodes.get(id);},querySelector:s=>{if(!selectors.has(s))selectors.set(s,new Node());return selectors.get(s);},querySelectorAll:()=>[],createElement:tag=>new Node(tag),documentElement:new Node('html')};
  const context=vm.createContext({window:{addEventListener(){}},document,location:{search:'?id='+game},URLSearchParams,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},console});
- for(const script of ['jogos.js','assets/faisca.js','assets/lenda-da-brasa.js','assets/imperio-industrial.js','assets/comum.js','assets/setor404.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
+ for(const script of ['jogos.js','assets/faisca.js','assets/lenda-da-brasa.js','assets/imperio-industrial.js','assets/comum.js','assets/setor404.js','assets/cafe-com-patas.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
  return {context,document,run:file=>vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file}),storage};
 }
 function descendants(node,tag){return node.children.flatMap(n=>[...(n.tagName===tag?[n]:[]),...descendants(n,tag)]);}
+
+test('Café com Patas aparece na busca e oferece capturas, equipe e guia local',()=>{
+ const f=fixture();f.run('assets/vitrine.js');
+ assert.match(f.document.getElementById('paineis').textContent,/Um café. Muitas patas/);
+ f.document.getElementById('busca').handlers.input({target:{value:'Café com Patas'}});
+ assert.match(f.document.getElementById('conteudo').textContent,/Café com Patas/);
+ const g=f.context.window.JOGOS.find(j=>j.id==='cafe-com-patas');
+ assert.equal(g.versao,'1.3.0');assert.equal(g.mobile,false);
+ assert.ok(fs.existsSync(path.join(root,g.guia)));
+ assert.ok(fs.existsSync(path.join(root,g.url)));
+ for(const nome of ['Emilly Lima','Ana Júlia Rodrigues','Heberson Miliano'])assert.ok(g.descricao.includes(nome));
+});
+test('Café com Patas inicia uma exportação local e mantém tela cheia e guia',()=>{
+ const f=fixture('jogo.html','cafe-com-patas');f.run('assets/pagina-jogo.js');
+ const wrapper=f.document.getElementById('apresentacao-cafe');assert.equal(wrapper.hidden,false);
+ assert.equal(descendants(wrapper,'img').length,8);
+ for(const img of descendants(wrapper,'img'))assert.ok(fs.existsSync(path.join(root,img.src)),img.src);
+ const palco=f.document.getElementById('palco');assert.equal(descendants(palco,'iframe').length,0);
+ wrapper.querySelector('button').click();assert.equal(wrapper.hidden,true);
+ assert.equal(descendants(palco,'iframe').length,1);
+ assert.equal(descendants(palco,'iframe')[0].src,'jogos/cafe-com-patas/index.html?v=1.3.0');
+ assert.equal(f.document.getElementById('tela-cheia').disabled,false);
+ const html=fs.readFileSync(path.join(root,'jogos/cafe-com-patas/index.html'),'utf8');
+ assert.ok(!html.includes('chatgpt.site'));assert.match(html,/B<\/strong> graves/);
+});
 
 test('card SETOR 404 mostra Maya, cinco fases, equipe e inicia o jogador existente',()=>{
  const f=fixture('jogo.html','setor-404');f.run('assets/pagina-jogo.js');

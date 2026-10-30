@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Café com Patas — jogar</title>
+<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+<meta name="description" content="Cafe com Patas — jogo educacional do Mundo SENAI">
+<style>
+:root{color-scheme:dark;font-family:ui-monospace,Consolas,monospace;background:#241812;color:#fff0d2}*{box-sizing:border-box}body{margin:0;padding:18px;min-height:100vh;background:radial-gradient(ellipse at top,#70472f,#241812 75%)}header,footer,.toolbar{max-width:1152px;margin:0 auto}header{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:14px}h1{font-size:clamp(20px,3vw,30px);margin:0;color:#f9cf77}header p{margin:6px 0;font-size:13px}.badge{border:1px solid #b3875b;padding:7px;color:#f9cf77;font-size:12px}.game-shell{position:relative;max-width:1152px;margin:auto;background:#211511;border:5px solid #b48254;box-shadow:0 12px 40px #0006;aspect-ratio:16/9;overflow:hidden}canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;outline:none;image-rendering:pixelated}#cover{position:absolute;inset:0;display:grid;place-items:center;background:#2c1c16f5;text-align:center;padding:24px}.card{max-width:650px}h2{color:#f9cf77;font-size:clamp(20px,3vw,32px)}.card p{line-height:1.7}button{font:inherit;font-weight:bold;padding:12px 18px;color:#fff0d2;background:#714a32;border:2px solid #d3a16b;cursor:pointer;box-shadow:0 3px #392419}button:hover{background:#8a5b3b}button:focus-visible{outline:3px solid #f9cf77;outline-offset:4px}button:disabled{opacity:.6;cursor:wait}.primary{background:#466c4b;font-size:20px;min-width:180px}progress{width:min(90%,380px);height:14px;accent-color:#70a35e}#error{color:#ffb3a3;white-space:pre-wrap}#cover[hidden],progress[hidden]{display:none}.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 0;flex-wrap:wrap}.toolbar p{font-size:13px;margin:0;line-height:1.8}footer{font-size:12px;line-height:1.8;color:#d9c3a5;padding-top:10px;border-top:1px solid #775237}.game-shell:fullscreen{width:100vw;height:100vh;max-width:none;aspect-ratio:auto;display:grid;place-items:center;background:#211511;border:0}.game-shell:fullscreen canvas{width:min(100vw,177.777vh);height:auto}#mobile-note{color:#f9cf77;font-size:13px;display:none}@media(pointer:coarse){#mobile-note{display:block}}@media(max-width:600px){body{padding:8px}header{align-items:flex-start}.badge{display:none}.game-shell{border-width:3px}.toolbar p{font-size:11px}}
+</style></head><body>
+<header><div><h1>Café com Patas</h1><p>Uma pequena cafeteria. Grandes amizades.</p></div><span class="badge">Mundo SENAI · versão Web 1.3</span></header>
+<main><section class="game-shell" id="game-shell" aria-label="Jogo Café com Patas">
+<canvas id="canvas" width="1152" height="648" tabindex="0" aria-label="Jogo de cafeteria. Use WASD ou setas para mover e E para interagir.">Seu navegador precisa permitir WebGL 2 para jogar.</canvas>
+<div id="cover"><div class="card"><h2>Abra as portas da cafeteria</h2><p>Controle a raposa barista, prepare os pedidos e atenda oito clientes em três minutos. Clique em jogar e depois pressione <strong>Enter</strong>.</p><button class="primary" id="start" type="button">Jogar</button><p id="status" role="status" aria-live="polite">Para computador com teclado.</p><progress id="progress" hidden></progress><p id="error" role="alert"></p><p id="mobile-note">Esta versão usa teclado. Os controles por toque ainda não foram implementados.</p></div></div>
+</section><div class="toolbar"><p><strong>WASD/setas</strong> mover · <strong>E</strong> interagir · <strong>R</strong> repor · <strong>Q</strong> descartar<br><strong>Esc</strong> pausa · <strong>F</strong> efeitos · <strong>M</strong> música · <strong>B</strong> graves · <strong>+ / −</strong> volume</p><button id="fullscreen" type="button">Tela cheia</button></div></main>
+<p style="text-align:center"><a style="color:#f9cf77" href="../../index.html" target="_top">← Portal Pixel</a> · <a style="color:#f9cf77" href="../../guias/cafe-com-patas.html" target="_top">Guia ilustrado</a></p><footer>Emilly Lima · Ana Júlia Rodrigues · Prof. Heberson Miliano<br>Programação de Jogos Digitais — 2º ano técnico · Projeto educacional para o Mundo SENAI.<br>O recorde é guardado neste navegador quando o armazenamento local está disponível.</footer>
+<script src="index.js"></script>
+<script>
+'use strict';
+const config={"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":5382044,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const engine=new Engine(config);
+const canvas=document.getElementById('canvas');
+const start=document.getElementById('start');
+const status=document.getElementById('status');
+const progress=document.getElementById('progress');
+start.addEventListener('click',async()=>{
+ start.disabled=true;
+ document.getElementById('error').textContent='';
+ try{
+  const missing=typeof Engine.getMissingFeatures==='function'?Engine.getMissingFeatures({threads:false}):[];
+  if(missing.length)throw new Error('O navegador não oferece os recursos gráficos necessários. Tente um navegador atualizado com WebGL 2 ativado.');
+  status.textContent='Carregando a cafeteria...';progress.hidden=false;
+  await engine.startGame({canvas,onProgress:(current,total)=>{if(total){progress.max=total;progress.value=current;status.textContent='Carregando... '+Math.round(current/total*100)+'%';}}});
+  document.getElementById('cover').hidden=true;
+  canvas.focus();
+ }catch(error){console.error(error);document.getElementById('error').textContent='Não foi possível iniciar o jogo. '+(error.message||String(error));status.textContent='Recarregue a página para tentar novamente.';progress.hidden=true;}
+});
+document.getElementById('fullscreen').addEventListener('click',async()=>{try{await document.getElementById('game-shell').requestFullscreen();canvas.focus();}catch{canvas.focus();}});
+canvas.addEventListener('keydown',event=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(event.code))event.preventDefault();});
+// No Portal Pixel, o clique no jogador já solicitou a abertura do jogo.
+if(window.self!==window.top) start.click();
+</script></body></html>
+
