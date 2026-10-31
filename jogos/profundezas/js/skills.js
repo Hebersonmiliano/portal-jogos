@@ -81,6 +81,8 @@ function dodgeRecharge(p) { const r = skillRank(p, 'rolamento'); return 0.75 * (
 // Direção da mira: mouse (se usado há pouco) ou para onde o herói olha
 function aimAngle() {
   const p = G.p;
+  const pa = Input.padAim();
+  if (pa !== null) return pa;
   if (!Input.isTouch && Input.mouse.lastMove && performance.now() - Input.mouse.lastMove < 2500) {
     const w = screenToWorld(Input.mouse.x, Input.mouse.y);
     return Math.atan2(w.y - (p.y - 5), w.x - p.x);

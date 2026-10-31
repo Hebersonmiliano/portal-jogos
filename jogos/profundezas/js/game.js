@@ -100,6 +100,7 @@ function enterFloor(floor, viaStairs) {
   G.floorCanvas = renderFloorCanvas(G.level);
   G.enemies = []; G.projectiles = []; G.drops = []; G.chests = []; G.props = []; G.hazards = []; G.traps = [];
   G.corpses = []; G.spikes = []; G.barrels = []; G.blessing = null;
+  resetFlow();
   G.texts = []; G.particles = []; G.effects = [];
   G.boss = null; G.tombEnt = null;
   p.floor = floor;
@@ -156,6 +157,7 @@ function enterFloor(floor, viaStairs) {
   showHud(true);
   Music.play(Music.forFloor(floor));
   UI.toast(`Andar ${floor} · ${L.biome.name}`, '#fde68a');
+  Tips.show('start', 'Bem-vindo às Profundezas', () => `Mova com ${K('move')}. Encontre a escada para descer mais fundo e volte vivo à vila com o que juntar.`);
   if (L.isBoss) UI.toast('Um chefe guarda este andar.', '#f87171');
   saveGame();
 }
@@ -343,14 +345,16 @@ function updateDungeon(dt) {
   }
 
   // ações
-  const atkKey = Input.keys['j'] || Input.keys['k'] || Input.held('atk');
+  const atkKey = Input.keys['j'] || Input.keys['k'] || Input.held('atk') || Input.keys['p_atk'];
   if (Input.mouse.down) {
     const w = screenToWorld(Input.mouse.x, Input.mouse.y);
     const a = Math.atan2(w.y - (p.y - 5), w.x - p.x);
     p.face = Math.cos(a) < 0 ? -1 : 1;
     playerAttack(a);
   } else if (atkKey) {
-    playerAttack(Math.atan2(p.fy, p.fx));
+    const pa = Input.padAim();
+    if (pa !== null) p.face = Math.cos(pa) < 0 ? -1 : 1;
+    playerAttack(pa !== null ? pa : Math.atan2(p.fy, p.fx));
   }
   if ((Input.hit(' ') || Input.tb('dodge')) && p.dodgeCd <= 0 && p.dodgeCh > 0) {
     const dx = mv.x || mv.y ? mv.x : p.fx, dy = mv.x || mv.y ? mv.y : p.fy;
@@ -369,6 +373,7 @@ function updateDungeon(dt) {
   if (Input.hit('h') || Input.tb('skills')) { UI.skills('dungeon'); return; }
   if (G.state !== 'dungeon' || !G.level) return; // voltou à vila (pergaminho)
   updateSkills(dt);
+  Tips.check(dt);
 
   // explorar
   const ptx = Math.floor(p.x / TILE), pty = Math.floor(p.y / TILE);
@@ -378,6 +383,7 @@ function updateDungeon(dt) {
   }
 
   // inimigos e projéteis
+  updateFlow(dt);
   for (const e of G.enemies) if (!e.dead && (e.isProp || dist(e.x, e.y, p.x, p.y) < 320)) e.update(dt);
   G.enemies = G.enemies.filter(e => !e.dead);
   for (const pr of G.projectiles) pr.update(dt);
@@ -672,6 +678,7 @@ function enterVillage(msg) {
   saveGame();
   Music.play('village');
   villageMenu(msg);
+  Tips.show('village', 'A vila', 'Aqui você dorme na estalagem, vende tesouros no mercado e melhora o equipamento no ferreiro. Quando estiver pronto, escolha "Descer à masmorra".');
 }
 
 function unlockedElevators() {
@@ -830,6 +837,8 @@ function pauseMenu() {
       { label: 'Controles', act: controlsScreen },
       { label: Music.muted ? 'Ligar música' : 'Desligar música', sub: 'Atalho: tecla M', act: () => { Music.toggle(); pauseMenu(); } },
       { label: Sfx.muted ? 'Ligar efeitos sonoros' : 'Desligar efeitos sonoros', act: () => { Sfx.muted = !Sfx.muted; pauseMenu(); } },
+      { label: Tips.enabled ? 'Desligar dicas' : 'Ligar dicas', sub: 'Dicas do tutorial que aparecem durante o jogo', act: () => { Tips.toggle(); pauseMenu(); } },
+      { label: 'Rever todas as dicas', sub: 'As dicas voltam a aparecer desde o começo', act: () => { Tips.reset(); UI.toast('As dicas vão aparecer de novo.', '#c4b5fd'); pauseMenu(); } },
       { label: 'Sair para o título', sub: 'O progresso fica salvo no início deste andar', act: () => { saveGame(); UI.close(); titleScreen(); } },
     ],
     back: () => UI.close(),
@@ -850,6 +859,16 @@ function controlsScreen(fromTitle) {
       <tr><td>Painel de habilidades</td><td>H</td></tr>
       <tr><td>Pausa</td><td>Esc</td></tr>
       <tr><td>Música liga/desliga</td><td>M</td></tr>
+      </table>
+      <p class="ctlh">Controle (Xbox / PlayStation)</p>
+      <table class="ctl">
+      <tr><td>Mover / mirar</td><td>analógico esquerdo ou direcional / analógico direito</td></tr>
+      <tr><td>Atacar / esquivar</td><td>A (✕) / B (○)</td></tr>
+      <tr><td>Interagir / poção</td><td>X (□) / Y (△)</td></tr>
+      <tr><td>Habilidades 1 / 2 / 3</td><td>LB / RB / RT</td></tr>
+      <tr><td>Comida / pergaminho</td><td>LT / clicar analógico esquerdo</td></tr>
+      <tr><td>Mochila / habilidades / pausa</td><td>View / clicar analógico direito / Menu</td></tr>
+      <tr><td>Nos menus</td><td>direcional navega, A confirma, B volta</td></tr>
       </table><p>No celular, use o analógico à esquerda e os botões à direita.</p>`,
     items: [],
     back: fromTitle === true ? titleScreen : pauseMenu,
@@ -945,6 +964,8 @@ let last = performance.now();
 function frame(now) {
   let dt = Math.min(0.05, (now - last) / 1000);
   last = now;
+  Input.pollPad(dt);
+  Tips.update(dt);
   G.time += dt;
   if (G.state === 'dungeon') {
     if (!UI.anyOpen()) {
@@ -971,6 +992,7 @@ window.addEventListener('load', () => {
   window.addEventListener('resize', resize);
   Input.init(G.canvas);
   Music.init();
+  Tips.init();
   window.addEventListener('keydown', e => {
     if (e.key.toLowerCase() !== 'm' || e.repeat) return;
     Sfx.init();

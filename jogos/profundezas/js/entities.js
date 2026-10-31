@@ -3,6 +3,48 @@
 // =============================================================
 'use strict';
 
+// ---------- Caminhos: mapa de distâncias a partir do herói ----------
+const Flow = { dist: null, tx: -1, ty: -1, t: 0 };
+function resetFlow() { Flow.dist = null; Flow.tx = Flow.ty = -1; }
+function updateFlow(dt) {
+  const p = G.p, tx = Math.floor(p.x / TILE), ty = Math.floor(p.y / TILE);
+  Flow.t -= dt;
+  if (!Flow.dist || ((tx !== Flow.tx || ty !== Flow.ty) && Flow.t <= 0)) {
+    if (G.level.map[ty * MAP_W + tx] !== 1) return;
+    Flow.dist = bfs(G.level.map, tx, ty); Flow.tx = tx; Flow.ty = ty; Flow.t = 0.12;
+  }
+}
+// Direção para o próximo quadrado do caminho até o herói
+function flowDir(e) {
+  const D = Flow.dist;
+  if (!D) return null;
+  const tx = Math.floor(e.x / TILE), ty = Math.floor(e.y / TILE);
+  const m = G.level.map;
+  let best = D[ty * MAP_W + tx], bx = 0, by = 0;
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    if (!dx && !dy) continue;
+    const nx = tx + dx, ny = ty + dy;
+    if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
+    if (dx && dy && (m[ty * MAP_W + nx] !== 1 || m[ny * MAP_W + tx] !== 1)) continue; // não corta quina
+    const v = D[ny * MAP_W + nx];
+    if (v >= 0 && (best < 0 || v < best)) { best = v; bx = dx; by = dy; }
+  }
+  if (!bx && !by) return null;
+  const cx = (tx + bx) * TILE + TILE / 2, cy = (ty + by) * TILE + TILE / 2 + 2;
+  const d = dist(e.x, e.y, cx, cy) || 1;
+  return { x: (cx - e.x) / d, y: (cy - e.y) / d };
+}
+// Linha livre entre dois pontos (com a largura do corpo)
+function hasLOS(ax, ay, bx, by, hw = 4) {
+  const d = dist(ax, ay, bx, by), steps = Math.ceil(d / 5);
+  const nx = -(by - ay) / (d || 1) * hw, ny = (bx - ax) / (d || 1) * hw;
+  for (let i = 1; i < steps; i++) {
+    const k = i / steps, x = ax + (bx - ax) * k, y = ay + (by - ay) * k;
+    if (solidAt(x + nx, y + ny) || solidAt(x - nx, y - ny)) return false;
+  }
+  return true;
+}
+
 // ---------- Colisão com o mapa ----------
 function solidAt(px, py) {
   const tx = Math.floor(px / TILE), ty = Math.floor(py / TILE);
@@ -112,6 +154,17 @@ class Enemy {
 
   setAnim(type, dur, ax = 0, ay = 0) { this.anim = { type, t: dur, dur, ax, ay }; }
 
+  // Linha de visão até o herói (recalculada algumas vezes por segundo)
+  canSee(dt, d) {
+    if (this.ability === 'phase') return true;
+    this.losT = (this.losT || 0) - dt;
+    if (this.losT <= 0) {
+      this.losT = 0.15 + Math.random() * 0.1;
+      this.los = d < 220 && hasLOS(this.x, this.y, G.p.x, G.p.y, this.hw);
+    }
+    return this.los;
+  }
+
   // Começa a preparar um golpe especial (o jogador vê o aviso)
   windup(act, t) { this.wind = t; this.windAct = act; }
 
@@ -174,23 +227,36 @@ class Enemy {
       }
       mx = this.wander.x * 0.4; my = this.wander.y * 0.4;
     } else {
+      // sem linha de visão: segue o caminho pelo mapa de distâncias
+      // travado numa quina? segue o caminho por um tempo mesmo vendo o herói
+      this.stuckT = (this.stuckT || 0) + dt;
+      if (this.stuckT > 0.5) {
+        const moved = dist(this.x, this.y, this.lastX ?? this.x, this.lastY ?? this.y);
+        if (moved < 4 && d > this.r + 10) this.forcePath = 1.5;
+        this.stuckT = 0; this.lastX = this.x; this.lastY = this.y;
+      }
+      if (this.forcePath > 0) this.forcePath -= dt;
+      const see = this.canSee(dt, d) && !(this.forcePath > 0);
+      const path = see ? null : flowDir(this);
+      const gx = path ? path.x : ax, gy = path ? path.y : ay;
       if (this.type === 'shooter') {
-        if (d > 95) { mx = ax; my = ay; }
+        if (!see) { mx = gx; my = gy; }
+        else if (d > 95) { mx = ax; my = ay; }
         else if (d < 55) { mx = -ax; my = -ay; }
         else { mx = -ay * 0.5; my = ax * 0.5; }
         this.shootCd -= dt;
-        if (this.shootCd <= 0 && d < 170) {
+        if (see && this.shootCd <= 0 && d < 170) {
           this.shootCd = 1.6 + Math.random() * 0.8;
           this.shoot(ax, ay);
         }
       } else if (this.type === 'fast') {
-        const w = Math.sin(this.t * 6) * 0.7;
-        mx = ax - ay * w; my = ay + ax * w;
+        const w = see ? Math.sin(this.t * 6) * 0.7 : 0;
+        mx = gx - gy * w; my = gy + gx * w;
       } else {
-        mx = ax; my = ay;
+        mx = gx; my = gy;
       }
       if (this.type !== 'shooter' && d < this.r + 6 && this.atkCd <= 0) this.contact(ax, ay);
-      this.tryAbility(d, ax, ay);
+      if (see || this.ability === 'raise' || this.ability === 'blink') this.tryAbility(d, ax, ay);
     }
     // separação entre inimigos
     for (const o of G.enemies) {
@@ -482,7 +548,8 @@ class Boss extends Enemy {
     if (this.mode) { this.runMode(dt, d); return; }
 
     const ax = (p.x - this.x) / (d || 1), ay = (p.y - this.y) / (d || 1);
-    moveBody(this, ax * this.spd * dt, ay * this.spd * dt);
+    const path = this.canSee(dt, d) ? null : flowDir(this);
+    moveBody(this, (path ? path.x : ax) * this.spd * dt, (path ? path.y : ay) * this.spd * dt);
     this.face = ax < 0 ? -1 : 1;
     if (d < this.r + 6 && this.atkCd <= 0) { this.atkCd = 1; hurtPlayer(this.dmg, this); }
 
@@ -802,6 +869,7 @@ function hurtPlayer(amount, source) {
   p.hp -= dmg;
   p.iframes = 0.5;
   p.hurtT = 0.3;
+  if (Input.lastDevice === 'pad') Input.rumble(dmg > st.maxHp * 0.15 ? 220 : 110, dmg > st.maxHp * 0.15 ? 0.9 : 0.45);
   G.shake = Math.max(G.shake, 3);
   G.hurtFlash = 0.25;
   addText(p.x, p.y - 16, '-' + Math.round(dmg), '#f87171');

@@ -6,7 +6,7 @@
 const TILE = 16;
 const MAP_W = 64;
 const MAP_H = 48;
-const VERSION = 'v0.4';
+const VERSION = 'v0.5';
 const SAVE_KEY = 'profundezas_save_v1';
 const MAX_FLOOR = 50;
 
