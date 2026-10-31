@@ -15,7 +15,7 @@ window.SITE = {
   // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
   estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
-  carrossel: ["lenda-da-brasa", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
+  carrossel: ["lenda-da-brasa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -33,6 +33,26 @@ window.GENEROS = [
 ];
 
 window.JOGOS = [
+  {
+    id: "profundezas",
+    titulo: "Profundezas",
+    chamada: "50 andares. Uma vila. Quanto você arrisca? Desça a masmorra, junte tesouros e volte vivo para contar.",
+    genero: ["Ação", "RPG"],
+    tags: ["pixel art", "masmorra", "dungeon crawler", "loot", "chefes", "roguelite"],
+    descricao: "Desça 50 andares gerados na hora, em cinco biomas: Cavernas Úmidas, Minas Abandonadas, Ruínas Submersas, Cripta Esquecida e Coração do Abismo. Enfrente hordas, elites, mímicos e um chefe a cada 10 andares. Junte loot de cinco raridades, suba de nível e distribua atributos. Cuide da fome e do cansaço e volte à vila para dormir, vender tesouros e melhorar o equipamento no ferreiro. Se morrer, sua mochila fica numa lápide no andar: volte lá para recuperá-la. Protótipo v0.1.",
+    controles: "Teclado: WASD/setas movem, J ou clique ataca (mira no mouse), Espaço esquiva, E interage com escada, fogueira e elevador. Q usa poção, F come, R lê o Pergaminho de Retorno, I abre a mochila e Esc pausa. No celular: analógico à esquerda e botões à direita. O progresso é salvo no navegador.",
+    url: "jogos/profundezas/index.html",
+    versao: "0.1.0",
+    capa: "jogos/profundezas/capa.png",
+    cor: "#e9b44c",
+    icone: "⛏️",
+    engine: "HTML5",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-10-31",
+    destaque: true,
+    novidades: [{ versao: "0.1", data: "2026-10-31", itens: ["Primeira versão jogável: 50 andares em cinco biomas, com chefe a cada 10", "Loot em cinco raridades, três lendários, XP e atributos", "Vila com estalagem, mercado, ferreiro, alfaiate e baú; salvamento automático"] }],
+  },
   {
     id: "cafe-com-patas",
     titulo: "Café com Patas",

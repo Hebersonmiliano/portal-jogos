@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Profundezas</title>
+  <meta name="description" content="Profundezas: desça 50 andares de uma masmorra, junte tesouros e volte vivo para a vila. Jogo em pixel art do Portal Pixel.">
+  <meta name="theme-color" content="#0b0a0f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="hudTop">
+      <div class="bar"><label>VIDA</label><div class="track"><div id="hpFill" class="fill hp"></div></div><span id="hpTxt"></span></div>
+      <div class="bar"><label>FOME</label><div class="track"><div id="foodFill" class="fill food"></div></div><span id="foodTxt"></span></div>
+      <div class="bar"><label>CANSAÇO</label><div class="track"><div id="tiredFill" class="fill tired"></div></div><span id="tiredTxt"></span></div>
+      <div class="bar"><label id="lvTxt">NV 1</label><div class="track thin"><div id="xpFill" class="fill xp"></div></div><span id="xpTxt" class="pts"></span></div>
+    </div>
+    <div id="hudRight">
+      <div id="floorTxt"></div>
+      <canvas id="minimap" width="128" height="96"></canvas>
+      <div id="goldTxt"></div>
+    </div>
+    <div id="bossBar" class="hidden"><div id="bossName"></div><div class="track"><div id="bossFill"></div></div></div>
+    <div id="prompt" class="hidden"></div>
+    <div id="quick">
+      <span><img src="" data-icon="potion" alt=""><b id="qPotion">0</b><i>Q</i></span>
+      <span><img src="" data-icon="food" alt=""><b id="qFood">0</b><i>F</i></span>
+      <span><img src="" data-icon="scroll" alt=""><b id="qScroll">0</b><i>R</i></span>
+      <span class="bagq">MOCHILA <b id="bagTxt">0/12</b><i>I</i></span>
+    </div>
+    <div id="toasts"></div>
+  </div>
+
+  <!-- Controles de toque -->
+  <div id="touchUI">
+    <div id="joyZone"></div>
+    <div id="joyBase"><div id="joyKnob"></div></div>
+    <div id="tbtns">
+      <button data-tbtn="atk" class="tb big">⚔</button>
+      <button data-tbtn="dodge" class="tb">»</button>
+      <button data-tbtn="use" class="tb">E</button>
+      <button data-tbtn="potion" class="tb pot">♥</button>
+    </div>
+    <div id="tbtnsTop">
+      <button data-tbtn="bag" class="tb sm">▤</button>
+      <button data-tbtn="pause" class="tb sm">II</button>
+    </div>
+  </div>
+
+  <!-- Painéis -->
+  <div id="overlay" class="hidden"><div id="panel" class="panel"></div></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/items.js"></script>
+  <script src="js/dungeon.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/game.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      document.querySelectorAll('[data-icon]').forEach(img => { img.src = itemIconURL({ kind: img.dataset.icon }); });
+    });
+  </script>
+</body>
+</html>

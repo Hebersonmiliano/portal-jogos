@@ -54,6 +54,14 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ## Publicar
 
+### Profundezas
+
+Disponível em `jogo.html?id=profundezas`, com a cópia de distribuição em `jogos/profundezas/` (`index.html`, `css/` e `js/`, HTML5 puro, sem bibliotecas). Versão 0.1.0, protótipo: 50 andares procedurais em cinco biomas, chefe a cada 10 andares, loot em cinco raridades, vila com estalagem, mercado, ferreiro, alfaiate e baú. Funciona no computador e no celular (controles de toque) e salva o progresso no `localStorage` do navegador.
+
+A capa `jogos/profundezas/capa.png` é uma captura real do andar 3. O link de compartilhamento fica em `j/profundezas/`.
+
+Fonte do jogo: https://github.com/Hebersonmiliano/Profundezas . Para atualizar, copie `index.html`, `css/` e `js/` do repositório para `jogos/profundezas/` (a capa fica preservada), aumente `versao` no catálogo, acrescente a versão em `novidades` e atualize a chave de cache de `jogos.js` nas duas páginas.
+
 ### Café com Patas
 
 Disponível em `jogo.html?id=cafe-com-patas`, com a exportação Godot 4.7.2 sem threads em `jogos/cafe-com-patas/`. Versão 1.3: bandeja com dois produtos, oito clientes em três minutos, música com contrabaixo e controle de graves na tecla B. Computador com teclado; esta versão não tem controles por toque.
