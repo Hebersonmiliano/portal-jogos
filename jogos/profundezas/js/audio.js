@@ -9,6 +9,7 @@ const Sfx = {
   init() {
     if (this.ctx) return;
     try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { this.ctx = null; }
+    if (this.ctx && typeof Music !== 'undefined') Music.ready();
   },
   tone(freq, dur, type = 'square', vol = 0.08, slide = 0) {
     if (!this.ctx || this.muted) return;

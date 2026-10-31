@@ -148,6 +148,7 @@ function enterFloor(floor, viaStairs) {
   G.enemies = G.enemies.filter(e => e.isBoss || dist(e.x, e.y, p.x, p.y) > 70);
   G.state = 'dungeon';
   showHud(true);
+  Music.play(Music.forFloor(floor));
   UI.toast(`Andar ${floor} · ${L.biome.name}`, '#fde68a');
   if (L.isBoss) UI.toast('Um chefe guarda este andar.', '#f87171');
   saveGame();
@@ -185,6 +186,7 @@ function onEnemyDeath(e) {
     if (!p.beaten.includes(f)) p.beaten.push(f);
     G.level.stairs = { x: e.x, y: e.y + 24 };
     UI.toast(`${e.name} foi derrotado!`, '#facc15');
+    Music.play(Music.forFloor(f));
     if (f === MAX_FLOOR) setTimeout(() => showVictory(), 1500);
     else UI.toast('Uma escada se abriu para as profundezas.', '#38bdf8');
     return;
@@ -250,6 +252,7 @@ function playerDie() {
   if (p.dead) return;
   p.dead = true;
   Sfx.die(); Sfx.boom();
+  Music.stop();
   G.shake = 8;
   const lostGold = Math.floor(p.gold / 2);
   const lostItems = p.bag.slice();
@@ -281,6 +284,7 @@ function returnToVillage(msg) {
 
 function showVictory() {
   G.state = 'dead';
+  Music.play('village');
   showHud(false);
   UI.menu({
     title: 'Vitória!',
@@ -615,6 +619,7 @@ function enterVillage(msg) {
   resetRuntime(p);
   showHud(false);
   saveGame();
+  Music.play('village');
   villageMenu(msg);
 }
 
@@ -639,6 +644,7 @@ function villageMenu(msg) {
       { label: 'Alfaiate', sub: `Mochila ${p.bagSize}/40 espaços`, act: tailorMenu },
       { label: 'Baú', sub: `Guardar itens com segurança (${p.stash.length}/30)`, act: () => stashMenu() },
       { label: 'Mochila e atributos', sub: p.points > 0 ? `${p.points} pontos para distribuir!` : 'Equipamentos e itens', color: p.points > 0 ? '#fde047' : null, act: () => { UI.invSel = { area: 'bag', i: 0 }; G.resumeFromMenu = () => villageMenu(); UI.inventory('village'); } },
+      { label: Music.muted ? 'Ligar música' : 'Desligar música', sub: 'Atalho: tecla M', act: () => { Music.toggle(); villageMenu(); } },
       { label: 'Sair para o título', act: () => { saveGame(); UI.close(); titleScreen(); } },
     ],
   });
@@ -770,7 +776,8 @@ function pauseMenu() {
     items: [
       { label: 'Continuar', act: () => UI.close() },
       { label: 'Controles', act: controlsScreen },
-      { label: Sfx.muted ? 'Ligar som' : 'Desligar som', act: () => { Sfx.muted = !Sfx.muted; pauseMenu(); } },
+      { label: Music.muted ? 'Ligar música' : 'Desligar música', sub: 'Atalho: tecla M', act: () => { Music.toggle(); pauseMenu(); } },
+      { label: Sfx.muted ? 'Ligar efeitos sonoros' : 'Desligar efeitos sonoros', act: () => { Sfx.muted = !Sfx.muted; pauseMenu(); } },
       { label: 'Sair para o título', sub: 'O progresso fica salvo no início deste andar', act: () => { saveGame(); UI.close(); titleScreen(); } },
     ],
     back: () => UI.close(),
@@ -788,6 +795,7 @@ function controlsScreen(fromTitle) {
       <tr><td>Poção / Comida / Pergaminho</td><td>Q / F / R</td></tr>
       <tr><td>Mochila e atributos</td><td>I ou Tab</td></tr>
       <tr><td>Pausa</td><td>Esc</td></tr>
+      <tr><td>Música liga/desliga</td><td>M</td></tr>
       </table><p>No celular, use o analógico à esquerda e os botões à direita.</p>`,
     items: [],
     back: fromTitle === true ? titleScreen : pauseMenu,
@@ -797,6 +805,7 @@ function controlsScreen(fromTitle) {
 // ---------- Título ----------
 function titleScreen() {
   G.state = 'title';
+  Music.play('village');
   showHud(false);
   const can = hasSave();
   UI.show(`
@@ -905,6 +914,13 @@ window.addEventListener('load', () => {
   resize();
   window.addEventListener('resize', resize);
   Input.init(G.canvas);
+  Music.init();
+  window.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() !== 'm' || e.repeat) return;
+    Sfx.init();
+    const on = Music.toggle();
+    if (G.state === 'dungeon') UI.toast(on ? 'Música ligada' : 'Música desligada', '#c4b5fd');
+  });
   // fecha a mochila voltando ao jogo quando aberta na masmorra
   G.resumeFromMenu = () => {};
   titleScreen();

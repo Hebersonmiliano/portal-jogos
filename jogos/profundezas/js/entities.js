@@ -216,7 +216,7 @@ class Boss extends Enemy {
     if (this.flash > 0) this.flash -= dt;
     if (this.atkCd > 0) this.atkCd -= dt;
     const d = dist(this.x, this.y, p.x, p.y);
-    if (!this.aware) { if (d < 150) { this.aware = true; G.boss = this; UI.toast(`${this.name} desperta!`, '#f87171'); Sfx.boom(); } else return; }
+    if (!this.aware) { if (d < 150) { this.aware = true; G.boss = this; UI.toast(`${this.name} desperta!`, '#f87171'); Sfx.boom(); Music.play('boss'); } else return; }
     if (this.phase === 1 && this.hp < this.maxHp * 0.5) { this.phase = 2; this.spd = 42; UI.toast(`${this.name} está furioso!`, '#f87171'); }
 
     if (this.slam) {
@@ -262,7 +262,7 @@ class Boss extends Enemy {
   hurt(amount, fromX, fromY, crit) {
     this.hp -= amount;
     this.flash = 0.08;
-    if (!this.aware) { this.aware = true; G.boss = this; }
+    if (!this.aware) { this.aware = true; G.boss = this; Music.play('boss'); }
     addText(this.x, this.y - 40, Math.round(amount) + (crit ? '!' : ''), crit ? '#fde047' : '#ffffff', crit ? 1.3 : 1);
     burst(this.x, this.y - 18, this.pal.g || this.pal.a || '#fff', 5);
     if (this.hp <= 0 && !this.dead) { this.dead = true; onEnemyDeath(this); }

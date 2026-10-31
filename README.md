@@ -56,7 +56,7 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ### Profundezas
 
-Disponível em `jogo.html?id=profundezas`, com a cópia de distribuição em `jogos/profundezas/` (`index.html`, `css/` e `js/`, HTML5 puro, sem bibliotecas). Versão 0.1.0, protótipo: 50 andares procedurais em cinco biomas, chefe a cada 10 andares, loot em cinco raridades, vila com estalagem, mercado, ferreiro, alfaiate e baú. Funciona no computador e no celular (controles de toque) e salva o progresso no `localStorage` do navegador.
+Disponível em `jogo.html?id=profundezas`, com a cópia de distribuição em `jogos/profundezas/` (`index.html`, `css/` e `js/`, HTML5 puro, sem bibliotecas). Versão 0.2.0, protótipo: trilha sonora original em chiptune (vila, cinco biomas e chefes, tecla M liga/desliga), 50 andares procedurais em cinco biomas, chefe a cada 10 andares, loot em cinco raridades, vila com estalagem, mercado, ferreiro, alfaiate e baú. Funciona no computador e no celular (controles de toque) e salva o progresso no `localStorage` do navegador.
 
 A capa `jogos/profundezas/capa.png` é uma captura real do andar 3. O link de compartilhamento fica em `j/profundezas/`.
 
