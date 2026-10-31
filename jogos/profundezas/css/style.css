@@ -204,3 +204,5 @@ body.touch #skillbar { display: none; }
   #skillbar { right: 6px; bottom: 54px; }
   .skslot { width: 44px; height: 34px; }
 }
+
+#floorTxt small.bless { color: #c4b5fd; }

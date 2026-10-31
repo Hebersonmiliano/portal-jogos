@@ -7,7 +7,7 @@
 function solidAt(px, py) {
   const tx = Math.floor(px / TILE), ty = Math.floor(py / TILE);
   if (tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H) return true;
-  return G.level.map[ty * MAP_W + tx] === 0;
+  return G.level.map[ty * MAP_W + tx] !== 1;
 }
 function boxSolid(x, y, hw, hh) {
   return solidAt(x - hw, y - hh) || solidAt(x + hw, y - hh) || solidAt(x - hw, y + hh) || solidAt(x + hw, y + hh);
@@ -44,12 +44,12 @@ function playerStats(p) {
     weaponDmg: w ? w.dmg * (1 + 0.08 * (w.up || 0)) : 3,
     cd: w ? w.cd * Math.max(0.6, 1 - p.agi * 0.008) : 0.4,
     range: w ? w.range : 12,
-    dmgMul: (1 + p.str * 0.05 + s.dmgPct / 100) * tired,
+    dmgMul: (1 + p.str * 0.05 + s.dmgPct / 100 + blessing('forca') * 0.25) * tired,
     crit: Math.min(0.6, 0.05 + p.agi * 0.01 + s.crit / 100),
-    speed: 74 * (1 + p.agi * 0.008 + s.spd / 100) * tired,
+    speed: 74 * (1 + p.agi * 0.008 + s.spd / 100 + blessing('rapidez') * 0.15) * tired * ((p.slowT || 0) > 0 ? (p.slowMul || 0.5) : 1),
     def: (a ? a.def * (1 + 0.08 * (a.up || 0)) : 0) + s.def,
     steal: s.steal / 100 + (s.effects.vamp ? 0.08 : 0),
-    luck: p.luck + s.luck,
+    luck: p.luck + s.luck + blessing('fortuna') * 10,
     effects: s.effects,
   };
 }
@@ -57,6 +57,15 @@ function playerStats(p) {
 function xpNext(level) { return Math.floor(40 * Math.pow(level, 1.6)); }
 
 // ---------- Inimigo ----------
+// Cada sprite tem um comportamento especial (ver ABILITY_OF)
+const ABILITY_OF = {
+  rat: 'lunge', bat: 'swoop', slime: 'split', goblin: 'volley',
+  skel: 'revive', spider: 'web', golem: 'pound', kobold: 'dynamite',
+  fishman: 'lunge', eel: 'shock', crab: 'shell', siren: 'orb',
+  zombie: 'grab', ghost: 'phase', knight: 'charge', necro: 'raise',
+  imp: 'blink', hound: 'trail', demon: 'pound', flame: 'deathburst',
+};
+
 class Enemy {
   constructor(type, floor, x, y, opts = {}) {
     const base = ENEMY_BASE[type];
@@ -71,40 +80,88 @@ class Enemy {
     const hpMul = Math.pow(1.07, floor - 1);
     const dmgMul = 1 + 0.12 * (floor - 1);
     this.elite = !!opts.elite;
-    this.scale = this.elite ? 1.3 : 1;
-    this.maxHp = Math.round(base.hp * hpMul * (this.elite ? 2.5 : 1));
+    this.mini = !!opts.mini;
+    this.scale = this.elite ? 1.3 : this.mini ? 0.7 : 1;
+    this.maxHp = Math.round(base.hp * hpMul * (this.elite ? 2.5 : this.mini ? 0.4 : 1));
     this.hp = this.maxHp;
-    this.dmg = base.dmg * dmgMul * (this.elite ? 1.5 : 1);
-    this.spd = base.spd * (this.elite ? 1.1 : 1);
-    this.xp = Math.round(base.xp * (1 + 0.15 * (floor - 1)) * (this.elite ? 3 : 1));
+    this.dmg = base.dmg * dmgMul * (this.elite ? 1.5 : this.mini ? 0.6 : 1);
+    this.spd = base.spd * (this.elite ? 1.1 : this.mini ? 1.3 : 1);
+    this.xp = Math.round(base.xp * (1 + 0.15 * (floor - 1)) * (this.elite ? 3 : this.mini ? 0.3 : 1));
     this.r = base.r * this.scale;
     this.hw = 4 * this.scale; this.hh = 3;
     this.aware = false;
     this.atkCd = 0;
     this.shootCd = 1 + Math.random() * 1.5;
+    this.shots = 0;
     this.kx = 0; this.ky = 0;
     this.flash = 0;
     this.wander = { x: 0, y: 0, t: 0 };
     this.t = Math.random() * 10;
     this.dead = false;
     this.floor = floor;
+    this.ability = opts.noAbility ? null : ABILITY_OF[this.sprite] || null;
+    this.abCd = rr(1.5, 3.5);
+    this.wind = 0; this.windAct = null;   // preparação de um golpe especial
+    this.dash = null;                       // avanço rápido
+    this.shellT = 0; this.downT = 0; this.revived = !!opts.revived;
+    this.trailT = 0; this.minions = [];
+    this.anim = null;                       // { type: 'attack'|'hurt', t, dur, ax, ay }
+    this.moving = false;
     if (this.elite) this.name += ' (Elite)';
   }
+
+  setAnim(type, dur, ax = 0, ay = 0) { this.anim = { type, t: dur, dur, ax, ay }; }
+
+  // Começa a preparar um golpe especial (o jogador vê o aviso)
+  windup(act, t) { this.wind = t; this.windAct = act; }
 
   update(dt) {
     const p = G.p;
     this.t += dt;
     if (this.flash > 0) this.flash -= dt;
     if (this.atkCd > 0) this.atkCd -= dt;
+    if (this.anim) { this.anim.t -= dt; if (this.anim.t <= 0) this.anim = null; }
+    if (this.abCd > 0) this.abCd -= dt * (this.elite ? 1.4 : 1);
+    this.moving = false;
+
+    // esqueleto caído: os ossos se juntam de novo
+    if (this.downT > 0) {
+      this.downT -= dt;
+      if (this.downT <= 0) {
+        this.revived = true; this.hp = Math.round(this.maxHp * 0.5);
+        burst(this.x, this.y - 6, '#e5e5d5', 12); Sfx.chest();
+        addText(this.x, this.y - 16, 'levantou!', '#e5e5d5', 0.8);
+      }
+      return;
+    }
+    if (this.shellT > 0) { this.shellT -= dt; return; }
+
     // empurrão
     if (this.kx || this.ky) {
-      moveBody(this, this.kx * dt, this.ky * dt);
+      this.move(this.kx * dt, this.ky * dt);
       this.kx *= Math.pow(0.002, dt); this.ky *= Math.pow(0.002, dt);
       if (Math.abs(this.kx) < 2) this.kx = 0;
       if (Math.abs(this.ky) < 2) this.ky = 0;
     }
     const d = dist(this.x, this.y, p.x, p.y);
     if (!this.aware && d < 120) this.aware = true;
+    const ax = (p.x - this.x) / (d || 1), ay = (p.y - this.y) / (d || 1);
+
+    // preparando golpe especial: fica parado tremendo
+    if (this.wind > 0) {
+      this.wind -= dt;
+      if (this.wind <= 0) this.doAbility(this.windAct, ax, ay, d);
+      return;
+    }
+    // avanço (bote, mergulho, investida)
+    if (this.dash) {
+      this.dash.t -= dt;
+      this.move(this.dash.vx * dt, this.dash.vy * dt);
+      this.moving = true;
+      if (d < this.r + 7 && this.atkCd <= 0) this.contact(ax, ay);
+      if (this.dash.t <= 0) this.dash = null;
+      return;
+    }
 
     let mx = 0, my = 0;
     if (!this.aware) {
@@ -117,7 +174,6 @@ class Enemy {
       }
       mx = this.wander.x * 0.4; my = this.wander.y * 0.4;
     } else {
-      const ax = (p.x - this.x) / (d || 1), ay = (p.y - this.y) / (d || 1);
       if (this.type === 'shooter') {
         if (d > 95) { mx = ax; my = ay; }
         else if (d < 55) { mx = -ax; my = -ay; }
@@ -125,8 +181,7 @@ class Enemy {
         this.shootCd -= dt;
         if (this.shootCd <= 0 && d < 170) {
           this.shootCd = 1.6 + Math.random() * 0.8;
-          G.projectiles.push(new Projectile(this.x, this.y - 6, ax * 110, ay * 110, this.dmg, false, biomeOf(this.floor).proj));
-          Sfx.shoot();
+          this.shoot(ax, ay);
         }
       } else if (this.type === 'fast') {
         const w = Math.sin(this.t * 6) * 0.7;
@@ -134,11 +189,8 @@ class Enemy {
       } else {
         mx = ax; my = ay;
       }
-      // ataque de contato
-      if (this.type !== 'shooter' && d < this.r + 6 && this.atkCd <= 0) {
-        this.atkCd = 0.9;
-        hurtPlayer(this.dmg, this);
-      }
+      if (this.type !== 'shooter' && d < this.r + 6 && this.atkCd <= 0) this.contact(ax, ay);
+      this.tryAbility(d, ax, ay);
     }
     // separação entre inimigos
     for (const o of G.enemies) {
@@ -148,44 +200,226 @@ class Enemy {
     }
     const len = Math.hypot(mx, my);
     if (len > 1) { mx /= len; my /= len; }
-    moveBody(this, mx * this.spd * dt, my * this.spd * dt);
+    if (len > 0.05) this.moving = true;
+    this.move(mx * this.spd * dt, my * this.spd * dt);
     if (mx) this.face = mx < 0 ? -1 : 1;
+    // cão infernal deixa um rastro de fogo
+    if (this.ability === 'trail' && this.aware && this.moving) {
+      this.trailT -= dt;
+      if (this.trailT <= 0) { this.trailT = 0.3; addHazard(this.x, this.y, 8, 0.05, 1.6, this.dmg * 0.35, '#f97316', 'fire'); }
+    }
+  }
+
+  // fantasma atravessa paredes
+  move(dx, dy) {
+    if (this.ability === 'phase') {
+      this.x = clamp(this.x + dx, TILE, (MAP_W - 1) * TILE);
+      this.y = clamp(this.y + dy, TILE, (MAP_H - 1) * TILE);
+    } else moveBody(this, dx, dy);
+  }
+
+  contact(ax, ay) {
+    this.atkCd = 0.9;
+    this.setAnim('attack', 0.18, ax, ay);
+    hurtPlayer(this.dmg, this);
+    if (this.ability === 'grab') { G.p.slowT = 1.5; G.p.slowMul = 0.55; }
+  }
+
+  shoot(ax, ay) {
+    const col = biomeOf(this.floor).proj;
+    this.setAnim('attack', 0.18, ax, ay);
+    this.shots++;
+    if (this.ability === 'volley' && this.shots % 3 === 0) {
+      for (const o of [-0.25, 0, 0.25]) {
+        const a = Math.atan2(ay, ax) + o;
+        G.projectiles.push(new Projectile(this.x, this.y - 6, Math.cos(a) * 115, Math.sin(a) * 115, this.dmg, false, col));
+      }
+    } else if (this.ability === 'orb') {
+      G.projectiles.push(new Projectile(this.x, this.y - 6, ax * 60, ay * 60, this.dmg * 1.2, false, '#ff66ff', 4, { homing: true, life: 4 }));
+    } else if (this.ability === 'dynamite') {
+      const p = G.p;
+      addHazard(p.x + rr(-6, 6), p.y + rr(-4, 4), 22, 1.0, 0, this.dmg * 1.3, '#ef4444', 'meteor');
+    } else {
+      G.projectiles.push(new Projectile(this.x, this.y - 6, ax * 110, ay * 110, this.dmg, false, col));
+    }
+    Sfx.shoot();
+  }
+
+  tryAbility(d, ax, ay) {
+    if (this.abCd > 0) return;
+    const a = this.ability;
+    if ((a === 'lunge') && d < 60) { this.windup('lunge', 0.35); this.abCd = 3; }
+    else if (a === 'swoop' && d < 90) { this.windup('swoop', 0.25); this.abCd = 2.6; }
+    else if (a === 'pound' && d < 42) { this.windup('pound', 0.6); this.abCd = 4; }
+    else if (a === 'shock' && d < 40) { this.windup('shock', 0.5); this.abCd = 3.5; }
+    else if (a === 'charge' && d < 110) { this.windup('charge', 0.55); this.chargeDir = { x: ax, y: ay }; this.abCd = 4; }
+    else if (a === 'web' && d < 120) { this.windup('web', 0.3); this.abCd = 3.5; }
+    else if (a === 'blink' && d < 130) { this.windup('blink', 0.3); this.abCd = 4; }
+    else if (a === 'raise' && d < 160) {
+      this.minions = this.minions.filter(m => !m.dead);
+      if (this.minions.length < 2) { this.windup('raise', 0.7); this.abCd = 7; } else this.abCd = 2;
+    }
+  }
+
+  doAbility(act, ax, ay, d) {
+    const p = G.p;
+    this.setAnim('attack', 0.2, ax, ay);
+    if (act === 'lunge') { this.dash = { t: this.sprite === 'fishman' ? 0.25 : 0.2, vx: ax * 230, vy: ay * 230 }; Sfx.dash(); }
+    else if (act === 'swoop') { this.dash = { t: 0.25, vx: ax * 260, vy: ay * 260 }; Sfx.dash(); }
+    else if (act === 'charge') { const c = this.chargeDir || { x: ax, y: ay }; this.dash = { t: 0.45, vx: c.x * 220, vy: c.y * 220 }; Sfx.dash(); }
+    else if (act === 'pound' || act === 'shock') {
+      const r = act === 'pound' ? 36 : 34, col = act === 'shock' ? '#38bdf8' : this.sprite === 'demon' ? '#f97316' : '#a8a29e';
+      G.effects.push({ type: 'ring', x: this.x, y: this.y - 4, r: 4, max: r, t: 0.3, color: col });
+      burst(this.x, this.y - 4, col, 12);
+      if (d < r + 4) hurtPlayer(this.dmg * 1.3, this);
+      if (this.sprite === 'demon') for (let i = 0; i < 6; i++) {
+        const a = i / 6 * Math.PI * 2;
+        G.projectiles.push(new Projectile(this.x, this.y - 6, Math.cos(a) * 80, Math.sin(a) * 80, this.dmg * 0.6, false, '#f97316', 3));
+      }
+      G.shake = Math.max(G.shake, 2); act === 'shock' ? Sfx.crit() : Sfx.boom();
+    } else if (act === 'web') {
+      G.projectiles.push(new Projectile(this.x, this.y - 6, ax * 95, ay * 95, this.dmg * 0.4, false, '#f5f5f4', 4, { slow: true }));
+      Sfx.shoot();
+    } else if (act === 'blink') {
+      burst(this.x, this.y - 6, '#f87171', 10);
+      for (let k = 0; k < 12; k++) {
+        const a = Math.random() * Math.PI * 2, nx = p.x + Math.cos(a) * 26, ny = p.y + Math.sin(a) * 26;
+        if (!boxSolid(nx, ny, this.hw, this.hh)) { this.x = nx; this.y = ny; break; }
+      }
+      burst(this.x, this.y - 6, '#f87171', 10); Sfx.dash();
+      this.atkCd = 0.3;
+    } else if (act === 'raise') {
+      const sk = BIOMES[1].enemies.chaser;
+      for (let i = 0; i < 2 - this.minions.length; i++) {
+        const e = new Enemy('chaser', this.floor, this.x + rr(-16, 16), this.y + rr(-8, 8), { def: sk, noAbility: true });
+        e.aware = true; e.xp = Math.round(e.xp / 3);
+        this.minions.push(e); G.enemies.push(e);
+        burst(e.x, e.y - 4, '#a855f7', 10);
+      }
+      Sfx.chest();
+    }
   }
 
   hurt(amount, fromX, fromY, crit) {
+    if (this.shellT > 0) { addText(this.x, this.y - 14, 'bloqueou', '#9ca3af', 0.7); Sfx.click(); return; }
+    if (this.downT > 0) { // quebrar os ossos antes que levante
+      this.downT = 0; this.dead = true; burst(this.x, this.y - 3, '#e5e5d5', 14); Sfx.hit();
+      addText(this.x, this.y - 12, 'ossos quebrados!', '#e5e5d5', 0.7);
+      onEnemyDeath(this); return;
+    }
     this.hp -= amount;
     this.flash = 0.1;
     this.aware = true;
     const d = dist(fromX, fromY, this.x, this.y) || 1;
     const kb = this.type === 'tank' ? 60 : 140;
     this.kx = (this.x - fromX) / d * kb; this.ky = (this.y - fromY) / d * kb;
+    this.setAnim('hurt', 0.14);
+    if (this.wind > 0 && this.type !== 'tank') this.wind += 0.15; // golpe atrasa a preparação
     addText(this.x, this.y - 14, Math.round(amount) + (crit ? '!' : ''), crit ? '#fde047' : '#ffffff', crit ? 1.3 : 1);
     burst(this.x, this.y - 5, this.pal.a || this.pal.g || '#fff', 4);
-    if (this.hp <= 0 && !this.dead) { this.dead = true; onEnemyDeath(this); }
+    if (this.ability === 'shell' && this.hp > 0 && this.hp < this.maxHp * 0.8 && this.abCd <= 0) {
+      this.shellT = 1.5; this.abCd = 5; this.kx = this.ky = 0;
+      addText(this.x, this.y - 18, 'casco!', '#fca5a5', 0.8);
+    }
+    if (this.hp <= 0 && !this.dead) {
+      if (this.ability === 'revive' && !this.revived) { this.hp = 0; this.downT = 2.5; this.kx = this.ky = 0; Sfx.die(); return; }
+      this.dead = true;
+      this.onDeathAbility();
+      onEnemyDeath(this);
+    }
+  }
+
+  onDeathAbility() {
+    if (this.ability === 'split' && !this.mini) {
+      for (const o of [-8, 8]) {
+        const e = new Enemy(this.type, this.floor, this.x + o, this.y, { def: { name: this.name.replace(' (Elite)', '') + ' Pequeno', sprite: this.sprite, pal: this.pal }, mini: true });
+        e.aware = true; e.kx = o * 12;
+        G.enemies.push(e);
+      }
+    } else if (this.ability === 'deathburst') {
+      for (let i = 0; i < 8; i++) {
+        const a = i / 8 * Math.PI * 2;
+        G.projectiles.push(new Projectile(this.x, this.y - 6, Math.cos(a) * 75, Math.sin(a) * 75, this.dmg * 0.7, false, '#fb923c', 3));
+      }
+      G.effects.push({ type: 'ring', x: this.x, y: this.y - 6, r: 4, max: 24, t: 0.3, color: '#f97316' });
+    }
   }
 
   draw(ctx) {
-    const spr = getSprite(this.sprite, this.pal, this.flash > 0);
-    const w = spr.width * this.scale, h = spr.height * this.scale;
-    const bob = this.type === 'fast' ? Math.sin(this.t * 10) * 2 - 4 : this.type === 'tank' ? Math.sin(this.t * 4) * 0.8 : 0;
-    // sombra
+    // ossos no chão
+    if (this.downT > 0) {
+      ctx.fillStyle = '#d6d3c4';
+      for (let i = 0; i < 6; i++) ctx.fillRect(Math.round(this.x - 6 + (i * 5) % 12), Math.round(this.y - 2 - (i % 2) * 2), 3, 1);
+      ctx.fillRect(Math.round(this.x - 2), Math.round(this.y - 5), 4, 3);
+      if (Math.sin(G.time * 16) > 0) { ctx.fillStyle = '#a855f7'; ctx.fillRect(Math.round(this.x), Math.round(this.y - 8), 1, 1); }
+      return;
+    }
+    const winding = this.wind > 0;
+    const mode = this.flash > 0 ? true : winding && Math.sin(G.time * 40) > 0 ? 'red' : false;
+    const spr = getSprite(this.shellT > 0 ? 'crabShell' : this.sprite, this.pal, mode);
+    let sx = this.scale, sy = this.scale, ox = 0, oy = 0;
+    // animação: caminhar (balanço), atacar (avanço), dano (amassar)
+    if (this.moving && !this.dash) { const k = Math.sin(this.t * 14); sy *= 1 + k * 0.06; sx *= 1 - k * 0.04; }
+    if (this.type === 'tank' && !this.moving) sy *= 1 + Math.sin(this.t * 4) * 0.04;
+    if (this.anim) {
+      const k = this.anim.t / this.anim.dur;
+      if (this.anim.type === 'attack') { const f = Math.sin(k * Math.PI); ox = this.anim.ax * 4 * f; oy = this.anim.ay * 3 * f; sx *= 1 + 0.18 * f; sy *= 1 - 0.1 * f; }
+      if (this.anim.type === 'hurt') { sx *= 1 + 0.18 * k; sy *= 1 - 0.18 * k; }
+    }
+    if (winding) { ox += rr(-0.8, 0.8); sy *= 0.92; sx *= 1.06; }
+    if (this.dash) { sx *= 1.15; sy *= 0.9; }
+    const w = spr.width * sx, h = spr.height * sy, baseH = spr.height * this.scale;
+    const bob = this.type === 'fast' ? Math.sin(this.t * 10) * 2 - 4 : 0;
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.beginPath(); ctx.ellipse(this.x, this.y, w * 0.32, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(this.x, this.y, spr.width * this.scale * 0.32, 2.5, 0, 0, Math.PI * 2); ctx.fill();
     ctx.save();
-    ctx.translate(Math.round(this.x), Math.round(this.y - h + 2 + bob));
-    if (this.face === -1) { ctx.scale(-1, 1); ctx.drawImage(spr, -w / 2, 0, w, h); }
-    else ctx.drawImage(spr, -w / 2, 0, w, h);
+    if (this.ability === 'phase') ctx.globalAlpha = 0.55 + Math.sin(this.t * 3) * 0.2;
+    ctx.translate(Math.round(this.x + ox), Math.round(this.y - h + 2 + bob + oy));
+    if (this.face === -1) ctx.scale(-1, 1);
+    ctx.drawImage(spr, -w / 2, 0, w, h);
     ctx.restore();
+    if (winding) { // aviso "!" sobre a cabeça
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(Math.round(this.x - 1), Math.round(this.y - baseH - 9 + bob), 2, 5);
+      ctx.fillRect(Math.round(this.x - 1), Math.round(this.y - baseH - 3 + bob), 2, 2);
+      if (this.windAct === 'charge' && this.chargeDir) {
+        ctx.strokeStyle = 'rgba(239,68,68,0.6)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(this.x, this.y - 4); ctx.lineTo(this.x + this.chargeDir.x * 99, this.y - 4 + this.chargeDir.y * 99); ctx.stroke();
+      }
+      if (this.windAct === 'pound' || this.windAct === 'shock') {
+        ctx.strokeStyle = 'rgba(239,68,68,0.5)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(this.x, this.y - 2, 36, 22, 0, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
     if (this.elite) {
       ctx.strokeStyle = 'rgba(250,204,21,0.7)'; ctx.lineWidth = 1;
-      ctx.strokeRect(Math.round(this.x - w / 2) - 0.5, Math.round(this.y - h + 2 + bob) - 0.5, w + 1, h + 1);
+      ctx.strokeRect(Math.round(this.x - w / 2 + ox) - 0.5, Math.round(this.y - h + 2 + bob + oy) - 0.5, w + 1, h + 1);
     }
-    if (this.hp < this.maxHp) {
+    if (this.hp < this.maxHp && !this.isBoss) {
       const bw = 12 * this.scale;
-      ctx.fillStyle = '#000'; ctx.fillRect(Math.round(this.x - bw / 2), Math.round(this.y - h - 1 + bob), bw, 2);
+      ctx.fillStyle = '#000'; ctx.fillRect(Math.round(this.x - bw / 2), Math.round(this.y - baseH - 1 + bob), bw, 2);
       ctx.fillStyle = this.elite ? '#facc15' : '#ef4444';
-      ctx.fillRect(Math.round(this.x - bw / 2), Math.round(this.y - h - 1 + bob), bw * Math.max(0, this.hp / this.maxHp), 2);
+      ctx.fillRect(Math.round(this.x - bw / 2), Math.round(this.y - baseH - 1 + bob), bw * Math.max(0, this.hp / this.maxHp), 2);
     }
+  }
+}
+
+// ---------- Restos de inimigos (animação de morte) ----------
+function addCorpse(e) {
+  G.corpses.push({ sprite: e.sprite, pal: e.pal, x: e.x, y: e.y, scale: e.scale, face: e.face || 1, t: 0.45, fly: e.type === 'fast' });
+}
+function drawCorpses(ctx, dt) {
+  for (const c of G.corpses) {
+    const k = 1 - c.t / 0.45;
+    const spr = getSprite(c.sprite, c.pal, k < 0.25);
+    const w = spr.width * c.scale, h = spr.height * c.scale;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, 1 - k * 1.1);
+    ctx.translate(Math.round(c.x), Math.round(c.y - 2 + (c.fly ? k * 6 : 0)));
+    ctx.rotate(c.face * k * 1.4);
+    ctx.scale(c.face * (1 + k * 0.2), 1 - k * 0.5);
+    ctx.drawImage(spr, -w / 2, -h, w, h);
+    ctx.restore();
   }
 }
 
@@ -410,6 +644,7 @@ class Boss extends Enemy {
     if (this.hidden) return; // embaixo da terra não leva dano
     this.hp -= amount;
     this.flash = 0.08;
+    this.setAnim('hurt', 0.1);
     if (!this.aware) { this.aware = true; G.boss = this; Music.play('boss'); }
     addText(this.x, this.y - 40, Math.round(amount) + (crit ? '!' : ''), crit ? '#fde047' : '#ffffff', crit ? 1.3 : 1);
     burst(this.x, this.y - 18, this.pal.g || this.pal.a || '#fff', 5);
@@ -446,8 +681,10 @@ function updateHazards(dt) {
     if (h.delay > 0) { h.delay -= dt; continue; }
     if (!h.fired) {
       h.fired = true;
-      G.effects.push({ type: 'ring', x: h.x, y: h.y, r: 3, max: h.r, t: 0.25, color: h.color });
-      burst(h.x, h.y - 3, h.color, 6);
+      if (h.kind !== 'fire') {
+        G.effects.push({ type: 'ring', x: h.x, y: h.y, r: 3, max: h.r, t: 0.25, color: h.color });
+        burst(h.x, h.y - 3, h.color, 6);
+      }
       if (h.kind === 'meteor' || h.kind === 'rock' || h.kind === 'burrow') { G.shake = Math.max(G.shake, 3); Sfx.boom(); }
       if (dist(h.x, h.y, p.x, p.y) < h.r) hurtPlayer(h.dmg, null);
       if (!h.dur) { h.done = true; continue; }
@@ -488,6 +725,7 @@ class Projectile {
     this.dmg = dmg; this.friendly = friendly; this.color = color || '#fff';
     this.life = opts.life || 3; this.size = size; this.dead = false;
     this.explode = opts.explode || 0;   // raio de explosão (bola de fogo)
+    this.homing = !!opts.homing; this.slow = !!opts.slow;
   }
   update(dt) {
     this.x += this.vx * dt; this.y += this.vy * dt;
@@ -504,8 +742,16 @@ class Projectile {
       return;
     }
     const p = G.p;
+    if (this.homing) { // orbe da sereia persegue devagar
+      const a = Math.atan2(p.y - 6 - this.y, p.x - this.x), sp = Math.hypot(this.vx, this.vy);
+      const cur = Math.atan2(this.vy, this.vx);
+      let da = a - cur; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+      const na = cur + clamp(da, -2 * dt, 2 * dt);
+      this.vx = Math.cos(na) * sp; this.vy = Math.sin(na) * sp;
+    }
     if (dist(this.x, this.y, p.x, p.y - 6) < 6 + this.size) {
       this.dead = true;
+      if (this.slow) { p.slowT = 2.2; p.slowMul = 0.45; addText(p.x, p.y - 18, 'preso na teia!', '#f5f5f4', 0.7); }
       hurtPlayer(this.dmg, null);
     }
   }
@@ -515,6 +761,11 @@ class Projectile {
   }
   draw(ctx) {
     ctx.fillStyle = this.color;
+    if (this.slow) { // teia
+      const x = Math.round(this.x), y = Math.round(this.y);
+      ctx.fillRect(x - 3, y, 7, 1); ctx.fillRect(x, y - 3, 1, 7); ctx.fillRect(x - 2, y - 2, 1, 1); ctx.fillRect(x + 2, y + 2, 1, 1); ctx.fillRect(x + 2, y - 2, 1, 1); ctx.fillRect(x - 2, y + 2, 1, 1);
+      return;
+    }
     ctx.fillRect(Math.round(this.x - this.size / 2), Math.round(this.y - this.size / 2), this.size, this.size);
     ctx.globalAlpha = 0.35;
     ctx.fillRect(Math.round(this.x - this.vx * 0.03 - 1), Math.round(this.y - this.vy * 0.03 - 1), 2, 2);
@@ -550,6 +801,7 @@ function hurtPlayer(amount, source) {
   if (p.shieldT > 0) { dmg *= 1 - p.shieldRed; G.effects.push({ type: 'ring', x: p.x, y: p.y - 6, r: 8, max: 13, t: 0.2, color: '#d6d3d1' }); }
   p.hp -= dmg;
   p.iframes = 0.5;
+  p.hurtT = 0.3;
   G.shake = Math.max(G.shake, 3);
   G.hurtFlash = 0.25;
   addText(p.x, p.y - 16, '-' + Math.round(dmg), '#f87171');
@@ -564,6 +816,7 @@ function playerAttack(aimAngle) {
   const st = playerStats(p);
   p.atkCd = st.cd;
   p.swing = { t: 0.14, a: aimAngle, range: st.range };
+  hitSecretWall(aimAngle);
   Sfx.swing();
   const cx = p.x, cy = p.y - 5;
   let hitAny = false;

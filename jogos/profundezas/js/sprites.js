@@ -547,7 +547,23 @@ const SPRITES = {
   ],
 };
 
+// Quadros de animação do herói, derivados do quadro parado
+(function () {
+  const h = SPRITES.hero;
+  const frame = (changes) => h.map((row, i) => changes[i] !== undefined ? changes[i] : row);
+  SPRITES.hero_walk1 = frame({ 10: '..pp....pp..', 11: '.kk......kk.' });
+  SPRITES.hero_walk2 = frame({ 10: '....pppp....', 11: '....kkkk....' });
+  SPRITES.hero_atk = frame({ 7: '.s.ccccccss.', 8: '...cbbbbc...', 10: '..pp...pp...', 11: '..kk...kk...' });
+  SPRITES.hero_hurt = frame({ 3: '...sksksss..', 5: '....skks....', 7: 's..cccccc..s' });
+  SPRITES.crabShell = [
+    '............', '............', '............', '............', '............',
+    '..aaaaaaaa..', '.alaaaaaaaa.', 'aaaaaaaaaaab', '.bbbbbbbbbb.',
+    '............', '............', '............',
+  ];
+})();
+
 const DEFAULT_PAL = {
+  hero_walk1: null, hero_walk2: null, hero_atk: null, hero_hurt: null,
   hero: { h: '#6b3e1f', s: '#f1c27d', e: '#1a1a1a', c: '#3b82f6', d: '#1d4ed8', b: '#7c4a1e', p: '#4b3621', k: '#2b1d10' },
   chest: { d: '#4a2e14', w: '#9a6a34', m: '#e0b040' },
   chestOpen: { d: '#4a2e14', w: '#9a6a34', m: '#e0b040', k: '#1a0f06' },
@@ -567,10 +583,10 @@ const _spriteCache = {};
 
 // Gera (e guarda em cache) um canvas com o sprite usando a paleta indicada.
 function getSprite(name, pal, flash) {
-  const key = name + JSON.stringify(pal || '') + (flash ? '!' : '');
+  const key = name + JSON.stringify(pal || '') + String(flash || '');
   if (_spriteCache[key]) return _spriteCache[key];
   const rows = SPRITES[name];
-  const p = pal || DEFAULT_PAL[name] || {};
+  const p = pal || DEFAULT_PAL[name] || (name.startsWith('hero') ? DEFAULT_PAL.hero : {});
   const c = document.createElement('canvas');
   c.width = rows[0].length; c.height = rows.length;
   const x = c.getContext('2d');
@@ -578,7 +594,7 @@ function getSprite(name, pal, flash) {
     for (let i = 0; i < rows[j].length; i++) {
       const ch = rows[j][i];
       if (ch === '.') continue;
-      x.fillStyle = flash ? '#ffffff' : (p[ch] || '#ff00ff');
+      x.fillStyle = flash === 'red' ? '#ff4d4d' : flash ? '#ffffff' : (p[ch] || '#ff00ff');
       x.fillRect(i, j, 1, 1);
     }
   }

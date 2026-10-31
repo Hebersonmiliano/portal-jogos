@@ -8,7 +8,8 @@ const G = {
   p: null,
   level: null,
   floorCanvas: null,
-  enemies: [], projectiles: [], drops: [], chests: [], props: [], hazards: [], traps: [],
+  enemies: [], projectiles: [], drops: [], chests: [], props: [], hazards: [], traps: [], corpses: [],
+  spikes: [], barrels: [], blessing: null,
   texts: [], particles: [], effects: [],
   tombEnt: null,
   boss: null,
@@ -48,12 +49,12 @@ function resetRuntime(p) {
   Object.assign(p, {
     atkCd: 0, swing: null, dodgeT: 0, dodgeCd: 0, iframes: 0, fx: 1, fy: 0,
     vx: 0, vy: 0, hitCount: 0, hungerTick: 0, starveTick: 0, dead: false, walkT: 0, face: 1,
-    skillCd: {}, charge: null, shieldT: 0, shieldRed: 0, spin: 0, dodgeCh: dodgeMax(p), dodgeRecT: 0,
+    skillCd: {}, charge: null, shieldT: 0, shieldRed: 0, spin: 0, dodgeCh: dodgeMax(p), dodgeRecT: 0, hurtT: 0, slowT: 0, slowMul: 1,
   });
 }
 
 // ---------- Salvamento ----------
-const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT'];
+const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT', 'hurtT', 'slowT', 'slowMul'];
 function saveGame() {
   try {
     const data = {};
@@ -98,6 +99,7 @@ function enterFloor(floor, viaStairs) {
   G.level = generateFloor(floor);
   G.floorCanvas = renderFloorCanvas(G.level);
   G.enemies = []; G.projectiles = []; G.drops = []; G.chests = []; G.props = []; G.hazards = []; G.traps = [];
+  G.corpses = []; G.spikes = []; G.barrels = []; G.blessing = null;
   G.texts = []; G.particles = []; G.effects = [];
   G.boss = null; G.tombEnt = null;
   p.floor = floor;
@@ -148,6 +150,7 @@ function enterFloor(floor, viaStairs) {
     UI.toast('Sua lápide está neste andar...', '#e5e7eb');
   }
   // tira inimigos de perto do início
+  placeFeatures(L, floor);
   G.enemies = G.enemies.filter(e => e.isBoss || dist(e.x, e.y, p.x, p.y) > 70);
   G.state = 'dungeon';
   showHud(true);
@@ -172,6 +175,7 @@ function spawnGold(x, y, amount) {
 
 function onEnemyDeath(e) {
   const p = G.p;
+  addCorpse(e);
   const f = G.level.floor;
   const st = playerStats(p);
   p.kills++;
@@ -323,6 +327,8 @@ function updateDungeon(dt) {
   if (p.dodgeCd > 0) p.dodgeCd -= dt;
   if (p.dodgeCh < dodgeMax(p)) { p.dodgeRecT -= dt; if (p.dodgeRecT <= 0) { p.dodgeCh++; p.dodgeRecT = dodgeRecharge(p); } }
   if (p.iframes > 0) p.iframes -= dt;
+  if (p.hurtT > 0) p.hurtT -= dt;
+  if (p.slowT > 0) p.slowT -= dt;
   if (p.swing) { p.swing.t -= dt; if (p.swing.t <= 0) p.swing = null; }
   const mv = Input.move();
   if (mv.x || mv.y) { p.fx = mv.x; p.fy = mv.y; p.walkT += dt; if (mv.x) p.face = mv.x < 0 ? -1 : 1; }
@@ -372,10 +378,11 @@ function updateDungeon(dt) {
   }
 
   // inimigos e projéteis
-  for (const e of G.enemies) if (!e.dead && dist(e.x, e.y, p.x, p.y) < 320) e.update(dt);
+  for (const e of G.enemies) if (!e.dead && (e.isProp || dist(e.x, e.y, p.x, p.y) < 320)) e.update(dt);
   G.enemies = G.enemies.filter(e => !e.dead);
   for (const pr of G.projectiles) pr.update(dt);
   updateHazards(dt);
+  updateFeatures(dt);
   if (G.state !== 'dungeon' || p.dead) { updateEffects(dt); return; }
   G.projectiles = G.projectiles.filter(pr => !pr.dead);
 
@@ -418,7 +425,8 @@ function updateDungeon(dt) {
     }
     Sfx.chest();
     const f = L.floor, luck = st.luck;
-    G.drops.push(makeDrop(c.x, c.y + 4, genItem(f, 1, null, luck), 0.3));
+    G.drops.push(makeDrop(c.x, c.y + 4, genItem(f, c.secret ? 2 : 1, null, luck + (c.secret ? 10 : 0)), 0.3));
+    if (c.secret) { G.drops.push(makeDrop(c.x - 8, c.y + 6, genItem(f, 1, null, luck), 0.3)); UI.toast('Baú especial!', '#facc15'); }
     if (Math.random() < 0.7) G.drops.push(makeDrop(c.x + 8, c.y + 4, genItem(f, 0, null, luck), 0.3));
     if (Math.random() < 0.5) G.drops.push(makeDrop(c.x - 8, c.y + 4, makeConsumable(pick(['potion', 'food', 'potion', 'scroll'])), 0.3));
     spawnGold(c.x, c.y + 6, rr(8, 16) * (1 + 0.3 * (f - 1)));
@@ -458,6 +466,10 @@ function updateDungeon(dt) {
     } else if (pr.type === 'elevator') {
       prompt = '[E] Subir pelo elevador até a vila';
       if (interact) { returnToVillage('Você subiu pelo elevador.'); return; }
+    } else {
+      const pt = featureInteract(pr, interact);
+      if (pt) prompt = pt;
+      if (UI.anyOpen()) return;
     }
   }
   const pe = document.getElementById('prompt');
@@ -469,6 +481,8 @@ function updateDungeon(dt) {
 }
 
 function updateEffects(dt) {
+  for (const c of G.corpses) c.t -= dt;
+  G.corpses = G.corpses.filter(c => c.t > 0);
   for (const t of G.texts) { t.t -= dt; t.y -= 18 * dt; }
   G.texts = G.texts.filter(t => t.t > 0);
   for (const q of G.particles) { q.t -= dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 120 * dt; }
@@ -500,6 +514,7 @@ function renderDungeon() {
   ctx.imageSmoothingEnabled = false;
   ctx.setTransform(G.scale, 0, 0, G.scale, -G.cam.x * G.scale, -G.cam.y * G.scale);
   ctx.drawImage(G.floorCanvas, 0, 0);
+  drawFeaturesFloor(ctx);
 
   const t = G.time;
   // escada
@@ -520,7 +535,7 @@ function renderDungeon() {
       ctx.fillStyle = '#334155'; ctx.fillRect(ex, ey, 16, 16);
       ctx.fillStyle = '#94a3b8'; ctx.fillRect(ex + 2, ey + 2, 12, 12);
       ctx.fillStyle = '#38bdf8'; ctx.fillRect(ex + 6, ey + 4 + Math.round(Math.sin(t * 3) * 2), 4, 4);
-    }
+    } else drawFeatureProp(ctx, pr);
   }
   if (G.tombEnt) ctx.drawImage(getSprite('tomb'), Math.round(G.tombEnt.x - 6), Math.round(G.tombEnt.y - 11));
   for (const c of G.chests) ctx.drawImage(getSprite(c.open ? 'chestOpen' : 'chest'), Math.round(c.x - 6), Math.round(c.y - 10));
@@ -542,6 +557,7 @@ function renderDungeon() {
   }
 
   drawHazards(ctx);
+  drawCorpses(ctx);
 
   // entidades ordenadas por y
   const list = G.enemies.filter(e => Math.abs(e.x - p.x) < vw && Math.abs(e.y - p.y) < vh).concat([p]);
@@ -610,17 +626,30 @@ function renderDungeon() {
 
 function drawPlayer(ctx) {
   const p = G.p;
-  if (p.iframes > 0 && Math.floor(G.time * 20) % 2 === 0) return;
-  const spr = getSprite('hero');
+  const hurtNow = p.hurtT > 0;
+  if (p.iframes > 0 && !hurtNow && !p.dodgeT && !p.charge && Math.floor(G.time * 20) % 2 === 0) return;
   const moving = Input.move().x || Input.move().y;
-  const bob = moving ? Math.round(Math.abs(Math.sin(p.walkT * 12)) * -1) : 0;
+  // escolhe o quadro: dano, ataque, caminhada ou parado
+  let frame = 'hero';
+  if (p.dead) frame = 'hero_hurt';
+  else if (hurtNow) frame = 'hero_hurt';
+  else if (p.swing || p.spin > 0) frame = 'hero_atk';
+  else if (moving) frame = ['hero_walk1', 'hero', 'hero_walk2', 'hero'][Math.floor(p.walkT * 9) % 4];
+  const spr = getSprite(frame, null, hurtNow && p.hurtT > 0.2 ? true : false);
+  const bob = moving && !p.dead ? Math.round(Math.abs(Math.sin(p.walkT * 12)) * -1) : 0;
   ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.beginPath(); ctx.ellipse(p.x, p.y, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
   ctx.save();
-  ctx.translate(Math.round(p.x), Math.round(p.y - 12 + bob));
-  ctx.globalAlpha = p.dodgeT > 0 ? 0.5 : 1;
+  ctx.translate(Math.round(p.x), Math.round(p.y - 6 + bob));
+  ctx.globalAlpha = p.dodgeT > 0 ? 0.6 : 1;
+  if (p.dead) { ctx.rotate(p.face * Math.PI / 2); ctx.globalAlpha = 0.8; }
+  else if (p.dodgeT > 0) ctx.rotate(p.face * (1 - p.dodgeT / 0.17) * Math.PI * 2); // rolamento
+  else if (hurtNow) ctx.translate(-p.face * 1, 0);
   if (p.face === -1) ctx.scale(-1, 1);
+  ctx.translate(0, -6);
+  if (p.slowT > 0) { ctx.fillStyle = 'rgba(245,245,244,0.5)'; ctx.fillRect(-5, 9, 10, 3); }
   ctx.drawImage(spr, -6, 0);
+  if (p.dead) { ctx.restore(); ctx.globalAlpha = 1; return; }
   // arma
   const w = p.eq.weapon;
   if (w) {

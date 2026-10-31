@@ -281,7 +281,7 @@ const UI = {
     this.$('foodFill').classList.toggle('warn', p.hunger <= 20);
     this.$('hpFill').classList.toggle('warn', p.hp / st.maxHp < 0.3);
     if (G.level) {
-      this.$('floorTxt').innerHTML = `ANDAR ${G.level.floor}<small>${G.level.biome.name}</small>`;
+      this.$('floorTxt').innerHTML = `ANDAR ${G.level.floor}<small>${G.level.biome.name}</small>${G.blessing ? `<small class="bless">${BLESSINGS[G.blessing].name}</small>` : ''}`;
     }
     this.$('goldTxt').textContent = `◆ ${p.gold}`;
     const count = k => p.bag.filter(i => i.kind === k).reduce((a, i) => a + i.qty, 0);
@@ -309,7 +309,7 @@ const UI = {
     x.fillStyle = 'rgba(200,190,170,0.55)';
     for (let ty = 0; ty < MAP_H; ty++) for (let tx = 0; tx < MAP_W; tx++) {
       const i = ty * MAP_W + tx;
-      if (L.explored[i] && L.map[i]) x.fillRect(tx * s, ty * s, s, s);
+      if (L.explored[i] && L.map[i] === 1) x.fillRect(tx * s, ty * s, s, s);
     }
     const mark = (wx, wy, col, sz = 3) => {
       const tx = Math.floor(wx / TILE), ty = Math.floor(wy / TILE);
@@ -317,7 +317,12 @@ const UI = {
       x.fillStyle = col; x.fillRect(tx * s - 1, ty * s - 1, sz, sz);
     };
     if (L.stairs) mark(L.stairs.x, L.stairs.y, '#38bdf8', 4);
-    for (const pr of G.props) if (pr.type === 'campfire' && !pr.used) mark(pr.x, pr.y, '#f97316');
+    for (const pr of G.props) {
+      if (pr.type === 'campfire' && !pr.used) mark(pr.x, pr.y, '#f97316');
+      if (pr.type === 'shrine' && !pr.used) mark(pr.x, pr.y, '#c4b5fd');
+      if (pr.type === 'merchant') mark(pr.x, pr.y, '#fde047');
+      if (pr.type === 'pedestal' && !pr.done) mark(pr.x, pr.y, '#ef4444');
+    }
     for (const ch of G.chests) if (!ch.open) mark(ch.x, ch.y, '#facc15');
     if (G.tombEnt) mark(G.tombEnt.x, G.tombEnt.y, '#e5e7eb');
     x.fillStyle = '#4ade80';
