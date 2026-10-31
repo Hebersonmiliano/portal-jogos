@@ -174,6 +174,10 @@ function featureInteract(pr, interact) {
     }
     return '[E] Orar no santuário';
   }
+  if (pr.type === 'miner') {
+    if (interact) talkMiner(pr);
+    return `[E] Falar com ${MINERS[pr.floor].name.split(',')[0]}`;
+  }
   if (pr.type === 'merchant') {
     if (interact) merchantMenu(pr);
     return '[E] Falar com o mercador';
@@ -263,6 +267,12 @@ function drawFeatureProp(ctx, pr) {
     ctx.fillStyle = '#27272a'; ctx.fillRect(x - 4, y - 17, 6, 5);  // capuz
     ctx.fillStyle = '#fde047'; ctx.fillRect(x - 3, y - 15, 1, 1); ctx.fillRect(x, y - 15, 1, 1);
     ctx.fillStyle = '#facc15'; ctx.fillRect(x - 1, y - 24 + Math.round(Math.sin(t * 3)), 2, 3); // moeda flutuando
+  } else if (pr.type === 'miner') {
+    const spr = getSprite('hero', PEOPLE.minerador.body);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(x - 4, y - 1, 8, 2);
+    ctx.save(); ctx.translate(x, y - 12 + Math.round(Math.sin(t * 2) * 0.5)); ctx.scale(G.p.x < x ? -1 : 1, 1); ctx.drawImage(spr, -6, 0); ctx.restore();
+    ctx.fillStyle = '#fde68a'; ctx.fillRect(x - 1, y - 13, 2, 1); // luz do capacete
+    if (!(G.p.minersMet || []).includes(pr.floor)) { const yy = Math.round(y - 22 + Math.sin(t * 5) * 1.5); ctx.fillStyle = '#fde047'; ctx.fillRect(x - 1, yy, 2, 5); ctx.fillRect(x - 1, yy + 6, 2, 2); }
   } else if (pr.type === 'pedestal') {
     ctx.fillStyle = '#44403c'; ctx.fillRect(x - 7, y - 3, 14, 4);
     ctx.fillStyle = '#57534e'; ctx.fillRect(x - 4, y - 11, 8, 8);

@@ -158,6 +158,7 @@ function enterFloor(floor, viaStairs) {
   }
   // tira inimigos de perto do início
   placeFeatures(L, floor);
+  placeMiner(L, floor);
   decorateFloor(L);
   G.ambient = [];
   G.enemies = G.enemies.filter(e => e.isBoss || dist(e.x, e.y, p.x, p.y) > 70);
@@ -171,9 +172,10 @@ function enterFloor(floor, viaStairs) {
   saveGame();
 }
 
-function showHud(on) {
+function showHud(on, mode) {
   document.getElementById('hud').classList.toggle('hidden', !on);
-  document.body.classList.toggle('in-dungeon', on);
+  document.body.classList.toggle('in-dungeon', !!on && mode !== 'village');
+  document.body.classList.toggle('in-village', !!on && mode === 'village');
 }
 
 // ---------- Drops ----------
@@ -293,7 +295,7 @@ function playerDie() {
       title: 'Você morreu',
       text: `Caiu no andar ${G.level.floor}. Perdeu ${lostGold} de ouro${lostItems.length ? ` e ${lostItems.length} ${lostItems.length > 1 ? 'itens' : 'item'} da mochila, que ficaram na sua lápide nesse andar` : ''}. Seu nível e equipamentos continuam com você.`,
       cls: 'death',
-      items: [{ label: 'Acordar na vila', act: () => { UI.close(); enterVillage(); } }],
+      items: [{ label: 'Acordar na vila', act: () => { UI.close(); enterVillage(null, 'inn'); Dialog.play([{ who: 'marta', text: 'Calma, calma, não se levante ainda! Te acharam desmaiado na porta da torre. Descanse um pouco.' }]); } }],
     });
   }, 900);
 }
@@ -717,18 +719,23 @@ function drawPlayer(ctx) {
 }
 
 // ---------- Vila ----------
-function enterVillage(msg) {
+function enterVillage(msg, spawn = 'tower') {
   const p = G.p;
   G.state = 'village';
   G.level = null; G.boss = null;
   p.floor = 0;
   resetRuntime(p);
-  showHud(false);
+  if (!VILLAGE.built) buildVillage();
+  const sp = villageSpawn(spawn);
+  p.x = sp.x; p.y = sp.y; p.face = 1;
+  showHud(true, 'village');
+  document.getElementById('floorTxt').innerHTML = `VILA<small>Pedra Funda</small>`;
+  document.getElementById('prompt').classList.add('hidden');
   saveGame();
   Music.play('village');
   villageMenu(msg);
-  if (p.portal) Tips.show('portal', 'Portal de Retorno', `Você deixou um portal aberto no andar ${p.portal}. Em "Descer à masmorra", escolha o portal para voltar direto para lá, sem repetir os andares.`);
-  Tips.show('village', 'A vila', 'Aqui você dorme na estalagem, vende tesouros no mercado e melhora o equipamento no ferreiro. Quando estiver pronto, escolha "Descer à masmorra".');
+  if (p.portal) Tips.show('portal', 'Portal de Retorno', `Você deixou um portal aberto no andar ${p.portal}. Na torre, escolha o portal para voltar direto para lá, sem repetir os andares.`);
+  Tips.show('village', 'A vila', () => `Ande com ${K('move')} e fale com os moradores usando ${K('use')}. A torre no canto leva à masmorra. ${K('bag')} abre a mochila e Esc abre o menu da vila.`);
 }
 
 function unlockedElevators() {
@@ -737,12 +744,21 @@ function unlockedElevators() {
   return out;
 }
 
+// Fecha os menus e volta a andar pela vila
 function villageMenu(msg) {
+  UI.close();
+  if (msg) UI.toast(msg, '#fde68a');
+}
+
+// Menu da vila (tecla Esc / botão de pausa): atalhos para tudo
+function villagePause(msg) {
   const p = G.p, st = playerStats(p);
   const tombLine = p.tomb ? `<br><span style="color:#e5e7eb">Sua lápide está no andar ${p.tomb.floor}.</span>` : '';
   UI.menu({
     title: 'Vila de Pedra Funda',
     cls: 'village',
+    back: () => UI.close(),
+    backLabel: 'Voltar a andar pela vila',
     text: `${msg ? `<span style="color:#fde68a">${msg}</span><br>` : ''}Vida ${Math.ceil(p.hp)}/${st.maxHp} · Fome ${Math.ceil(p.hunger)} · Cansaço ${Math.floor(p.fatigue)} · ◆ ${p.gold} ouro · Mais fundo: andar ${p.maxFloor}${tombLine}`,
     items: [
       { label: 'Descer à masmorra', sub: p.portal ? `Portal de Retorno aberto no andar ${p.portal}` : 'Escolha o elevador de partida', act: descendMenu },
@@ -998,7 +1014,18 @@ function startGame(fresh) {
   ensureQuests(G.p);
   G.resumeFromMenu = () => {};
   if (G.p.floor > 0) enterFloor(G.p.floor, false);
-  else if (fresh) { G.state = 'village'; Music.play('village'); showStory(STORY.intro.title, STORY.intro.text, () => enterVillage('Bem-vindo à vila. Fale com o Ancião Tobias para saber seu objetivo.')); }
+  else if (fresh) {
+    G.state = 'title'; Music.play('village');
+    Scene.show('intro', STORY.intro.title, STORY.intro.text, () => {
+      enterVillage(null, 'plaza');
+      Dialog.play([
+        { who: 'tobias', text: 'Explorador! Que bom que você veio. Eu sou Tobias, o Ancião de Pedra Funda.' },
+        { who: 'tobias', text: 'A torre ali no canto leva à masmorra. Antes de descer, fale com Marta, Joana, Bruno e Lia: cada um vai te ajudar de um jeito.' },
+        { who: 'pedrinho', text: 'E comigo também! Eu sei um monte de segredos da masmorra!' },
+        { who: 'tobias', text: 'Quando quiser saber seu próximo objetivo, venha falar comigo. Boa sorte.' },
+      ]);
+    });
+  }
   else enterVillage(null);
 }
 
@@ -1066,6 +1093,11 @@ function frame(now) {
       updateSkillBar();
       if (Math.floor(G.time * 4) !== Math.floor((G.time - dt) * 4)) { UI.drawMinimap(); updateQuestTracker(); }
     }
+  } else if (G.state === 'village' && VILLAGE.built && G.p) {
+    if (!UI.anyOpen()) updateVillage(dt);
+    renderVillage();
+    UI.updateHud(dt);
+    if (Math.floor(G.time * 4) !== Math.floor((G.time - dt) * 4)) updateQuestTracker();
   } else {
     renderVillageBg();
   }

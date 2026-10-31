@@ -91,6 +91,7 @@ const Tips = {
       if (pr.type === 'shrine' && !pr.used) this.show('shrine', 'Santuário', () => `Ore com ${K('use')} para receber uma bênção que dura até você sair do andar.`);
       if (pr.type === 'merchant') this.show('merchant', 'Mercador errante', () => `Aperte ${K('use')} para comprar. Ele cobra mais caro que a vila, mas sempre traz um item raro.`);
       if (pr.type === 'pedestal' && !pr.used) this.show('pedestal', 'Sala de desafio', () => `Aperte ${K('use')} na caveira para chamar uma leva de inimigos. Derrote todos e ganhe um baú especial.`);
+      if (pr.type === 'miner') this.show('miner', 'Mineiro perdido', () => `Um sobrevivente da equipe de Aldo! Fale com ele usando ${K('use')}: os mineiros contam pedaços da história e sempre ajudam.`);
       if (pr.type === 'elevator') this.show('elevator', 'Elevador', () => `Chegou a um elevador! Aperte ${K('use')} para voltar à vila. De lá, você pode descer direto para este andar.`);
     }
     if (G.tombEnt) this.show('tomb', 'Sua lápide', 'Seus itens perdidos estão na lápide deste andar. Encoste nela para recuperar tudo.');

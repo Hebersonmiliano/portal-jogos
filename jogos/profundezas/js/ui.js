@@ -325,6 +325,7 @@ const UI = {
       if (pr.type === 'shrine' && !pr.used) mark(pr.x, pr.y, '#c4b5fd');
       if (pr.type === 'merchant') mark(pr.x, pr.y, '#fde047');
       if (pr.type === 'pedestal' && !pr.done) mark(pr.x, pr.y, '#ef4444');
+      if (pr.type === 'miner') mark(pr.x, pr.y, '#fde68a');
     }
     for (const ch of G.chests) if (!ch.open) mark(ch.x, ch.y, '#facc15');
     if (G.tombEnt) mark(G.tombEnt.x, G.tombEnt.y, '#e5e7eb');

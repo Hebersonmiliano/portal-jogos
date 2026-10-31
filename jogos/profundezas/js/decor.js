@@ -100,6 +100,7 @@ function decorateFloor(L) {
   }
   // luz das fogueiras e da escada
   for (const pr of G.props) if (pr.type === 'campfire') L.lights.push({ x: pr.x, y: pr.y - 4, r: 70, color: '255,140,40', flicker: true, phase: 0, prop: pr });
+  for (const pr of G.props) if (pr.type === 'miner') L.lights.push({ x: pr.x, y: pr.y - 10, r: 46, color: '253,230,138', soft: true });
 }
 
 // ---------- Tochas animadas ----------

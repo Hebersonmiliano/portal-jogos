@@ -28,8 +28,9 @@ const STORY = {
   },
 };
 
-function showStory(title, text, after) {
-  UI.menu({ title, text, cls: 'story', items: [{ label: 'Continuar', act: () => { UI.close(); if (after) after(); } }] });
+const SCENE_OF = { 10: 'ch1', 20: 'ch2', 30: 'ch3', 40: 'ch4', 50: 'ch5' };
+function showStory(title, text, after, sceneId) {
+  Scene.show(sceneId || 'intro', title, text, after);
 }
 
 // Chamado quando um chefe cai pela primeira vez
@@ -38,7 +39,7 @@ function storyOnBoss(floor) {
   if (!ch) return;
   setTimeout(() => {
     if (G.state !== 'dungeon') return;
-    showStory(ch.title, ch.text + (floor === MAX_FLOOR ? '' : '<br><br><small>O Ancião vai querer ouvir isso. Volte à vila quando puder.</small>'), floor === MAX_FLOOR ? () => showVictory() : null);
+    showStory(ch.title, ch.text + (floor === MAX_FLOOR ? '' : '<br><br><small>O Ancião vai querer ouvir isso. Volte à vila quando puder.</small>'), floor === MAX_FLOOR ? () => showVictory() : null, SCENE_OF[floor]);
   }, 1600);
 }
 
@@ -79,7 +80,12 @@ function genQuest(p) {
 
 function ensureQuests(p) {
   if (!Array.isArray(p.quests)) p.quests = [];
-  while (p.quests.length < MAX_QUESTS) p.quests.push(genQuest(p));
+  while (p.quests.length < MAX_QUESTS) {
+    let q, tries = 0;
+    // evita missões repetidas (mesmo tipo e mesmo alvo)
+    do { q = genQuest(p); tries++; } while (tries < 20 && p.quests.some(o => o.type === q.type && (o.target === q.target || q.type !== 'kill' && q.type !== 'treasure')));
+    p.quests.push(q);
+  }
 }
 
 // Eventos do jogo que fazem as missões andarem
@@ -147,7 +153,7 @@ function elderMenu() {
     text: `${e.talk}<br><br><span style="color:#fde68a">Objetivo: ${e.goal}</span>`,
     items: [
       { label: 'Ouvir a história de novo', sub: 'Como tudo começou', act: () => showStory(STORY.intro.title, STORY.intro.text, elderMenu) },
-      ...chapters.map(c => ({ label: c.title, sub: 'Capítulo já descoberto', act: () => showStory(c.title, c.text, elderMenu) })),
+      ...chapters.map(c => ({ label: c.title, sub: 'Capítulo já descoberto', act: () => showStory(c.title, c.text, elderMenu, SCENE_OF[c.floor]) })),
     ],
     back: () => villageMenu(),
   });
@@ -160,4 +166,58 @@ function updateQuestTracker() {
   const p = G.p, e = STORY.elder(p);
   const html = `<p class="goal">${e.goal}</p>` + p.quests.map(q => `<p class="${q.done ? 'ok' : ''}">${q.done ? '✔' : '•'} ${q.type === 'depth' ? `Andar ${q.target}` : q.text.replace(/ \(.*\)/, '').replace(/\.$/, '')} ${q.done ? '' : `<b>${q.count}/${q.need}</b>`}</p>`).join('');
   if (el.innerHTML !== html) el.innerHTML = html;
+}
+
+// ---------- História durante a masmorra ----------
+const BOSS_TAUNT = {
+  0: ['HUMANO! Veio roubar a brasa do rei? Ela é NOSSA agora!', 'Lá embaixo tem coisa pior que nós. Muito pior! Mas daqui você não passa!'],
+  1: ['*a terra treme... uma voz vem de dentro da pedra*', 'Eu engoli o mineiro... e a picareta dele. Você vai pelo mesmo caminho.'],
+  2: ['Três cabeças, três vozes: "VOLTE." "VOLTE." "AFUNDE."', 'Guardamos as ruínas do rei. Ninguém lê os murais e sai vivo.'],
+  3: ['Então você é quem anda pisando no meu reino.', 'Eu bebi da Chama para nunca morrer. E não vou morrer hoje, explorador.'],
+  4: ['A pequena chama da superfície... ainda resiste? Que adorável.', 'Eu bebi do seu fogo por trinta anos. Venha. Vou beber você também.'],
+};
+
+const MINERS = {
+  4:  { name: 'Tito, mineiro', lines: ['Ei! Você é da vila? Eu sou o Tito, da equipe do Aldo. Me escondi aqui quando os goblins desceram correndo.', 'Eles carregavam algo brilhante e quente, como uma brasa. Tome esta poção. Eu vou subir devagar.'] },
+  8:  { name: 'Rosa, mineira', lines: ['Graças à Chama, alguém! Sou a Rosa. O Aldo desceu sozinho atrás dos goblins.', 'Ele dizia que o fogo estava "fugindo para baixo". Tome isto, você vai precisar.'] },
+  14: { name: 'Beto, mineiro', lines: ['Shh! As aranhas ouvem tudo. Sou o Beto.', 'Vi o Aldo passar pelo andar 18 com a picareta na mão, falando sozinho sobre alguém que bebe fogo.'] },
+  18: { name: 'Nina, mineira', lines: ['Você acha que o Aldo ainda vive? Eu vi um verme gigante engolir o túnel inteiro...', 'Se encontrar a picareta dele, leia o cabo. Ele sempre deixava recados ali.'] },
+  24: { name: 'Caio, mineiro', lines: ['Estas ruínas são mais velhas que Pedra Funda. Os desenhos mostram gente dançando em volta de um fogo.', 'Mas no fim do corredor os desenhos mudam: um rei de coroa leva o fogo embora.'] },
+  28: { name: 'Dona Iara', lines: ['Meu avô contava de um rei que queria viver para sempre. Ninguém acreditava.', 'Agora, olhando estas paredes... acho que ele não mentia.'] },
+  34: { name: 'Gui, mineiro', lines: ['Os mortos daqui não descansam. Eles andam em direção ao andar 40, como se alguém os chamasse.', 'Leve isto. E não deixe os ossos inteiros: eles levantam de novo!'] },
+  38: { name: 'Lena, mineira', lines: ['Sinto um frio que não é deste mundo. O rei está perto.', 'Dizem que a coroa dele ainda brilha com a luz roubada da Chama.'] },
+  44: { name: 'Velho Ivo', lines: ['Calor... tanto calor. A Chama está aqui embaixo, eu sinto.', 'Mas tem algo enorme bebendo dela. Cada vez que ela pulsa, aquilo cresce.'] },
+  48: { name: 'Aldo, mineiro-chefe', lines: ['Você leu meu recado... então chegou até aqui. Eu sou Aldo.', 'Não tive coragem de enfrentar o que está lá embaixo. Mas você tem. Pegue minhas últimas poções e devolva a Chama para Pedra Funda.'] },
+};
+
+function bossIntro(boss) {
+  const p = G.p;
+  if (!Array.isArray(p.bossMet)) p.bossMet = [];
+  if (boss.floor > MAX_FLOOR || p.bossMet.includes(boss.floor)) return;
+  p.bossMet.push(boss.floor);
+  Dialog.play((BOSS_TAUNT[boss.kind] || []).map(t => ({ who: 'boss' + boss.kind, text: t })));
+}
+
+function placeMiner(L, floor) {
+  const p = G.p, m = MINERS[floor];
+  if (!m || (p.minersMet || []).includes(floor) || L.isBoss) return;
+  const rooms = L.rooms.filter(r => r !== L.startRoom && r !== L.stairsRoom);
+  if (!rooms.length) return;
+  const pt = randomPointIn(pick(rooms), 1);
+  G.props.push({ type: 'miner', floor, x: pt.x, y: pt.y });
+  G.enemies = G.enemies.filter(e => e.isProp || dist(e.x, e.y, pt.x, pt.y) > 50);
+}
+
+function talkMiner(pr) {
+  const p = G.p, m = MINERS[pr.floor];
+  if (!Array.isArray(p.minersMet)) p.minersMet = [];
+  const first = !p.minersMet.includes(pr.floor);
+  Dialog.play(m.lines.map(t => ({ who: 'minerador', name: m.name, text: t })), () => {
+    if (!first) return;
+    p.minersMet.push(pr.floor);
+    const n = pr.floor === 48 ? 3 : 1;
+    if (bagAdd(p.bag, p.bagSize, makeConsumable('potion', n))) UI.toast(`${m.name.split(',')[0]} te deu ${n > 1 ? n + ' poções' : 'uma poção'}.`, '#4ade80');
+    gainXp(Math.round(20 * pr.floor));
+    saveGame();
+  });
 }

@@ -234,3 +234,24 @@ body.pad #touchUI { display: none !important; }
 .panel.story h2 { color: #fde68a; }
 .panel.story .mtext { color: var(--text); font-size: 9px; line-height: 2; }
 @media (max-width: 760px) { #questTracker { display: none; } }
+
+/* ---------- Diálogos e cenas ---------- */
+#overlay:has(.panel.dialog) { align-items: end; background: rgba(5,4,8,.15); padding-bottom: 18px; }
+.panel.dialog { width: min(720px, 100%); padding: 12px; border-color: #a16207; }
+.dlg { display: flex; gap: 14px; align-items: flex-start; cursor: pointer; }
+.dlg .pt { width: 72px; height: 72px; image-rendering: pixelated; border: 3px solid #a16207; flex: none; background: #0e0c12; }
+.dtx { flex: 1; min-height: 72px; }
+.dn { margin: 2px 0 8px; color: #fde68a; font-size: 10px; }
+.dn small { color: var(--muted); font-size: 7px; margin-left: 8px; }
+.dt { margin: 0; font-size: 9px; line-height: 2; color: var(--text); }
+.dnext { align-self: flex-end; background: #a16207; color: #fff7ed; border: 2px solid #fde68a; width: 34px; height: 30px; cursor: pointer; font-size: 10px; animation: blink 1s steps(2) infinite; }
+.panel.scenep { width: min(680px, 100%); border-color: #a16207; text-align: center; }
+.scene .sci { width: 100%; image-rendering: pixelated; border: 3px solid #1c1917; display: block; margin-bottom: 12px; }
+.scene h2 { color: #fde68a; }
+.scene .sct { font-size: 9px; line-height: 2; color: var(--text); text-align: left; min-height: 90px; }
+.scene .sbtn { justify-content: center; }
+/* vila: HUD e toque */
+body.in-village #minimap, body.in-village #quick, body.in-village #skillbar { display: none; }
+body.touch.in-village #touchUI { display: block; }
+body.touch.in-village [data-tbtn="atk"], body.touch.in-village [data-tbtn="dodge"], body.touch.in-village [data-tbtn="potion"], body.touch.in-village #tskills { display: none; }
+@media (max-width: 760px) { .dlg .pt { width: 52px; height: 52px; } .dt { font-size: 8px; } }
