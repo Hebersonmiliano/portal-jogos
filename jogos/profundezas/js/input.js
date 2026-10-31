@@ -22,7 +22,7 @@ const Input = {
     window.addEventListener('keyup', e => { this.keys[e.key.toLowerCase()] = false; });
     window.addEventListener('blur', () => { this.keys = {}; });
 
-    canvas.addEventListener('mousemove', e => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; });
+    canvas.addEventListener('mousemove', e => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; this.mouse.lastMove = performance.now(); });
     canvas.addEventListener('mousedown', e => {
       Sfx.init();
       this.mouse.x = e.clientX; this.mouse.y = e.clientY;

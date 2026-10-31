@@ -190,13 +190,24 @@ class Enemy {
 }
 
 // ---------- Chefe ----------
+// Cada chefe tem o golpe em área e o anel de projéteis em comum,
+// mais ataques exclusivos conforme o bioma (kind 0 a 4).
+const BOSS_MOVES = {
+  0: { name: 'Rei Goblin',       p1: ['slam', 'volley', 'charge'],   p2: ['volley', 'charge', 'summon', 'volley'] },
+  1: { name: 'Verme de Pedra',   p1: ['burrow', 'rocks', 'slam'],    p2: ['burrow', 'rocks', 'burrow', 'ring'] },
+  2: { name: 'Hidra das Marés',  p1: ['streams', 'wave', 'ring'],    p2: ['streams', 'wave', 'wave', 'streams'] },
+  3: { name: 'Lich Ancestral',   p1: ['spiral', 'blink', 'summon'],  p2: ['spiral', 'blink', 'spiral', 'summon'] },
+  4: { name: 'Senhor do Abismo', p1: ['lava', 'meteors', 'slam'],    p2: ['meteors', 'lava', 'ring', 'meteors'] },
+};
+
 class Boss extends Enemy {
   constructor(floor, x, y) {
     const b = biomeOf(floor).boss;
     super('tank', floor, x, y, { def: b });
     this.isBoss = true;
+    this.kind = b.kind || 0;
     this.name = b.name;
-    this.scale = 2.6;
+    this.scale = 2.3;
     this.maxHp = Math.round(260 * Math.pow(1.07, floor - 1));
     this.hp = this.maxHp;
     this.dmg = 9 * (1 + 0.12 * (floor - 1));
@@ -206,9 +217,13 @@ class Boss extends Enemy {
     this.aware = false;
     this.actCd = 2.5;
     this.slam = null;
+    this.mode = null;     // ataque em andamento: { type, t, ... }
+    this.hidden = false;  // o verme fica embaixo da terra
     this.phase = 1;
     this.proj = biomeOf(floor).proj;
   }
+
+  arena() { return G.level.rooms[1] || G.level.rooms[0]; }
 
   update(dt) {
     const p = G.p;
@@ -219,6 +234,7 @@ class Boss extends Enemy {
     if (!this.aware) { if (d < 150) { this.aware = true; G.boss = this; UI.toast(`${this.name} desperta!`, '#f87171'); Sfx.boom(); Music.play('boss'); } else return; }
     if (this.phase === 1 && this.hp < this.maxHp * 0.5) { this.phase = 2; this.spd = 42; UI.toast(`${this.name} está furioso!`, '#f87171'); }
 
+    // golpe em área (comum)
     if (this.slam) {
       this.slam.t -= dt;
       if (this.slam.t <= 0) {
@@ -229,6 +245,8 @@ class Boss extends Enemy {
       }
       return;
     }
+    if (this.mode) { this.runMode(dt, d); return; }
+
     const ax = (p.x - this.x) / (d || 1), ay = (p.y - this.y) / (d || 1);
     moveBody(this, ax * this.spd * dt, ay * this.spd * dt);
     this.face = ax < 0 ? -1 : 1;
@@ -236,30 +254,160 @@ class Boss extends Enemy {
 
     this.actCd -= dt;
     if (this.actCd <= 0) {
-      const opts = ['slam', 'ring'];
-      if (this.phase === 2) opts.push('summon', 'ring');
-      const act = pick(opts);
-      this.actCd = this.phase === 2 ? 2.2 : 3.2;
-      if (act === 'slam') this.slam = { x: p.x, y: p.y, t: 0.9 };
-      else if (act === 'ring') {
-        const n = this.phase === 2 ? 14 : 10, off = Math.random();
-        for (let i = 0; i < n; i++) {
-          const a = off + i / n * Math.PI * 2;
-          G.projectiles.push(new Projectile(this.x, this.y - 10, Math.cos(a) * 85, Math.sin(a) * 85, this.dmg * 0.7, false, this.proj, 3));
-        }
-        Sfx.shoot();
-      } else if (act === 'summon') {
-        for (let i = 0; i < 2; i++) {
-          const e = new Enemy(pick(['chaser', 'fast']), this.floor, this.x + rr(-20, 20), this.y + rr(-10, 10));
-          e.aware = true; e.xp = Math.round(e.xp / 2);
-          G.enemies.push(e);
-        }
-        burst(this.x, this.y - 10, '#c084fc', 14);
-      }
+      const moves = BOSS_MOVES[this.kind] || BOSS_MOVES[0];
+      const act = pick(this.phase === 2 ? moves.p2 : moves.p1);
+      this.actCd = this.phase === 2 ? 2.1 : 3.0;
+      this.start(act, ax, ay);
     }
   }
 
+  start(act, ax, ay) {
+    const p = G.p;
+    if (act === 'slam') { this.slam = { x: p.x, y: p.y, t: 0.9 }; return; }
+    if (act === 'ring') { this.ring(this.phase === 2 ? 14 : 10, 85); return; }
+    if (act === 'summon') { this.summon(); return; }
+    // ---- Rei Goblin ----
+    if (act === 'volley') {          // chuva de flechas: círculos marcados em volta do jogador
+      const n = this.phase === 2 ? 9 : 6;
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2, r = i === 0 ? 0 : rr(14, 60);
+        addHazard(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, 16, 0.9 + i * 0.06, 0, this.dmg * 0.9, '#c9a46a', 'arrow');
+      }
+      Sfx.shoot();
+      return;
+    }
+    if (act === 'charge') {          // investida: sinaliza e corre em linha reta
+      this.mode = { type: 'charge', t: 1.1, wind: 0.5, vx: ax * 230, vy: ay * 230, hit: false };
+      return;
+    }
+    // ---- Verme de Pedra ----
+    if (act === 'burrow') {          // mergulha e sai embaixo do jogador
+      this.mode = { type: 'burrow', t: 2.2, tx: p.x, ty: p.y, marked: false };
+      this.hidden = true;
+      burst(this.x, this.y - 6, '#8a7a6a', 20); G.shake = 4; Sfx.boom();
+      return;
+    }
+    if (act === 'rocks') {           // pedras caindo do teto
+      const n = this.phase === 2 ? 8 : 5;
+      for (let i = 0; i < n; i++) addHazard(p.x + rr(-70, 70), p.y + rr(-50, 50), 18, 0.8 + i * 0.12, 0, this.dmg * 1.1, '#a8a29e', 'rock');
+      G.shake = 3;
+      return;
+    }
+    // ---- Hidra das Marés ----
+    if (act === 'streams') {         // as três cabeças disparam em sequência
+      this.mode = { type: 'streams', t: 1.2, next: 0, shots: 0 };
+      return;
+    }
+    if (act === 'wave') {            // muralha de água com uma brecha
+      const dx = p.x - this.x, dy = p.y - this.y, dd = Math.hypot(dx, dy) || 1;
+      const ux = dx / dd, uy = dy / dd, px = -uy, py = ux;
+      const n = 15, gap = 3 + ri(n - 6);
+      for (let i = 0; i < n; i++) {
+        if (i === gap || i === gap + 1 || i === gap + 2) continue;
+        const o = (i - (n - 1) / 2) * 11;
+        G.projectiles.push(new Projectile(this.x + px * o, this.y - 10 + py * o, ux * 70, uy * 70, this.dmg * 0.8, false, '#5eead4', 4));
+      }
+      Sfx.shoot();
+      return;
+    }
+    // ---- Lich Ancestral ----
+    if (act === 'spiral') {          // espiral de orbes
+      this.mode = { type: 'spiral', t: this.phase === 2 ? 2.6 : 2.0, emit: 0, ang: Math.random() * 6 };
+      return;
+    }
+    if (act === 'blink') {           // some e reaparece em outro ponto da sala
+      const ar = this.arena();
+      burst(this.x, this.y - 14, '#a855f7', 18);
+      for (let k = 0; k < 20; k++) {
+        const pt = randomPointIn(ar, 2);
+        if (dist(pt.x, pt.y, p.x, p.y) > 80) { this.x = pt.x; this.y = pt.y; break; }
+      }
+      burst(this.x, this.y - 14, '#a855f7', 18);
+      Sfx.dash();
+      this.ring(8, 70);
+      return;
+    }
+    // ---- Senhor do Abismo ----
+    if (act === 'lava') {            // poças de lava que queimam por alguns segundos
+      const n = this.phase === 2 ? 5 : 3;
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2, r = i === 0 ? 0 : rr(30, 80);
+        addHazard(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, 26, 0.9, 4.5, this.dmg * 0.5, '#f97316', 'lava');
+      }
+      return;
+    }
+    if (act === 'meteors') {         // chuva de meteoros
+      const n = this.phase === 2 ? 10 : 7;
+      for (let i = 0; i < n; i++) addHazard(p.x + rr(-80, 80), p.y + rr(-60, 60), 20, 0.7 + i * 0.15, 0, this.dmg * 1.2, '#fb923c', 'meteor');
+      return;
+    }
+  }
+
+  runMode(dt, d) {
+    const m = this.mode, p = G.p;
+    m.t -= dt;
+    if (m.type === 'charge') {
+      if (m.wind > 0) { m.wind -= dt; if (m.wind <= 0) Sfx.dash(); }
+      else {
+        const ox = this.x, oy = this.y;
+        moveBody(this, m.vx * dt, m.vy * dt);
+        if (Math.abs(this.x - ox) + Math.abs(this.y - oy) < 0.5) m.t = 0; // bateu na parede
+        if (!m.hit && dist(this.x, this.y, p.x, p.y) < this.r + 8) { m.hit = true; hurtPlayer(this.dmg * 1.5, this); }
+        if (Math.random() < 0.5) burst(this.x, this.y - 4, '#a8a29e', 1);
+      }
+    } else if (m.type === 'burrow') {
+      if (!m.marked && m.t < 1.0) { // marca o ponto onde vai sair
+        m.marked = true; m.tx = p.x; m.ty = p.y;
+        addHazard(m.tx, m.ty, 30, 0.9, 0, this.dmg * 1.7, '#8a7a6a', 'burrow');
+      }
+      if (m.t <= 0.05 && this.hidden) {
+        this.x = m.tx; this.y = m.ty; this.hidden = false;
+        burst(this.x, this.y - 6, '#8a7a6a', 26);
+        this.ring(this.phase === 2 ? 12 : 8, 80);
+      }
+    } else if (m.type === 'streams') {
+      m.next -= dt;
+      if (m.next <= 0 && m.shots < 9) {
+        m.next = 0.12; m.shots++;
+        const head = (m.shots - 1) % 3, hx = this.x + (head - 1) * 14, hy = this.y - 30;
+        const a = Math.atan2(p.y - 6 - hy, p.x - hx);
+        G.projectiles.push(new Projectile(hx, hy, Math.cos(a) * 130, Math.sin(a) * 130, this.dmg * 0.7, false, '#5eead4', 3));
+        Sfx.shoot();
+      }
+    } else if (m.type === 'spiral') {
+      m.emit -= dt;
+      while (m.emit <= 0) {
+        m.emit += 0.09; m.ang += 0.42;
+        for (const off of [0, Math.PI]) {
+          const a = m.ang + off;
+          G.projectiles.push(new Projectile(this.x, this.y - 14, Math.cos(a) * 62, Math.sin(a) * 62, this.dmg * 0.6, false, '#c084fc', 3));
+        }
+      }
+    }
+    if (m.t <= 0) { this.mode = null; this.hidden = false; }
+  }
+
+  ring(n, speed) {
+    const off = Math.random();
+    for (let i = 0; i < n; i++) {
+      const a = off + i / n * Math.PI * 2;
+      G.projectiles.push(new Projectile(this.x, this.y - 10, Math.cos(a) * speed, Math.sin(a) * speed, this.dmg * 0.7, false, this.proj, 3));
+    }
+    Sfx.shoot();
+  }
+
+  summon() {
+    const types = this.kind === 0 ? ['shooter', 'shooter'] : this.kind === 3 ? ['chaser', 'chaser', 'chaser'] : ['chaser', 'fast'];
+    for (const t of types) {
+      const e = new Enemy(t, this.floor, this.x + rr(-24, 24), this.y + rr(-12, 12));
+      e.aware = true; e.xp = Math.round(e.xp / 2);
+      G.enemies.push(e);
+    }
+    burst(this.x, this.y - 10, '#c084fc', 14);
+  }
+
   hurt(amount, fromX, fromY, crit) {
+    if (this.hidden) return; // embaixo da terra não leva dano
     this.hp -= amount;
     this.flash = 0.08;
     if (!this.aware) { this.aware = true; G.boss = this; Music.play('boss'); }
@@ -274,34 +422,96 @@ class Boss extends Enemy {
       ctx.beginPath(); ctx.arc(this.slam.x, this.slam.y, 46, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(this.slam.x, this.slam.y, 46 * (1 - this.slam.t / 0.9), 0, Math.PI * 2); ctx.stroke();
     }
+    if (this.hidden) { // monte de terra se movendo
+      ctx.fillStyle = 'rgba(138,122,106,0.8)';
+      ctx.beginPath(); ctx.ellipse(this.x, this.y, 10 + Math.sin(this.t * 20) * 2, 4, 0, 0, Math.PI * 2); ctx.fill();
+      return;
+    }
+    if (this.mode && this.mode.type === 'charge' && this.mode.wind > 0) { // aviso da investida
+      ctx.strokeStyle = 'rgba(239,68,68,0.7)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x + this.mode.vx * 0.5, this.y + this.mode.vy * 0.5); ctx.stroke();
+    }
     super.draw(ctx);
-    // coroa
-    const h = 12 * this.scale;
-    ctx.fillStyle = '#facc15';
-    const cy = Math.round(this.y - h + 2 - 3);
-    ctx.fillRect(Math.round(this.x - 6), cy, 12, 3);
-    ctx.fillRect(Math.round(this.x - 6), cy - 3, 2, 3);
-    ctx.fillRect(Math.round(this.x - 1), cy - 4, 2, 4);
-    ctx.fillRect(Math.round(this.x + 4), cy - 3, 2, 3);
+  }
+}
+
+// ---------- Perigos no chão (flechas, pedras, lava, meteoros) ----------
+function addHazard(x, y, r, delay, dur, dmg, color, kind) {
+  if (solidAt(x, y)) return;
+  G.hazards.push({ x, y, r, delay, delay0: delay, dur, dmg, color, kind, tick: 0, fired: false });
+}
+function updateHazards(dt) {
+  const p = G.p;
+  for (const h of G.hazards) {
+    if (h.delay > 0) { h.delay -= dt; continue; }
+    if (!h.fired) {
+      h.fired = true;
+      G.effects.push({ type: 'ring', x: h.x, y: h.y, r: 3, max: h.r, t: 0.25, color: h.color });
+      burst(h.x, h.y - 3, h.color, 6);
+      if (h.kind === 'meteor' || h.kind === 'rock' || h.kind === 'burrow') { G.shake = Math.max(G.shake, 3); Sfx.boom(); }
+      if (dist(h.x, h.y, p.x, p.y) < h.r) hurtPlayer(h.dmg, null);
+      if (!h.dur) { h.done = true; continue; }
+    }
+    h.dur -= dt; h.tick -= dt;
+    if (h.tick <= 0 && dist(h.x, h.y, p.x, p.y) < h.r) { h.tick = 0.5; hurtPlayer(h.dmg, null); }
+    if (h.dur <= 0) h.done = true;
+  }
+  G.hazards = G.hazards.filter(h => !h.done);
+}
+function drawHazards(ctx) {
+  for (const h of G.hazards) {
+    if (h.delay > 0) {
+      const k = 1 - h.delay / h.delay0;
+      ctx.fillStyle = 'rgba(239,68,68,0.15)'; ctx.strokeStyle = 'rgba(239,68,68,0.85)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(h.x, h.y, h.r, h.r * 0.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(239,68,68,0.3)';
+      ctx.beginPath(); ctx.ellipse(h.x, h.y, h.r * k, h.r * 0.6 * k, 0, 0, Math.PI * 2); ctx.fill();
+      if (h.kind === 'meteor' || h.kind === 'rock') { // sombra do que vai cair
+        ctx.fillStyle = h.color;
+        ctx.fillRect(Math.round(h.x - 2), Math.round(h.y - 60 * (1 - k) - 4), 4, 4);
+      }
+    } else if (h.dur > 0) {
+      ctx.globalAlpha = 0.55 + Math.sin(G.time * 10 + h.x) * 0.15;
+      ctx.fillStyle = h.color;
+      ctx.beginPath(); ctx.ellipse(h.x, h.y, h.r, h.r * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fde047'; ctx.globalAlpha = 0.5;
+      ctx.beginPath(); ctx.ellipse(h.x, h.y, h.r * 0.5, h.r * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
   }
 }
 
 // ---------- Projétil ----------
 class Projectile {
-  constructor(x, y, vx, vy, dmg, friendly, color, size = 2) {
+  constructor(x, y, vx, vy, dmg, friendly, color, size = 2, opts = {}) {
     this.x = x; this.y = y; this.vx = vx; this.vy = vy;
     this.dmg = dmg; this.friendly = friendly; this.color = color || '#fff';
-    this.life = 3; this.size = size; this.dead = false;
+    this.life = opts.life || 3; this.size = size; this.dead = false;
+    this.explode = opts.explode || 0;   // raio de explosão (bola de fogo)
   }
   update(dt) {
     this.x += this.vx * dt; this.y += this.vy * dt;
     this.life -= dt;
-    if (this.life <= 0 || solidAt(this.x, this.y + 6)) { this.dead = true; return; }
+    if (this.life <= 0 || solidAt(this.x, this.y + 6)) { this.end(); return; }
+    if (this.friendly) {
+      for (const e of G.enemies) {
+        if (e.dead || e.hidden) continue;
+        if (dist(this.x, this.y, e.x, e.y - (e.isBoss ? 14 : 5)) < e.r + this.size + 1) {
+          if (!this.explode) e.hurt(this.dmg, this.x - this.vx * 0.05, this.y - this.vy * 0.05, false);
+          this.end(); return;
+        }
+      }
+      return;
+    }
     const p = G.p;
-    if (!this.friendly && dist(this.x, this.y, p.x, p.y - 6) < 6 + this.size) {
+    if (dist(this.x, this.y, p.x, p.y - 6) < 6 + this.size) {
       this.dead = true;
       hurtPlayer(this.dmg, null);
     }
+  }
+  end() {
+    this.dead = true;
+    if (this.explode) areaDamage(this.x, this.y, this.explode, this.dmg, this.color);
   }
   draw(ctx) {
     ctx.fillStyle = this.color;
@@ -310,6 +520,14 @@ class Projectile {
     ctx.fillRect(Math.round(this.x - this.vx * 0.03 - 1), Math.round(this.y - this.vy * 0.03 - 1), 2, 2);
     ctx.globalAlpha = 1;
   }
+}
+
+// Dano em área causado pelo jogador
+function areaDamage(x, y, r, dmg, color) {
+  G.effects.push({ type: 'ring', x, y, r: 4, max: r, t: 0.3, color: color || '#f97316' });
+  burst(x, y, color || '#f97316', 14);
+  Sfx.boom();
+  for (const e of G.enemies) if (!e.dead && dist(x, y, e.x, e.y - 5) < r + e.r) e.hurt(dmg, x, y, false);
 }
 
 // ---------- Efeitos ----------
@@ -328,7 +546,8 @@ function hurtPlayer(amount, source) {
   const p = G.p;
   if (p.dodgeT > 0 || p.iframes > 0 || p.dead) return;
   const st = playerStats(p);
-  const dmg = Math.max(1, amount * 100 / (100 + st.def * 6));
+  let dmg = Math.max(1, amount * 100 / (100 + st.def * 6));
+  if (p.shieldT > 0) { dmg *= 1 - p.shieldRed; G.effects.push({ type: 'ring', x: p.x, y: p.y - 6, r: 8, max: 13, t: 0.2, color: '#d6d3d1' }); }
   p.hp -= dmg;
   p.iframes = 0.5;
   G.shake = Math.max(G.shake, 3);

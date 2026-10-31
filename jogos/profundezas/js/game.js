@@ -8,7 +8,7 @@ const G = {
   p: null,
   level: null,
   floorCanvas: null,
-  enemies: [], projectiles: [], drops: [], chests: [], props: [],
+  enemies: [], projectiles: [], drops: [], chests: [], props: [], hazards: [], traps: [],
   texts: [], particles: [], effects: [],
   tombEnt: null,
   boss: null,
@@ -32,6 +32,7 @@ function newPlayer() {
     bag: [], bagSize: 12, stash: [],
     eq: { weapon: null, armor: null, ring: null },
     maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [],
+    skills: {}, slots: [null, null, null], skillPts: 0,
     x: 0, y: 0,
   };
   p.eq.weapon = { id: uid(), kind: 'weapon', name: 'Espada Curta', rarity: 0, lvl: 1, up: 0, dmg: 7, cd: 0.36, range: 15, bonuses: [] };
@@ -47,11 +48,12 @@ function resetRuntime(p) {
   Object.assign(p, {
     atkCd: 0, swing: null, dodgeT: 0, dodgeCd: 0, iframes: 0, fx: 1, fy: 0,
     vx: 0, vy: 0, hitCount: 0, hungerTick: 0, starveTick: 0, dead: false, walkT: 0, face: 1,
+    skillCd: {}, charge: null, shieldT: 0, shieldRed: 0, spin: 0, dodgeCh: dodgeMax(p), dodgeRecT: 0,
   });
 }
 
 // ---------- Salvamento ----------
-const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y'];
+const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT'];
 function saveGame() {
   try {
     const data = {};
@@ -69,6 +71,7 @@ function loadGame() {
     delete data.uid;
     const p = newPlayer();
     Object.assign(p, data);
+    ensureSkills(p);
     resetRuntime(p);
     return p;
   } catch (e) { return null; }
@@ -94,7 +97,7 @@ function enterFloor(floor, viaStairs) {
   const p = G.p;
   G.level = generateFloor(floor);
   G.floorCanvas = renderFloorCanvas(G.level);
-  G.enemies = []; G.projectiles = []; G.drops = []; G.chests = []; G.props = [];
+  G.enemies = []; G.projectiles = []; G.drops = []; G.chests = []; G.props = []; G.hazards = []; G.traps = [];
   G.texts = []; G.particles = []; G.effects = [];
   G.boss = null; G.tombEnt = null;
   p.floor = floor;
@@ -206,6 +209,7 @@ function gainXp(n) {
     p.xp -= xpNext(p.level);
     p.level++;
     p.points += 3;
+    if (p.level % 5 === 0) { p.skillPts = (p.skillPts || 0) + 1; setTimeout(() => UI.toast('Novo ponto de habilidade! Aperte H para escolher.', '#a78bfa'), 400); }
     p.hp = playerStats(p).maxHp;
     addText(p.x, p.y - 24, 'NÍVEL ' + p.level + '!', '#fde047', 1.4);
     G.effects.push({ type: 'ring', x: p.x, y: p.y - 6, r: 4, max: 30, t: 0.4, color: '#fde047' });
@@ -317,11 +321,14 @@ function updateDungeon(dt) {
   // movimento
   if (p.atkCd > 0) p.atkCd -= dt;
   if (p.dodgeCd > 0) p.dodgeCd -= dt;
+  if (p.dodgeCh < dodgeMax(p)) { p.dodgeRecT -= dt; if (p.dodgeRecT <= 0) { p.dodgeCh++; p.dodgeRecT = dodgeRecharge(p); } }
   if (p.iframes > 0) p.iframes -= dt;
   if (p.swing) { p.swing.t -= dt; if (p.swing.t <= 0) p.swing = null; }
   const mv = Input.move();
   if (mv.x || mv.y) { p.fx = mv.x; p.fy = mv.y; p.walkT += dt; if (mv.x) p.face = mv.x < 0 ? -1 : 1; }
-  if (p.dodgeT > 0) {
+  if (p.charge) {
+    // a investida controla o movimento (skills.js)
+  } else if (p.dodgeT > 0) {
     p.dodgeT -= dt;
     moveBody(p, p.vx * dt, p.vy * dt);
     if (Math.random() < 0.6) G.particles.push({ x: p.x, y: p.y - 4, vx: 0, vy: -5, t: 0.2, color: '#93c5fd' });
@@ -339,11 +346,13 @@ function updateDungeon(dt) {
   } else if (atkKey) {
     playerAttack(Math.atan2(p.fy, p.fx));
   }
-  if ((Input.hit(' ') || Input.tb('dodge')) && p.dodgeCd <= 0) {
+  if ((Input.hit(' ') || Input.tb('dodge')) && p.dodgeCd <= 0 && p.dodgeCh > 0) {
     const dx = mv.x || mv.y ? mv.x : p.fx, dy = mv.x || mv.y ? mv.y : p.fy;
     const d = Math.hypot(dx, dy) || 1;
     p.vx = dx / d * 230; p.vy = dy / d * 230;
-    p.dodgeT = 0.17; p.dodgeCd = 0.75;
+    p.dodgeT = 0.17; p.dodgeCd = 0.22;
+    if (p.dodgeCh >= dodgeMax(p)) p.dodgeRecT = dodgeRecharge(p);
+    p.dodgeCh--;
     Sfx.dash();
   }
   if (Input.hit('q') || Input.tb('potion')) quickUse('potion');
@@ -351,7 +360,9 @@ function updateDungeon(dt) {
   if (Input.hit('r')) quickUse('scroll');
   if (Input.hit('i') || Input.hit('tab') || Input.tb('bag')) { UI.invSel = { area: 'bag', i: 0 }; UI.inventory('dungeon'); return; }
   if (Input.hit('escape') || Input.tb('pause')) { pauseMenu(); return; }
+  if (Input.hit('h') || Input.tb('skills')) { UI.skills('dungeon'); return; }
   if (G.state !== 'dungeon' || !G.level) return; // voltou à vila (pergaminho)
+  updateSkills(dt);
 
   // explorar
   const ptx = Math.floor(p.x / TILE), pty = Math.floor(p.y / TILE);
@@ -364,6 +375,8 @@ function updateDungeon(dt) {
   for (const e of G.enemies) if (!e.dead && dist(e.x, e.y, p.x, p.y) < 320) e.update(dt);
   G.enemies = G.enemies.filter(e => !e.dead);
   for (const pr of G.projectiles) pr.update(dt);
+  updateHazards(dt);
+  if (G.state !== 'dungeon' || p.dead) { updateEffects(dt); return; }
   G.projectiles = G.projectiles.filter(pr => !pr.dead);
 
   // drops
@@ -528,11 +541,14 @@ function renderDungeon() {
     ctx.drawImage(icon, Math.round(d.x - 4), dy);
   }
 
+  drawHazards(ctx);
+
   // entidades ordenadas por y
   const list = G.enemies.filter(e => Math.abs(e.x - p.x) < vw && Math.abs(e.y - p.y) < vh).concat([p]);
   list.sort((a, b) => a.y - b.y);
   for (const e of list) { if (e === p) drawPlayer(ctx); else e.draw(ctx); }
   for (const pr of G.projectiles) pr.draw(ctx);
+  drawSkillsWorld(ctx);
 
   // golpe
   if (p.swing) {
@@ -542,7 +558,13 @@ function renderDungeon() {
   }
   for (const f of G.effects) {
     ctx.strokeStyle = f.color; ctx.globalAlpha = Math.max(0, f.t / 0.3); ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath();
+    if (f.type === 'bolt') { // raio em zigue-zague
+      ctx.moveTo(f.x, f.y);
+      for (let i = 1; i < 6; i++) ctx.lineTo(f.x + (f.x2 - f.x) * i / 6 + rr(-4, 4), f.y + (f.y2 - f.y) * i / 6 + rr(-4, 4));
+      ctx.lineTo(f.x2, f.y2);
+    } else ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.globalAlpha = 1;
   }
   for (const q of G.particles) { ctx.fillStyle = q.color; ctx.globalAlpha = Math.min(1, q.t * 4); ctx.fillRect(Math.round(q.x), Math.round(q.y), 1, 1); }
@@ -643,6 +665,7 @@ function villageMenu(msg) {
       { label: 'Ferreiro', sub: 'Melhorar arma e armadura', act: smithMenu },
       { label: 'Alfaiate', sub: `Mochila ${p.bagSize}/40 espaços`, act: tailorMenu },
       { label: 'Baú', sub: `Guardar itens com segurança (${p.stash.length}/30)`, act: () => stashMenu() },
+      { label: 'Habilidades', sub: (G.p.skillPts || 0) > 0 ? `${G.p.skillPts} ${G.p.skillPts > 1 ? 'pontos' : 'ponto'} para gastar!` : 'Guerreiro, Caçador e Arcano', color: (G.p.skillPts || 0) > 0 ? '#a78bfa' : null, act: () => UI.skills('village') },
       { label: 'Mochila e atributos', sub: p.points > 0 ? `${p.points} pontos para distribuir!` : 'Equipamentos e itens', color: p.points > 0 ? '#fde047' : null, act: () => { UI.invSel = { area: 'bag', i: 0 }; G.resumeFromMenu = () => villageMenu(); UI.inventory('village'); } },
       { label: Music.muted ? 'Ligar música' : 'Desligar música', sub: 'Atalho: tecla M', act: () => { Music.toggle(); villageMenu(); } },
       { label: 'Sair para o título', act: () => { saveGame(); UI.close(); titleScreen(); } },
@@ -794,6 +817,8 @@ function controlsScreen(fromTitle) {
       <tr><td>Interagir</td><td>E (escada, fogueira, elevador)</td></tr>
       <tr><td>Poção / Comida / Pergaminho</td><td>Q / F / R</td></tr>
       <tr><td>Mochila e atributos</td><td>I ou Tab</td></tr>
+      <tr><td>Habilidades (usar)</td><td>1 / 2 / 3</td></tr>
+      <tr><td>Painel de habilidades</td><td>H</td></tr>
       <tr><td>Pausa</td><td>Esc</td></tr>
       <tr><td>Música liga/desliga</td><td>M</td></tr>
       </table><p>No celular, use o analógico à esquerda e os botões à direita.</p>`,
@@ -835,6 +860,7 @@ function startGame(fresh) {
   UI.close();
   G.p = fresh ? null : loadGame();
   if (!G.p) { G.p = newPlayer(); resetRuntime(G.p); }
+  ensureSkills(G.p); G.p.dodgeCh = dodgeMax(G.p);
   G.resumeFromMenu = () => {};
   if (G.p.floor > 0) enterFloor(G.p.floor, false);
   else enterVillage(fresh ? 'Bem-vindo à vila. A masmorra fica logo ali, embaixo da velha torre.' : null);
@@ -899,6 +925,7 @@ function frame(now) {
     if (G.state === 'dungeon' && G.level) {
       renderDungeon();
       UI.updateHud(dt);
+      updateSkillBar();
       if (Math.floor(G.time * 4) !== Math.floor((G.time - dt) * 4)) UI.drawMinimap();
     }
   } else {
