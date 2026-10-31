@@ -112,8 +112,8 @@ function itemStatLines(item) {
 function bagAdd(bag, size, item) {
   if (isConsumable(item)) {
     for (const it of bag) {
-      if (it.kind === item.kind && it.qty < 9) {
-        const room = 9 - it.qty;
+      if (it.kind === item.kind && it.qty < STACK_MAX) {
+        const room = STACK_MAX - it.qty;
         const n = Math.min(room, item.qty);
         it.qty += n; item.qty -= n;
         if (item.qty <= 0) return true;
@@ -124,3 +124,33 @@ function bagAdd(bag, size, item) {
   bag.push(item);
   return true;
 }
+
+// ---------- Pontuação para "equipar melhores" ----------
+const BONUS_WEIGHT = { dmg: 1.0, hp: 0.25, crit: 1.2, spd: 0.8, steal: 3, luck: 0.4, def: 1.5 };
+function itemScore(item) {
+  if (!item || !isEquip(item)) return -1;
+  let s = 0;
+  for (const b of item.bonuses || []) s += (BONUS_WEIGHT[b.k] || 0) * b.v;
+  if (item.effect) s += 15;
+  const up = 1 + 0.08 * (item.up || 0);
+  if (item.kind === 'weapon') s += (item.dmg * up / item.cd) * 1.6;
+  if (item.kind === 'armor') s += item.def * up * 2.5;
+  return s;
+}
+// Equipa o melhor item de cada tipo (mochila x equipado). Retorna os nomes equipados.
+function equipBest(p) {
+  const done = [];
+  for (const slot of ['weapon', 'armor', 'ring']) {
+    let best = p.eq[slot], bestS = itemScore(best), bestIdx = -1;
+    p.bag.forEach((it, i) => { if (it.kind === slot) { const sc = itemScore(it); if (sc > bestS + 0.01) { best = it; bestS = sc; bestIdx = i; } } });
+    if (bestIdx >= 0) {
+      const old = p.eq[slot];
+      p.eq[slot] = best;
+      if (old) p.bag[bestIdx] = old; else p.bag.splice(bestIdx, 1);
+      done.push(best.name);
+    }
+  }
+  if (done.length) p.hp = Math.min(p.hp, playerStats(p).maxHp);
+  return done;
+}
+function isUpgrade(p, item) { return isEquip(item) && itemScore(item) > itemScore(p.eq[item.kind]) + 0.01; }

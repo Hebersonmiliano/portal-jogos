@@ -6,9 +6,13 @@
 const TILE = 16;
 const MAP_W = 64;
 const MAP_H = 48;
-const VERSION = 'v0.5';
+const VERSION = 'v0.6';
 const SAVE_KEY = 'profundezas_save_v1';
 const MAX_FLOOR = 50;
+const BAG_START = 24;   // espaços da mochila no começo
+const BAG_MAX = 60;     // máximo com o alfaiate
+const BAG_STEP = 6;     // espaços por melhoria
+const STACK_MAX = 20;   // consumíveis iguais por espaço
 
 // ---------- Biomas (10 andares cada) ----------
 const BIOMES = [

@@ -114,7 +114,7 @@ button { font-family: var(--font); }
 .slot i { font-style: normal; font-size: 6px; color: #4a4155; }
 .slot.sel, .slot:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
 .bagtitle { font-size: 8px; color: var(--muted); margin: 0 0 8px; }
-.bag { display: grid; grid-template-columns: repeat(6, 46px); gap: 6px; }
+.bag { display: grid; grid-template-columns: repeat(6, 46px); gap: 6px; max-height: 262px; overflow-y: auto; padding: 2px; scrollbar-width: thin; scrollbar-color: #5b4a7a transparent; }
 .attrs { display: grid; gap: 6px; }
 .lvl { font-size: 8px; margin: 0 0 4px; line-height: 1.6; }
 .attr { display: grid; grid-template-columns: 1fr auto; align-items: center; background: var(--panel2); padding: 7px 8px; border: 1px solid var(--line); font-size: 9px; }
@@ -219,3 +219,7 @@ body.pad #touchUI { display: none !important; }
 #tip b { color: #fde68a; font-weight: normal; }
 @keyframes tipIn { from { transform: translate(-50%, -10px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 @media (max-width: 760px) { #tip { top: 86px; } }
+
+.invhead .best { background: #14532d; color: #bbf7d0; border: 2px solid #22c55e; padding: 7px 9px; font-size: 8px; cursor: pointer; }
+.invhead .best:hover, .invhead .best:focus { border-color: var(--gold); outline: none; }
+.slot b.better { left: 2px; bottom: 1px; right: auto; color: #4ade80; font-size: 8px; }

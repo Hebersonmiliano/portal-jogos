@@ -110,7 +110,7 @@ const UI = {
       const isSel = sel.area === area && sel.i === i;
       if (!item) return `<button class="slot empty ${isSel ? 'sel' : ''}" data-act="sel" data-arg="${area}:${i}" ${area === 'bag' ? 'data-grid' : ''}>${label ? `<i>${label}</i>` : ''}</button>`;
       return `<button class="slot ${isSel ? 'sel' : ''}" style="--rc:${RARITIES[item.rarity].color}" data-act="sel" data-arg="${area}:${i}" ${area === 'bag' ? 'data-grid' : ''} title="${item.name}">
-        <img src="${itemIconURL(item)}">${item.qty > 1 ? `<b>${item.qty}</b>` : ''}${item.up ? `<b class="up">+${item.up}</b>` : ''}</button>`;
+        <img src="${itemIconURL(item)}">${item.qty > 1 ? `<b>${item.qty}</b>` : ''}${item.up ? `<b class="up">+${item.up}</b>` : ''}${area === 'bag' && isUpgrade(p, item) ? '<b class="better">▲</b>' : ''}</button>`;
     };
     const eqSlots = ['weapon', 'armor', 'ring'];
     const eqLabels = { weapon: 'Arma', armor: 'Armadura', ring: 'Acessório' };
@@ -152,7 +152,7 @@ const UI = {
       ${p.points > 0 ? `<button class="plus" data-act="pt" data-arg="${k}">+</button>` : ''}</div>`;
 
     const html = `
-      <div class="invhead"><h2>Mochila</h2><span class="gold">◆ ${p.gold} ouro</span><button class="x" data-act="close">✕</button></div>
+      <div class="invhead"><h2>Mochila</h2><button class="best" data-act="best" title="Tecla B">▲ Equipar melhores</button><span class="gold">◆ ${p.gold} ouro</span><button class="x" data-act="close">✕</button></div>
       <div class="invgrid">
         <div class="col-left">
           <div class="eqrow">${eqSlots.map((s, i) => `<div class="eqc">${slotHtml(p.eq[s], 'eq', i, eqLabels[s])}<small>${eqLabels[s]}</small></div>`).join('')}</div>
@@ -171,7 +171,7 @@ const UI = {
           <div class="detail">${detail}<div class="acts">${acts}</div></div>
         </div>
       </div>
-      <p class="hint">${Input.isTouch ? 'Toque num item para ver detalhes.' : 'Setas: navegar · Enter: escolher · U: usar/equipar · X: largar · I ou Esc: fechar'}</p>`;
+      <p class="hint">${Input.isTouch ? 'Toque num item para ver detalhes.' : 'Setas: navegar · Enter: escolher · U: usar/equipar · X: largar · B: equipar melhores · I ou Esc: fechar'}</p>`;
 
     const rerender = () => this.inventory(ctx);
     this.show(html, {
@@ -179,6 +179,7 @@ const UI = {
       onBack: () => { this.keyHook = null; this.close(); G.resumeFromMenu(); },
       actions: {
         close: () => { this.keyHook = null; this.close(); G.resumeFromMenu(); },
+        best: () => { const eq = equipBest(p); this.toast(eq.length ? `Equipado: ${eq.join(', ')}` : 'Você já está com o melhor equipamento.', eq.length ? '#4ade80' : '#9ca3af'); if (eq.length) Sfx.pickup(); saveGame(); rerender(); },
         sel: arg => {
           const [area, i] = arg.split(':');
           const same = sel.area === area && sel.i === +i;
@@ -197,12 +198,14 @@ const UI = {
     // foca no item selecionado
     const fb = document.querySelector(`[data-arg="${sel.area}:${sel.i}"]`);
     if (fb && !Input.isTouch) fb.focus({ preventScroll: true });
+    if (fb && sel.area === 'bag') fb.scrollIntoView({ block: 'nearest' }); // mochila grande rola até o item
     // atalhos
     this.keyHook = e => {
       const k = e.key.toLowerCase();
       if (k === 'i' || k === 'tab') { e.preventDefault(); this.back(); return true; }
       if (k === 'u') { this.invUse(); if (G.state === 'dungeon' || ctx !== 'dungeon') rerender(); return true; }
       if (k === 'x') { this.invDrop(); rerender(); return true; }
+      if (k === 'b') { const eq = equipBest(p); this.toast(eq.length ? `Equipado: ${eq.join(', ')}` : 'Você já está com o melhor equipamento.', eq.length ? '#4ade80' : '#9ca3af'); saveGame(); rerender(); return true; }
       return false;
     };
     // seleção acompanha o foco das setas

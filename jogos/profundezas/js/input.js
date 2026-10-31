@@ -166,6 +166,7 @@ const Input = {
       if (just(8) || just(11)) UI.handleKey({ key: 'Escape', preventDefault() {} });
       if (just(2)) UI.handleKey({ key: 'u', preventDefault() {} });
       if (just(3)) UI.handleKey({ key: 'x', preventDefault() {} });
+      if (just(5)) UI.handleKey({ key: 'b', preventDefault() {} });
     } else {
       const len = Math.hypot(mx, my);
       if (len > 1) { mx /= len; my /= len; }

@@ -11,7 +11,7 @@ const KEYNAMES = {
   use:     { keyboard: 'E',                  pad: 'X',                   touch: 'E' },
   potion:  { keyboard: 'Q',                  pad: 'Y',                   touch: '♥' },
   food:    { keyboard: 'F',                  pad: 'LT',                  touch: 'a mochila' },
-  scroll:  { keyboard: 'R',                  pad: 'clique no analógico esquerdo', touch: 'a mochila' },
+  scroll:  { keyboard: 'R',                  pad: 'clique no analógico esquerdo', touch: 'o menu de pausa (II)' },
   bag:     { keyboard: 'I',                  pad: 'View',                touch: '▤' },
   skills:  { keyboard: 'H',                  pad: 'clique no analógico direito', touch: '✦' },
   skill1:  { keyboard: '1, 2 e 3',           pad: 'LB, RB e RT',         touch: 'os botões roxos' },
@@ -74,7 +74,7 @@ const Tips = {
     if (foes.some(e => e.elite && near(e.x, e.y, 110)))
       this.show('elite', 'Inimigo de elite', 'Inimigos com moldura dourada são mais fortes, mas sempre deixam um item raro ou melhor.');
     if (G.drops.some(d => d.item && near(d.x, d.y, 70)))
-      this.show('loot', 'Itens no chão', () => `Passe por cima para pegar. A cor mostra a raridade: branco, verde, azul, roxo e dourado. Abra a mochila com ${K('bag')} para equipar.`);
+      this.show('loot', 'Itens no chão', () => `Passe por cima para pegar. A cor mostra a raridade: branco, verde, azul, roxo e dourado. Itens melhores que o seu são equipados sozinhos e ganham uma seta verde ▲. Na mochila (${K('bag')}) também há o botão <b>Equipar melhores</b>.`);
     if (G.chests.some(c => !c.open && near(c.x, c.y, 80)))
       this.show('chest', 'Baú', 'Encoste no baú para abrir. Cuidado: a partir do andar 3, alguns baús são mímicos.');
     if (L.stairs && near(L.stairs.x, L.stairs.y, 110))
@@ -95,12 +95,13 @@ const Tips = {
     }
     if (G.tombEnt) this.show('tomb', 'Sua lápide', 'Seus itens perdidos estão na lápide deste andar. Encoste nela para recuperar tudo.');
     if (G.boss && G.boss.aware) this.show('boss', 'Chefe!', 'Cada chefe tem ataques próprios. Círculos vermelhos no chão mostram onde o golpe vai cair. Na metade da vida, ele fica furioso.');
-    if (p.hp < st.maxHp * 0.35) this.show('lowhp', 'Vida baixa', () => `Use uma poção com ${K('potion')}. Se as poções acabarem, leia o Pergaminho de Retorno (${K('scroll')}) para voltar à vila com o loot.`);
+    if (p.hp < st.maxHp * 0.35) this.show('lowhp', 'Vida baixa', () => `Use uma poção com ${K('potion')}. Se precisar fugir, volte à vila com ${K('scroll')}: com um Pergaminho é na hora; sem ele, a Runa de Retorno leva 4 segundos parado, longe dos inimigos.`);
     if (p.hunger < 40) this.show('hunger', 'Fome', () => `A fome está baixando. Coma com ${K('food')}. Se zerar, você perde vida aos poucos.`);
     if (p.fatigue >= 60) this.show('fatigue', 'Cansaço', 'Com 80 de cansaço, seu dano e velocidade caem 20%. Descanse numa fogueira ou durma na estalagem da vila.');
     if (p.points > 0) this.show('attrs', 'Subiu de nível!', () => `Você tem pontos de atributo. Abra a mochila com ${K('bag')} e clique em <b>+</b> para distribuir.`);
     if ((p.skillPts || 0) > 0) this.show('skills', 'Ponto de habilidade!', () => `A cada 5 níveis você ganha um ponto. Abra as habilidades com ${K('skills')} e use-as com ${K('skill1')}.`);
-    if (p.bag.length >= p.bagSize) this.show('bagfull', 'Mochila cheia', 'Volte à vila para vender tesouros, guarde itens no baú ou aumente a mochila no alfaiate. Se morrer, você perde tudo o que está na mochila.');
+    if (p.bag.length >= p.bagSize) this.show('bagfull', 'Mochila cheia', () => `Volte à vila com ${K('scroll')} para vender tesouros, guardar itens no baú ou aumentar a mochila no alfaiate. Se morrer, você perde tudo o que está na mochila.`);
+    if (L.floor >= 2 && !this.seen.recall) this.show('recall', 'Voltar à vila', () => `A qualquer momento, aperte ${K('scroll')} para voltar à vila. Sem Pergaminho, a Runa de Retorno leva 4 segundos: fique parado e longe de inimigos.`);
     if (p.slowT > 0) this.show('slow', 'Você está lento', 'Teias e golpes de zumbi deixam você lento por alguns segundos. Afaste-se e espere passar.');
   },
 };

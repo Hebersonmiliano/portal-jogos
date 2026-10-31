@@ -30,9 +30,10 @@ function newPlayer() {
     str: 1, vit: 1, agi: 1, luck: 1,
     hp: 1, hunger: 100, fatigue: 0,
     gold: 30,
-    bag: [], bagSize: 12, stash: [],
+    bag: [], bagSize: BAG_START, stash: [],
     eq: { weapon: null, armor: null, ring: null },
-    maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [],
+    maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [], bagV2: true,
+    autoEquip: true, lootMin: 0, portal: null,
     skills: {}, slots: [null, null, null], skillPts: 0,
     x: 0, y: 0,
   };
@@ -54,7 +55,7 @@ function resetRuntime(p) {
 }
 
 // ---------- Salvamento ----------
-const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT', 'hurtT', 'slowT', 'slowMul'];
+const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT', 'hurtT', 'slowT', 'slowMul', 'recall'];
 function saveGame() {
   try {
     const data = {};
@@ -73,6 +74,11 @@ function loadGame() {
     const p = newPlayer();
     Object.assign(p, data);
     ensureSkills(p);
+    if (!data.bagV2) { // mochila antiga (12 a 40, de 4 em 4) vira a nova (24 a 60, de 6 em 6)
+      const ups = Math.max(0, Math.round(((data.bagSize || 12) - 12) / 4));
+      p.bagSize = Math.min(BAG_MAX, BAG_START + ups * BAG_STEP);
+    }
+    p.bagV2 = true;
     resetRuntime(p);
     return p;
   } catch (e) { return null; }
@@ -240,7 +246,8 @@ function useConsumable(it) {
     if (G.state !== 'dungeon') return false;
     it.qty--;
     UI.close();
-    returnToVillage('Você leu o pergaminho e voltou à vila com todo o seu loot.');
+    G.p.portal = G.level.floor;
+    returnToVillage(`Você leu o pergaminho e voltou à vila. Um portal ficou aberto no andar ${G.p.portal}.`);
     return true;
   }
   it.qty--;
@@ -268,6 +275,7 @@ function playerDie() {
   const lostItems = p.bag.slice();
   p.gold -= lostGold;
   p.tomb = lostItems.length ? { floor: G.level.floor, items: lostItems } : null;
+  p.portal = null; // morrer fecha o portal
   p.bag = [];
   p.floor = 0;
   p.hp = playerStats(p).maxHp;
@@ -330,6 +338,16 @@ function updateDungeon(dt) {
   if (p.dodgeCh < dodgeMax(p)) { p.dodgeRecT -= dt; if (p.dodgeRecT <= 0) { p.dodgeCh++; p.dodgeRecT = dodgeRecharge(p); } }
   if (p.iframes > 0) p.iframes -= dt;
   if (p.hurtT > 0) p.hurtT -= dt;
+  // Runa de Retorno: fica parado 4 s para voltar à vila
+  if (p.recall) {
+    const mvR = Input.move();
+    if (mvR.x || mvR.y || Input.mouse.down || Input.keys['j'] || Input.keys['p_atk'] || Input.held('atk')) cancelReturn('Retorno cancelado: você se mexeu.');
+    else {
+      p.recall.t += dt;
+      if (Math.random() < 0.7) G.particles.push({ x: p.x + rr(-7, 7), y: p.y - rr(0, 4), vx: 0, vy: -rr(20, 45), t: 0.6, color: '#7dd3fc' });
+      if (p.recall.t >= RECALL_TIME) { p.recall = null; p.portal = G.level.floor; returnToVillage(`Você voltou à vila pela Runa de Retorno. Um portal ficou aberto no andar ${p.portal}.`); return; }
+    }
+  }
   if (p.slowT > 0) p.slowT -= dt;
   if (p.swing) { p.swing.t -= dt; if (p.swing.t <= 0) p.swing = null; }
   const mv = Input.move();
@@ -367,7 +385,7 @@ function updateDungeon(dt) {
   }
   if (Input.hit('q') || Input.tb('potion')) quickUse('potion');
   if (Input.hit('f')) quickUse('food');
-  if (Input.hit('r')) quickUse('scroll');
+  if (Input.hit('r')) startReturn();
   if (Input.hit('i') || Input.hit('tab') || Input.tb('bag')) { UI.invSel = { area: 'bag', i: 0 }; UI.inventory('dungeon'); return; }
   if (Input.hit('escape') || Input.tb('pause')) { pauseMenu(); return; }
   if (Input.hit('h') || Input.tb('skills')) { UI.skills('dungeon'); return; }
@@ -402,12 +420,18 @@ function updateDungeon(dt) {
         p.gold += d.gold; d.taken = true;
         addText(d.x, d.y - 10, '+' + d.gold, '#facc15', 0.9);
         Sfx.gold();
+      } else if (isEquip(d.item) && d.item.rarity < (p.lootMin || 0) && !isUpgrade(p, d.item)) {
+        d.filtered = true; // abaixo do filtro de raridade: fica no chão
       } else if (bagAdd(p.bag, p.bagSize, d.item)) {
         d.taken = true;
         const r = d.item.rarity;
         addText(d.x, d.y - 12, d.item.name, RARITIES[r].color, 0.8);
         if (r >= 2) { Sfx.rare(); UI.toast(`${RARITIES[r].name}: ${d.item.name}`, RARITIES[r].color); }
         else Sfx.pickup();
+        if (p.autoEquip && isUpgrade(p, d.item)) {
+          const eq = equipBest(p);
+          if (eq.length) { UI.toast(`Equipado: ${eq.join(', ')} ▲`, '#4ade80'); addText(p.x, p.y - 22, 'equipado ▲', '#4ade80', 0.8); }
+        }
       } else if (!d.warned) {
         d.warned = true;
         UI.toast('Mochila cheia! Largue algo (tecla I) ou volte à vila.', '#f87171');
@@ -559,7 +583,9 @@ function renderDungeon() {
     }
     ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(Math.round(d.x - 4), Math.round(d.y), 8, 1);
     const icon = getSprite(itemIconName(d.item), itemIconPal(d.item));
+    if (d.filtered) ctx.globalAlpha = 0.4; // abaixo do filtro de raridade
     ctx.drawImage(icon, Math.round(d.x - 4), dy);
+    ctx.globalAlpha = 1;
   }
 
   drawHazards(ctx);
@@ -630,6 +656,22 @@ function renderDungeon() {
   }
 }
 
+// ---------- Runa de Retorno ----------
+const RECALL_TIME = 4;
+function startReturn() {
+  const p = G.p;
+  if (p.recall) { cancelReturn('Retorno cancelado.'); return; }
+  if (p.bag.some(i => i.kind === 'scroll')) { quickUse('scroll'); return; } // pergaminho: na hora
+  p.recall = { t: 0 };
+  Sfx.heal();
+  UI.toast('Runa de Retorno: fique parado por 4 segundos. Levar dano cancela.', '#7dd3fc');
+}
+function cancelReturn(msg) {
+  if (!G.p.recall) return;
+  G.p.recall = null;
+  UI.toast(msg, '#9ca3af');
+}
+
 function drawPlayer(ctx) {
   const p = G.p;
   const hurtNow = p.hurtT > 0;
@@ -656,6 +698,17 @@ function drawPlayer(ctx) {
   if (p.slowT > 0) { ctx.fillStyle = 'rgba(245,245,244,0.5)'; ctx.fillRect(-5, 9, 10, 3); }
   ctx.drawImage(spr, -6, 0);
   if (p.dead) { ctx.restore(); ctx.globalAlpha = 1; return; }
+  if (p.recall) { // círculo da runa enchendo
+    ctx.restore(); ctx.save();
+    const k = p.recall.t / RECALL_TIME;
+    ctx.strokeStyle = 'rgba(125,211,252,0.35)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, 11, 6, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = '#7dd3fc';
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, 11, 6, 0, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.stroke();
+    ctx.restore(); ctx.save();
+    ctx.translate(Math.round(p.x), Math.round(p.y - 12));
+    if (p.face === -1) ctx.scale(-1, 1);
+  }
   // arma
   const w = p.eq.weapon;
   if (w) {
@@ -678,6 +731,7 @@ function enterVillage(msg) {
   saveGame();
   Music.play('village');
   villageMenu(msg);
+  if (p.portal) Tips.show('portal', 'Portal de Retorno', `Você deixou um portal aberto no andar ${p.portal}. Em "Descer à masmorra", escolha o portal para voltar direto para lá, sem repetir os andares.`);
   Tips.show('village', 'A vila', 'Aqui você dorme na estalagem, vende tesouros no mercado e melhora o equipamento no ferreiro. Quando estiver pronto, escolha "Descer à masmorra".');
 }
 
@@ -699,13 +753,33 @@ function villageMenu(msg) {
       { label: 'Estalagem', sub: 'Dormir e comer', act: innMenu },
       { label: 'Mercado', sub: 'Comprar suprimentos e vender tesouros', act: () => marketMenu('buy') },
       { label: 'Ferreiro', sub: 'Melhorar arma e armadura', act: smithMenu },
-      { label: 'Alfaiate', sub: `Mochila ${p.bagSize}/40 espaços`, act: tailorMenu },
+      { label: 'Alfaiate', sub: `Mochila ${p.bagSize}/${BAG_MAX} espaços`, act: tailorMenu },
       { label: 'Baú', sub: `Guardar itens com segurança (${p.stash.length}/30)`, act: () => stashMenu() },
       { label: 'Habilidades', sub: (G.p.skillPts || 0) > 0 ? `${G.p.skillPts} ${G.p.skillPts > 1 ? 'pontos' : 'ponto'} para gastar!` : 'Guerreiro, Caçador e Arcano', color: (G.p.skillPts || 0) > 0 ? '#a78bfa' : null, act: () => UI.skills('village') },
       { label: 'Mochila e atributos', sub: p.points > 0 ? `${p.points} pontos para distribuir!` : 'Equipamentos e itens', color: p.points > 0 ? '#fde047' : null, act: () => { UI.invSel = { area: 'bag', i: 0 }; G.resumeFromMenu = () => villageMenu(); UI.inventory('village'); } },
+      { label: 'Opções de itens', sub: `Equipar automático: ${p.autoEquip ? 'ligado' : 'desligado'} · Filtro: ${LOOT_FILTERS[p.lootMin || 0]}`, act: () => lootOptions(() => villageMenu()) },
       { label: Music.muted ? 'Ligar música' : 'Desligar música', sub: 'Atalho: tecla M', act: () => { Music.toggle(); villageMenu(); } },
       { label: 'Sair para o título', act: () => { saveGame(); UI.close(); titleScreen(); } },
     ],
+  });
+}
+
+const LOOT_FILTERS = ['pegar tudo', 'só incomum ou melhor', 'só raro ou melhor'];
+function lootOptions(back) {
+  const p = G.p;
+  UI.menu({
+    title: 'Opções de itens',
+    text: 'O filtro vale só para armas, armaduras e acessórios. Ouro, tesouros e consumíveis são sempre pegos, e um item melhor que o seu é pego mesmo abaixo do filtro.',
+    items: [
+      { label: `Equipar automaticamente: ${p.autoEquip ? 'LIGADO' : 'DESLIGADO'}`, sub: 'Ao pegar um item melhor que o seu, ele é equipado na hora', color: p.autoEquip ? '#4ade80' : null,
+        act: () => { p.autoEquip = !p.autoEquip; saveGame(); lootOptions(back); } },
+      ...LOOT_FILTERS.map((name, i) => ({
+        label: `${(p.lootMin || 0) === i ? '» ' : ''}Filtro: ${name}`, color: (p.lootMin || 0) === i ? '#fde047' : null,
+        sub: i === 0 ? 'Pega todo equipamento' : i === 1 ? 'Deixa no chão os equipamentos comuns (brancos)' : 'Deixa no chão comuns e incomuns (brancos e verdes)',
+        act: () => { p.lootMin = i; saveGame(); lootOptions(back); },
+      })),
+    ],
+    back,
   });
 }
 
@@ -715,12 +789,17 @@ function descendMenu() {
   UI.menu({
     title: 'Descer',
     text: warn,
-    items: unlockedElevators().map(f => ({
+    items: (p.portal ? [{
+      label: `Portal de Retorno · andar ${p.portal}`, color: '#7dd3fc',
+      sub: `${biomeOf(p.portal).name} · volta para onde você parou (o portal fecha ao usar)`,
+      right: 'andar ' + p.portal,
+      act: () => { const f = p.portal; p.portal = null; UI.close(); G.resumeFromMenu = () => {}; enterFloor(f, false); },
+    }] : []).concat(unlockedElevators().reverse().map(f => ({
       label: f === 1 ? 'Entrada da masmorra' : `Elevador do andar ${f}`,
       sub: biomeOf(f).name,
       right: 'andar ' + f,
       act: () => { UI.close(); G.resumeFromMenu = () => {}; enterFloor(f, false); },
-    })),
+    }))),
     back: () => villageMenu(),
   });
 }
@@ -761,6 +840,12 @@ function marketMenu(tab) {
       });
     }
   } else {
+    const junk = p.bag.filter(i => !isConsumable(i));
+    if (junk.length) {
+      const tot = junk.reduce((a, i) => a + i.value, 0);
+      items.push({ label: `Vender tudo (${junk.length} ${junk.length > 1 ? 'itens' : 'item'})`, sub: 'Equipamentos e tesouros da mochila. Poções, pães e pergaminhos ficam. O que está equipado não é vendido.', right: tot + ' ◆', color: '#facc15',
+        act: () => { p.bag = p.bag.filter(i => isConsumable(i)); p.gold += tot; Sfx.gold(); Sfx.rare(); saveGame(); UI.toast(`Vendeu ${junk.length} itens por ${tot} ouro.`, '#facc15'); marketMenu('sell'); } });
+    }
     const sellAll = p.bag.filter(i => i.kind === 'treasure');
     if (sellAll.length) {
       const total = sellAll.reduce((a, i) => a + i.value, 0);
@@ -800,14 +885,14 @@ function smithMenu() {
 
 function tailorMenu() {
   const p = G.p;
-  const cost = 100 * Math.pow(2, (p.bagSize - 12) / 4);
+  const cost = Math.round(80 * Math.pow(1.7, (p.bagSize - BAG_START) / BAG_STEP));
   UI.menu({
     title: 'Alfaiate',
     text: `"Uma mochila maior é mais tesouro voltando para casa." · ◆ ${p.gold}`,
-    items: [p.bagSize >= 40
+    items: [p.bagSize >= BAG_MAX
       ? { label: 'Sua mochila já é a maior possível.', disabled: true }
-      : { label: `Aumentar mochila (${p.bagSize} → ${p.bagSize + 4})`, right: cost + ' ◆', disabled: p.gold < cost,
-          act: () => { p.gold -= cost; p.bagSize += 4; Sfx.chest(); saveGame(); tailorMenu(); } }],
+      : { label: `Aumentar mochila (${p.bagSize} → ${p.bagSize + BAG_STEP})`, right: cost + ' ◆', disabled: p.gold < cost,
+          act: () => { p.gold -= cost; p.bagSize = Math.min(BAG_MAX, p.bagSize + BAG_STEP); Sfx.chest(); saveGame(); tailorMenu(); } }],
     back: () => villageMenu(),
   });
 }
@@ -834,9 +919,11 @@ function pauseMenu() {
     title: 'Pausa',
     items: [
       { label: 'Continuar', act: () => UI.close() },
+      { label: 'Voltar à vila', sub: G.p.bag.some(i => i.kind === 'scroll') ? 'Usa um Pergaminho de Retorno na hora' : 'Runa de Retorno: fique parado por 4 segundos', act: () => { UI.close(); startReturn(); } },
       { label: 'Controles', act: controlsScreen },
       { label: Music.muted ? 'Ligar música' : 'Desligar música', sub: 'Atalho: tecla M', act: () => { Music.toggle(); pauseMenu(); } },
       { label: Sfx.muted ? 'Ligar efeitos sonoros' : 'Desligar efeitos sonoros', act: () => { Sfx.muted = !Sfx.muted; pauseMenu(); } },
+      { label: 'Opções de itens', sub: `Equipar automático: ${G.p.autoEquip ? 'ligado' : 'desligado'} · Filtro: ${LOOT_FILTERS[G.p.lootMin || 0]}`, act: () => lootOptions(pauseMenu) },
       { label: Tips.enabled ? 'Desligar dicas' : 'Ligar dicas', sub: 'Dicas do tutorial que aparecem durante o jogo', act: () => { Tips.toggle(); pauseMenu(); } },
       { label: 'Rever todas as dicas', sub: 'As dicas voltam a aparecer desde o começo', act: () => { Tips.reset(); UI.toast('As dicas vão aparecer de novo.', '#c4b5fd'); pauseMenu(); } },
       { label: 'Sair para o título', sub: 'O progresso fica salvo no início deste andar', act: () => { saveGame(); UI.close(); titleScreen(); } },
@@ -853,7 +940,8 @@ function controlsScreen(fromTitle) {
       <tr><td>Atacar</td><td>J ou clique (mira no mouse)</td></tr>
       <tr><td>Esquivar</td><td>Espaço</td></tr>
       <tr><td>Interagir</td><td>E (escada, fogueira, elevador)</td></tr>
-      <tr><td>Poção / Comida / Pergaminho</td><td>Q / F / R</td></tr>
+      <tr><td>Poção / Comida</td><td>Q / F</td></tr>
+      <tr><td>Voltar à vila</td><td>R (pergaminho na hora, ou Runa: 4 s parado)</td></tr>
       <tr><td>Mochila e atributos</td><td>I ou Tab</td></tr>
       <tr><td>Habilidades (usar)</td><td>1 / 2 / 3</td></tr>
       <tr><td>Painel de habilidades</td><td>H</td></tr>
@@ -866,7 +954,7 @@ function controlsScreen(fromTitle) {
       <tr><td>Atacar / esquivar</td><td>A (✕) / B (○)</td></tr>
       <tr><td>Interagir / poção</td><td>X (□) / Y (△)</td></tr>
       <tr><td>Habilidades 1 / 2 / 3</td><td>LB / RB / RT</td></tr>
-      <tr><td>Comida / pergaminho</td><td>LT / clicar analógico esquerdo</td></tr>
+      <tr><td>Comida / voltar à vila</td><td>LT / clicar analógico esquerdo</td></tr>
       <tr><td>Mochila / habilidades / pausa</td><td>View / clicar analógico direito / Menu</td></tr>
       <tr><td>Nos menus</td><td>direcional navega, A confirma, B volta</td></tr>
       </table><p>No celular, use o analógico à esquerda e os botões à direita.</p>`,

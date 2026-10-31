@@ -869,6 +869,7 @@ function hurtPlayer(amount, source) {
   p.hp -= dmg;
   p.iframes = 0.5;
   p.hurtT = 0.3;
+  if (p.recall) cancelReturn('Retorno interrompido: você levou dano!');
   if (Input.lastDevice === 'pad') Input.rumble(dmg > st.maxHp * 0.15 ? 220 : 110, dmg > st.maxHp * 0.15 ? 0.9 : 0.45);
   G.shake = Math.max(G.shake, 3);
   G.hurtFlash = 0.25;
