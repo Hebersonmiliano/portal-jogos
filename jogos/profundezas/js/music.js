@@ -387,5 +387,5 @@ const Music = {
   },
 
   // Música certa para o andar atual
-  forFloor(floor) { return 'd' + (Math.min(4, Math.floor((floor - 1) / 10)) + 1); },
+  forFloor(floor) { return 'd' + (biomeOf(floor).idx + 1); },
 };

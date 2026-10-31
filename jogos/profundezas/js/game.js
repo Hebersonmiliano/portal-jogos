@@ -158,11 +158,14 @@ function enterFloor(floor, viaStairs) {
   }
   // tira inimigos de perto do início
   placeFeatures(L, floor);
+  decorateFloor(L);
+  G.ambient = [];
   G.enemies = G.enemies.filter(e => e.isBoss || dist(e.x, e.y, p.x, p.y) > 70);
   G.state = 'dungeon';
   showHud(true);
   Music.play(Music.forFloor(floor));
-  UI.toast(`Andar ${floor} · ${L.biome.name}`, '#fde68a');
+  questEvent('floor', { floor });
+  UI.toast(`Andar ${floor} · ${L.biome.name}${floor > MAX_FLOOR ? ' (Profundezas Infinitas)' : ''}`, '#fde68a');
   Tips.show('start', 'Bem-vindo às Profundezas', () => `Mova com ${K('move')}. Encontre a escada para descer mais fundo e volte vivo à vila com o que juntar.`);
   if (L.isBoss) UI.toast('Um chefe guarda este andar.', '#f87171');
   saveGame();
@@ -184,6 +187,7 @@ function spawnGold(x, y, amount) {
 function onEnemyDeath(e) {
   const p = G.p;
   addCorpse(e);
+  if (!e.isBoss) questEvent('kill', e);
   const f = G.level.floor;
   const st = playerStats(p);
   p.kills++;
@@ -198,11 +202,12 @@ function onEnemyDeath(e) {
     G.drops.push(makeDrop(e.x - 12, e.y, genItem(f, 1, null, st.luck), 0.5));
     G.drops.push(makeDrop(e.x + 12, e.y, genItem(f, 1, null, st.luck), 0.5));
     G.drops.push(makeDrop(e.x, e.y + 10, makeConsumable('potion', 2), 0.5));
-    if (!p.beaten.includes(f)) p.beaten.push(f);
+    const first = !p.beaten.includes(f);
+    if (first) p.beaten.push(f);
     G.level.stairs = { x: e.x, y: e.y + 24 };
     UI.toast(`${e.name} foi derrotado!`, '#facc15');
     Music.play(Music.forFloor(f));
-    if (f === MAX_FLOOR) setTimeout(() => showVictory(), 1500);
+    if (first && f <= MAX_FLOOR) storyOnBoss(f);
     else UI.toast('Uma escada se abriu para as profundezas.', '#38bdf8');
     return;
   }
@@ -306,7 +311,7 @@ function showVictory() {
   showHud(false);
   UI.menu({
     title: 'Vitória!',
-    text: `Você derrotou o Senhor do Abismo no andar 50! Inimigos derrotados: ${G.p.kills}. As profundezas continuam além... e ficam mais perigosas.`,
+    text: `A Chama do Fundo voltou a arder! Inimigos derrotados: ${G.p.kills}. Missões entregues: ${G.p.questsDone || 0}.<br><br>Abaixo do Abismo começam as <b>Profundezas Infinitas</b>: os biomas se repetem cada vez mais perigosos, com um chefe a cada 10 andares. Até onde você vai?`,
     cls: 'death',
     items: [
       { label: 'Continuar descendo', act: () => { UI.close(); G.state = 'dungeon'; showHud(true); } },
@@ -407,6 +412,7 @@ function updateDungeon(dt) {
   for (const pr of G.projectiles) pr.update(dt);
   updateHazards(dt);
   updateFeatures(dt);
+  updateAmbient(dt);
   if (G.state !== 'dungeon' || p.dead) { updateEffects(dt); return; }
   G.projectiles = G.projectiles.filter(pr => !pr.dead);
 
@@ -427,6 +433,7 @@ function updateDungeon(dt) {
         const r = d.item.rarity;
         addText(d.x, d.y - 12, d.item.name, RARITIES[r].color, 0.8);
         if (r >= 2) { Sfx.rare(); UI.toast(`${RARITIES[r].name}: ${d.item.name}`, RARITIES[r].color); }
+        if (d.item.kind === 'treasure') questEvent('treasure', d.item);
         else Sfx.pickup();
         if (p.autoEquip && isUpgrade(p, d.item)) {
           const eq = equipBest(p);
@@ -454,6 +461,7 @@ function updateDungeon(dt) {
       continue;
     }
     Sfx.chest();
+    questEvent('chest');
     const f = L.floor, luck = st.luck;
     G.drops.push(makeDrop(c.x, c.y + 4, genItem(f, c.secret ? 2 : 1, null, luck + (c.secret ? 10 : 0)), 0.3));
     if (c.secret) { G.drops.push(makeDrop(c.x - 8, c.y + 6, genItem(f, 1, null, luck), 0.3)); UI.toast('Baú especial!', '#facc15'); }
@@ -545,6 +553,7 @@ function renderDungeon() {
   ctx.setTransform(G.scale, 0, 0, G.scale, -G.cam.x * G.scale, -G.cam.y * G.scale);
   ctx.drawImage(G.floorCanvas, 0, 0);
   drawFeaturesFloor(ctx);
+  drawTorches(ctx);
 
   const t = G.time;
   // escada
@@ -616,24 +625,11 @@ function renderDungeon() {
     ctx.globalAlpha = 1;
   }
   for (const q of G.particles) { ctx.fillStyle = q.color; ctx.globalAlpha = Math.min(1, q.t * 4); ctx.fillRect(Math.round(q.x), Math.round(q.y), 1, 1); }
+  drawAmbient(ctx);
   ctx.globalAlpha = 1;
 
-  // escuridão
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const px = (p.x - G.cam.x) * G.scale, py = (p.y - 6 - G.cam.y) * G.scale;
-  const rad = L.biome.light * G.scale;
-  const g = ctx.createRadialGradient(px, py, rad * 0.35, px, py, rad);
-  g.addColorStop(0, 'rgba(0,0,0,0)');
-  g.addColorStop(1, 'rgba(0,0,0,0.88)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, G.canvas.width, G.canvas.height);
-  // brilho das fogueiras
-  for (const pr of G.props) if (pr.type === 'campfire' && !pr.used) {
-    const fx = (pr.x - G.cam.x) * G.scale, fy = (pr.y - 6 - G.cam.y) * G.scale;
-    const fg = ctx.createRadialGradient(fx, fy, 0, fx, fy, 50 * G.scale);
-    fg.addColorStop(0, 'rgba(255,140,40,0.22)'); fg.addColorStop(1, 'rgba(255,140,40,0)');
-    ctx.fillStyle = fg; ctx.fillRect(fx - 50 * G.scale, fy - 50 * G.scale, 100 * G.scale, 100 * G.scale);
-  }
+  // escuridão com várias fontes de luz (decor.js)
+  drawLighting(ctx);
   if (G.hurtFlash > 0) { ctx.fillStyle = `rgba(200,0,0,${G.hurtFlash * 0.6})`; ctx.fillRect(0, 0, G.canvas.width, G.canvas.height); }
 
   // textos flutuantes (em resolução de tela)
@@ -749,7 +745,9 @@ function villageMenu(msg) {
     cls: 'village',
     text: `${msg ? `<span style="color:#fde68a">${msg}</span><br>` : ''}Vida ${Math.ceil(p.hp)}/${st.maxHp} · Fome ${Math.ceil(p.hunger)} · Cansaço ${Math.floor(p.fatigue)} · ◆ ${p.gold} ouro · Mais fundo: andar ${p.maxFloor}${tombLine}`,
     items: [
-      { label: 'Descer à masmorra', sub: 'Escolha o elevador de partida', act: descendMenu },
+      { label: 'Descer à masmorra', sub: p.portal ? `Portal de Retorno aberto no andar ${p.portal}` : 'Escolha o elevador de partida', act: descendMenu },
+      { label: 'Ancião Tobias', sub: `Objetivo: ${STORY.elder(p).goal}`, color: '#fde68a', act: elderMenu },
+      { label: 'Quadro de Missões', sub: (() => { ensureQuests(p); const n = p.quests.filter(q => q.done).length; return n ? `${n} ${n > 1 ? 'missões prontas' : 'missão pronta'} para entregar!` : 'Pedidos dos moradores com recompensas'; })(), color: p.quests && p.quests.some(q => q.done) ? '#4ade80' : null, act: questBoard },
       { label: 'Estalagem', sub: 'Dormir e comer', act: innMenu },
       { label: 'Mercado', sub: 'Comprar suprimentos e vender tesouros', act: () => marketMenu('buy') },
       { label: 'Ferreiro', sub: 'Melhorar arma e armadura', act: smithMenu },
@@ -997,9 +995,11 @@ function startGame(fresh) {
   G.p = fresh ? null : loadGame();
   if (!G.p) { G.p = newPlayer(); resetRuntime(G.p); }
   ensureSkills(G.p); G.p.dodgeCh = dodgeMax(G.p);
+  ensureQuests(G.p);
   G.resumeFromMenu = () => {};
   if (G.p.floor > 0) enterFloor(G.p.floor, false);
-  else enterVillage(fresh ? 'Bem-vindo à vila. A masmorra fica logo ali, embaixo da velha torre.' : null);
+  else if (fresh) { G.state = 'village'; Music.play('village'); showStory(STORY.intro.title, STORY.intro.text, () => enterVillage('Bem-vindo à vila. Fale com o Ancião Tobias para saber seu objetivo.')); }
+  else enterVillage(null);
 }
 
 // ---------- Cena da vila (fundo) ----------
@@ -1064,7 +1064,7 @@ function frame(now) {
       renderDungeon();
       UI.updateHud(dt);
       updateSkillBar();
-      if (Math.floor(G.time * 4) !== Math.floor((G.time - dt) * 4)) UI.drawMinimap();
+      if (Math.floor(G.time * 4) !== Math.floor((G.time - dt) * 4)) { UI.drawMinimap(); updateQuestTracker(); }
     }
   } else {
     renderVillageBg();

@@ -6,7 +6,7 @@
 const TILE = 16;
 const MAP_W = 64;
 const MAP_H = 48;
-const VERSION = 'v0.6';
+const VERSION = 'v0.7';
 const SAVE_KEY = 'profundezas_save_v1';
 const MAX_FLOOR = 50;
 const BAG_START = 24;   // espaços da mochila no começo
@@ -73,7 +73,12 @@ const BIOMES = [
   },
 ];
 
-function biomeOf(floor) { return BIOMES[Math.min(BIOMES.length - 1, Math.floor((floor - 1) / 10))]; }
+BIOMES.forEach((b, i) => { b.idx = i; });
+// Depois do andar 50 (Profundezas Infinitas), os biomas voltam a se repetir
+function biomeOf(floor) {
+  const i = Math.floor((floor - 1) / 10);
+  return BIOMES[floor > MAX_FLOOR ? i % BIOMES.length : Math.min(BIOMES.length - 1, i)];
+}
 
 // ---------- Comportamentos base dos inimigos (andar 1) ----------
 const ENEMY_BASE = {

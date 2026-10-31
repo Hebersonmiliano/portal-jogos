@@ -223,3 +223,14 @@ body.pad #touchUI { display: none !important; }
 .invhead .best { background: #14532d; color: #bbf7d0; border: 2px solid #22c55e; padding: 7px 9px; font-size: 8px; cursor: pointer; }
 .invhead .best:hover, .invhead .best:focus { border-color: var(--gold); outline: none; }
 .slot b.better { left: 2px; bottom: 1px; right: auto; color: #4ade80; font-size: 8px; }
+
+/* ---------- História e missões ---------- */
+#questTracker { max-width: 210px; text-align: right; background: rgba(11,10,15,.6); padding: 6px 8px; border-right: 2px solid #5b4a7a; }
+#questTracker p { margin: 0 0 4px; font-size: 7px; line-height: 1.6; color: var(--muted); }
+#questTracker p.goal { color: #fde68a; }
+#questTracker p.ok { color: #4ade80; }
+#questTracker b { color: var(--text); font-weight: normal; }
+.panel.story { width: min(620px, 100%); border-color: #a16207; }
+.panel.story h2 { color: #fde68a; }
+.panel.story .mtext { color: var(--text); font-size: 9px; line-height: 2; }
+@media (max-width: 760px) { #questTracker { display: none; } }

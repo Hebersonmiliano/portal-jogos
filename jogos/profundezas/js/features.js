@@ -127,6 +127,7 @@ function updateFeatures(dt) {
       G.chests.push({ x: pr.x, y: pr.y + 18, open: false, secret: true });
       spawnGold(pr.x, pr.y + 10, 30 * (1 + 0.3 * (G.level.floor - 1)));
       UI.toast('Desafio vencido! Um baú especial apareceu.', '#facc15');
+      questEvent('challenge');
       Sfx.rare();
     }
   }
@@ -151,6 +152,7 @@ function hitSecretWall(aim) {
           burst(g.x * TILE + 8, g.y * TILE + 8, '#d6d3d1', 20);
           Sfx.boom();
           UI.toast('Você encontrou uma passagem secreta!', '#facc15');
+          questEvent('secret');
         }
         return;
       }
