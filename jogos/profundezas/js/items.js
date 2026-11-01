@@ -109,6 +109,8 @@ function itemValue(item) {
   const m = RARITIES[item.rarity].mult;
   if (item.kind === 'treasure') return Math.round(item.base * (1 + 0.35 * (item.lvl - 1)) * m);
   if (CONSUMABLES[item.kind]) return Math.floor(CONSUMABLES[item.kind].price / 2);
+  if (item.kind === 'mat') return MATERIALS[item.mat].value;
+  if (item.kind === 'gem') return GEM_VALUE[item.sz];
   const slotMul = item.kind === 'weapon' || item.kind === 'armor' ? 1 : 0.7;
   return Math.round(8 * (1 + 0.3 * (item.lvl - 1)) * m * slotMul);
 }
@@ -135,6 +137,7 @@ function itemStatLines(item) {
   if (item.kind === 'wings') lines.push('Asas: a esquiva vira um voo por cima de espinhos, lava e inimigos.', '✦ ' + WINGS[item.wing].desc);
   if (item.kind === 'treasure') lines.push('Tesouro: venda no mercado da vila.');
   if (CONSUMABLES[item.kind]) lines.push(CONSUMABLES[item.kind].desc);
+  lines.push(...craftItemLines(item));
   for (const b of item.bonuses || []) {
     const def = BONUS_POOL.find(p => p.k === b.k);
     if (def) lines.push(def.label(b.v));
@@ -143,6 +146,7 @@ function itemStatLines(item) {
   if (item.legendDesc) lines.push('★ ' + item.legendDesc);
   const sp = specialLine(item); if (sp) lines.push(sp);
   lines.push(...setLines(item));
+  lines.push(...socketLines(item));
   if (canUpgrade(item)) lines.push(`Melhorias no ferreiro: até +${upgradeCap(item)}`);
   if (item.lvl) lines.push(`Nível do item: ${item.lvl}`);
   return lines;
@@ -151,9 +155,10 @@ function canUpgrade(item) { return item && (item.kind === 'weapon' || DEF_KINDS.
 
 // Tenta colocar um item na mochila; retorna true se coube.
 function bagAdd(bag, size, item) {
-  if (isConsumable(item)) {
+  if (isStackable(item)) {
+    const key = stackKey(item);
     for (const it of bag) {
-      if (it.kind === item.kind && it.qty < STACK_MAX) {
+      if (stackKey(it) === key && it.qty < STACK_MAX) {
         const room = STACK_MAX - it.qty;
         const n = Math.min(room, item.qty);
         it.qty += n; item.qty -= n;
@@ -176,6 +181,7 @@ function itemScore(item) {
   if (item.special) s += 12;
   if (item.skillUp) s += 10;
   if (item.set !== undefined && item.set !== null) s += 10;
+  if (item.sockets) s += item.sockets.filter(Boolean).length * 6;
   const up = 1 + 0.08 * (item.up || 0);
   if (item.kind === 'weapon') {
     s += (item.dmg * up / item.cd) * 1.6;
@@ -199,7 +205,7 @@ function targetSlot(p, item) {
 // mode 'style' (botão Equipar melhores): só mantém o estilo de arma
 function keepPiece(p, cur, cand, mode) {
   if (!cur) return false;
-  if (mode !== 'style' && (cur.special || cur.skillUp || cur.effect)) return true;
+  if (mode !== 'style' && (cur.special || cur.skillUp || cur.effect || (cur.sockets && cur.sockets.some(Boolean)))) return true;
   if (cur.set !== undefined && cur.set !== null && cand.set !== cur.set && setCount(p, cur.set) >= 2) return true; // não desfaz um conjunto ativo
   if (cur.kind === 'weapon') {
     const cls = w => (WEAPONS.find(x => x.type === weaponType(w)) || {}).cls;

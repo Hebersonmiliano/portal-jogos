@@ -575,6 +575,36 @@ const SPRITES = {
     '.h......',
     'h.......',
   ],
+  i_mat: [
+    '........',
+    '...ll...',
+    '..lmml..',
+    '.lmmmml.',
+    '.mmmmmd.',
+    '..mmmd..',
+    '...dd...',
+    '........',
+  ],
+  i_gem: [
+    '........',
+    '..mmmm..',
+    '.mlmmmm.',
+    'mllmmmmd',
+    '.mmmmmd.',
+    '..mmmd..',
+    '...md...',
+    '........',
+  ],
+  i_cup: [
+    '..l..l..',
+    '...l....',
+    '.wwwwww.',
+    '.wrrrrww',
+    '.wrrrrw.',
+    '.wwwwww.',
+    '..wwww..',
+    '........',
+  ],
   i_treasure: [
     '........',
     '..gggg..',
@@ -691,6 +721,9 @@ function getSprite(name, pal, flash) {
 }
 
 function itemIconName(item) {
+  if (item.kind === 'mat' || item.kind === 'gem') return 'i_' + item.kind;
+  if (item.kind === 'cha') return 'i_cup';
+  if (item.kind === 'potion2' || (item.kind || '').startsWith('elixir')) return 'i_potion';
   if (item.kind === 'weapon') {
     const t = weaponType(item);
     if (t === 'arco') return 'i_bow';
@@ -707,6 +740,10 @@ function itemIconPal(item) {
     const g = cols[Math.max(0, idx) % cols.length];
     return { g, l: '#ffffff' };
   }
+  if (item.kind === 'mat' && typeof MATERIALS !== 'undefined') { const m = MATERIALS[item.mat]; return { m: m.c1, l: m.c2, d: shade(m.c1, -40) }; }
+  if (item.kind === 'gem' && typeof GEMS !== 'undefined') { const g = GEMS[item.gem]; return { m: g.c1, l: g.c2, d: shade(g.c1, -45) }; }
+  if (item.kind === 'cha') return { w: '#e7e5e4', r: '#a16207', l: '#d6d3d1' };
+  if (typeof ELIXIR_COLOR !== 'undefined' && ELIXIR_COLOR[item.kind]) { const c = ELIXIR_COLOR[item.kind]; return { c: '#8b5a2b', g: '#cbd5e1', r: c, l: shade(c, 60) }; }
   if (item.kind === 'wings' && WINGS[item.wing]) { const w = WINGS[item.wing]; return { m: w.color, l: w.edge, k: shade(w.color, -40) }; }
   return null;
 }

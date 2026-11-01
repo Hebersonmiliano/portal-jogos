@@ -17,6 +17,8 @@ const HOUSES = [
   { id: 'smith',  x: 4,  y: 14, w: 7, h: 5, roof: '#44403c', wall: '#78716c', sign: 'anvil',  npc: 'bruno' },
   { id: 'tailor', x: 22, y: 16, w: 6, h: 4, roof: '#7e22ce', wall: '#d6d3d1', sign: 'needle', npc: 'lia' },
   { id: 'elder',  x: 31, y: 14, w: 6, h: 5, roof: '#166534', wall: '#a8a29e', sign: 'book',   npc: 'tobias' },
+  { id: 'alchemy', x: 13, y: 2, w: 5, h: 4, roof: '#0f766e', wall: '#d6d3d1', sign: 'flask',  npc: 'iara' },
+  { id: 'jeweler', x: 13, y: 15, w: 5, h: 3, roof: '#be185d', wall: '#a8a29e', sign: 'gem',   npc: 'otto' },
 ];
 const TOWER = { x: 32, y: 2, w: 5, h: 7 };
 const FOUNTAIN = { x: 20, y: 9, w: 3, h: 3 };
@@ -28,6 +30,8 @@ const NPC_LINES = {
   lia:     ['Mochila maior, mais tesouro!', 'Costuro qualquer coisa.', 'Cuidado com as teias lá embaixo.'],
   tobias:  ['A Chama ainda pulsa...', 'Venha conversar, explorador.', 'A história não acabou.'],
   pedrinho:['Um dia eu vou descer também!', 'Você viu um dragão?', 'Me conta da masmorra!'],
+  iara:    ['Cogumelos! Preciso de cogumelos!', 'Esse elixir quase explodiu...', 'Cada bioma, um ingrediente.'],
+  otto:    ['Gemas, gemas, gemas.', 'Três pequenas fazem uma média.', 'Cuidado com essa safira!'],
 };
 
 function buildVillage() {
@@ -46,7 +50,7 @@ function buildVillage() {
   }
   // estradas e praça
   const road = (tx, ty, tw, th) => { for (let yy = ty; yy < ty + th; yy++) for (let xx = tx; xx < tx + tw; xx++) { R('#6b4f35', xx * TILE, yy * TILE, TILE, TILE); for (let k = 0; k < 3; k++) R('#7c5c3e', xx * TILE + ri(14), yy * TILE + ri(14), 2, 1); } };
-  road(1, 10, 38, 2); road(19, 1, 2, 22); road(8, 8, 2, 2); road(26, 6, 2, 4); road(7, 12, 2, 2); road(25, 12, 2, 4); road(34, 9, 2, 1); road(33, 12, 2, 2);
+  road(1, 10, 38, 2); road(19, 1, 2, 22); road(8, 8, 2, 2); road(26, 6, 2, 4); road(7, 12, 2, 2); road(25, 12, 2, 4); road(34, 9, 2, 1); road(33, 12, 2, 2); road(15, 6, 2, 1); road(15, 18, 4, 1);
   for (let ty = 7; ty <= 14; ty++) for (let tx = 15; tx <= 27; tx++) {
     R('#57534e', tx * TILE, ty * TILE, TILE, TILE);
     R('#78716c', tx * TILE + 1, ty * TILE + 1, 6, 6); R('#6b6560', tx * TILE + 9, ty * TILE + 1, 6, 6);
@@ -76,6 +80,8 @@ function buildVillage() {
     if (h.sign === 'anvil') { R('#1c1917', sx + 2, sy + 3, 8, 2); R('#1c1917', sx + 4, sy + 5, 4, 2); }
     if (h.sign === 'needle') { R('#e5e7eb', sx + 3, sy + 6, 6, 1); R('#e5e7eb', sx + 8, sy + 2, 1, 5); }
     if (h.sign === 'book') { R('#7f1d1d', sx + 3, sy + 2, 6, 5); R('#f5f5f4', sx + 4, sy + 3, 4, 3); }
+    if (h.sign === 'flask') { R('#e5e7eb', sx + 5, sy + 1, 2, 2); R('#22c55e', sx + 3, sy + 3, 6, 4); R('#86efac', sx + 4, sy + 4, 2, 1); }
+    if (h.sign === 'gem') { R('#e11d48', sx + 4, sy + 2, 4, 1); R('#e11d48', sx + 3, sy + 3, 6, 2); R('#e11d48', sx + 5, sy + 5, 2, 2); R('#fecdd3', sx + 4, sy + 3, 1, 1); }
     solid(h.x, h.y, h.w, h.h);
     if (h.id === 'smith') { V.smokeAt = { x: px + 10, y: py - 12 }; R('#57534e', px + 6, py - 14, 8, 10); }
   }
@@ -130,7 +136,7 @@ function buildVillage() {
     V.solids.push({ x: px + 4, y: py + 8, w: 8, h: 7 });
   };
   const blocked = (tx, ty) => V.solids.some(s => tx * TILE + 8 > s.x - 8 && tx * TILE + 8 < s.x + s.w + 8 && ty * TILE + 8 > s.y - 8 && ty * TILE + 8 < s.y + s.h + 8);
-  const keep = [[8, 9], [23.5, 7.3], [13.2, 18.3], [25, 20.6], [33.8, 19.6], [23, 13], [34.5, 9.5], [21.5, 13.5], [6.5, 9.5]];
+  const keep = [[8, 9], [18.3, 6.4], [17.1, 19.2], [17.3, 4], [23.5, 7.3], [11.9, 19.1], [25, 20.6], [33.8, 19.6], [23, 13], [34.5, 9.5], [21.5, 13.5], [6.5, 9.5]];
   for (const h of HOUSES) for (let ty = h.y + h.h; ty <= h.y + h.h + 3; ty++) keep.push([h.x + h.w / 2, ty]);
   const isRoad = (tx, ty) => (ty >= 10 && ty <= 11) || (tx >= 19 && tx <= 20) || (tx >= 15 && tx <= 27 && ty >= 7 && ty <= 14) || keep.some(([kx, ky]) => Math.abs(kx - tx - 0.5) < 2.5 && Math.abs(ky - ty - 0.5) < 2.5);
   for (let tx = 0; tx < VW; tx++) { tree(tx, 0); tree(tx, VH - 1); }
@@ -144,10 +150,12 @@ function buildVillage() {
   const npc = (id, tx, ty, wander) => { const p = at(tx, ty); V.npcs.push({ id, x: p.x, y: p.y, hx: p.x, hy: p.y, wander, t: Math.random() * 9, face: 1, mv: 0, tx: p.x, ty: p.y, wt: 0 }); };
   npc('marta', 8, 9, false);
   npc('joana', 23.5, 7.3, false);
-  npc('bruno', 13.2, 18.3, false);
+  npc('bruno', 11.9, 19.1, false);
   npc('lia', 25, 20.6, false);
   npc('tobias', 33.8, 19.6, false);
   npc('pedrinho', 23, 13, true);
+  npc('iara', 18.3, 6.4, false);
+  npc('otto', 17.1, 19.2, false);
   V.built = true;
 }
 
@@ -176,6 +184,7 @@ function updateVillage(dt) {
 
   // moradores
   for (const n of V.npcs) {
+    if (!npcHere(n)) continue;
     n.t += dt;
     if (n.wander) {
       n.wt -= dt;
@@ -195,7 +204,7 @@ function updateVillage(dt) {
   if (V.bubble) { V.bubble.t -= dt; if (V.bubble.t <= 0) V.bubble = null; }
   if (V.bubbleT <= 0) {
     V.bubbleT = 4 + Math.random() * 4;
-    const near = V.npcs.filter(n => dist(n.x, n.y, p.x, p.y) < 140);
+    const near = V.npcs.filter(n => npcHere(n) && dist(n.x, n.y, p.x, p.y) < 140);
     if (near.length) { const n = pick(near); V.bubble = { npc: n, text: pick(NPC_LINES[n.id]), t: 3 }; }
   }
 
@@ -213,12 +222,12 @@ function updateVillage(dt) {
 function villageTarget() {
   const p = G.p, V = VILLAGE;
   let best = null, bd = 24;
-  for (const n of V.npcs) { const d = dist(n.x, n.y, p.x, p.y); if (d < bd) { bd = d; best = { kind: 'npc', npc: n, label: `Falar com ${PEOPLE[n.id].name}` }; } }
+  for (const n of V.npcs) { if (!npcHere(n)) continue; const d = dist(n.x, n.y, p.x, p.y); if (d < bd) { bd = d; best = { kind: 'npc', npc: n, label: `Falar com ${PEOPLE[n.id].name}` }; } }
   for (const o of V.objs) { const d = dist(o.x, o.y, p.x, p.y); if (d < bd) { bd = d; best = { kind: 'obj', obj: o, label: o.id === 'tower' ? 'Descer à masmorra' : o.id === 'board' ? 'Ver o Quadro de Missões' : o.id === 'stash' ? 'Abrir o baú' : 'Olhar a fonte' }; } }
   return best;
 }
 
-function giverOf(q) { return { Bruno: 'bruno', Marta: 'marta', Joana: 'joana', Pedrinho: 'pedrinho', 'Ancião': 'tobias', Lia: 'lia' }[q.giver.split(/[ ,]/)[0]]; }
+function giverOf(q) { return { Bruno: 'bruno', Marta: 'marta', Joana: 'joana', Pedrinho: 'pedrinho', 'Ancião': 'tobias', Lia: 'lia', Iara: 'iara', Otto: 'otto' }[q.giver.split(/[ ,]/)[0]]; }
 
 function villageInteract(t) {
   const p = G.p;
@@ -246,6 +255,8 @@ function npcTalk(id) {
   if (id === 'joana') return [{ who: id, text: p.bag.some(i => i.kind === 'treasure') ? 'Opa, estou vendo tesouros nessa mochila! Vamos negociar?' : 'Poções, pão, pergaminhos... e compro tudo o que você trouxer lá de baixo.' }];
   if (id === 'bruno') return [{ who: id, text: p.eq.weapon && p.eq.weapon.up >= 5 ? `Essa ${p.eq.weapon.name} já está +${p.eq.weapon.up}. Trabalho bonito, se me permite dizer.` : 'Hmpf. Essa arma precisa de cuidado. Traga ouro que eu deixo ela afiada.' }];
   if (id === 'lia') return [{ who: id, text: p.bag.length >= p.bagSize - 3 ? 'Sua mochila está explodindo! Deixa eu aumentar ela.' : 'Uma mochila maior é mais tesouro voltando para casa.' }];
+  if (id === 'iara') { const n = countStock(p, i => i.kind === 'mat'); return [{ who: id, text: n >= 3 ? `Hmm, ${n} ingredientes nessa mochila... Vamos preparar alguma coisa?` : 'Traga ingredientes da masmorra: cada bioma tem o seu. Com eles eu faço elixires que duram dois andares.' }]; }
+  if (id === 'otto') { const n = countStock(p, i => i.kind === 'gem'); return [{ who: id, text: n ? `Estou vendo ${n > 1 ? n + ' gemas' : 'uma gema'} aí! Quer encaixar? Primeiro eu abro um espaço na arma, no anel ou no amuleto.` : 'Gemas caem dos inimigos, principalmente dos de elite. Traga que eu encaixo.' }]; }
   if (id === 'pedrinho') return [{ who: id, text: pick([
     'Sabia que dá para quebrar paredes rachadas lá embaixo? Meu avô dizia que tem salas secretas!',
     'Os barris vermelhos explodem! Eu vi uma vez pela janela da torre... ou foi um sonho.',
@@ -282,6 +293,8 @@ function npcMenu(id) {
   else if (id === 'bruno') smithMenu();
   else if (id === 'lia') tailorMenu();
   else if (id === 'tobias') elderMenu();
+  else if (id === 'iara') alchemistMenu();
+  else if (id === 'otto') jewelerMenu('gems');
 }
 
 // ---------- Desenho ----------
@@ -305,7 +318,7 @@ function renderVillage() {
   for (const sm of V.smoke) { ctx.globalAlpha = 0.35 * (1 - sm.t / 2.5); ctx.fillStyle = '#a8a29e'; ctx.fillRect(Math.round(sm.x), Math.round(sm.y), 3, 3); }
   ctx.globalAlpha = 1;
   // moradores e herói ordenados por altura
-  const list = V.npcs.map(n => ({ y: n.y, n })).concat([{ y: p.y, me: true }]);
+  const list = V.npcs.filter(npcHere).map(n => ({ y: n.y, n })).concat([{ y: p.y, me: true }]);
   list.sort((a, b) => a.y - b.y);
   for (const it of list) {
     if (it.me) { drawPlayer(ctx); continue; }
@@ -319,6 +332,8 @@ function renderVillage() {
     ctx.drawImage(spr, -6 * sc, 0, 12 * sc, 12 * sc);
     if (n.id === 'tobias') { ctx.fillStyle = '#7c4a1e'; ctx.fillRect(6, -2, 1, 14); ctx.fillStyle = '#a78bfa'; ctx.fillRect(5, -4, 3, 3); }
     if (n.id === 'bruno') { ctx.fillStyle = '#9ca3af'; ctx.fillRect(6, 2, 3, 2); ctx.fillStyle = '#5a3412'; ctx.fillRect(7, 4, 1, 6); }
+    if (n.id === 'iara') { ctx.fillStyle = '#e5e7eb'; ctx.fillRect(6, 4, 2, 1); ctx.fillStyle = '#22c55e'; ctx.fillRect(5, 5, 4, 3); }
+    if (n.id === 'otto') { ctx.fillStyle = '#e11d48'; ctx.fillRect(6, 5, 2, 2); ctx.fillStyle = '#fecdd3'; ctx.fillRect(6, 5, 1, 1); }
     ctx.restore();
     // marcador de missão pronta (!) ou de conversa nova
     const hasDone = (p.quests || []).some(q => q.done && giverOf(q) === n.id);
@@ -351,7 +366,7 @@ function renderVillage() {
   ctx.textAlign = 'center';
   ctx.font = `${fs}px "Press Start 2P", monospace`;
   for (const n of V.npcs) {
-    if (dist(n.x, n.y, p.x, p.y) > 60) continue;
+    if (!npcHere(n) || dist(n.x, n.y, p.x, p.y) > 60) continue;
     const sx = (n.x - G.cam.x) * s, sy = (n.y - 18 - G.cam.y) * s;
     ctx.fillStyle = '#000'; ctx.fillText(PEOPLE[n.id].name, sx + 2, sy + 2);
     ctx.fillStyle = '#fde68a'; ctx.fillText(PEOPLE[n.id].name, sx, sy);

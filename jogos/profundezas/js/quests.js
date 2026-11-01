@@ -52,8 +52,9 @@ function questTier(p) { return Math.max(1, p.maxFloor || 1); }
 function genQuest(p) {
   const f = questTier(p);
   const bi = Math.min(biomeOf(f).idx, 4);
-  const giver = pick(GIVERS);
+  let giver = pick(GIVERS);
   const types = ['kill', 'kill', 'treasure', 'chests', 'elites', 'depth'];
+  if (craftArrived(p)) types.push('mat', 'brew', 'socket');
   if (f >= 2) types.push('challenge');
   if (f >= 3) types.push('secret');
   const type = pick(types);
@@ -70,8 +71,11 @@ function genQuest(p) {
   else if (type === 'elites') { q.need = 2 + ri(3); q.text = `Derrote ${q.need} inimigos de elite.`; }
   else if (type === 'secret') { q.need = 1 + ri(2); q.text = `Encontre ${q.need} ${q.need > 1 ? 'salas secretas' : 'sala secreta'} (paredes rachadas).`; }
   else if (type === 'challenge') { q.need = 1; q.text = 'Vença uma sala de desafio.'; }
+  else if (type === 'mat') { q.target = MAT_BY_BIOME[Math.min(bi, 4)]; q.need = 4 + ri(5); q.giver = 'Iara, a alquimista'; q.text = `Traga ${q.need}× ${MATERIALS[q.target].name} da masmorra.`; }
+  else if (type === 'brew') { q.need = 2; q.giver = 'Iara, a alquimista'; q.text = 'Prepare 2 poções ou elixires com a Iara.'; }
+  else if (type === 'socket') { q.need = 1; q.giver = 'Otto, o joalheiro'; q.text = 'Encaixe uma gema com o Otto.'; }
   else { q.need = 1; q.target = Math.min(f + 3 + ri(3), f > MAX_FLOOR ? f + 6 : f + 5); q.text = `Chegue ao andar ${q.target}.`; }
-  const mult = { kill: 1, treasure: 1.1, chests: 1, elites: 1.3, secret: 1.4, challenge: 1.5, depth: 1.3 }[type];
+  const mult = { kill: 1, treasure: 1.1, chests: 1, elites: 1.3, secret: 1.4, challenge: 1.5, depth: 1.3, mat: 1.1, brew: 1, socket: 1.2 }[type];
   q.gold = Math.round((50 + 12 * f) * mult);
   q.xp = Math.round(25 * Math.pow(f, 1.35) * mult);
   q.itemRarity = Math.random() < 0.4 ? 2 : 1;
@@ -102,6 +106,9 @@ function questEvent(type, data) {
     if (type === 'secret' && q.type === 'secret') add = 1;
     if (type === 'challenge' && q.type === 'challenge') add = 1;
     if (type === 'floor' && q.type === 'depth' && data.floor >= q.target) add = 1;
+    if (type === 'mat' && q.type === 'mat' && data.mat === q.target) add = data.qty || 1;
+    if (type === 'brew' && q.type === 'brew') add = 1;
+    if (type === 'socket' && q.type === 'socket') add = 1;
     if (!add) continue;
     q.count = Math.min(q.need, q.count + add);
     if (q.count >= q.need) {

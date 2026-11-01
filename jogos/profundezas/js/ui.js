@@ -285,7 +285,7 @@ const UI = {
     this.$('foodFill').classList.toggle('warn', p.hunger <= 20);
     this.$('hpFill').classList.toggle('warn', p.hp / st.maxHp < 0.3);
     if (G.level) {
-      this.$('floorTxt').innerHTML = `ANDAR ${G.level.floor}<small>${G.level.biome.name}</small>${G.blessing ? `<small class="bless">${BLESSINGS[G.blessing].name}</small>` : ''}${G.modList && G.modList.length ? `<small class="mods">${G.modList.map(m => MODIFIERS[m].name).join(' · ')}</small>` : ''}${G.level.locked ? '<small class="lock">🔒 escada selada</small>' : ''}`;
+      this.$('floorTxt').innerHTML = `ANDAR ${G.level.floor}<small>${G.level.biome.name}</small>${G.blessing ? `<small class="bless">${BLESSINGS[G.blessing].name}</small>` : ''}${G.p.elixir && !G.p.elixir.fresh ? `<small class="bless" style="color:${ELIXIR_COLOR[G.p.elixir.id]}">Elixir: ${ELIXIR_SHORT[G.p.elixir.id]}</small>` : ''}${G.modList && G.modList.length ? `<small class="mods">${G.modList.map(m => MODIFIERS[m].name).join(' · ')}</small>` : ''}${G.level.locked ? '<small class="lock">🔒 escada selada</small>' : ''}`;
     }
     this.$('goldTxt').textContent = `◆ ${p.gold}`;
     const count = k => p.bag.filter(i => i.kind === k).reduce((a, i) => a + i.qty, 0);

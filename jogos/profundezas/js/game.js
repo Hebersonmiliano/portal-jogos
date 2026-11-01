@@ -110,6 +110,7 @@ function resize() {
 // ---------- Entrar num andar ----------
 function enterFloor(floor, viaStairs) {
   const p = G.p;
+  elixirOnFloor(p);
   G.level = generateFloor(floor);
   G.floorCanvas = renderFloorCanvas(G.level);
   G.enemies = []; G.projectiles = []; G.drops = []; G.chests = []; G.props = []; G.hazards = []; G.traps = [];
@@ -203,6 +204,7 @@ function onEnemyDeath(e) {
   addCorpse(e);
   if (!e.isBoss) questEvent('kill', e);
   onDepthDeath(e);
+  craftDrops(e, G.level.floor);
   if (!e.isProp) setOnKill(p);
   const f = G.level.floor;
   const st = playerStats(p);
@@ -256,6 +258,8 @@ function gainXp(n) {
 }
 
 function useConsumable(it) {
+  const craft = useCraftConsumable(it);
+  if (craft !== undefined) return craft;
   const p = G.p, st = playerStats(p);
   if (it.kind === 'potion') {
     if (p.hp >= st.maxHp) { UI.toast('Vida já está cheia.', '#9ca3af'); return false; }
@@ -281,7 +285,8 @@ function useConsumable(it) {
 
 function quickUse(kind) {
   const p = G.p;
-  const idx = p.bag.findIndex(i => i.kind === kind);
+  let idx = p.bag.findIndex(i => i.kind === kind);
+  if (idx < 0 && kind === 'potion') idx = p.bag.findIndex(i => i.kind === 'potion2'); // sem poção comum: usa a forte
   if (idx < 0) { UI.toast(`Sem ${CONSUMABLES[kind].name.toLowerCase()} na mochila.`, '#9ca3af'); return; }
   const it = p.bag[idx];
   useConsumable(it);
@@ -447,13 +452,14 @@ function updateDungeon(dt) {
         Sfx.gold();
       } else if (isEquip(d.item) && d.item.rarity < (p.lootMin || 0) && !isUpgrade(p, d.item)) {
         d.filtered = true; // abaixo do filtro de raridade: fica no chão
-      } else if (bagAdd(p.bag, p.bagSize, d.item)) {
+      } else if ((d.q0 = d.item.qty || 1, bagAdd(p.bag, p.bagSize, d.item))) {
         d.taken = true;
         const r = d.item.rarity;
         addText(d.x, d.y - 12, d.item.name, RARITIES[r].color, 0.8);
         if (r >= 2) { Sfx.rare(); UI.toast(`${RARITIES[r].name}: ${d.item.name}`, RARITIES[r].color); }
         if (d.item.set !== undefined && d.item.set !== null) { const S = SETS[d.item.set]; const have = SET_KINDS.filter(k => (p.eq[k] && p.eq[k].set === S.id) || p.bag.some(i => i.kind === k && i.set === S.id) || (p.stash || []).some(i => i.kind === k && i.set === S.id)).length; UI.toast(`◆ Peça do conjunto ${S.name} (${have}/4 encontradas)`, S.color); Tips.show('conjunto', 'Peça de conjunto', `Capacete, armadura, luvas e botas do mesmo conjunto dão bônus: um com 2 peças e outro, mais forte, com as 4. Cada bioma tem o seu conjunto, e todo chefe deixa uma peça. Veja na mochila.`); }
         if (d.item.kind === 'treasure') questEvent('treasure', d.item);
+        if (d.item.kind === 'mat') questEvent('mat', { mat: d.item.mat, qty: d.q0 });
         else Sfx.pickup();
         if (isUpgrade(p, d.item)) {
           const eq = p.autoEquip ? equipBest(p, true) : [];
@@ -762,6 +768,7 @@ function enterVillage(msg, spawn = 'tower') {
   Music.play('village');
   villageMenu(msg);
   setTimeout(() => { if (G.state === 'village' && !UI.anyOpen()) deliverForgeGift(); }, 400);
+  setTimeout(craftArrival, 900);
   if (p.portal) Tips.show('portal', 'Portal de Retorno', `Você deixou um portal aberto no andar ${p.portal}. Na torre, escolha o portal para voltar direto para lá, sem repetir os andares.`);
   Tips.show('village', 'A vila', () => `Ande com ${K('move')} e fale com os moradores usando ${K('use')}. A torre no canto leva à masmorra. ${K('bag')} abre a mochila e Esc abre o menu da vila.`);
 }
@@ -795,6 +802,10 @@ function villagePause(msg) {
       { label: 'Estalagem', sub: 'Dormir e comer', act: innMenu },
       { label: 'Mercado', sub: 'Comprar suprimentos e vender tesouros', act: () => marketMenu('buy') },
       { label: 'Ferreiro', sub: 'Melhorar arma e armadura', act: smithMenu },
+      ...(craftArrived(p) ? [
+        { label: 'Alquimista', sub: 'Poções fortes, chá e elixires com ingredientes', act: alchemistMenu },
+        { label: 'Joalheiro', sub: 'Encaixar e fundir gemas', act: () => jewelerMenu('gems') },
+      ] : []),
       { label: 'Alfaiate', sub: `Mochila ${p.bagSize}/${BAG_MAX} espaços`, act: tailorMenu },
       { label: 'Baú', sub: `Guardar itens com segurança (${p.stash.length}/30)`, act: () => stashMenu() },
       { label: 'Habilidades', sub: (G.p.skillPts || 0) > 0 ? `${G.p.skillPts} ${G.p.skillPts > 1 ? 'pontos' : 'ponto'} para gastar!` : 'Guerreiro, Caçador e Arcano', color: (G.p.skillPts || 0) > 0 ? '#a78bfa' : null, act: () => UI.skills('village') },
@@ -882,11 +893,12 @@ function marketMenu(tab) {
       });
     }
   } else {
-    const junk = p.bag.filter(i => !isConsumable(i));
+    const keep = i => isConsumable(i) || isCraftItem(i) || i.kind === 'wings' || i.set != null || (i.sockets && i.sockets.some(Boolean));
+    const junk = p.bag.filter(i => !keep(i));
     if (junk.length) {
       const tot = junk.reduce((a, i) => a + i.value, 0);
-      items.push({ label: `Vender tudo (${junk.length} ${junk.length > 1 ? 'itens' : 'item'})`, sub: 'Equipamentos e tesouros da mochila. Poções, pães e pergaminhos ficam. O que está equipado não é vendido.', right: tot + ' ◆', color: '#facc15',
-        act: () => { p.bag = p.bag.filter(i => isConsumable(i)); p.gold += tot; Sfx.gold(); Sfx.rare(); saveGame(); UI.toast(`Vendeu ${junk.length} itens por ${tot} ouro.`, '#facc15'); marketMenu('sell'); } });
+      items.push({ label: `Vender tudo (${junk.length} ${junk.length > 1 ? 'itens' : 'item'})`, sub: 'Equipamentos e tesouros da mochila. Ficam: poções, ingredientes, gemas, asas, peças de conjunto e itens com gemas. O que está equipado não é vendido.', right: tot + ' ◆', color: '#facc15',
+        act: () => { p.bag = p.bag.filter(keep); p.gold += tot; Sfx.gold(); Sfx.rare(); saveGame(); UI.toast(`Vendeu ${junk.length} itens por ${tot} ouro.`, '#facc15'); marketMenu('sell'); } });
     }
     const sellAll = p.bag.filter(i => i.kind === 'treasure');
     if (sellAll.length) {
