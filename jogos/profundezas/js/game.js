@@ -298,6 +298,7 @@ function playerDie() {
   const p = G.p;
   if (p.dead) return;
   p.dead = true;
+  fbTrackDeath(p);
   Sfx.die(); Sfx.boom();
   Music.stop();
   G.shake = 8;
@@ -812,6 +813,7 @@ function villagePause(msg) {
       { label: 'Mochila e atributos', sub: p.points > 0 ? `${p.points} pontos para distribuir!` : 'Equipamentos e itens', color: p.points > 0 ? '#fde047' : null, act: () => { UI.invSel = { area: 'bag', i: 0 }; G.resumeFromMenu = () => villageMenu(); UI.inventory('village'); } },
       { label: 'Opções de itens', sub: `Equipar automático: ${p.autoEquip ? 'ligado' : 'desligado'} · Filtro: ${LOOT_FILTERS[p.lootMin || 0]}`, act: () => lootOptions(() => villageMenu()) },
       { label: Music.muted ? 'Ligar música' : 'Desligar música', sub: 'Atalho: tecla M', act: () => { Music.toggle(); villageMenu(); } },
+      { label: 'Dar opinião', sub: 'Conte o que achou do jogo para o professor', act: () => feedbackMenu(() => villagePause()) },
       { label: 'Sair para o título', act: () => { saveGame(); UI.close(); titleScreen(); } },
     ],
   });
@@ -977,6 +979,7 @@ function pauseMenu() {
       { label: 'Continuar', act: () => UI.close() },
       { label: 'Voltar à vila', sub: G.p.bag.some(i => i.kind === 'scroll') ? 'Usa um Pergaminho de Retorno na hora' : 'Runa de Retorno: fique parado por 4 segundos', act: () => { UI.close(); startReturn(); } },
       { label: 'Controles', act: controlsScreen },
+      { label: 'Dar opinião', sub: 'Conte o que achou do jogo para o professor', act: () => feedbackMenu(pauseMenu) },
       { label: Music.muted ? 'Ligar música' : 'Desligar música', sub: 'Atalho: tecla M', act: () => { Music.toggle(); pauseMenu(); } },
       { label: Sfx.muted ? 'Ligar efeitos sonoros' : 'Desligar efeitos sonoros', act: () => { Sfx.muted = !Sfx.muted; pauseMenu(); } },
       { label: 'Opções de itens', sub: `Equipar automático: ${G.p.autoEquip ? 'ligado' : 'desligado'} · Filtro: ${LOOT_FILTERS[G.p.lootMin || 0]}`, act: () => lootOptions(pauseMenu) },
@@ -1033,8 +1036,9 @@ function titleScreen() {
         ${can ? '<button data-act="cont" data-focus>Continuar</button>' : ''}
         <button data-act="new" ${can ? '' : 'data-focus'}>Novo jogo</button>
         <button data-act="ctl">Controles</button>
+        <button data-act="fb">Dar opinião</button>
       </div>
-      <p class="ver">${VERSION} · protótipo · Portal Pixel</p>
+      <p class="ver">${VERSION} · Portal Pixel</p>
     </div>`, {
     full: true, cls: 'titlep',
     actions: {
@@ -1044,6 +1048,7 @@ function titleScreen() {
         startGame(true);
       },
       ctl: () => controlsScreen(true),
+      fb: () => feedbackMenu(titleScreen),
     },
   });
 }
@@ -1176,6 +1181,7 @@ function frame(now) {
   Input.pollPad(dt);
   Tips.update(dt);
   G.time += dt;
+  fbTrackTime(dt);
   if (G.state === 'dungeon') {
     if (!UI.anyOpen()) {
       if (G.hitStop > 0) { G.hitStop -= dt; dt = 0; }

@@ -52,6 +52,8 @@ const UI = {
     const k = e.key;
     const panel = this.$('panel');
     if (k === 'Escape') { e.preventDefault(); this.back(); return; }
+    const tg = e.target && e.target.tagName;
+    if (tg === 'INPUT' || tg === 'TEXTAREA') return; // digitando num campo: as teclas são do texto
     if (this.keyHook && this.keyHook(e)) return;
     const btns = [...panel.querySelectorAll('button:not([disabled])')];
     if (!btns.length) return;

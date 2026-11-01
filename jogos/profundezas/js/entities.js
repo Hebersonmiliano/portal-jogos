@@ -881,6 +881,7 @@ function burst(x, y, color, n) {
 function hurtPlayer(amount, source) {
   const p = G.p;
   if (p.dodgeT > 0 || p.iframes > 0 || p.dead) return;
+  p.lastHitBy = source && source.name ? source.name.replace(' (Elite)', '') : 'projétil ou armadilha';
   if (skillOnHurt(p, source)) return; // Escudo Arcano bloqueou
   const st = playerStats(p);
   let dmg = Math.max(1, amount * 100 / (100 + st.def * 6)) * (hasSpecial('robusta') ? 0.88 : 1) * (p.stoneT > 0 ? 0.5 : 1) * setDamageTaken(p) * elixirDamageTaken();

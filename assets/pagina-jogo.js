@@ -90,7 +90,7 @@ if (!jogo) {
       // "versao" no catálogo força o navegador a baixar a versão nova do jogo (sem cache antigo).
       quadro.src = jogo.versao ? jogo.url + "?v=" + encodeURIComponent(jogo.versao) : jogo.url;
       quadro.title = jogo.titulo;
-      quadro.allow = "fullscreen; autoplay; gamepad";
+      quadro.allow = "fullscreen; autoplay; gamepad; clipboard-write";
       quadro.allowFullscreen = true;
       palco.replaceChildren(quadro);
       if (jogo.vitrineCafe) {
