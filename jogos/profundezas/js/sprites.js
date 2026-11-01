@@ -721,15 +721,18 @@ const GEAR_COLORS = {
 function heroPal(p) {
   const pal = Object.assign({}, DEFAULT_PAL.hero);
   if (!p || !p.eq) return pal;
-  const col = it => it && (it.rarity === 4 ? RARITIES[4].color : GEAR_COLORS[it.name]);
+  const base = it => { let best = null; for (const k in GEAR_COLORS) if (it.name.startsWith(k) && (!best || k.length > best.length)) best = k; return best && GEAR_COLORS[best]; };
+  const tint = it => it.rarity === 4 ? RARITIES[4].color : it.set != null && typeof SETS !== 'undefined' ? SETS[it.set].color : null;
+  const col = it => it && (tint(it) || base(it));
   const h = col(p.eq.helmet); if (h) pal.h = h;
-  const a = p.eq.armor && p.eq.armor.rarity === 4 ? [RARITIES[4].color, shade(RARITIES[4].color, -40)] : p.eq.armor && GEAR_COLORS[p.eq.armor.name];
+  const ar = p.eq.armor, at = ar && tint(ar);
+  const a = at ? [at, shade(at, -40)] : ar && base(ar);
   if (a) { pal.c = a[0]; pal.d = a[1]; }
   const g = col(p.eq.gloves); if (g) pal.g = g;
   const b = col(p.eq.boots); if (b) pal.k = b;
   return pal;
 }
-function heroPalKey(p) { return EQUIP_SLOTS.map(s => p.eq[s] ? p.eq[s].name + p.eq[s].rarity : '-').join('|'); }
+function heroPalKey(p) { return EQUIP_SLOTS.map(s => p.eq[s] ? p.eq[s].name + p.eq[s].rarity + (p.eq[s].set ?? '') : '-').join('|'); }
 
 // Retrato do herói para a mochila
 const _dollCache = {};

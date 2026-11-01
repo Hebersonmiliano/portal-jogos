@@ -130,8 +130,8 @@ function applySkillStats(p, st) {
 function skillDmgMul(p) { return (1 + 0.02 * branchPoints(p, 'arcano')) * (hasSpecial('arcano') ? 1.2 : 1); }
 function skillCdMult(p) { return Math.max(0.5, 1 - 0.07 * skillRank(p, 'mente')) * cdMult(); }
 
-function dodgeMax(p) { return skillRank(p, 'rolamento') ? 2 : 1; }
-function dodgeRecharge(p) { const r = skillRank(p, 'rolamento'); return 0.75 * (r ? 1 - (0.15 + 0.1 * (r - 1)) : 1) * (hasSpecial('agil') ? 0.65 : 1) * (wingHas(p, 3) ? 0.6 : 1); }
+function dodgeMax(p) { return (skillRank(p, 'rolamento') ? 2 : 1) + setDodgeExtra(p); }
+function dodgeRecharge(p) { const r = skillRank(p, 'rolamento'); return 0.75 * (r ? 1 - (0.15 + 0.1 * (r - 1)) : 1) * (hasSpecial('agil') ? 0.65 : 1) * (wingHas(p, 3) ? 0.6 : 1) * setDodgeRecharge(p); }
 
 // Passivas que reagem a golpes recebidos (chamado por hurtPlayer)
 function skillOnHurt(p, source) {

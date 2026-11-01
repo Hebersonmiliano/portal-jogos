@@ -110,7 +110,7 @@ const UI = {
       const isSel = sel.area === area && sel.i === i;
       if (!item) return `<button class="slot empty ${isSel ? 'sel' : ''}" data-act="sel" data-arg="${area}:${i}" ${area === 'bag' ? 'data-grid' : ''}>${label ? `<i>${label}</i>` : ''}</button>`;
       return `<button class="slot ${isSel ? 'sel' : ''}" style="--rc:${RARITIES[item.rarity].color}" data-act="sel" data-arg="${area}:${i}" ${area === 'bag' ? 'data-grid' : ''} title="${item.name}">
-        <img src="${itemIconURL(item)}">${item.qty > 1 ? `<b>${item.qty}</b>` : ''}${item.up ? `<b class="up">+${item.up}</b>` : ''}${area === 'bag' && isUpgrade(p, item) ? '<b class="better">▲</b>' : ''}</button>`;
+        <img src="${itemIconURL(item)}">${item.qty > 1 ? `<b>${item.qty}</b>` : ''}${item.up ? `<b class="up">+${item.up}</b>` : ''}${item.set != null ? `<b class="set" style="color:${SETS[item.set].color}">◆</b>` : ''}${area === 'bag' && isUpgrade(p, item) ? '<b class="better">▲</b>' : ''}</button>`;
     };
     const eqSlots = EQUIP_SLOTS;
     const eqLabels = SLOT_LABEL;
@@ -167,6 +167,7 @@ const UI = {
             ${attr('agi', 'Agilidade', 'velocidade e crítico')}
             ${attr('luck', 'Sorte', 'drops raros')}
             <p class="sum">Vida ${Math.ceil(p.hp)}/${st.maxHp} · Dano ${(st.weaponDmg * st.dmgMul).toFixed(1)} · Def ${Math.round(st.def)} · Crít ${Math.round(st.crit * 100)}%</p>
+            ${activeSets(p).map(({ s, n }) => `<p class="setsum" style="color:${s.color}">◆ ${s.name} ${n}/4: ${s.b2}${n >= 4 ? ' · ' + s.b4 : ''}</p>`).join('')}
           </div>
         </div>
         <div class="col-right">

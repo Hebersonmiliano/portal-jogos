@@ -203,6 +203,7 @@ function onEnemyDeath(e) {
   addCorpse(e);
   if (!e.isBoss) questEvent('kill', e);
   onDepthDeath(e);
+  if (!e.isProp) setOnKill(p);
   const f = G.level.floor;
   const st = playerStats(p);
   p.kills++;
@@ -217,6 +218,7 @@ function onEnemyDeath(e) {
     G.drops.push(makeDrop(e.x - 12, e.y, genItem(f, 1, null, st.luck), 0.5));
     G.drops.push(makeDrop(e.x + 12, e.y, genItem(f, 1, null, st.luck), 0.5));
     G.drops.push(makeDrop(e.x, e.y + 10, makeConsumable('potion', 2), 0.5));
+    { const sp = genItem(f, 3, pick(SET_KINDS), st.luck); if (!sp.effect && (sp.set === undefined || sp.set === null)) rollSet(sp, f, setForFloor(f)); sp.value = Math.round(itemValue(sp) * 1.5); G.drops.push(makeDrop(e.x + 12, e.y + 10, sp, 0.5)); } // chefe sempre deixa uma peça de conjunto
     const first = !p.beaten.includes(f);
     const wings = bossWingDrop(f, first);
     if (wings) { G.drops.push(makeDrop(e.x, e.y - 12, wings, 0.5)); setTimeout(() => UI.toast(`${e.name} deixou cair ${wings.name}! A esquiva vira um voo.`, WINGS[wings.wing].edge), 1600); }
@@ -428,6 +430,7 @@ function updateDungeon(dt) {
   updateHazards(dt);
   updateFeatures(dt);
   updateDepth(dt);
+  updateSets(p, dt);
   updateAmbient(dt);
   if (G.state !== 'dungeon' || p.dead) { updateEffects(dt); return; }
   G.projectiles = G.projectiles.filter(pr => !pr.dead);
@@ -449,6 +452,7 @@ function updateDungeon(dt) {
         const r = d.item.rarity;
         addText(d.x, d.y - 12, d.item.name, RARITIES[r].color, 0.8);
         if (r >= 2) { Sfx.rare(); UI.toast(`${RARITIES[r].name}: ${d.item.name}`, RARITIES[r].color); }
+        if (d.item.set !== undefined && d.item.set !== null) { const S = SETS[d.item.set]; const have = SET_KINDS.filter(k => (p.eq[k] && p.eq[k].set === S.id) || p.bag.some(i => i.kind === k && i.set === S.id) || (p.stash || []).some(i => i.kind === k && i.set === S.id)).length; UI.toast(`◆ Peça do conjunto ${S.name} (${have}/4 encontradas)`, S.color); Tips.show('conjunto', 'Peça de conjunto', `Capacete, armadura, luvas e botas do mesmo conjunto dão bônus: um com 2 peças e outro, mais forte, com as 4. Cada bioma tem o seu conjunto, e todo chefe deixa uma peça. Veja na mochila.`); }
         if (d.item.kind === 'treasure') questEvent('treasure', d.item);
         else Sfx.pickup();
         if (isUpgrade(p, d.item)) {

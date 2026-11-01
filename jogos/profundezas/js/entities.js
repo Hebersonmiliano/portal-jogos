@@ -82,7 +82,7 @@ function playerStats(p) {
   }
   const w = p.eq.weapon;
   const tired = p.fatigue >= 80 ? 0.8 : 1;
-  return applySkillStats(p, {
+  return applySetStats(p, applySkillStats(p, {
     maxHp: Math.round(60 + p.level * 6 + p.vit * 10 + s.hp),
     weaponDmg: w ? w.dmg * (1 + 0.08 * (w.up || 0)) : 3,
     cd: w ? w.cd * Math.max(0.6, 1 - p.agi * 0.008) : 0.4,
@@ -94,7 +94,7 @@ function playerStats(p) {
     steal: s.steal / 100 + (s.effects.vamp ? 0.08 : 0),
     luck: p.luck + s.luck + blessing('fortuna') * 10,
     effects: s.effects,
-  });
+  }));
 }
 
 function xpNext(level) { return Math.floor(40 * Math.pow(level, 1.6)); }
@@ -883,7 +883,7 @@ function hurtPlayer(amount, source) {
   if (p.dodgeT > 0 || p.iframes > 0 || p.dead) return;
   if (skillOnHurt(p, source)) return; // Escudo Arcano bloqueou
   const st = playerStats(p);
-  let dmg = Math.max(1, amount * 100 / (100 + st.def * 6)) * (hasSpecial('robusta') ? 0.88 : 1) * (p.stoneT > 0 ? 0.5 : 1);
+  let dmg = Math.max(1, amount * 100 / (100 + st.def * 6)) * (hasSpecial('robusta') ? 0.88 : 1) * (p.stoneT > 0 ? 0.5 : 1) * setDamageTaken(p);
   if (p.shieldT > 0) { dmg *= 1 - p.shieldRed; G.effects.push({ type: 'ring', x: p.x, y: p.y - 6, r: 8, max: 13, t: 0.2, color: '#d6d3d1' }); }
   p.hp -= dmg;
   p.iframes = 0.5;
@@ -976,6 +976,7 @@ function applyWeaponHit(e, dmg, crit, fromX, fromY, st) {
   e.hurt(dmg, fromX, fromY, crit);
   if (!e.isProp) onWeaponHit(e, dmg);
   if (st.steal > 0) p.hp = Math.min(st.maxHp, p.hp + dmg * st.steal);
+  if (!e.isProp) setOnHit(p, e, dmg);
   if (crit) Sfx.crit(); else Sfx.hit();
 }
 function weaponProjectileHit(pr, e) {

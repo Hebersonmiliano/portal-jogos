@@ -85,6 +85,7 @@ function genItem(floor, minR = 0, forceKind = null, luck = 0) {
   }
 
   rollSpecial(item);
+  rollSet(item, floor);
   item.value = Math.round(itemValue(item) * (item.special ? 1.5 : 1));
   return item;
 }
@@ -141,6 +142,7 @@ function itemStatLines(item) {
   if (item.skillUp && typeof SKILLS !== 'undefined' && SKILLS[item.skillUp]) lines.push(`✦ +1 nível em ${SKILLS[item.skillUp].name} (se você já tiver aprendido)`);
   if (item.legendDesc) lines.push('★ ' + item.legendDesc);
   const sp = specialLine(item); if (sp) lines.push(sp);
+  lines.push(...setLines(item));
   if (canUpgrade(item)) lines.push(`Melhorias no ferreiro: até +${upgradeCap(item)}`);
   if (item.lvl) lines.push(`Nível do item: ${item.lvl}`);
   return lines;
@@ -173,6 +175,7 @@ function itemScore(item) {
   if (item.effect) s += 15;
   if (item.special) s += 12;
   if (item.skillUp) s += 10;
+  if (item.set !== undefined && item.set !== null) s += 10;
   const up = 1 + 0.08 * (item.up || 0);
   if (item.kind === 'weapon') {
     s += (item.dmg * up / item.cd) * 1.6;
@@ -197,6 +200,7 @@ function targetSlot(p, item) {
 function keepPiece(p, cur, cand, mode) {
   if (!cur) return false;
   if (mode !== 'style' && (cur.special || cur.skillUp || cur.effect)) return true;
+  if (cur.set !== undefined && cur.set !== null && cand.set !== cur.set && setCount(p, cur.set) >= 2) return true; // não desfaz um conjunto ativo
   if (cur.kind === 'weapon') {
     const cls = w => (WEAPONS.find(x => x.type === weaponType(w)) || {}).cls;
     if (cls(cand) !== cls(cur)) return true; // outro estilo de arma (ex.: arco por machado)
