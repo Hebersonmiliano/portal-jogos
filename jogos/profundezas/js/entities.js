@@ -81,7 +81,7 @@ function playerStats(p) {
   const w = p.eq.weapon;
   const a = p.eq.armor;
   const tired = p.fatigue >= 80 ? 0.8 : 1;
-  return {
+  return applySkillStats(p, {
     maxHp: Math.round(60 + p.level * 6 + p.vit * 10 + s.hp),
     weaponDmg: w ? w.dmg * (1 + 0.08 * (w.up || 0)) : 3,
     cd: w ? w.cd * Math.max(0.6, 1 - p.agi * 0.008) : 0.4,
@@ -93,7 +93,7 @@ function playerStats(p) {
     steal: s.steal / 100 + (s.effects.vamp ? 0.08 : 0),
     luck: p.luck + s.luck + blessing('fortuna') * 10,
     effects: s.effects,
-  };
+  });
 }
 
 function xpNext(level) { return Math.floor(40 * Math.pow(level, 1.6)); }
@@ -793,7 +793,7 @@ class Projectile {
     this.dmg = dmg; this.friendly = friendly; this.color = color || '#fff';
     this.life = opts.life || 3; this.size = size; this.dead = false;
     this.explode = opts.explode || 0;   // raio de explosão (bola de fogo)
-    this.homing = !!opts.homing; this.slow = !!opts.slow;
+    this.homing = !!opts.homing; this.slow = !!opts.slow; this.pierce = !!opts.pierce;
   }
   update(dt) {
     this.x += this.vx * dt; this.y += this.vy * dt;
@@ -803,6 +803,11 @@ class Projectile {
       for (const e of G.enemies) {
         if (e.dead || e.hidden) continue;
         if (dist(this.x, this.y, e.x, e.y - (e.isBoss ? 14 : 5)) < e.r + this.size + 1) {
+          if (this.pierce) { // Flecha Perfurante: atravessa e acerta cada inimigo uma vez
+            this.hitSet = this.hitSet || new Set();
+            if (!this.hitSet.has(e)) { this.hitSet.add(e); e.hurt(this.dmg, this.x - this.vx * 0.05, this.y - this.vy * 0.05, false); }
+            continue;
+          }
           if (!this.explode) e.hurt(this.dmg, this.x - this.vx * 0.05, this.y - this.vy * 0.05, false);
           this.end(); return;
         }
@@ -864,6 +869,7 @@ function burst(x, y, color, n) {
 function hurtPlayer(amount, source) {
   const p = G.p;
   if (p.dodgeT > 0 || p.iframes > 0 || p.dead) return;
+  if (skillOnHurt(p, source)) return; // Escudo Arcano bloqueou
   const st = playerStats(p);
   let dmg = Math.max(1, amount * 100 / (100 + st.def * 6));
   if (p.shieldT > 0) { dmg *= 1 - p.shieldRed; G.effects.push({ type: 'ring', x: p.x, y: p.y - 6, r: 8, max: 13, t: 0.2, color: '#d6d3d1' }); }
@@ -908,6 +914,7 @@ function playerAttack(aimAngle) {
   }
   if (hitAny) {
     G.hitStop = 0.04;
+    skillOnMeleeHits(p, aimAngle, st);
     p.hitCount = (p.hitCount || 0) + 1;
     if (st.effects.fogo && p.hitCount % 3 === 0) {
       const fx = cx + Math.cos(aimAngle) * 14, fy = cy + Math.sin(aimAngle) * 14;

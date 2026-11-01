@@ -8,7 +8,7 @@ const G = {
   p: null,
   level: null,
   floorCanvas: null,
-  enemies: [], projectiles: [], drops: [], chests: [], props: [], hazards: [], traps: [], corpses: [],
+  enemies: [], projectiles: [], drops: [], chests: [], props: [], hazards: [], traps: [], corpses: [], rains: [], meteors: [],
   spikes: [], barrels: [], blessing: null,
   texts: [], particles: [], effects: [],
   tombEnt: null,
@@ -50,12 +50,12 @@ function resetRuntime(p) {
   Object.assign(p, {
     atkCd: 0, swing: null, dodgeT: 0, dodgeCd: 0, iframes: 0, fx: 1, fy: 0,
     vx: 0, vy: 0, hitCount: 0, hungerTick: 0, starveTick: 0, dead: false, walkT: 0, face: 1,
-    skillCd: {}, charge: null, shieldT: 0, shieldRed: 0, spin: 0, dodgeCh: dodgeMax(p), dodgeRecT: 0, hurtT: 0, slowT: 0, slowMul: 1,
+    skillCd: {}, charge: null, shieldT: 0, shieldRed: 0, spin: 0, dodgeCh: dodgeMax(p), dodgeRecT: 0, hurtT: 0, slowT: 0, slowMul: 1, rageT: 0, arcShieldCd: 0,
   });
 }
 
 // ---------- Salvamento ----------
-const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT', 'hurtT', 'slowT', 'slowMul', 'recall'];
+const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT', 'hurtT', 'slowT', 'slowMul', 'recall', 'rageT', 'arcShieldCd'];
 function saveGame() {
   try {
     const data = {};
@@ -107,7 +107,7 @@ function enterFloor(floor, viaStairs) {
   G.level = generateFloor(floor);
   G.floorCanvas = renderFloorCanvas(G.level);
   G.enemies = []; G.projectiles = []; G.drops = []; G.chests = []; G.props = []; G.hazards = []; G.traps = [];
-  G.corpses = []; G.spikes = []; G.barrels = []; G.blessing = null;
+  G.corpses = []; G.spikes = []; G.barrels = []; G.blessing = null; G.rains = []; G.meteors = [];
   resetFlow();
   rollMods(floor, G.level.isBoss);
   G.texts = []; G.particles = []; G.effects = [];
@@ -212,7 +212,7 @@ function onEnemyDeath(e) {
     G.drops.push(makeDrop(e.x + 12, e.y, genItem(f, 1, null, st.luck), 0.5));
     G.drops.push(makeDrop(e.x, e.y + 10, makeConsumable('potion', 2), 0.5));
     const first = !p.beaten.includes(f);
-    if (first) p.beaten.push(f);
+    if (first) { p.beaten.push(f); p.skillPts = (p.skillPts || 0) + 1; setTimeout(() => UI.toast('Chefe derrotado pela primeira vez: +1 ponto de habilidade!', '#a78bfa'), 900); }
     G.level.stairs = { x: e.x, y: e.y + 24 };
     UI.toast(`${e.name} foi derrotado!`, '#facc15');
     Music.play(Music.forFloor(f));
@@ -236,7 +236,7 @@ function gainXp(n) {
     p.xp -= xpNext(p.level);
     p.level++;
     p.points += 3;
-    if (p.level % 5 === 0) { p.skillPts = (p.skillPts || 0) + 1; setTimeout(() => UI.toast('Novo ponto de habilidade! Aperte H para escolher.', '#a78bfa'), 400); }
+    if (p.level % 2 === 0) { p.skillPts = (p.skillPts || 0) + 1; setTimeout(() => UI.toast('Novo ponto de habilidade! Aperte H para abrir a árvore.', '#a78bfa'), 400); }
     p.hp = playerStats(p).maxHp;
     addText(p.x, p.y - 24, 'NÍVEL ' + p.level + '!', '#fde047', 1.4);
     G.effects.push({ type: 'ring', x: p.x, y: p.y - 6, r: 4, max: 30, t: 0.4, color: '#fde047' });
@@ -705,6 +705,7 @@ function drawPlayer(ctx) {
   else if (p.dodgeT > 0) ctx.rotate(p.face * (1 - p.dodgeT / 0.17) * Math.PI * 2); // rolamento
   else if (hurtNow) ctx.translate(-p.face * 1, 0);
   if (p.face === -1) ctx.scale(-1, 1);
+  if (p.rageT > 0) { ctx.translate(0, 4); ctx.scale(1.3, 1.3); ctx.translate(0, -4); } // Fúria do Titã
   ctx.translate(0, -6);
   if (p.slowT > 0) { ctx.fillStyle = 'rgba(245,245,244,0.5)'; ctx.fillRect(-5, 9, 10, 3); }
   ctx.drawImage(spr, -6, 0);

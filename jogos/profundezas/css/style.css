@@ -258,3 +258,36 @@ body.touch.in-village [data-tbtn="atk"], body.touch.in-village [data-tbtn="dodge
 
 #floorTxt small.mods { color: #f87171; }
 #floorTxt small.lock { color: #facc15; }
+
+/* ---------- Árvore de habilidades (v1.0) ---------- */
+.panel.skillsp { width: min(1040px, 100%); }
+.invhead .ttl { color: #fde68a; font-size: 8px; border: 1px solid #a16207; padding: 4px 6px; }
+.trees2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.tree2 { background: #120f17; border: 2px solid color-mix(in srgb, var(--tc) 40%, #000); padding: 10px; }
+.tree2 h3 { margin: 0 0 4px; font-size: 11px; color: var(--tc); text-shadow: 2px 2px 0 #000; display: flex; justify-content: space-between; }
+.tree2 h3 span { font-size: 8px; color: var(--muted); text-shadow: none; }
+.tree2 .spec { font-size: 7px; color: var(--muted); margin: 0 0 10px; line-height: 1.6; }
+.tree2 .spec b { color: #fde68a; font-weight: normal; }
+.tier { border: 1px dashed #2d2538; padding: 6px; opacity: .55; }
+.tier.open { opacity: 1; border-style: solid; border-color: color-mix(in srgb, var(--tc) 35%, #000); }
+.tier.top { background: color-mix(in srgb, var(--tc) 8%, transparent); }
+.tlabel { margin: 0 0 6px; font-size: 7px; color: var(--tc); }
+.tlink { width: 2px; height: 10px; margin: 0 auto; background: color-mix(in srgb, var(--tc) 60%, #000); }
+.trow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tier.top .trow { grid-template-columns: 1fr; }
+.sn { background: var(--panel2); border: 2px solid var(--line); padding: 7px; display: flex; flex-direction: column; }
+.sn.has { border-color: color-mix(in srgb, var(--tc) 70%, #000); }
+.sn.passive { border-style: dashed; }
+.sn.ultimate { border-color: color-mix(in srgb, var(--tc) 50%, #a16207); }
+.sn.ultimate.has { box-shadow: 0 0 10px color-mix(in srgb, var(--tc) 40%, transparent); }
+.sn.locked { filter: grayscale(1); }
+.sn .skh b { font-size: 8px; }
+.sn .kind { margin: 3px 0 0 !important; font-size: 6px !important; color: var(--tc) !important; text-transform: uppercase; }
+.sn p { font-size: 6.5px; line-height: 1.75; color: var(--muted); margin: 5px 0; flex: 1; }
+.sn p small { color: #c4b5fd; font-size: 6.5px; }
+.sn .skf { min-height: 24px; flex-wrap: wrap; }
+.sn .note { font-size: 6.5px; }
+.sn .learn { font-size: 7px; padding: 5px 7px; }
+.sn .slots button { width: 22px; height: 22px; font-size: 7px; }
+.skslot.ult { border-color: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,.5); }
+@media (max-width: 900px) { .trees2 { grid-template-columns: 1fr; } }

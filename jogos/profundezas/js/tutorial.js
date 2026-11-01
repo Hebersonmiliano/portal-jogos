@@ -101,7 +101,7 @@ const Tips = {
     if (p.hunger < 40) this.show('hunger', 'Fome', () => `A fome está baixando. Coma com ${K('food')}. Se zerar, você perde vida aos poucos.`);
     if (p.fatigue >= 60) this.show('fatigue', 'Cansaço', 'Com 80 de cansaço, seu dano e velocidade caem 20%. Descanse numa fogueira ou durma na estalagem da vila.');
     if (p.points > 0) this.show('attrs', 'Subiu de nível!', () => `Você tem pontos de atributo. Abra a mochila com ${K('bag')} e clique em <b>+</b> para distribuir.`);
-    if ((p.skillPts || 0) > 0) this.show('skills', 'Ponto de habilidade!', () => `A cada 5 níveis você ganha um ponto. Abra as habilidades com ${K('skills')} e use-as com ${K('skill1')}.`);
+    if ((p.skillPts || 0) > 0) this.show('skills', 'Ponto de habilidade!', () => `Você ganha um ponto a cada 2 níveis e por chefe derrotado. Abra a árvore com ${K('skills')}: cada ponto num ramo abre o degrau seguinte. Use as ativas com ${K('skill1')}.`);
     if (p.bag.length >= p.bagSize) this.show('bagfull', 'Mochila cheia', () => `Volte à vila com ${K('scroll')} para vender tesouros, guardar itens no baú ou aumentar a mochila no alfaiate. Se morrer, você perde tudo o que está na mochila.`);
     if (L.floor >= 2 && !this.seen.recall) this.show('recall', 'Voltar à vila', () => `A qualquer momento, aperte ${K('scroll')} para voltar à vila. Sem Pergaminho, a Runa de Retorno leva 4 segundos: fique parado e longe de inimigos.`);
     if (p.slowT > 0) this.show('slow', 'Você está lento', 'Teias e golpes de zumbi deixam você lento por alguns segundos. Afaste-se e espere passar.');

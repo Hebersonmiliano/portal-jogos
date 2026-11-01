@@ -154,6 +154,10 @@ function elderMenu() {
     items: [
       { label: 'Ouvir a história de novo', sub: 'Como tudo começou', act: () => showStory(STORY.intro.title, STORY.intro.text, elderMenu) },
       ...chapters.map(c => ({ label: c.title, sub: 'Capítulo já descoberto', act: () => showStory(c.title, c.text, elderMenu, SCENE_OF[c.floor]) })),
+      { label: 'Esquecer habilidades', color: '#a78bfa', right: respecCost(p) + ' ◆',
+        sub: skillPointsSpent(p) ? `Devolve os ${skillPointsSpent(p)} pontos gastos para você montar outra árvore` : 'Você ainda não gastou pontos na árvore',
+        disabled: !skillPointsSpent(p) || p.gold < respecCost(p),
+        act: () => { p.gold -= respecCost(p); resetSkills(p); saveGame(); Sfx.level(); UI.toast('Você esqueceu suas habilidades. Os pontos voltaram: aperte H para montar a árvore de novo.', '#a78bfa'); elderMenu(); } },
     ],
     back: () => villageMenu(),
   });
