@@ -192,15 +192,27 @@ function targetSlot(p, item) {
   if (empty) return empty;
   return itemScore(p.eq[slots[0]]) <= itemScore(p.eq[slots[1]]) ? slots[0] : slots[1];
 }
+// Peça que o equipar automático não troca sozinho (escolha do jogador)
+// mode 'style' (botão Equipar melhores): só mantém o estilo de arma
+function keepPiece(p, cur, cand, mode) {
+  if (!cur) return false;
+  if (mode !== 'style' && (cur.special || cur.skillUp || cur.effect)) return true;
+  if (cur.kind === 'weapon') {
+    const cls = w => (WEAPONS.find(x => x.type === weaponType(w)) || {}).cls;
+    if (cls(cand) !== cls(cur)) return true; // outro estilo de arma (ex.: arco por machado)
+  }
+  return false;
+}
 // Equipa o melhor de cada espaço (mochila x equipado). Retorna os nomes equipados.
-function equipBest(p) {
+// safe = true (equipar automático): respeita as peças especiais e o estilo de arma.
+function equipBest(p, safe) {
   const done = [];
   for (const kind of ['weapon', 'helmet', 'armor', 'gloves', 'boots', 'amulet', 'ring', 'wings']) {
     const slots = slotsForKind(kind);
     for (let pass = 0; pass < slots.length; pass++) {
       const slot = targetSlot(p, { kind });
       let bestS = itemScore(p.eq[slot]), bestIdx = -1;
-      p.bag.forEach((it, i) => { if (it.kind === kind) { const sc = itemScore(it); if (sc > bestS + 0.01) { bestS = sc; bestIdx = i; } } });
+      p.bag.forEach((it, i) => { if (it.kind === kind && !(safe && keepPiece(p, p.eq[slot], it, safe))) { const sc = itemScore(it); if (sc > bestS + 0.01) { bestS = sc; bestIdx = i; } } });
       if (bestIdx < 0) break;
       const best = p.bag[bestIdx], old = p.eq[slot];
       p.eq[slot] = best;

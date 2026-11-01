@@ -74,7 +74,7 @@ const Tips = {
     if (foes.some(e => e.elite && near(e.x, e.y, 110)))
       this.show('elite', 'Inimigo de elite', 'Inimigos com moldura dourada são mais fortes, mas sempre deixam um item raro ou melhor.');
     if (G.drops.some(d => d.item && near(d.x, d.y, 70)))
-      this.show('loot', 'Itens no chão', () => `Passe por cima para pegar. A cor mostra a raridade: branco, verde, azul, roxo e dourado. Itens melhores que o seu são equipados sozinhos e ganham uma seta verde ▲. Na mochila (${K('bag')}) também há o botão <b>Equipar melhores</b>.`);
+      this.show('loot', 'Itens no chão', () => `Passe por cima para pegar. A cor mostra a raridade: branco, verde, azul, roxo e dourado. Itens melhores que o seu ganham uma seta verde ▲: abra a mochila (${K('bag')}) e escolha o que vestir, ou use o botão <b>Equipar melhores</b>. Quem preferir pode ligar o equipar automático em Opções de itens, na pausa.`);
     if (G.chests.some(c => !c.open && near(c.x, c.y, 80)))
       this.show('chest', 'Baú', 'Encoste no baú para abrir. Cuidado: a partir do andar 3, alguns baús são mímicos.');
     if (L.locked) this.show('key', 'Escada selada', 'A partir do andar 2, a escada fica selada. Derrote o Guardião da Chave (inimigo com uma chave dourada, marcado no minimapa) para abri-la. Derrotar todos os inimigos do andar dá um baú de recompensa.');

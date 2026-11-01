@@ -33,7 +33,7 @@ function newPlayer() {
     bag: [], bagSize: BAG_START, stash: [],
     eq: { weapon: null, helmet: null, armor: null, gloves: null, boots: null, amulet: null, ring: null, ring2: null, wings: null },
     maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [], bagV2: true, balV3: true, itemsV3: true, cls: null,
-    autoEquip: true, lootMin: 0, portal: null,
+    autoEquip: false, lootMin: 0, portal: null,
     skills: {}, slots: [null, null, null], skillPts: 0,
     x: 0, y: 0,
   };
@@ -451,9 +451,13 @@ function updateDungeon(dt) {
         if (r >= 2) { Sfx.rare(); UI.toast(`${RARITIES[r].name}: ${d.item.name}`, RARITIES[r].color); }
         if (d.item.kind === 'treasure') questEvent('treasure', d.item);
         else Sfx.pickup();
-        if (p.autoEquip && isUpgrade(p, d.item)) {
-          const eq = equipBest(p);
+        if (isUpgrade(p, d.item)) {
+          const eq = p.autoEquip ? equipBest(p, true) : [];
           if (eq.length) { UI.toast(`Equipado: ${eq.join(', ')} ▲`, '#4ade80'); addText(p.x, p.y - 22, 'equipado ▲', '#4ade80', 0.8); }
+          else if (isUpgrade(p, d.item)) {
+            UI.toast(`Item melhor na mochila: ${d.item.name} (${Input.lastDevice === 'pad' ? 'View' : Input.isTouch ? '▤' : 'I'} para ver)`, '#4ade80');
+            addText(p.x, p.y - 22, '▲ melhor', '#4ade80', 0.8);
+          }
         }
       } else if (!d.warned) {
         d.warned = true;
@@ -805,7 +809,7 @@ function lootOptions(back) {
     title: 'Opções de itens',
     text: 'O filtro vale só para armas, armaduras e acessórios. Ouro, tesouros e consumíveis são sempre pegos, e um item melhor que o seu é pego mesmo abaixo do filtro.',
     items: [
-      { label: `Equipar automaticamente: ${p.autoEquip ? 'LIGADO' : 'DESLIGADO'}`, sub: 'Ao pegar um item melhor que o seu, ele é equipado na hora', color: p.autoEquip ? '#4ade80' : null,
+      { label: `Equipar automaticamente: ${p.autoEquip ? 'LIGADO' : 'DESLIGADO'}`, sub: 'Ao pegar um item melhor, ele é equipado na hora. Nunca troca a arma da sua classe nem peças com efeito especial ou bônus de habilidade', color: p.autoEquip ? '#4ade80' : null,
         act: () => { p.autoEquip = !p.autoEquip; saveGame(); lootOptions(back); } },
       ...LOOT_FILTERS.map((name, i) => ({
         label: `${(p.lootMin || 0) === i ? '» ' : ''}Filtro: ${name}`, color: (p.lootMin || 0) === i ? '#fde047' : null,

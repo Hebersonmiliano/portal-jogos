@@ -183,7 +183,7 @@ const UI = {
       onBack: () => { this.keyHook = null; this.close(); G.resumeFromMenu(); },
       actions: {
         close: () => { this.keyHook = null; this.close(); G.resumeFromMenu(); },
-        best: () => { const eq = equipBest(p); this.toast(eq.length ? `Equipado: ${eq.join(', ')}` : 'Você já está com o melhor equipamento.', eq.length ? '#4ade80' : '#9ca3af'); if (eq.length) Sfx.pickup(); saveGame(); rerender(); },
+        best: () => { const eq = equipBest(p, 'style'); this.toast(eq.length ? `Equipado: ${eq.join(', ')}` : 'Você já está com o melhor equipamento. Armas de outro estilo você troca clicando nelas.', eq.length ? '#4ade80' : '#9ca3af'); if (eq.length) Sfx.pickup(); saveGame(); rerender(); },
         sel: arg => {
           const [area, i] = arg.split(':');
           const same = sel.area === area && sel.i === +i;
@@ -209,7 +209,7 @@ const UI = {
       if (k === 'i' || k === 'tab') { e.preventDefault(); this.back(); return true; }
       if (k === 'u') { this.invUse(); if (G.state === 'dungeon' || ctx !== 'dungeon') rerender(); return true; }
       if (k === 'x') { this.invDrop(); rerender(); return true; }
-      if (k === 'b') { const eq = equipBest(p); this.toast(eq.length ? `Equipado: ${eq.join(', ')}` : 'Você já está com o melhor equipamento.', eq.length ? '#4ade80' : '#9ca3af'); saveGame(); rerender(); return true; }
+      if (k === 'b') { const eq = equipBest(p, 'style'); this.toast(eq.length ? `Equipado: ${eq.join(', ')}` : 'Você já está com o melhor equipamento. Armas de outro estilo você troca clicando nelas.', eq.length ? '#4ade80' : '#9ca3af'); saveGame(); rerender(); return true; }
       return false;
     };
     // seleção acompanha o foco das setas
