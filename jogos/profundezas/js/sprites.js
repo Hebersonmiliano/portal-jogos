@@ -576,14 +576,14 @@ const SPRITES = {
     'h.......',
   ],
   i_mat: [
-    '........',
-    '...ll...',
-    '..lmml..',
-    '.lmmmml.',
+    '..b..b..',
+    '...bb...',
+    '...mm...',
+    '.mmlmmm.',
+    'mmllmmmd',
+    'mmmmmmmd',
     '.mmmmmd.',
-    '..mmmd..',
-    '...dd...',
-    '........',
+    '..dddd..',
   ],
   i_gem: [
     '........',
@@ -740,7 +740,7 @@ function itemIconPal(item) {
     const g = cols[Math.max(0, idx) % cols.length];
     return { g, l: '#ffffff' };
   }
-  if (item.kind === 'mat' && typeof MATERIALS !== 'undefined') { const m = MATERIALS[item.mat]; return { m: m.c1, l: m.c2, d: shade(m.c1, -40) }; }
+  if (item.kind === 'mat' && typeof MATERIALS !== 'undefined') { const m = MATERIALS[item.mat]; return { m: m.c1, l: m.c2, d: shade(m.c1, -40), b: '#8b5a2b' }; }
   if (item.kind === 'gem' && typeof GEMS !== 'undefined') { const g = GEMS[item.gem]; return { m: g.c1, l: g.c2, d: shade(g.c1, -45) }; }
   if (item.kind === 'cha') return { w: '#e7e5e4', r: '#a16207', l: '#d6d3d1' };
   if (typeof ELIXIR_COLOR !== 'undefined' && ELIXIR_COLOR[item.kind]) { const c = ELIXIR_COLOR[item.kind]; return { c: '#8b5a2b', g: '#cbd5e1', r: c, l: shade(c, 60) }; }
