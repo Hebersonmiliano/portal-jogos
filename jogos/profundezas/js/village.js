@@ -117,8 +117,15 @@ function buildVillage() {
   for (let k = 0; k < 4; k++) R('#f5f5f4', 16 * TILE + 3 + k * 7, 8 * TILE - 3 + (k % 2) * 3, 5, 6);
   solid(16, 8, 2, 1);
   V.objs.push({ id: 'board', x: 17 * TILE, y: 9 * TILE + 6, label: 'Quadro de Missões' });
-  R('#4a2e14', 25 * TILE + 2, 12 * TILE + 3, 12, 10); R('#9a6a34', 25 * TILE + 3, 12 * TILE + 4, 10, 8); R('#e0b040', 25 * TILE + 2, 12 * TILE + 7, 12, 2);
-  solid(25, 12, 1, 1);
+  { // baú grande da vila
+    const bx = 25 * TILE - 2, by = 12 * TILE + 1;
+    R('rgba(0,0,0,0.35)', bx + 2, by + 14, 20, 3);
+    R('#3f2410', bx, by + 4, 20, 11); R('#7c4a1e', bx + 1, by + 5, 18, 9);
+    R('#5a3412', bx, by, 20, 5); R('#9a6a34', bx + 1, by + 1, 18, 3); R('#b8854a', bx + 1, by + 1, 18, 1);
+    R('#e0b040', bx, by + 4, 20, 2); R('#e0b040', bx + 3, by, 2, 15); R('#e0b040', bx + 15, by, 2, 15);
+    R('#facc15', bx + 8, by + 5, 4, 4); R('#1c1917', bx + 9, by + 7, 2, 1);
+  }
+  V.solids.push({ x: 25 * TILE - 2, y: 12 * TILE + 5, w: 20, h: 10 });
   V.objs.push({ id: 'stash', x: 25 * TILE + 8, y: 13 * TILE + 8, label: 'Baú' });
 
   // postes de luz
@@ -349,6 +356,8 @@ function renderVillage() {
       ctx.fillStyle = hasDone ? '#4ade80' : '#fde047'; ctx.fillRect(Math.round(n.x) - 1, yy, 2, 5); ctx.fillRect(Math.round(n.x) - 1, yy + 6, 2, 2);
     }
   }
+  // brilho do baú quando o herói chega perto
+  { const o = V.objs.find(o => o.id === 'stash'); if (o && dist(o.x, o.y, p.x, p.y) < 40) { ctx.globalAlpha = 0.35 + 0.25 * Math.sin(t * 5); ctx.fillStyle = '#fde68a'; ctx.fillRect(25 * TILE - 3, 12 * TILE, 22, 1); ctx.fillRect(25 * TILE + 6, 12 * TILE - 4 - Math.round(Math.sin(t * 4) * 2), 2, 2); ctx.globalAlpha = 1; } }
   // iluminação da noite
   const W = G.canvas.width, H = G.canvas.height;
   if (!_villageLight || _villageLight.width !== W || _villageLight.height !== H) { _villageLight = document.createElement('canvas'); _villageLight.width = W; _villageLight.height = H; }

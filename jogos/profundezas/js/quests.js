@@ -128,7 +128,7 @@ function claimQuest(p, q) {
   p.gold += q.gold;
   gainXp(q.xp);
   const item = genItem(questTier(p), q.itemRarity, null, playerStats(p).luck);
-  const where = bagAdd(p.bag, p.bagSize, item) ? 'na mochila' : (p.stash.length < 30 ? (p.stash.push(item), 'no baú') : null);
+  const where = bagAdd(p.bag, p.bagSize, item) ? 'na mochila' : (stashAdd(p, item) ? 'no baú' : null);
   p.questsDone = (p.questsDone || 0) + 1;
   p.quests = p.quests.filter(x => x !== q);
   ensureQuests(p);

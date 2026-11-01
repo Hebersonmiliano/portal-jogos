@@ -30,7 +30,7 @@ function newPlayer() {
     str: 1, vit: 1, agi: 1, luck: 1,
     hp: 1, hunger: 100, fatigue: 0,
     gold: 30,
-    bag: [], bagSize: BAG_START, stash: [],
+    bag: [], bagSize: BAG_START, stash: [], stashSize: STASH_START, invCat: 'tudo', sortMode: 'tipo',
     eq: { weapon: null, helmet: null, armor: null, gloves: null, boots: null, amulet: null, ring: null, ring2: null, wings: null },
     maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [], bagV2: true, balV3: true, itemsV3: true, cls: null,
     autoEquip: false, lootMin: 0, portal: null,
@@ -810,7 +810,7 @@ function villagePause(msg) {
         { label: 'Joalheiro', sub: 'Encaixar e fundir gemas', act: () => jewelerMenu('gems') },
       ] : []),
       { label: 'Alfaiate', sub: `Mochila ${p.bagSize}/${BAG_MAX} espaços`, act: tailorMenu },
-      { label: 'Baú', sub: `Guardar itens com segurança (${p.stash.length}/30)`, act: () => stashMenu() },
+      { label: 'Baú', sub: `Guardar itens com segurança (${p.stash.length}/${stashCap(p)})`, act: () => stashMenu() },
       { label: 'Habilidades', sub: (G.p.skillPts || 0) > 0 ? `${G.p.skillPts} ${G.p.skillPts > 1 ? 'pontos' : 'ponto'} para gastar!` : 'Guerreiro, Caçador e Arcano', color: (G.p.skillPts || 0) > 0 ? '#a78bfa' : null, act: () => UI.skills('village') },
       { label: 'Mochila e atributos', sub: p.points > 0 ? `${p.points} pontos para distribuir!` : 'Equipamentos e itens', color: p.points > 0 ? '#fde047' : null, act: () => { UI.invSel = { area: 'bag', i: 0 }; G.resumeFromMenu = () => villageMenu(); UI.inventory('village'); } },
       { label: 'Opções de itens', sub: `Equipar automático: ${p.autoEquip ? 'ligado' : 'desligado'} · Filtro: ${LOOT_FILTERS[p.lootMin || 0]}`, act: () => lootOptions(() => villageMenu()) },
@@ -897,11 +897,11 @@ function marketMenu(tab) {
       });
     }
   } else {
-    const keep = i => isConsumable(i) || isCraftItem(i) || i.kind === 'wings' || i.set != null || (i.sockets && i.sockets.some(Boolean));
+    const keep = i => i.fav || isConsumable(i) || isCraftItem(i) || i.kind === 'wings' || i.set != null || (i.sockets && i.sockets.some(Boolean));
     const junk = p.bag.filter(i => !keep(i));
     if (junk.length) {
       const tot = junk.reduce((a, i) => a + i.value, 0);
-      items.push({ label: `Vender tudo (${junk.length} ${junk.length > 1 ? 'itens' : 'item'})`, sub: 'Equipamentos e tesouros da mochila. Ficam: poções, ingredientes, gemas, asas, peças de conjunto e itens com gemas. O que está equipado não é vendido.', right: tot + ' ◆', color: '#facc15',
+      items.push({ label: `Vender tudo (${junk.length} ${junk.length > 1 ? 'itens' : 'item'})`, sub: 'Equipamentos e tesouros da mochila. Ficam: favoritos (★), poções, ingredientes, gemas, asas, peças de conjunto e itens com gemas. O que está equipado não é vendido.', right: tot + ' ◆', color: '#facc15',
         act: () => { p.bag = p.bag.filter(keep); p.gold += tot; Sfx.gold(); Sfx.rare(); saveGame(); UI.toast(`Vendeu ${junk.length} itens por ${tot} ouro.`, '#facc15'); marketMenu('sell'); } });
     }
     const sellAll = p.bag.filter(i => i.kind === 'treasure');
@@ -913,7 +913,7 @@ function marketMenu(tab) {
     p.bag.forEach((it, idx) => {
       const v = it.value * (it.qty || 1);
       items.push({
-        label: itemDisplayName(it), color: RARITIES[it.rarity].color, icon: itemIconURL(it),
+        label: (it.fav ? '★ ' : '') + itemDisplayName(it), color: RARITIES[it.rarity].color, icon: itemIconURL(it),
         sub: itemStatLines(it)[0], right: v + ' ◆',
         act: () => { p.bag.splice(idx, 1); p.gold += v; Sfx.gold(); saveGame(); marketMenu('sell'); },
       });
@@ -946,33 +946,23 @@ function smithMenu() {
 function tailorMenu() {
   const p = G.p;
   const cost = Math.round(80 * Math.pow(1.7, (p.bagSize - BAG_START) / BAG_STEP));
+  const stashCost = Math.round(60 * Math.pow(1.45, (stashCap(p) - STASH_START) / STASH_STEP));
   UI.menu({
     title: 'Alfaiate',
     text: `"Uma mochila maior é mais tesouro voltando para casa." · ◆ ${p.gold}`,
     items: [p.bagSize >= BAG_MAX
       ? { label: 'Sua mochila já é a maior possível.', disabled: true }
       : { label: `Aumentar mochila (${p.bagSize} → ${p.bagSize + BAG_STEP})`, right: cost + ' ◆', disabled: p.gold < cost,
-          act: () => { p.gold -= cost; p.bagSize = Math.min(BAG_MAX, p.bagSize + BAG_STEP); Sfx.chest(); saveGame(); tailorMenu(); } }],
+          act: () => { p.gold -= cost; p.bagSize = Math.min(BAG_MAX, p.bagSize + BAG_STEP); Sfx.chest(); saveGame(); tailorMenu(); } },
+      stashCap(p) >= STASH_MAX
+      ? { label: 'Seu baú já é o maior possível.', disabled: true }
+      : { label: `Aumentar o baú da vila (${stashCap(p)} → ${stashCap(p) + STASH_STEP})`, sub: 'A Lia costura mais divisórias no baú da praça', right: stashCost + ' ◆', disabled: p.gold < stashCost,
+          act: () => { p.gold -= stashCost; p.stashSize = Math.min(STASH_MAX, stashCap(p) + STASH_STEP); Sfx.chest(); saveGame(); tailorMenu(); } }],
     back: () => villageMenu(),
   });
 }
 
-function stashMenu() {
-  const p = G.p;
-  const items = [{ label: '— Na mochila (guardar) —', disabled: true }];
-  p.bag.forEach((it, idx) => items.push({
-    label: itemDisplayName(it), color: RARITIES[it.rarity].color, icon: itemIconURL(it), right: 'guardar',
-    disabled: p.stash.length >= 30,
-    act: () => { p.stash.push(p.bag.splice(idx, 1)[0]); saveGame(); stashMenu(); },
-  }));
-  items.push({ label: '— No baú (retirar) —', disabled: true });
-  p.stash.forEach((it, idx) => items.push({
-    label: itemDisplayName(it), color: RARITIES[it.rarity].color, icon: itemIconURL(it), right: 'retirar',
-    disabled: p.bag.length >= p.bagSize,
-    act: () => { p.bag.push(p.stash.splice(idx, 1)[0]); saveGame(); stashMenu(); },
-  }));
-  UI.menu({ title: 'Baú', text: 'Itens guardados aqui nunca são perdidos quando você morre.', items, back: () => villageMenu(), focus: 1 });
-}
+function stashMenu() { UI.stashSel = { area: 'bag', i: -1 }; UI.stash(); }
 
 function pauseMenu() {
   UI.menu({

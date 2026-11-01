@@ -116,8 +116,7 @@ const UI = {
     };
     const eqSlots = EQUIP_SLOTS;
     const eqLabels = SLOT_LABEL;
-    let bagHtml = '';
-    for (let i = 0; i < p.bagSize; i++) bagHtml += slotHtml(p.bag[i], 'bag', i);
+    const bagHtml = gridHtml(p, p.bag, p.bagSize, 'bag', sel, { better: true });
 
     const selItem = sel.area === 'bag' ? p.bag[sel.i] : p.eq[eqSlots[sel.i]];
     let detail = '<p class="mtext">Selecione um item.</p>';
@@ -147,7 +146,8 @@ const UI = {
           const can = !(selItem.kind === 'scroll' && ctx !== 'dungeon');
           acts += `<button data-act="use" ${can ? '' : 'disabled'} data-focus>Usar</button>`;
         }
-        acts += `<button data-act="drop" class="danger">${ctx === 'dungeon' ? 'Largar' : 'Descartar'}</button>`;
+        acts += `<button data-act="fav">${selItem.fav ? 'Tirar ★' : '★ Favoritar'}</button>`;
+        acts += `<button data-act="drop" class="danger" ${selItem.fav ? 'disabled title="Tire a estrela antes de largar"' : ''}>${ctx === 'dungeon' ? 'Largar' : 'Descartar'}</button>`;
       } else {
         acts += `<button data-act="unequip" data-focus>Desequipar</button>`;
       }
@@ -174,17 +174,19 @@ const UI = {
         </div>
         <div class="col-right">
           <p class="bagtitle">Mochila ${p.bag.length}/${p.bagSize}</p>
+          ${filterBarHtml(p, p.bag)}
           <div class="bag">${bagHtml}</div>
           <div class="detail">${detail}<div class="acts">${acts}</div></div>
         </div>
       </div>
-      <p class="hint">${Input.isTouch ? 'Toque num item para ver detalhes.' : 'Setas: navegar · Enter: escolher · U: usar/equipar · X: largar · B: equipar melhores · I ou Esc: fechar'}</p>`;
+      <p class="hint">${Input.isTouch ? 'Toque num item para ver detalhes.' : 'Setas: navegar · Enter: escolher · U: usar/equipar · F: favoritar · X: largar · B: equipar melhores · I ou Esc: fechar'}</p>`;
 
     const rerender = () => this.inventory(ctx);
     this.show(html, {
       cls: 'inv',
       onBack: () => { this.keyHook = null; this.close(); G.resumeFromMenu(); },
-      actions: {
+      actions: Object.assign(filterActions(p, () => this.inventory(ctx), () => [p.bag]), {
+        fav: () => { const it = sel.area === 'bag' ? p.bag[sel.i] : null; if (it) { it.fav = !it.fav; saveGame(); } this.inventory(ctx); },
         close: () => { this.keyHook = null; this.close(); G.resumeFromMenu(); },
         best: () => { const eq = equipBest(p, 'style'); this.toast(eq.length ? `Equipado: ${eq.join(', ')}` : 'Você já está com o melhor equipamento. Armas de outro estilo você troca clicando nelas.', eq.length ? '#4ade80' : '#9ca3af'); if (eq.length) Sfx.pickup(); saveGame(); rerender(); },
         sel: arg => {
@@ -200,7 +202,7 @@ const UI = {
         drop: () => { this.invDrop(); rerender(); },
         unequip: () => { this.invUnequip(); rerender(); },
         pt: k => { if (p.points > 0) { p[k]++; p.points--; if (k === 'vit') p.hp += 10; } rerender(); },
-      },
+      }),
     });
     // foca no item selecionado
     const fb = document.querySelector(`[data-arg="${sel.area}:${sel.i}"]`);
@@ -212,6 +214,7 @@ const UI = {
       if (k === 'i' || k === 'tab') { e.preventDefault(); this.back(); return true; }
       if (k === 'u') { this.invUse(); if (G.state === 'dungeon' || ctx !== 'dungeon') rerender(); return true; }
       if (k === 'x') { this.invDrop(); rerender(); return true; }
+      if (k === 'f') { const it = sel.area === 'bag' ? p.bag[sel.i] : null; if (it) { it.fav = !it.fav; saveGame(); rerender(); } return true; }
       if (k === 'b') { const eq = equipBest(p, 'style'); this.toast(eq.length ? `Equipado: ${eq.join(', ')}` : 'Você já está com o melhor equipamento. Armas de outro estilo você troca clicando nelas.', eq.length ? '#4ade80' : '#9ca3af'); saveGame(); rerender(); return true; }
       return false;
     };
@@ -241,6 +244,7 @@ const UI = {
     if (sel.area !== 'bag') return;
     const it = p.bag[sel.i];
     if (!it) return;
+    if (it.fav) { this.toast('Esse item é favorito (★). Tire a estrela antes de largar.', '#fde68a'); return; }
     p.bag.splice(sel.i, 1);
     if (this.invCtx === 'dungeon') G.drops.push(makeDrop(p.x + rr(-6, 6), p.y + 8, it, 1.2));
   },

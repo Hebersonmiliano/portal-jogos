@@ -173,7 +173,7 @@ function takeStock(p, pred, n) {
 }
 function giveItem(p, it) {
   if (bagAdd(p.bag, p.bagSize, it)) return 'na mochila';
-  if ((p.stash || []).length < 30) { p.stash.push(it); return 'no baú'; }
+  if (stashAdd(p, it)) return 'no baú';
   return null;
 }
 
