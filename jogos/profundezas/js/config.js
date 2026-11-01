@@ -6,7 +6,7 @@
 const TILE = 16;
 const MAP_W = 64;
 const MAP_H = 48;
-const VERSION = 'v0.8';
+const VERSION = 'v0.9';
 const SAVE_KEY = 'profundezas_save_v1';
 const MAX_FLOOR = 50;
 const BAG_START = 24;   // espaços da mochila no começo
@@ -79,6 +79,17 @@ function biomeOf(floor) {
   const i = Math.floor((floor - 1) / 10);
   return BIOMES[floor > MAX_FLOOR ? i % BIOMES.length : Math.min(BIOMES.length - 1, i)];
 }
+
+// ---------- Curva de dificuldade (simulada para manter ~3 golpes por inimigo) ----------
+// Inimigos: vida cresce 6% por andar + 4,5% linear; o começo é mais leve
+function enemyHpMul(f) { return Math.pow(1.06, f - 1) * (1 + 0.045 * (f - 1)) * (1.7 + 0.9 * Math.min(1, (f - 1) / 12)); }
+function enemyDmgMul(f) { return (1 + 0.10 * (f - 1)) * Math.pow(1.012, f - 1) * (1.5 + 0.6 * Math.min(1, (f - 1) / 15)); }
+function enemySpdMul(f) { return 1 + Math.min(0.45, 0.009 * (f - 1)); }
+// Itens: dano cresce 6% por nível do item; armadura 7% linear
+function itemDmgMul(lvl) { return Math.pow(1.06, lvl - 1); }
+function itemDefMul(lvl) { return 1 + 0.07 * (lvl - 1); }
+// Limite de melhorias do ferreiro conforme o nível do item
+function upgradeCap(item) { return Math.min(10, 2 + Math.floor((item.lvl || 1) / 5)); }
 
 // ---------- Comportamentos base dos inimigos (andar 1) ----------
 const ENEMY_BASE = {

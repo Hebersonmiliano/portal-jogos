@@ -119,15 +119,16 @@ class Enemy {
     this.sprite = def.sprite;
     this.pal = def.pal;
     this.x = x; this.y = y;
-    const hpMul = Math.pow(1.07, floor - 1);
-    const dmgMul = 1 + 0.12 * (floor - 1);
+    const mod = G.mods || {};
+    const hpMul = enemyHpMul(floor) * (mod.blindados ? 1.4 : 1);
+    const dmgMul = enemyDmgMul(floor) * (mod.furia ? 1.3 : 1);
     this.elite = !!opts.elite;
     this.mini = !!opts.mini;
     this.scale = this.elite ? 1.3 : this.mini ? 0.7 : 1;
     this.maxHp = Math.round(base.hp * hpMul * (this.elite ? 2.5 : this.mini ? 0.4 : 1));
     this.hp = this.maxHp;
     this.dmg = base.dmg * dmgMul * (this.elite ? 1.5 : this.mini ? 0.6 : 1);
-    this.spd = base.spd * (this.elite ? 1.1 : this.mini ? 1.3 : 1);
+    this.spd = base.spd * (this.elite ? 1.1 : this.mini ? 1.3 : 1) * enemySpdMul(floor) * (mod.velozes ? 1.25 : 1);
     this.xp = Math.round(base.xp * (1 + 0.15 * (floor - 1)) * (this.elite ? 3 : this.mini ? 0.3 : 1));
     this.r = base.r * this.scale;
     this.hw = 4 * this.scale; this.hh = 3;
@@ -508,9 +509,9 @@ class Boss extends Enemy {
     this.kind = b.kind || 0;
     this.name = b.name;
     this.scale = 2.3;
-    this.maxHp = Math.round(260 * Math.pow(1.07, floor - 1));
+    this.maxHp = Math.round(260 * enemyHpMul(floor) * 1.15);
     this.hp = this.maxHp;
-    this.dmg = 9 * (1 + 0.12 * (floor - 1));
+    this.dmg = 9 * enemyDmgMul(floor) * 0.8;
     this.spd = 32;
     this.xp = Math.round(150 * (1 + 0.15 * (floor - 1)));
     this.r = 15; this.hw = 9; this.hh = 5;
@@ -898,7 +899,9 @@ function playerAttack(aimAngle) {
     if (d > 9 && angDiff(a, aimAngle) > 1.15) continue;
     const crit = Math.random() < st.crit;
     const dmg = st.weaponDmg * st.dmgMul * (crit ? 2 : 1) * rr(0.9, 1.1);
+    e.lastHitByPlayer = G.time; // antes do golpe, para a Explosão saber quem matou
     e.hurt(dmg, p.x, p.y, crit);
+    if (!e.isProp) onWeaponHit(e, dmg);
     if (st.steal > 0) p.hp = Math.min(st.maxHp, p.hp + dmg * st.steal);
     hitAny = true;
     if (crit) Sfx.crit(); else Sfx.hit();

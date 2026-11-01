@@ -77,6 +77,7 @@ const Tips = {
       this.show('loot', 'Itens no chão', () => `Passe por cima para pegar. A cor mostra a raridade: branco, verde, azul, roxo e dourado. Itens melhores que o seu são equipados sozinhos e ganham uma seta verde ▲. Na mochila (${K('bag')}) também há o botão <b>Equipar melhores</b>.`);
     if (G.chests.some(c => !c.open && near(c.x, c.y, 80)))
       this.show('chest', 'Baú', 'Encoste no baú para abrir. Cuidado: a partir do andar 3, alguns baús são mímicos.');
+    if (L.locked) this.show('key', 'Escada selada', 'A partir do andar 2, a escada fica selada. Derrote o Guardião da Chave (inimigo com uma chave dourada, marcado no minimapa) para abri-la. Derrotar todos os inimigos do andar dá um baú de recompensa.');
     if (L.stairs && near(L.stairs.x, L.stairs.y, 110))
       this.show('stairs', 'Escada', () => `Aperte ${K('use')} na escada para descer. Cada andar descido aumenta o cansaço.`);
     if (foes.length && G.enemies.some(e => e.isProp && !e.dead && near(e.x, e.y, 80)))

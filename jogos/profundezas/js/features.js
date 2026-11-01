@@ -19,7 +19,8 @@ class Barrel {
     this.r = 6; this.hw = 4; this.hh = 3;
     this.hp = 1; this.maxHp = 1;
     this.isProp = true; this.fuse = 0; this.dead = false; this.flash = 0;
-    this.dmg = 22 * (1 + 0.15 * (floor - 1));
+    this.dmg = 18 * enemyHpMul(floor);      // dano nos inimigos
+    this.pdmg = 7 * enemyDmgMul(floor);     // dano no herói
     this.name = 'Barril';
   }
   update(dt) {
@@ -30,7 +31,7 @@ class Barrel {
         this.dead = true;
         G.shake = Math.max(G.shake, 5);
         const p = G.p;
-        if (dist(this.x, this.y, p.x, p.y) < 34) hurtPlayer(this.dmg * 0.5, null);
+        if (dist(this.x, this.y, p.x, p.y) < 34) hurtPlayer(this.pdmg, null);
         areaDamage(this.x, this.y - 4, 34, this.dmg, '#f97316');
       }
     }
@@ -110,7 +111,7 @@ function updateFeatures(dt) {
     if (!up) { s.hitP = false; s.hitE = null; continue; }
     if (!s.hitP && Math.abs(p.x - s.x) < 8 && Math.abs(p.y - s.y) < 8) {
       s.hitP = true;
-      hurtPlayer(6 * (1 + 0.12 * (G.level.floor - 1)), null);
+      hurtPlayer(5 * enemyDmgMul(G.level.floor), null);
     }
     if (!s.hitE) {
       s.hitE = true;

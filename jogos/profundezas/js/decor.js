@@ -173,7 +173,7 @@ function drawLighting(ctx) {
     g.addColorStop(0, `rgba(0,0,0,${strength})`); g.addColorStop(1, 'rgba(0,0,0,0)');
     lc.fillStyle = g; lc.fillRect(sx - rr2, sy - rr2, rr2 * 2, rr2 * 2);
   };
-  hole(p.x, p.y - 6, L.biome.light * 1.05, 1);
+  hole(p.x, p.y - 6, L.biome.light * 1.05 * (G.mods && G.mods.escuridao ? 0.6 : 1), 1);
   const visible = (L.lights || []).filter(l => !(l.prop && l.prop.used) && Math.abs(l.x - p.x) < G.viewW && Math.abs(l.y - p.y) < G.viewH);
   for (const l of visible) {
     const f = l.flicker ? 0.9 + Math.sin(G.time * 11 + l.phase) * 0.06 + Math.sin(G.time * 23 + l.phase) * 0.04 : 1;

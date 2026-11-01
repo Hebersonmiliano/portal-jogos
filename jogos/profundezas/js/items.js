@@ -35,12 +35,12 @@ function genItem(floor, minR = 0, forceKind = null, luck = 0) {
   if (kind === 'weapon') {
     const w = pick(WEAPONS);
     item.name = w.name;
-    item.dmg = Math.round(w.dmg * (1 + 0.12 * (lvl - 1)) * (1 + r * 0.08) * 10) / 10;
+    item.dmg = Math.round(w.dmg * itemDmgMul(lvl) * (1 + r * 0.08) * 10) / 10;
     item.cd = w.cd; item.range = w.range;
   } else if (kind === 'armor') {
     const a = pick(ARMORS);
     item.name = a.name;
-    item.def = Math.round(a.def * (1 + 0.1 * (lvl - 1)) * (1 + r * 0.1));
+    item.def = Math.round(a.def * itemDefMul(lvl) * (1 + r * 0.1));
   } else if (kind === 'ring') {
     item.name = pick(RINGS);
   } else if (kind === 'treasure') {
@@ -64,7 +64,8 @@ function genItem(floor, minR = 0, forceKind = null, luck = 0) {
     item.name = 'Relíquia dos Antigos';
   }
 
-  item.value = itemValue(item);
+  rollSpecial(item);
+  item.value = itemValue(item) * (item.special ? 1.5 : 1);
   return item;
 }
 
@@ -104,6 +105,8 @@ function itemStatLines(item) {
     if (def) lines.push(def.label(b.v));
   }
   if (item.legendDesc) lines.push('★ ' + item.legendDesc);
+  const sp = specialLine(item); if (sp) lines.push(sp);
+  if (isEquip(item) && item.lvl) lines.push(`Melhorias no ferreiro: até +${upgradeCap(item)}`);
   if (item.lvl) lines.push(`Nível do item: ${item.lvl}`);
   return lines;
 }
@@ -132,6 +135,7 @@ function itemScore(item) {
   let s = 0;
   for (const b of item.bonuses || []) s += (BONUS_WEIGHT[b.k] || 0) * b.v;
   if (item.effect) s += 15;
+  if (item.special) s += 12;
   const up = 1 + 0.08 * (item.up || 0);
   if (item.kind === 'weapon') s += (item.dmg * up / item.cd) * 1.6;
   if (item.kind === 'armor') s += item.def * up * 2.5;

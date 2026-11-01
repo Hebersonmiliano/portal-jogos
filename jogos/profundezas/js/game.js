@@ -32,7 +32,7 @@ function newPlayer() {
     gold: 30,
     bag: [], bagSize: BAG_START, stash: [],
     eq: { weapon: null, armor: null, ring: null },
-    maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [], bagV2: true,
+    maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [], bagV2: true, balV3: true,
     autoEquip: true, lootMin: 0, portal: null,
     skills: {}, slots: [null, null, null], skillPts: 0,
     x: 0, y: 0,
@@ -74,6 +74,8 @@ function loadGame() {
     const p = newPlayer();
     Object.assign(p, data);
     ensureSkills(p);
+    if (!data.balV3) p.balV3 = false; // jogo salvo antes da v0.9
+    migrateBalance(p);
     if (!data.bagV2) { // mochila antiga (12 a 40, de 4 em 4) vira a nova (24 a 60, de 6 em 6)
       const ups = Math.max(0, Math.round(((data.bagSize || 12) - 12) / 4));
       p.bagSize = Math.min(BAG_MAX, BAG_START + ups * BAG_STEP);
@@ -107,6 +109,7 @@ function enterFloor(floor, viaStairs) {
   G.enemies = []; G.projectiles = []; G.drops = []; G.chests = []; G.props = []; G.hazards = []; G.traps = [];
   G.corpses = []; G.spikes = []; G.barrels = []; G.blessing = null;
   resetFlow();
+  rollMods(floor, G.level.isBoss);
   G.texts = []; G.particles = []; G.effects = [];
   G.boss = null; G.tombEnt = null;
   p.floor = floor;
@@ -125,14 +128,14 @@ function enterFloor(floor, viaStairs) {
     }
     G.props.push({ type: 'campfire', x: L.start.x, y: L.start.y + 20, used: false });
   } else {
-    const count = Math.min(40, 15 + Math.floor(floor * 0.5) + ri(5));
+    const count = Math.round(Math.min(40, 15 + Math.floor(floor * 0.5) + ri(5)) * (G.mods.horda ? 1.5 : 1));
     const others = L.rooms.filter(r => r !== L.startRoom);
     for (let i = 0; i < count; i++) {
       const room = pick(others);
       const pt = randomPointIn(room, 1);
       const n = Math.random();
       const type = n < 0.35 ? 'chaser' : n < 0.6 ? 'fast' : n < 0.8 ? 'tank' : 'shooter';
-      G.enemies.push(new Enemy(type, floor, pt.x, pt.y, { elite: Math.random() < 0.05 }));
+      G.enemies.push(new Enemy(type, floor, pt.x, pt.y, { elite: Math.random() < (G.mods.elites ? 0.25 : 0.05) }));
     }
     const nChests = 2 + ri(3);
     for (let i = 0; i < nChests; i++) {
@@ -162,11 +165,14 @@ function enterFloor(floor, viaStairs) {
   decorateFloor(L);
   G.ambient = [];
   G.enemies = G.enemies.filter(e => e.isBoss || dist(e.x, e.y, p.x, p.y) > 70);
+  placeKey(L, floor);
   G.state = 'dungeon';
   showHud(true);
   Music.play(Music.forFloor(floor));
   questEvent('floor', { floor });
   UI.toast(`Andar ${floor} · ${L.biome.name}${floor > MAX_FLOOR ? ' (Profundezas Infinitas)' : ''}`, '#fde68a');
+  if (G.modList.length) UI.toast(`Andar modificado: ${G.modList.map(m => `${MODIFIERS[m].name} (${MODIFIERS[m].desc})`).join(', ')}. Recompensas +${G.modList.length * 25}%.`, '#f87171');
+  if (L.locked) UI.toast('A escada está selada. Derrote o Guardião da Chave (chave dourada no mapa).', '#facc15');
   Tips.show('start', 'Bem-vindo às Profundezas', () => `Mova com ${K('move')}. Encontre a escada para descer mais fundo e volte vivo à vila com o que juntar.`);
   if (L.isBoss) UI.toast('Um chefe guarda este andar.', '#f87171');
   saveGame();
@@ -183,13 +189,14 @@ function makeDrop(x, y, item, delay = 0) {
   return { x, y, item, t: 0, delay, vy: -40, z: 0 };
 }
 function spawnGold(x, y, amount) {
-  G.drops.push({ x: x + rr(-4, 4), y: y + rr(-3, 3), gold: Math.max(1, Math.round(amount)), t: 0, delay: 0.35, vy: -50, z: 0 });
+  G.drops.push({ x: x + rr(-4, 4), y: y + rr(-3, 3), gold: Math.max(1, Math.round(amount * goldMult())), t: 0, delay: 0.35, vy: -50, z: 0 });
 }
 
 function onEnemyDeath(e) {
   const p = G.p;
   addCorpse(e);
   if (!e.isBoss) questEvent('kill', e);
+  onDepthDeath(e);
   const f = G.level.floor;
   const st = playerStats(p);
   p.kills++;
@@ -214,7 +221,8 @@ function onEnemyDeath(e) {
     return;
   }
   if (Math.random() < 0.55) spawnGold(e.x, e.y, rr(2, 5) * (1 + 0.25 * (f - 1)) * (e.elite ? 3 : 1));
-  const itemChance = 0.12 + st.luck * 0.005;
+  const itemChance = (0.12 + st.luck * 0.005) * modReward() * (e.key ? 0 : 1);
+  if (e.key) G.drops.push(makeDrop(e.x, e.y, genItem(f, 2, null, st.luck), 0.35));
   if (e.elite) G.drops.push(makeDrop(e.x, e.y, genItem(f, 2, null, st.luck), 0.35));
   else if (Math.random() < itemChance) G.drops.push(makeDrop(e.x, e.y, genItem(f, 0, null, st.luck), 0.35));
   if (Math.random() < 0.06) G.drops.push(makeDrop(e.x, e.y, makeConsumable(Math.random() < 0.5 ? 'potion' : 'food'), 0.35));
@@ -223,7 +231,7 @@ function onEnemyDeath(e) {
 function gainXp(n) {
   const p = G.p;
   if (p.level >= 50) return;
-  p.xp += n;
+  p.xp += Math.round(n * xpMult());
   while (p.level < 50 && p.xp >= xpNext(p.level)) {
     p.xp -= xpNext(p.level);
     p.level++;
@@ -414,6 +422,7 @@ function updateDungeon(dt) {
   for (const pr of G.projectiles) pr.update(dt);
   updateHazards(dt);
   updateFeatures(dt);
+  updateDepth(dt);
   updateAmbient(dt);
   if (G.state !== 'dungeon' || p.dead) { updateEffects(dt); return; }
   G.projectiles = G.projectiles.filter(pr => !pr.dead);
@@ -488,8 +497,11 @@ function updateDungeon(dt) {
   let prompt = '';
   const interact = Input.hit('e') || Input.tb('use');
   if (L.stairs && dist(L.stairs.x, L.stairs.y, p.x, p.y) < 14) {
-    prompt = `[E] Descer para o andar ${L.floor + 1}`;
-    if (interact) { Sfx.stairs(); enterFloor(L.floor + 1, true); return; }
+    if (L.locked) prompt = 'Escada selada: derrote o Guardião da Chave';
+    else {
+      prompt = `[E] Descer para o andar ${L.floor + 1}`;
+      if (interact) { Sfx.stairs(); enterFloor(L.floor + 1, true); return; }
+    }
   }
   for (const pr of G.props) {
     if (dist(pr.x, pr.y, p.x, p.y) > 16) continue;
@@ -608,6 +620,7 @@ function renderDungeon() {
   for (const e of list) { if (e === p) drawPlayer(ctx); else e.draw(ctx); }
   for (const pr of G.projectiles) pr.draw(ctx);
   drawSkillsWorld(ctx);
+  drawDepth(ctx);
 
   // golpe
   if (p.swing) {
@@ -709,11 +722,7 @@ function drawPlayer(ctx) {
   }
   // arma
   const w = p.eq.weapon;
-  if (w) {
-    ctx.fillStyle = RARITIES[w.rarity].color === '#e8e8e8' ? '#cbd5e1' : RARITIES[w.rarity].color;
-    if (p.swing) ctx.fillRect(5, 3, 6, 1);
-    else { ctx.fillRect(6, 1, 1, 7); ctx.fillStyle = '#8b5a2b'; ctx.fillRect(5, 7, 3, 1); }
-  }
+  if (w) drawWeaponInHand(ctx, w, !!p.swing);
   ctx.restore();
   ctx.globalAlpha = 1;
 }
@@ -734,6 +743,7 @@ function enterVillage(msg, spawn = 'tower') {
   saveGame();
   Music.play('village');
   villageMenu(msg);
+  setTimeout(() => { if (G.state === 'village' && !UI.anyOpen()) deliverForgeGift(); }, 400);
   if (p.portal) Tips.show('portal', 'Portal de Retorno', `Você deixou um portal aberto no andar ${p.portal}. Na torre, escolha o portal para voltar direto para lá, sem repetir os andares.`);
   Tips.show('village', 'A vila', () => `Ande com ${K('move')} e fale com os moradores usando ${K('use')}. A torre no canto leva à masmorra. ${K('bag')} abre a mochila e Esc abre o menu da vila.`);
 }
@@ -882,19 +892,21 @@ function marketMenu(tab) {
 function smithMenu() {
   const p = G.p;
   const cost = it => Math.round(40 * (it.up + 1) * (1 + it.lvl * 0.15) * (1 + it.rarity * 0.3));
+  const capLine = it => `Limite para item nível ${it.lvl}: +${upgradeCap(it)}`;
   const row = (slot, label) => {
     const it = p.eq[slot];
     if (!it) return { label: `${label}: nada equipado`, disabled: true };
-    if (it.up >= 10) return { label: `${itemDisplayName(it)}`, sub: 'Já está no máximo (+10)', disabled: true, color: RARITIES[it.rarity].color };
+    if (it.up >= upgradeCap(it)) return { label: `${itemDisplayName(it)}`, color: RARITIES[it.rarity].color, icon: itemIconURL(it), disabled: true,
+      sub: it.up >= 10 ? 'Já está no máximo (+10)' : `${capLine(it)}. Itens de andares mais fundos aguentam mais melhorias.` };
     const c = cost(it);
     return {
       label: `${itemDisplayName(it)} → +${it.up + 1}`, color: RARITIES[it.rarity].color, icon: itemIconURL(it),
-      sub: slot === 'weapon' ? '+8% de dano por nível' : '+8% de defesa por nível',
+      sub: `${slot === 'weapon' ? '+8% de dano' : '+8% de defesa'} · ${capLine(it)}`,
       right: c + ' ◆', disabled: p.gold < c,
       act: () => { p.gold -= c; it.up++; it.value = itemValue(it); Sfx.chest(); saveGame(); smithMenu(); UI.toast(`${it.name} agora é +${it.up}!`, '#fde047'); },
     };
   };
-  UI.menu({ title: 'Ferreiro', text: `"Traga ouro que eu deixo isso afiado." · ◆ ${p.gold}`, items: [row('weapon', 'Arma'), row('armor', 'Armadura')], back: () => villageMenu() });
+  UI.menu({ title: 'Ferreiro', text: `"Aço velho só aguenta até certo ponto. Quanto mais fundo o item foi forjado, mais melhorias ele suporta." · ◆ ${p.gold}`, items: [row('weapon', 'Arma'), row('armor', 'Armadura')], back: () => villageMenu() });
 }
 
 function tailorMenu() {

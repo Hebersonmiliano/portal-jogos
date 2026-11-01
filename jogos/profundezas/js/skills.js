@@ -76,7 +76,7 @@ function learnSkill(p, id) {
 }
 
 function dodgeMax(p) { return skillRank(p, 'rolamento') ? 2 : 1; }
-function dodgeRecharge(p) { const r = skillRank(p, 'rolamento'); return 0.75 * (r ? 1 - (0.15 + 0.1 * (r - 1)) : 1); }
+function dodgeRecharge(p) { const r = skillRank(p, 'rolamento'); return 0.75 * (r ? 1 - (0.15 + 0.1 * (r - 1)) : 1) * (hasSpecial('agil') ? 0.65 : 1); }
 
 // Direção da mira: mouse (se usado há pouco) ou para onde o herói olha
 function aimAngle() {
@@ -101,7 +101,7 @@ function useSkill(slot) {
   const base = st.weaponDmg * st.dmgMul;
   const a = aimAngle();
   const cx = p.x, cy = p.y - 5;
-  p.skillCd[id] = SKILLS[id].cd(r);
+  p.skillCd[id] = SKILLS[id].cd(r) * cdMult();
   p.face = Math.cos(a) < 0 ? -1 : 1;
 
   if (id === 'giro') {

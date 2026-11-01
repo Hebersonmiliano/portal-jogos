@@ -284,7 +284,7 @@ const UI = {
     this.$('foodFill').classList.toggle('warn', p.hunger <= 20);
     this.$('hpFill').classList.toggle('warn', p.hp / st.maxHp < 0.3);
     if (G.level) {
-      this.$('floorTxt').innerHTML = `ANDAR ${G.level.floor}<small>${G.level.biome.name}</small>${G.blessing ? `<small class="bless">${BLESSINGS[G.blessing].name}</small>` : ''}`;
+      this.$('floorTxt').innerHTML = `ANDAR ${G.level.floor}<small>${G.level.biome.name}</small>${G.blessing ? `<small class="bless">${BLESSINGS[G.blessing].name}</small>` : ''}${G.modList && G.modList.length ? `<small class="mods">${G.modList.map(m => MODIFIERS[m].name).join(' · ')}</small>` : ''}${G.level.locked ? '<small class="lock">🔒 escada selada</small>' : ''}`;
     }
     this.$('goldTxt').textContent = `◆ ${p.gold}`;
     const count = k => p.bag.filter(i => i.kind === k).reduce((a, i) => a + i.qty, 0);
@@ -319,7 +319,11 @@ const UI = {
       if (!L.explored[ty * MAP_W + tx]) return;
       x.fillStyle = col; x.fillRect(tx * s - 1, ty * s - 1, sz, sz);
     };
-    if (L.stairs) mark(L.stairs.x, L.stairs.y, '#38bdf8', 4);
+    if (L.stairs) mark(L.stairs.x, L.stairs.y, L.locked ? '#78716c' : '#38bdf8', 4);
+    for (const e of G.enemies) if (e.key && !e.dead) { // a chave aparece sempre, para não ficar perdido
+      const tx = Math.floor(e.x / TILE), ty = Math.floor(e.y / TILE);
+      x.fillStyle = Math.sin(G.time * 6) > 0 ? '#facc15' : '#a16207'; x.fillRect(tx * s - 2, ty * s - 2, 5, 5);
+    }
     for (const pr of G.props) {
       if (pr.type === 'campfire' && !pr.used) mark(pr.x, pr.y, '#f97316');
       if (pr.type === 'shrine' && !pr.used) mark(pr.x, pr.y, '#c4b5fd');

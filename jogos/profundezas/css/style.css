@@ -255,3 +255,6 @@ body.in-village #minimap, body.in-village #quick, body.in-village #skillbar { di
 body.touch.in-village #touchUI { display: block; }
 body.touch.in-village [data-tbtn="atk"], body.touch.in-village [data-tbtn="dodge"], body.touch.in-village [data-tbtn="potion"], body.touch.in-village #tskills { display: none; }
 @media (max-width: 760px) { .dlg .pt { width: 52px; height: 52px; } .dt { font-size: 8px; } }
+
+#floorTxt small.mods { color: #f87171; }
+#floorTxt small.lock { color: #facc15; }
