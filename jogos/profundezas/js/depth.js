@@ -75,7 +75,24 @@ const SPECIALS = {
   },
   armor: {
     regeneracao: { name: 'Regeneração', desc: 'Recupera 1,2% da vida por segundo na masmorra.' },
+    robusta:     { name: 'Robusta',     desc: 'Recebe 12% menos dano.' },
     agil:        { name: 'Ágil',        desc: 'A esquiva recarrega 35% mais rápido.' },
+  },
+  helmet: {
+    visao:     { name: 'Visão',     desc: 'Enxerga 30% mais longe no escuro.' },
+    sabedoria: { name: 'Sabedoria', desc: '+20% de XP.' },
+  },
+  gloves: {
+    vampirismo: { name: 'Vampirismo',  desc: 'Cada inimigo derrotado devolve 3% da vida.' },
+    golpeduplo: { name: 'Golpe Duplo', desc: '20% de chance de acertar o mesmo golpe duas vezes.' },
+  },
+  boots: {
+    agil:   { name: 'Ágil',   desc: 'A esquiva recarrega 35% mais rápido.' },
+    vento:  { name: 'Vento',  desc: '+12% de velocidade de movimento.' },
+  },
+  amulet: {
+    foco:   { name: 'Foco',   desc: 'Habilidades recarregam 20% mais rápido.' },
+    arcano: { name: 'Arcano', desc: 'Habilidades causam 20% mais dano.' },
   },
   ring: {
     ganancia:  { name: 'Ganância',  desc: '+35% de ouro encontrado.' },
@@ -91,7 +108,7 @@ function rollSpecial(item) {
 }
 function hasSpecial(id) {
   const eq = G.p && G.p.eq;
-  return !!eq && ['weapon', 'armor', 'ring'].some(s => eq[s] && eq[s].special === id);
+  return !!eq && EQUIP_SLOTS.some(s => eq[s] && eq[s].special === id);
 }
 function specialLine(item) {
   const s = item.special && SPECIALS[item.kind] && SPECIALS[item.kind][item.special];
@@ -106,6 +123,9 @@ function onWeaponHit(e, dmg) {
   e.lastHitByPlayer = G.time;
   if (hasSpecial('veneno')) { e.poisonT = 3; e.poisonDps = dmg * 0.25; }
   if (hasSpecial('gelo')) e.chillT = 2;
+  if (hasSpecial('golpeduplo') && !e.dead && Math.random() < 0.2) {
+    setTimeout(() => { if (!e.dead && G.state === 'dungeon') { e.hurt(dmg, G.p.x, G.p.y, false); addText(e.x, e.y - 20, 'duplo!', '#fde047', 0.6); } }, 90);
+  }
   if (hasSpecial('relampago') && Math.random() < 0.25) {
     let from = { x: e.x, y: e.y - 5 };
     const hit = [e];
@@ -150,6 +170,7 @@ function updateDepth(dt) {
 function onDepthDeath(e) {
   if (e.isProp) return;
   if (e.key) onKeyHolderDeath(e);
+  if (hasSpecial('vampirismo')) { const st = playerStats(G.p); G.p.hp = Math.min(st.maxHp, G.p.hp + st.maxHp * 0.03); }
   if (hasSpecial('explosao') && G.time - (e.lastHitByPlayer || -9) < 0.1) {
     const st = playerStats(G.p);
     G.time += 0; // marca
@@ -194,18 +215,23 @@ function drawDepth(ctx) {
 function drawWeaponInHand(ctx, w, swinging) {
   const col = RARITIES[w.rarity].color === '#e8e8e8' ? '#cbd5e1' : RARITIES[w.rarity].color;
   const wood = '#8b5a2b';
-  const n = w.name || '';
-  const type = n.startsWith('Adaga') ? 'adaga' : n.startsWith('Machado') ? 'machado' : n.startsWith('Lança') ? 'lanca' : n.startsWith('Lâmina') ? 'lendaria' : 'espada';
+  const type = (w.name || '').startsWith('Lâmina') ? 'lendaria' : weaponType(w);
   const R = (c, x, y, ww, hh) => { ctx.fillStyle = c; ctx.fillRect(x, y, ww, hh); };
   if (swinging) { // arma estendida para a frente
     if (type === 'adaga') { R(wood, 5, 4, 2, 1); R(col, 7, 3, 4, 1); }
     else if (type === 'machado') { R(wood, 5, 4, 7, 1); R(col, 10, 1, 3, 6); }
     else if (type === 'lanca') { R(wood, 3, 4, 10, 1); R(col, 13, 3, 3, 3); }
+    else if (type === 'martelo') { R(wood, 5, 4, 6, 1); R(col, 10, 0, 4, 8); R(shade(col, -35), 13, 0, 1, 8); }
+    else if (type === 'arco') { R(wood, 8, -1, 1, 2); R(wood, 9, 1, 1, 6); R(wood, 8, 7, 1, 2); R('#e5e7eb', 7, 0, 1, 8); R(col, 5, 4, 5, 1); }
+    else if (type === 'cajado') { R(wood, 4, 4, 8, 1); R(col, 12, 3, 3, 3); R('#ffffff', 13, 4, 1, 1); }
     else { R(wood, 5, 4, 2, 1); R(col, 7, 3, 7, 2); if (type === 'lendaria') { ctx.globalAlpha = 0.5; R('#f97316', 7, 2, 7, 1); ctx.globalAlpha = 1; } }
   } else { // arma em pé ao lado
     if (type === 'adaga') { R(col, 6, 4, 1, 4); R(wood, 5, 8, 3, 1); }
     else if (type === 'machado') { R(wood, 6, 0, 1, 10); R(col, 7, 0, 3, 4); R(shade(col, -30), 9, 1, 1, 2); }
     else if (type === 'lanca') { R(wood, 6, -2, 1, 13); R(col, 5, -5, 3, 3); }
+    else if (type === 'martelo') { R(wood, 6, 0, 1, 11); R(col, 4, -2, 5, 4); R(shade(col, -35), 4, 1, 5, 1); }
+    else if (type === 'arco') { R(wood, 7, 0, 1, 2); R(wood, 8, 2, 1, 6); R(wood, 7, 8, 1, 2); R('#e5e7eb', 6, 1, 1, 8); }
+    else if (type === 'cajado') { R(wood, 6, -1, 1, 12); R(col, 5, -4, 3, 3); R('#ffffff', 6, -3 - Math.round(Math.sin(G.time * 6)), 1, 1); }
     else { R(col, 6, 0, 1, 8); R(wood, 5, 8, 3, 1); R(wood, 6, 9, 1, 2); if (type === 'lendaria') { R('#f97316', 6, -1 - Math.round(Math.sin(G.time * 12)), 1, 2); } }
   }
 }
@@ -219,7 +245,7 @@ function migrateBalance(p) {
     if (it.kind === 'armor' && it.def) it.def = Math.max(1, Math.round(it.def * itemDefMul(it.lvl) / (1 + 0.1 * (it.lvl - 1))));
     if (it.value !== undefined) it.value = itemValue(it);
   };
-  ['weapon', 'armor', 'ring'].forEach(s => fix(p.eq[s]));
+  EQUIP_SLOTS.forEach(s => fix(p.eq[s]));
   (p.bag || []).forEach(fix); (p.stash || []).forEach(fix);
   p.balV3 = true;
   if ((p.maxFloor || 1) > 5) p.forgeGift = true; // Bruno forja equipamento novo na vila

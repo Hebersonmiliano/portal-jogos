@@ -64,11 +64,16 @@ const SKILLS = {
 };
 const maxRank = id => SKILLS[id].kind === 'ultimate' ? 1 : 3;
 
-function skillRank(p, id) { return (p.skills && p.skills[id]) || 0; }
+function skillRank(p, id) {
+  const r = (p.skills && p.skills[id]) || 0;
+  if (!r || maxRank(id) === 1) return r;
+  return r + EQUIP_SLOTS.filter(s => p.eq && p.eq[s] && p.eq[s].skillUp === id).length; // amuleto: +1 nível
+}
+function learnedRank(p, id) { return (p.skills && p.skills[id]) || 0; }
 function skillPointsSpent(p) { return Object.values(p.skills || {}).reduce((a, b) => a + b, 0); }
 function branchPoints(p, tree) { return Object.entries(p.skills || {}).reduce((a, [id, r]) => a + (SKILLS[id] && SKILLS[id].tree === tree ? r : 0), 0); }
 function tierOpen(p, id) { const s = SKILLS[id]; return branchPoints(p, s.tree) >= TIER_REQ[s.tier - 1]; }
-function expectedPoints(p) { return Math.floor(p.level / 2) + (p.beaten || []).length; }
+function expectedPoints(p) { return Math.floor(p.level / 2) + (p.beaten || []).length + (p.cls ? 1 : 0); }
 function playerTitle(p) { const t = SKILL_TREES.find(t => branchPoints(p, t.id) >= TITLE_AT); return t ? t.title : null; }
 
 // Garante os campos (e converte jogos salvos da árvore antiga)
@@ -88,11 +93,11 @@ function ensureSkills(p) {
   p.slots = p.slots.map(id => id && skillRank(p, id) && SKILLS[id].kind !== 'passive' ? id : null);
 }
 
-function canLearn(p, id) { return p.skillPts > 0 && skillRank(p, id) < maxRank(id) && tierOpen(p, id); }
+function canLearn(p, id) { return p.skillPts > 0 && learnedRank(p, id) < maxRank(id) && tierOpen(p, id); }
 
 function learnSkill(p, id) {
   if (!canLearn(p, id)) return false;
-  const r = skillRank(p, id);
+  const r = learnedRank(p, id);
   p.skills[id] = r + 1;
   p.skillPts--;
   if (r === 0 && SKILLS[id].kind !== 'passive' && !p.slots.includes(id)) {
@@ -122,11 +127,11 @@ function applySkillStats(p, st) {
   if (p.rageT > 0) { st.dmgMul *= 1.5; st.speed = Math.max(st.speed, 74 * 0.95); }
   return st;
 }
-function skillDmgMul(p) { return 1 + 0.02 * branchPoints(p, 'arcano'); }
+function skillDmgMul(p) { return (1 + 0.02 * branchPoints(p, 'arcano')) * (hasSpecial('arcano') ? 1.2 : 1); }
 function skillCdMult(p) { return Math.max(0.5, 1 - 0.07 * skillRank(p, 'mente')) * cdMult(); }
 
 function dodgeMax(p) { return skillRank(p, 'rolamento') ? 2 : 1; }
-function dodgeRecharge(p) { const r = skillRank(p, 'rolamento'); return 0.75 * (r ? 1 - (0.15 + 0.1 * (r - 1)) : 1) * (hasSpecial('agil') ? 0.65 : 1); }
+function dodgeRecharge(p) { const r = skillRank(p, 'rolamento'); return 0.75 * (r ? 1 - (0.15 + 0.1 * (r - 1)) : 1) * (hasSpecial('agil') ? 0.65 : 1) * (wingHas(p, 3) ? 0.6 : 1); }
 
 // Passivas que reagem a golpes recebidos (chamado por hurtPlayer)
 function skillOnHurt(p, source) {
@@ -397,7 +402,7 @@ UI.skills = function (ctx) {
   const p = G.p;
   ensureSkills(p);
   const node = (id) => {
-    const s = SKILLS[id], r = skillRank(p, id), mr = maxRank(id), open = tierOpen(p, id);
+    const s = SKILLS[id], r = learnedRank(p, id), eff = skillRank(p, id), mr = maxRank(id), open = tierOpen(p, id);
     const tree = SKILL_TREES.find(t => t.id === s.tree);
     const need = TIER_REQ[s.tier - 1] - branchPoints(p, s.tree);
     const dots = Array.from({ length: mr }, (_, i) => `<i class="${i < r ? 'on' : ''}"></i>`).join('');
@@ -405,9 +410,9 @@ UI.skills = function (ctx) {
       `<button data-act="slot" data-arg="${id}:${i}" class="${p.slots[i] === id ? 'cur' : ''}" title="Atalho ${i + 1}">${i + 1}</button>`).join('')}</div>` : '';
     const kindLabel = s.kind === 'passive' ? 'passiva' : s.kind === 'ultimate' ? 'suprema' : 'ativa';
     return `<div class="sn ${s.kind} ${r ? 'has' : ''} ${open ? '' : 'locked'}">
-      <div class="skh"><b>${s.name}</b><span class="dots">${dots}</span></div>
+      <div class="skh"><b>${s.name}</b><span class="dots">${dots}${eff > r ? '<em class="amu" title="Bônus do amuleto">+' + (eff - r) + '</em>' : ''}</span></div>
       <p class="kind">${kindLabel}${s.cd && s.kind !== 'passive' ? ` · recarga ${s.cd(Math.max(1, r))} s` : ''}</p>
-      <p>${s.desc(Math.max(1, r))}${r > 0 && r < mr ? `<br><small>Próximo: ${s.desc(r + 1)}</small>` : ''}</p>
+      <p>${s.desc(Math.max(1, eff))}${r > 0 && r < mr ? `<br><small>Próximo: ${s.desc(r + 1)}</small>` : ''}</p>
       <div class="skf">
         ${!open ? `<span class="note">🔒 faltam ${need} ${need > 1 ? 'pontos' : 'ponto'} em ${tree.name}</span>`
           : canLearn(p, id) ? `<button data-act="learn" data-arg="${id}" class="learn">${r ? 'Melhorar' : 'Aprender'}</button>`

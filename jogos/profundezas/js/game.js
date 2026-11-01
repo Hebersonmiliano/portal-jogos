@@ -31,8 +31,8 @@ function newPlayer() {
     hp: 1, hunger: 100, fatigue: 0,
     gold: 30,
     bag: [], bagSize: BAG_START, stash: [],
-    eq: { weapon: null, armor: null, ring: null },
-    maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [], bagV2: true, balV3: true,
+    eq: { weapon: null, helmet: null, armor: null, gloves: null, boots: null, amulet: null, ring: null, ring2: null, wings: null },
+    maxFloor: 1, floor: 0, tomb: null, kills: 0, beaten: [], bagV2: true, balV3: true, itemsV3: true, cls: null,
     autoEquip: true, lootMin: 0, portal: null,
     skills: {}, slots: [null, null, null], skillPts: 0,
     x: 0, y: 0,
@@ -50,12 +50,12 @@ function resetRuntime(p) {
   Object.assign(p, {
     atkCd: 0, swing: null, dodgeT: 0, dodgeCd: 0, iframes: 0, fx: 1, fy: 0,
     vx: 0, vy: 0, hitCount: 0, hungerTick: 0, starveTick: 0, dead: false, walkT: 0, face: 1,
-    skillCd: {}, charge: null, shieldT: 0, shieldRed: 0, spin: 0, dodgeCh: dodgeMax(p), dodgeRecT: 0, hurtT: 0, slowT: 0, slowMul: 1, rageT: 0, arcShieldCd: 0,
+    skillCd: {}, charge: null, shieldT: 0, shieldRed: 0, spin: 0, dodgeCh: dodgeMax(p), dodgeRecT: 0, hurtT: 0, slowT: 0, slowMul: 1, rageT: 0, arcShieldCd: 0, flyT: 0, flyHit: null, stoneT: 0,
   });
 }
 
 // ---------- Salvamento ----------
-const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT', 'hurtT', 'slowT', 'slowMul', 'recall', 'rageT', 'arcShieldCd'];
+const RUNTIME_KEYS = ['atkCd', 'swing', 'dodgeT', 'dodgeCd', 'iframes', 'fx', 'fy', 'vx', 'vy', 'hitCount', 'hungerTick', 'starveTick', 'dead', 'walkT', 'face', 'x', 'y', 'skillCd', 'charge', 'shieldT', 'shieldRed', 'spin', 'dodgeCh', 'dodgeRecT', 'hurtT', 'slowT', 'slowMul', 'recall', 'rageT', 'arcShieldCd', 'flyT', 'flyHit', 'stoneT'];
 function saveGame() {
   try {
     const data = {};
@@ -81,6 +81,12 @@ function loadGame() {
       p.bagSize = Math.min(BAG_MAX, BAG_START + ups * BAG_STEP);
     }
     p.bagV2 = true;
+    if (!data.itemsV3) { // v1.1: 9 espaços de equipamento; a defesa da armadura foi dividida com elmo, luvas e botas
+      const half = it => { if (it && it.kind === 'armor' && it.def) { it.def = Math.max(1, Math.round(it.def / 2)); it.value = itemValue(it); } };
+      half(p.eq.armor); (p.bag || []).forEach(half); (p.stash || []).forEach(half);
+      p.itemsV3 = true; p.newSlotsTip = true;
+    }
+    for (const s of EQUIP_SLOTS) if (p.eq[s] === undefined) p.eq[s] = null;
     resetRuntime(p);
     return p;
   } catch (e) { return null; }
@@ -212,6 +218,8 @@ function onEnemyDeath(e) {
     G.drops.push(makeDrop(e.x + 12, e.y, genItem(f, 1, null, st.luck), 0.5));
     G.drops.push(makeDrop(e.x, e.y + 10, makeConsumable('potion', 2), 0.5));
     const first = !p.beaten.includes(f);
+    const wings = bossWingDrop(f, first);
+    if (wings) { G.drops.push(makeDrop(e.x, e.y - 12, wings, 0.5)); setTimeout(() => UI.toast(`${e.name} deixou cair ${wings.name}! A esquiva vira um voo.`, WINGS[wings.wing].edge), 1600); }
     if (first) { p.beaten.push(f); p.skillPts = (p.skillPts || 0) + 1; setTimeout(() => UI.toast('Chefe derrotado pela primeira vez: +1 ponto de habilidade!', '#a78bfa'), 900); }
     G.level.stairs = { x: e.x, y: e.y + 24 };
     UI.toast(`${e.name} foi derrotado!`, '#facc15');
@@ -364,15 +372,17 @@ function updateDungeon(dt) {
     }
   }
   if (p.slowT > 0) p.slowT -= dt;
+  if (p.stoneT > 0) p.stoneT -= dt;
   if (p.swing) { p.swing.t -= dt; if (p.swing.t <= 0) p.swing = null; }
   const mv = Input.move();
   if (mv.x || mv.y) { p.fx = mv.x; p.fy = mv.y; p.walkT += dt; if (mv.x) p.face = mv.x < 0 ? -1 : 1; }
   if (p.charge) {
     // a investida controla o movimento (skills.js)
   } else if (p.dodgeT > 0) {
+    updateFlight(p, dt);
     p.dodgeT -= dt;
     moveBody(p, p.vx * dt, p.vy * dt);
-    if (Math.random() < 0.6) G.particles.push({ x: p.x, y: p.y - 4, vx: 0, vy: -5, t: 0.2, color: '#93c5fd' });
+    if (!p.flyT && Math.random() < 0.6) G.particles.push({ x: p.x, y: p.y - 4, vx: 0, vy: -5, t: 0.2, color: '#93c5fd' });
   } else {
     moveBody(p, mv.x * st.speed * dt, mv.y * st.speed * dt);
   }
@@ -387,16 +397,11 @@ function updateDungeon(dt) {
   } else if (atkKey) {
     const pa = Input.padAim();
     if (pa !== null) p.face = Math.cos(pa) < 0 ? -1 : 1;
-    playerAttack(pa !== null ? pa : Math.atan2(p.fy, p.fx));
+    playerAttack(pa !== null ? pa : Math.atan2(p.fy, p.fx), true);
   }
   if ((Input.hit(' ') || Input.tb('dodge')) && p.dodgeCd <= 0 && p.dodgeCh > 0) {
     const dx = mv.x || mv.y ? mv.x : p.fx, dy = mv.x || mv.y ? mv.y : p.fy;
-    const d = Math.hypot(dx, dy) || 1;
-    p.vx = dx / d * 230; p.vy = dy / d * 230;
-    p.dodgeT = 0.17; p.dodgeCd = 0.22;
-    if (p.dodgeCh >= dodgeMax(p)) p.dodgeRecT = dodgeRecharge(p);
-    p.dodgeCh--;
-    Sfx.dash();
+    startDodge(p, dx, dy);
   }
   if (Input.hit('q') || Input.tb('potion')) quickUse('potion');
   if (Input.hit('f')) quickUse('food');
@@ -623,8 +628,9 @@ function renderDungeon() {
   drawDepth(ctx);
 
   // golpe
-  if (p.swing) {
+  if (p.swing && !p.swing.ranged) {
     const s = p.swing, a = s.a, k = 1 - s.t / 0.14;
+    if (s.wide) { ctx.strokeStyle = `rgba(253,224,71,${0.7 - k * 0.5})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(p.x, p.y - 5, s.range * (0.6 + k * 0.4), a - 1.6, a + 1.6); ctx.stroke(); }
     ctx.strokeStyle = `rgba(255,255,255,${0.9 - k * 0.6})`; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(p.x, p.y - 5, s.range * (0.7 + k * 0.3), a - 1.0 + k * 0.4, a + 1.0 - k * 0.4); ctx.stroke();
   }
@@ -694,20 +700,23 @@ function drawPlayer(ctx) {
   else if (hurtNow) frame = 'hero_hurt';
   else if (p.swing || p.spin > 0) frame = 'hero_atk';
   else if (moving) frame = ['hero_walk1', 'hero', 'hero_walk2', 'hero'][Math.floor(p.walkT * 9) % 4];
-  const spr = getSprite(frame, null, hurtNow && p.hurtT > 0.2 ? true : false);
-  const bob = moving && !p.dead ? Math.round(Math.abs(Math.sin(p.walkT * 12)) * -1) : 0;
+  const spr = getSprite(frame, heroPal(p), hurtNow && p.hurtT > 0.2 ? true : false);
+  const flying = p.flyT > 0 && p.dodgeT > 0;
+  const bob = flying ? -5 - Math.round(Math.sin((1 - p.dodgeT / p.flyT) * Math.PI) * 4) : moving && !p.dead ? Math.round(Math.abs(Math.sin(p.walkT * 12)) * -1) : 0;
   ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.beginPath(); ctx.ellipse(p.x, p.y, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
   ctx.save();
   ctx.translate(Math.round(p.x), Math.round(p.y - 6 + bob));
-  ctx.globalAlpha = p.dodgeT > 0 ? 0.6 : 1;
+  ctx.globalAlpha = p.dodgeT > 0 && !flying ? 0.6 : 1;
   if (p.dead) { ctx.rotate(p.face * Math.PI / 2); ctx.globalAlpha = 0.8; }
-  else if (p.dodgeT > 0) ctx.rotate(p.face * (1 - p.dodgeT / 0.17) * Math.PI * 2); // rolamento
+  else if (p.dodgeT > 0 && !flying) ctx.rotate(p.face * (1 - p.dodgeT / 0.17) * Math.PI * 2); // rolamento
   else if (hurtNow) ctx.translate(-p.face * 1, 0);
   if (p.face === -1) ctx.scale(-1, 1);
   if (p.rageT > 0) { ctx.translate(0, 4); ctx.scale(1.3, 1.3); ctx.translate(0, -4); } // Fúria do Titã
   ctx.translate(0, -6);
   if (p.slowT > 0) { ctx.fillStyle = 'rgba(245,245,244,0.5)'; ctx.fillRect(-5, 9, 10, 3); }
+  if (p.eq.wings && !p.dead) { ctx.save(); ctx.translate(0, 7); drawWings(ctx, p.eq.wings.wing, G.time, flying); ctx.restore(); }
+  if (p.stoneT > 0) { ctx.globalAlpha = 0.35 + 0.2 * Math.sin(G.time * 10); ctx.fillStyle = '#d6d3d1'; ctx.fillRect(-6, 6, 12, 6); ctx.globalAlpha = 1; }
   ctx.drawImage(spr, -6, 0);
   if (p.dead) { ctx.restore(); ctx.globalAlpha = 1; return; }
   if (p.recall) { // círculo da runa enchendo
@@ -892,7 +901,7 @@ function marketMenu(tab) {
 
 function smithMenu() {
   const p = G.p;
-  const cost = it => Math.round(40 * (it.up + 1) * (1 + it.lvl * 0.15) * (1 + it.rarity * 0.3));
+  const cost = it => Math.round(40 * (it.up + 1) * (1 + it.lvl * 0.15) * (1 + it.rarity * 0.3) * (it.kind === 'weapon' || it.kind === 'armor' ? 1 : 0.6));
   const capLine = it => `Limite para item nível ${it.lvl}: +${upgradeCap(it)}`;
   const row = (slot, label) => {
     const it = p.eq[slot];
@@ -907,7 +916,7 @@ function smithMenu() {
       act: () => { p.gold -= c; it.up++; it.value = itemValue(it); Sfx.chest(); saveGame(); smithMenu(); UI.toast(`${it.name} agora é +${it.up}!`, '#fde047'); },
     };
   };
-  UI.menu({ title: 'Ferreiro', text: `"Aço velho só aguenta até certo ponto. Quanto mais fundo o item foi forjado, mais melhorias ele suporta." · ◆ ${p.gold}`, items: [row('weapon', 'Arma'), row('armor', 'Armadura')], back: () => villageMenu() });
+  UI.menu({ title: 'Ferreiro', text: `"Aço velho só aguenta até certo ponto. Quanto mais fundo o item foi forjado, mais melhorias ele suporta." · ◆ ${p.gold}`, items: ['weapon', 'armor', 'helmet', 'gloves', 'boots'].map(s => row(s, SLOT_LABEL[s])), back: () => villageMenu() });
 }
 
 function tailorMenu() {
@@ -1029,7 +1038,7 @@ function startGame(fresh) {
   if (G.p.floor > 0) enterFloor(G.p.floor, false);
   else if (fresh) {
     G.state = 'title'; Music.play('village');
-    Scene.show('intro', STORY.intro.title, STORY.intro.text, () => {
+    Scene.show('intro', STORY.intro.title, STORY.intro.text, () => chooseClass(true, () => {
       enterVillage(null, 'plaza');
       Dialog.play([
         { who: 'tobias', text: 'Explorador! Que bom que você veio. Eu sou Tobias, o Ancião de Pedra Funda.' },
@@ -1037,9 +1046,61 @@ function startGame(fresh) {
         { who: 'pedrinho', text: 'E comigo também! Eu sei um monte de segredos da masmorra!' },
         { who: 'tobias', text: 'Quando quiser saber seu próximo objetivo, venha falar comigo. Boa sorte.' },
       ]);
-    });
+    }));
   }
-  else enterVillage(null);
+  else {
+    const go = () => { enterVillage(null); if (G.p.newSlotsTip) newSlotsTip(); };
+    if (!G.p.cls) { G.state = 'title'; Music.play('village'); chooseClass(false, go); } // jogo salvo antes da v1.1
+    else go();
+  }
+}
+
+// ---------- Escolha de classe ----------
+function makeClassWeapon(cls) {
+  const w = WEAPONS.find(w => w.name === CLASS_INFO[cls].weapon);
+  const it = { id: uid(), kind: 'weapon', name: w.name, wtype: w.type, rarity: 0, lvl: 1, up: 0, dmg: w.dmg, cd: w.cd, range: w.range, bonuses: [] };
+  it.value = itemValue(it);
+  return it;
+}
+function chooseClass(fresh, done) {
+  const p = G.p;
+  const card = id => {
+    const c = CLASS_INFO[id], w = makeClassWeapon(id);
+    return `<button class="clsc" data-act="pick" data-arg="${id}" style="--cc:${c.color}">
+      <span class="ci"><img src="${itemIconURL(w)}" alt=""></span>
+      <b>${c.name}</b><small>${c.desc}</small>
+      <em>Começa com: ${c.weapon} + ${SKILLS[c.skill].name}</em></button>`;
+  };
+  UI.show(`<h2>Escolha sua classe</h2>
+    <p class="mtext">${fresh ? 'Cada classe começa com uma arma e uma habilidade. Você pode aprender habilidades das três árvores e usar qualquer arma depois.'
+      : 'Novidade da versão 1.1! Escolha uma classe: você ganha a arma dela, 1 ponto de habilidade extra, e as armas da sua classe passam a cair mais vezes.'}</p>
+    <div class="clsrow">${Object.keys(CLASS_INFO).map(card).join('')}</div>`, {
+    cls: 'clspanel',
+    actions: {
+      pick: id => {
+        p.cls = id;
+        const w = makeClassWeapon(id);
+        if (fresh) { p.eq.weapon = w; }
+        else if (!bagAdd(p.bag, p.bagSize, w)) p.stash.push(w);
+        ensureSkills(p);
+        learnSkill(p, CLASS_INFO[id].skill);
+        UI.close();
+        UI.toast(`Classe: ${CLASS_INFO[id].name}! ${fresh ? '' : w.name + ' está na mochila. '}${SKILLS[CLASS_INFO[id].skill].name} já está no atalho.`, CLASS_INFO[id].color);
+        Sfx.level(); saveGame();
+        if (done) done();
+      },
+    },
+  });
+}
+function newSlotsTip() {
+  if (UI.open) { setTimeout(newSlotsTip, 800); return; } // espera outro diálogo terminar
+  if (G.state !== 'village') return;
+  G.p.newSlotsTip = false;
+  Dialog.play([
+    { who: 'bruno', text: 'Novidade na forja! Agora dá pra usar capacete, luvas, botas, amuleto e dois anéis. Cada peça soma defesa e bônus.' },
+    { who: 'bruno', text: 'Ah, e dizem que os chefes guardam asas mágicas. Com elas, a esquiva vira um voo. Abra a mochila pra ver os novos espaços.' },
+  ]);
+  saveGame();
 }
 
 // ---------- Cena da vila (fundo) ----------

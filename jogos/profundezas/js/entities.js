@@ -64,7 +64,8 @@ function moveBody(e, dx, dy) {
 // ---------- Atributos derivados do jogador ----------
 function playerStats(p) {
   const s = { dmgPct: 0, hp: 0, crit: 0, spd: 0, steal: 0, luck: 0, def: 0, effects: {} };
-  for (const slot of ['weapon', 'armor', 'ring']) {
+  let armorDef = 0;
+  for (const slot of EQUIP_SLOTS) {
     const it = p.eq[slot];
     if (!it) continue;
     for (const b of it.bonuses || []) {
@@ -77,9 +78,9 @@ function playerStats(p) {
       else if (b.k === 'def') s.def += b.v;
     }
     if (it.effect) s.effects[it.effect] = true;
+    if (it.def && (DEF_KINDS.includes(it.kind) || it.kind === 'wings')) armorDef += it.def * (1 + 0.08 * (it.up || 0));
   }
   const w = p.eq.weapon;
-  const a = p.eq.armor;
   const tired = p.fatigue >= 80 ? 0.8 : 1;
   return applySkillStats(p, {
     maxHp: Math.round(60 + p.level * 6 + p.vit * 10 + s.hp),
@@ -88,8 +89,8 @@ function playerStats(p) {
     range: w ? w.range : 12,
     dmgMul: (1 + p.str * 0.05 + s.dmgPct / 100 + blessing('forca') * 0.25) * tired,
     crit: Math.min(0.6, 0.05 + p.agi * 0.01 + s.crit / 100),
-    speed: 74 * (1 + p.agi * 0.008 + s.spd / 100 + blessing('rapidez') * 0.15) * tired * ((p.slowT || 0) > 0 ? (p.slowMul || 0.5) : 1),
-    def: (a ? a.def * (1 + 0.08 * (a.up || 0)) : 0) + s.def,
+    speed: 74 * (1 + p.agi * 0.008 + s.spd / 100 + blessing('rapidez') * 0.15 + (hasSpecial('vento') ? 0.12 : 0)) * tired * ((p.slowT || 0) > 0 ? (p.slowMul || 0.5) : 1),
+    def: armorDef + s.def,
     steal: s.steal / 100 + (s.effects.vamp ? 0.08 : 0),
     luck: p.luck + s.luck + blessing('fortuna') * 10,
     effects: s.effects,
@@ -794,6 +795,8 @@ class Projectile {
     this.life = opts.life || 3; this.size = size; this.dead = false;
     this.explode = opts.explode || 0;   // raio de explosão (bola de fogo)
     this.homing = !!opts.homing; this.slow = !!opts.slow; this.pierce = !!opts.pierce;
+    this.weapon = opts.weapon || null;  // flecha/magia da arma: { crit, splash }
+    this.arrow = !!opts.arrow;
   }
   update(dt) {
     this.x += this.vx * dt; this.y += this.vy * dt;
@@ -808,7 +811,8 @@ class Projectile {
             if (!this.hitSet.has(e)) { this.hitSet.add(e); e.hurt(this.dmg, this.x - this.vx * 0.05, this.y - this.vy * 0.05, false); }
             continue;
           }
-          if (!this.explode) e.hurt(this.dmg, this.x - this.vx * 0.05, this.y - this.vy * 0.05, false);
+          if (this.weapon) weaponProjectileHit(this, e);
+          else if (!this.explode) e.hurt(this.dmg, this.x - this.vx * 0.05, this.y - this.vy * 0.05, false);
           this.end(); return;
         }
       }
@@ -834,6 +838,14 @@ class Projectile {
   }
   draw(ctx) {
     ctx.fillStyle = this.color;
+    if (this.arrow) { // flecha: haste + ponta
+      const a = Math.atan2(this.vy, this.vx), c = Math.cos(a), s = Math.sin(a);
+      ctx.fillStyle = '#d6b88a';
+      for (let i = -5; i <= 0; i++) ctx.fillRect(Math.round(this.x + c * i), Math.round(this.y + s * i), 1, 1);
+      ctx.fillStyle = this.color; ctx.fillRect(Math.round(this.x + c), Math.round(this.y + s), 2, 2);
+      ctx.fillStyle = '#f5f5f4'; ctx.fillRect(Math.round(this.x - c * 6), Math.round(this.y - s * 6), 1, 1);
+      return;
+    }
     if (this.slow) { // teia
       const x = Math.round(this.x), y = Math.round(this.y);
       ctx.fillRect(x - 3, y, 7, 1); ctx.fillRect(x, y - 3, 1, 7); ctx.fillRect(x - 2, y - 2, 1, 1); ctx.fillRect(x + 2, y + 2, 1, 1); ctx.fillRect(x + 2, y - 2, 1, 1); ctx.fillRect(x - 2, y + 2, 1, 1);
@@ -871,7 +883,7 @@ function hurtPlayer(amount, source) {
   if (p.dodgeT > 0 || p.iframes > 0 || p.dead) return;
   if (skillOnHurt(p, source)) return; // Escudo Arcano bloqueou
   const st = playerStats(p);
-  let dmg = Math.max(1, amount * 100 / (100 + st.def * 6));
+  let dmg = Math.max(1, amount * 100 / (100 + st.def * 6)) * (hasSpecial('robusta') ? 0.88 : 1) * (p.stoneT > 0 ? 0.5 : 1);
   if (p.shieldT > 0) { dmg *= 1 - p.shieldRed; G.effects.push({ type: 'ring', x: p.x, y: p.y - 6, r: 8, max: 13, t: 0.2, color: '#d6d3d1' }); }
   p.hp -= dmg;
   p.iframes = 0.5;
@@ -886,15 +898,48 @@ function hurtPlayer(amount, source) {
   if (p.hp <= 0) { p.hp = 0; playerDie(); }
 }
 
-function playerAttack(aimAngle) {
+function playerAttack(aimAngle, assist) {
   const p = G.p;
   if (p.atkCd > 0 || p.dodgeT > 0) return;
   const st = playerStats(p);
   p.atkCd = st.cd;
-  p.swing = { t: 0.14, a: aimAngle, range: st.range };
+  const wt = weaponType(p.eq.weapon);
+  const cx = p.x, cy = p.y - 5;
+  // teclado/controle/toque: a flecha ou magia procura o inimigo mais próximo à frente
+  if (assist && (wt === 'arco' || wt === 'cajado')) {
+    let best = null, bs = 1e9;
+    for (const e of G.enemies) {
+      if (e.dead || e.isProp || e.hidden) continue;
+      const ey = e.y - (e.isBoss ? 14 : 5), d = dist(cx, cy, e.x, ey);
+      if (d > 180) continue;
+      const da = angDiff(Math.atan2(ey - cy, e.x - cx), aimAngle);
+      if (da > 0.8 || !hasLOS(cx, cy, e.x, ey, 1)) continue;
+      const sc = d + da * 120;
+      if (sc < bs) { bs = sc; best = { x: e.x, y: ey }; }
+    }
+    if (best) aimAngle = Math.atan2(best.y - cy, best.x - cx);
+  }
+  // arco e cajado: atacam de longe
+  if (wt === 'arco' || wt === 'cajado') {
+    p.swing = { t: 0.14, a: aimAngle, range: 10, ranged: true };
+    hitSecretWall(aimAngle);
+    const crit = Math.random() < st.crit;
+    const dmg = st.weaponDmg * st.dmgMul * (crit ? 2 : 1) * rr(0.9, 1.1);
+    const sx = cx + Math.cos(aimAngle) * 7, sy = cy + Math.sin(aimAngle) * 7;
+    if (wt === 'arco') {
+      Sfx.bow();
+      G.projectiles.push(new Projectile(sx, sy, Math.cos(aimAngle) * 260, Math.sin(aimAngle) * 260, dmg, true, RARITIES[p.eq.weapon.rarity].color, 2, { life: 0.75 + st.range * 0.01, weapon: { crit }, arrow: true }));
+    } else {
+      Sfx.magic();
+      G.projectiles.push(new Projectile(sx, sy, Math.cos(aimAngle) * 170, Math.sin(aimAngle) * 170, dmg, true, '#67e8f9', 4, { life: 0.85, weapon: { crit, splash: 18 } }));
+      burst(sx, sy, '#a5f3fc', 4);
+    }
+    return;
+  }
+  const hammer = wt === 'martelo';
+  p.swing = { t: 0.14, a: aimAngle, range: st.range, wide: hammer };
   hitSecretWall(aimAngle);
   Sfx.swing();
-  const cx = p.x, cy = p.y - 5;
   let hitAny = false;
   for (const e of G.enemies) {
     if (e.dead) continue;
@@ -902,18 +947,16 @@ function playerAttack(aimAngle) {
     const d = dist(cx, cy, ex, ey);
     if (d > st.range + e.r) continue;
     const a = Math.atan2(ey - cy, ex - cx);
-    if (d > 9 && angDiff(a, aimAngle) > 1.15) continue;
+    if (d > 9 && angDiff(a, aimAngle) > (hammer ? 1.7 : 1.15)) continue;
     const crit = Math.random() < st.crit;
     const dmg = st.weaponDmg * st.dmgMul * (crit ? 2 : 1) * rr(0.9, 1.1);
-    e.lastHitByPlayer = G.time; // antes do golpe, para a Explosão saber quem matou
-    e.hurt(dmg, p.x, p.y, crit);
-    if (!e.isProp) onWeaponHit(e, dmg);
-    if (st.steal > 0) p.hp = Math.min(st.maxHp, p.hp + dmg * st.steal);
+    applyWeaponHit(e, dmg, crit, p.x, p.y, st);
+    if (hammer && !e.isBoss && !e.isProp) { e.kx += Math.cos(a) * 90; e.ky += Math.sin(a) * 90; }
     hitAny = true;
-    if (crit) Sfx.crit(); else Sfx.hit();
   }
   if (hitAny) {
-    G.hitStop = 0.04;
+    G.hitStop = hammer ? 0.07 : 0.04;
+    if (hammer) G.shake = Math.max(G.shake, 2);
     skillOnMeleeHits(p, aimAngle, st);
     p.hitCount = (p.hitCount || 0) + 1;
     if (st.effects.fogo && p.hitCount % 3 === 0) {
@@ -923,5 +966,24 @@ function playerAttack(aimAngle) {
       Sfx.boom();
       for (const e of G.enemies) if (!e.dead && dist(fx, fy, e.x, e.y - 5) < 34) e.hurt(st.weaponDmg * st.dmgMul, fx, fy, false);
     }
+  }
+}
+
+// Um golpe da arma (corpo a corpo, flecha ou magia) acertou
+function applyWeaponHit(e, dmg, crit, fromX, fromY, st) {
+  const p = G.p;
+  e.lastHitByPlayer = G.time; // antes do golpe, para a Explosão saber quem matou
+  e.hurt(dmg, fromX, fromY, crit);
+  if (!e.isProp) onWeaponHit(e, dmg);
+  if (st.steal > 0) p.hp = Math.min(st.maxHp, p.hp + dmg * st.steal);
+  if (crit) Sfx.crit(); else Sfx.hit();
+}
+function weaponProjectileHit(pr, e) {
+  const st = playerStats(G.p);
+  applyWeaponHit(e, pr.dmg, pr.weapon.crit, pr.x - pr.vx * 0.05, pr.y - pr.vy * 0.05, st);
+  if (pr.weapon.splash) {
+    G.effects.push({ type: 'ring', x: pr.x, y: pr.y, r: 3, max: pr.weapon.splash, t: 0.25, color: '#67e8f9' });
+    burst(pr.x, pr.y, '#a5f3fc', 8);
+    for (const o of G.enemies) if (o !== e && !o.dead && !o.hidden && dist(pr.x, pr.y, o.x, o.y - 5) < pr.weapon.splash + o.r) o.hurt(pr.dmg * 0.45, pr.x, pr.y, false);
   }
 }

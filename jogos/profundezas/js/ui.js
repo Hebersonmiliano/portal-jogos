@@ -112,8 +112,8 @@ const UI = {
       return `<button class="slot ${isSel ? 'sel' : ''}" style="--rc:${RARITIES[item.rarity].color}" data-act="sel" data-arg="${area}:${i}" ${area === 'bag' ? 'data-grid' : ''} title="${item.name}">
         <img src="${itemIconURL(item)}">${item.qty > 1 ? `<b>${item.qty}</b>` : ''}${item.up ? `<b class="up">+${item.up}</b>` : ''}${area === 'bag' && isUpgrade(p, item) ? '<b class="better">▲</b>' : ''}</button>`;
     };
-    const eqSlots = ['weapon', 'armor', 'ring'];
-    const eqLabels = { weapon: 'Arma', armor: 'Armadura', ring: 'Acessório' };
+    const eqSlots = EQUIP_SLOTS;
+    const eqLabels = SLOT_LABEL;
     let bagHtml = '';
     for (let i = 0; i < p.bagSize; i++) bagHtml += slotHtml(p.bag[i], 'bag', i);
 
@@ -123,18 +123,21 @@ const UI = {
     if (selItem) {
       const lines = itemStatLines(selItem).map(l => `<li>${l}</li>`).join('');
       let cmp = '';
-      if (sel.area === 'bag' && isEquip(selItem) && p.eq[selItem.kind]) {
-        const cur = p.eq[selItem.kind];
+      const cur = sel.area === 'bag' && isEquip(selItem) ? p.eq[targetSlot(p, selItem)] : null;
+      if (cur) {
         if (selItem.kind === 'weapon') {
           const a = selItem.dmg * (1 + 0.08 * (selItem.up || 0)), b = cur.dmg * (1 + 0.08 * (cur.up || 0));
           cmp = `<p class="cmp ${a >= b ? 'good' : 'bad'}">Dano ${a >= b ? '▲' : '▼'} ${(a - b).toFixed(1)} em relação à arma atual</p>`;
-        } else if (selItem.kind === 'armor') {
+        } else if (selItem.def && cur.def) {
           const a = selItem.def * (1 + 0.08 * (selItem.up || 0)), b = cur.def * (1 + 0.08 * (cur.up || 0));
-          cmp = `<p class="cmp ${a >= b ? 'good' : 'bad'}">Defesa ${a >= b ? '▲' : '▼'} ${Math.round(a - b)} em relação à atual</p>`;
+          cmp = `<p class="cmp ${a >= b ? 'good' : 'bad'}">Defesa ${a >= b ? '▲' : '▼'} ${Math.round(a - b)} em relação ${selItem.kind === 'armor' ? 'à atual' : 'ao atual'}</p>`;
+        } else {
+          const up = itemScore(selItem) > itemScore(cur);
+          cmp = `<p class="cmp ${up ? 'good' : 'bad'}">${up ? '▲ Melhor' : '▼ Pior'} que ${cur.name}${selItem.kind === 'ring' ? ' (troca o anel mais fraco)' : ''}</p>`;
         }
       }
       detail = `<h3 style="color:${RARITIES[selItem.rarity].color}">${itemDisplayName(selItem)}</h3>
-        <p class="rar">${isConsumable(selItem) ? 'Consumível' : RARITIES[selItem.rarity].name} · vale ${selItem.value * (selItem.qty || 1)} ouro</p>
+        <p class="rar">${isConsumable(selItem) ? 'Consumível' : RARITIES[selItem.rarity].name + (KIND_LABEL[selItem.kind] ? ' · ' + KIND_LABEL[selItem.kind] : '')} · vale ${selItem.value * (selItem.qty || 1)} ouro</p>
         <ul class="stats">${lines}</ul>${cmp}`;
       if (sel.area === 'bag') {
         if (isEquip(selItem)) acts += `<button data-act="use" data-focus>Equipar</button>`;
@@ -155,7 +158,8 @@ const UI = {
       <div class="invhead"><h2>Mochila</h2><button class="best" data-act="best" title="Tecla B">▲ Equipar melhores</button><span class="gold">◆ ${p.gold} ouro</span><button class="x" data-act="close">✕</button></div>
       <div class="invgrid">
         <div class="col-left">
-          <div class="eqrow">${eqSlots.map((s, i) => `<div class="eqc">${slotHtml(p.eq[s], 'eq', i, eqLabels[s])}<small>${eqLabels[s]}</small></div>`).join('')}</div>
+          <div class="doll">${eqSlots.map((s, i) => `<div class="eqc d-${s}">${slotHtml(p.eq[s], 'eq', i, eqLabels[s])}<small>${eqLabels[s]}</small></div>`).join('')}
+            <div class="d-hero"><img src="${heroPortraitURL(p)}" alt="Herói"><small>${p.cls ? CLASS_INFO[p.cls].name : playerTitle(p) || 'Aventureiro'}</small></div></div>
           <div class="attrs">
             <p class="lvl">Nível ${p.level} · XP ${p.xp}/${xpNext(p.level)}${p.points > 0 ? ` · <span class="pts">${p.points} pontos!</span>` : ''}</p>
             ${attr('str', 'Força', 'dano')}
@@ -220,11 +224,7 @@ const UI = {
     const it = p.bag[sel.i];
     if (!it) return;
     if (isEquip(it)) {
-      const old = p.eq[it.kind];
-      p.eq[it.kind] = it;
-      if (old) p.bag[sel.i] = old; else p.bag.splice(sel.i, 1);
-      const st = playerStats(p);
-      p.hp = Math.min(p.hp, st.maxHp);
+      equipItem(p, sel.i);
       Sfx.pickup();
     } else if (isConsumable(it)) {
       if (it.kind === 'scroll' && this.invCtx !== 'dungeon') return;
@@ -243,7 +243,7 @@ const UI = {
   },
 
   invUnequip() {
-    const p = G.p, slot = ['weapon', 'armor', 'ring'][this.invSel.i];
+    const p = G.p, slot = EQUIP_SLOTS[this.invSel.i];
     const it = p.eq[slot];
     if (!it) return;
     if (p.bag.length >= p.bagSize) { this.toast('Mochila cheia!', '#f87171'); return; }

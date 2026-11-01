@@ -1,5 +1,6 @@
 // =============================================================
-// Geração de itens, raridade, descrição e preço
+// Geração de itens, raridade, descrição, preço e "equipar melhores"
+// Tipos: weapon, helmet, armor, gloves, boots, amulet, ring, wings, treasure
 // =============================================================
 'use strict';
 
@@ -12,37 +13,51 @@ function rollRarity(luck, minR = 0) {
   return minR;
 }
 
-function rollBonuses(count, lvl, exclude) {
-  const pool = BONUS_POOL.filter(b => !exclude || !exclude.includes(b.k));
+function rollBonuses(count, lvl, kind) {
+  const cfg = SLOT_BONUS[kind] || { pool: null, mul: 1 };
+  const pool = BONUS_POOL.filter(b => !cfg.pool || cfg.pool.includes(b.k));
   const out = [];
   for (let i = 0; i < count && pool.length; i++) {
     const b = pool.splice(ri(pool.length), 1)[0];
-    out.push({ k: b.k, v: b.roll(lvl) });
+    out.push({ k: b.k, v: Math.max(1, Math.round(b.roll(lvl) * cfg.mul)) });
   }
   return out;
 }
 
+// Tipo de item que cai (sem tipo forçado)
+function rollKind() {
+  const n = Math.random() * 100;
+  return n < 20 ? 'weapon' : n < 30 ? 'armor' : n < 38 ? 'helmet' : n < 46 ? 'gloves' : n < 54 ? 'boots' : n < 59 ? 'amulet' : n < 67 ? 'ring' : 'treasure';
+}
+
 function genItem(floor, minR = 0, forceKind = null, luck = 0) {
   const r = rollRarity(luck, minR);
-  let kind = forceKind;
-  if (!kind) {
-    const n = Math.random() * 100;
-    kind = n < 28 ? 'weapon' : n < 50 ? 'armor' : n < 62 ? 'ring' : 'treasure';
-  }
+  const kind = forceKind || rollKind();
   const lvl = floor;
   const item = { id: uid(), kind, rarity: r, lvl, up: 0, bonuses: [] };
 
   if (kind === 'weapon') {
-    const w = pick(WEAPONS);
-    item.name = w.name;
+    // metade das vezes, uma arma da classe do herói
+    const cls = G.p && G.p.cls;
+    const pool = cls && Math.random() < 0.5 ? WEAPONS.filter(w => w.cls === cls) : WEAPONS;
+    const w = pick(pool);
+    item.name = w.name; item.wtype = w.type;
     item.dmg = Math.round(w.dmg * itemDmgMul(lvl) * (1 + r * 0.08) * 10) / 10;
     item.cd = w.cd; item.range = w.range;
   } else if (kind === 'armor') {
     const a = pick(ARMORS);
     item.name = a.name;
-    item.def = Math.round(a.def * itemDefMul(lvl) * (1 + r * 0.1));
+    item.def = Math.max(1, Math.round(a.def * itemDefMul(lvl) * (1 + r * 0.1)));
+  } else if (GEAR[kind]) {
+    const g = pick(GEAR[kind]);
+    item.name = g.name;
+    item.def = Math.max(1, Math.round(g.def * itemDefMul(lvl) * (1 + r * 0.1)));
   } else if (kind === 'ring') {
     item.name = pick(RINGS);
+  } else if (kind === 'amulet') {
+    item.name = pick(AMULETS);
+  } else if (kind === 'wings') {
+    return makeWings(0, floor);
   } else if (kind === 'treasure') {
     const t = pick(TREASURES);
     item.name = t.name;
@@ -51,21 +66,36 @@ function genItem(floor, minR = 0, forceKind = null, luck = 0) {
 
   if (kind !== 'treasure') {
     let n = RARITIES[r].bonus;
-    if (kind === 'ring') n = Math.max(1, n + 1);
-    item.bonuses = rollBonuses(n, lvl);
+    if (kind === 'ring' || kind === 'amulet') n = Math.max(1, n + 1);
+    item.bonuses = rollBonuses(n, lvl, kind);
+  }
+  // amuletos raros ou melhores dão +1 nível numa habilidade
+  if (kind === 'amulet' && r >= 2 && typeof SKILLS !== 'undefined') {
+    const known = G.p ? Object.keys(G.p.skills || {}).filter(id => SKILLS[id] && SKILLS[id].kind !== 'ultimate') : [];
+    item.skillUp = known.length && Math.random() < 0.6 ? pick(known) : pick(Object.keys(SKILLS).filter(id => SKILLS[id].kind !== 'ultimate'));
   }
 
   if (r === 4 && LEGENDS[kind]) {
     const L = LEGENDS[kind];
     item.name = L.name; item.effect = L.effect; item.legendDesc = L.desc;
-    if (kind === 'weapon') { item.dmg = Math.round(item.dmg * 1.3 * 10) / 10; item.cd = 0.34; item.range = 16; }
+    if (kind === 'weapon') { item.dmg = Math.round(8 * itemDmgMul(lvl) * (1 + r * 0.08) * 1.3 * 10) / 10; item.cd = 0.34; item.range = 16; item.wtype = 'espada'; }
     if (kind === 'armor') item.def = Math.round(item.def * 1.3);
   } else if (r === 4 && kind === 'treasure') {
     item.name = 'Relíquia dos Antigos';
   }
 
   rollSpecial(item);
-  item.value = itemValue(item) * (item.special ? 1.5 : 1);
+  item.value = Math.round(itemValue(item) * (item.special ? 1.5 : 1));
+  return item;
+}
+
+// Asas: wi = índice em WINGS (0 a 5)
+function makeWings(wi, floor) {
+  const w = WINGS[wi];
+  const item = { id: uid(), kind: 'wings', wing: wi, name: w.name, rarity: wi >= 5 ? 4 : 3, lvl: floor, up: 0, bonuses: [] };
+  item.def = Math.max(1, Math.round(0.8 * itemDefMul(floor)));
+  item.bonuses = rollBonuses(2, floor, 'wings');
+  item.value = itemValue(item) * 3;
   return item;
 }
 
@@ -78,11 +108,12 @@ function itemValue(item) {
   const m = RARITIES[item.rarity].mult;
   if (item.kind === 'treasure') return Math.round(item.base * (1 + 0.35 * (item.lvl - 1)) * m);
   if (CONSUMABLES[item.kind]) return Math.floor(CONSUMABLES[item.kind].price / 2);
-  return Math.round(8 * (1 + 0.3 * (item.lvl - 1)) * m);
+  const slotMul = item.kind === 'weapon' || item.kind === 'armor' ? 1 : 0.7;
+  return Math.round(8 * (1 + 0.3 * (item.lvl - 1)) * m * slotMul);
 }
 
 function isConsumable(item) { return !!CONSUMABLES[item.kind]; }
-function isEquip(item) { return item.kind === 'weapon' || item.kind === 'armor' || item.kind === 'ring'; }
+function isEquip(item) { return !!item && slotsForKind(item.kind).length > 0; }
 
 function itemDisplayName(item) {
   let n = item.name;
@@ -95,21 +126,26 @@ function itemStatLines(item) {
   const lines = [];
   if (item.kind === 'weapon') {
     const d = item.dmg * (1 + 0.08 * (item.up || 0));
-    lines.push(`Dano ${d.toFixed(1)} · ${item.cd < 0.3 ? 'rápida' : item.cd > 0.5 ? 'lenta' : 'média'} · alcance ${item.range}`);
+    const t = weaponType(item);
+    const how = t === 'arco' ? 'flechas à distância' : t === 'cajado' ? 'magia que explode' : t === 'martelo' ? 'golpe em área' : `alcance ${item.range}`;
+    lines.push(`Dano ${d.toFixed(1)} · ${item.cd < 0.3 ? 'rápida' : item.cd > 0.55 ? 'lenta' : 'média'} · ${how}`);
   }
-  if (item.kind === 'armor') lines.push(`Defesa ${Math.round(item.def * (1 + 0.08 * (item.up || 0)))}`);
+  if (DEF_KINDS.includes(item.kind) || item.kind === 'wings') lines.push(`Defesa ${Math.round(item.def * (1 + 0.08 * (item.up || 0)))}`);
+  if (item.kind === 'wings') lines.push('Asas: a esquiva vira um voo por cima de espinhos, lava e inimigos.', '✦ ' + WINGS[item.wing].desc);
   if (item.kind === 'treasure') lines.push('Tesouro: venda no mercado da vila.');
   if (CONSUMABLES[item.kind]) lines.push(CONSUMABLES[item.kind].desc);
   for (const b of item.bonuses || []) {
     const def = BONUS_POOL.find(p => p.k === b.k);
     if (def) lines.push(def.label(b.v));
   }
+  if (item.skillUp && typeof SKILLS !== 'undefined' && SKILLS[item.skillUp]) lines.push(`✦ +1 nível em ${SKILLS[item.skillUp].name} (se você já tiver aprendido)`);
   if (item.legendDesc) lines.push('★ ' + item.legendDesc);
   const sp = specialLine(item); if (sp) lines.push(sp);
-  if (isEquip(item) && item.lvl) lines.push(`Melhorias no ferreiro: até +${upgradeCap(item)}`);
+  if (canUpgrade(item)) lines.push(`Melhorias no ferreiro: até +${upgradeCap(item)}`);
   if (item.lvl) lines.push(`Nível do item: ${item.lvl}`);
   return lines;
 }
+function canUpgrade(item) { return item && (item.kind === 'weapon' || DEF_KINDS.includes(item.kind)) && !!item.lvl; }
 
 // Tenta colocar um item na mochila; retorna true se coube.
 function bagAdd(bag, size, item) {
@@ -136,19 +172,37 @@ function itemScore(item) {
   for (const b of item.bonuses || []) s += (BONUS_WEIGHT[b.k] || 0) * b.v;
   if (item.effect) s += 15;
   if (item.special) s += 12;
+  if (item.skillUp) s += 10;
   const up = 1 + 0.08 * (item.up || 0);
-  if (item.kind === 'weapon') s += (item.dmg * up / item.cd) * 1.6;
-  if (item.kind === 'armor') s += item.def * up * 2.5;
+  if (item.kind === 'weapon') {
+    s += (item.dmg * up / item.cd) * 1.6;
+    const cls = G.p && G.p.cls; // a arma da sua classe vale mais
+    const w = WEAPONS.find(w => w.type === weaponType(item));
+    if (cls && w && w.cls === cls) s *= 1.3;
+  }
+  if (DEF_KINDS.includes(item.kind)) s += item.def * up * 2.5;
+  if (item.kind === 'wings') s += 30 + item.wing * 6 + item.def * 2.5;
   return s;
 }
-// Equipa o melhor item de cada tipo (mochila x equipado). Retorna os nomes equipados.
+// Espaço onde um item entraria (para anéis: o vazio ou o mais fraco)
+function targetSlot(p, item) {
+  const slots = slotsForKind(item.kind);
+  if (slots.length === 1) return slots[0];
+  const empty = slots.find(s => !p.eq[s]);
+  if (empty) return empty;
+  return itemScore(p.eq[slots[0]]) <= itemScore(p.eq[slots[1]]) ? slots[0] : slots[1];
+}
+// Equipa o melhor de cada espaço (mochila x equipado). Retorna os nomes equipados.
 function equipBest(p) {
   const done = [];
-  for (const slot of ['weapon', 'armor', 'ring']) {
-    let best = p.eq[slot], bestS = itemScore(best), bestIdx = -1;
-    p.bag.forEach((it, i) => { if (it.kind === slot) { const sc = itemScore(it); if (sc > bestS + 0.01) { best = it; bestS = sc; bestIdx = i; } } });
-    if (bestIdx >= 0) {
-      const old = p.eq[slot];
+  for (const kind of ['weapon', 'helmet', 'armor', 'gloves', 'boots', 'amulet', 'ring', 'wings']) {
+    const slots = slotsForKind(kind);
+    for (let pass = 0; pass < slots.length; pass++) {
+      const slot = targetSlot(p, { kind });
+      let bestS = itemScore(p.eq[slot]), bestIdx = -1;
+      p.bag.forEach((it, i) => { if (it.kind === kind) { const sc = itemScore(it); if (sc > bestS + 0.01) { bestS = sc; bestIdx = i; } } });
+      if (bestIdx < 0) break;
+      const best = p.bag[bestIdx], old = p.eq[slot];
       p.eq[slot] = best;
       if (old) p.bag[bestIdx] = old; else p.bag.splice(bestIdx, 1);
       done.push(best.name);
@@ -157,4 +211,12 @@ function equipBest(p) {
   if (done.length) p.hp = Math.min(p.hp, playerStats(p).maxHp);
   return done;
 }
-function isUpgrade(p, item) { return isEquip(item) && itemScore(item) > itemScore(p.eq[item.kind]) + 0.01; }
+function isUpgrade(p, item) { return isEquip(item) && itemScore(item) > itemScore(p.eq[targetSlot(p, item)]) + 0.01; }
+function equipItem(p, bagIdx) {
+  const it = p.bag[bagIdx];
+  const slot = targetSlot(p, it);
+  const old = p.eq[slot];
+  p.eq[slot] = it;
+  if (old) p.bag[bagIdx] = old; else p.bag.splice(bagIdx, 1);
+  p.hp = Math.min(p.hp, playerStats(p).maxHp);
+}

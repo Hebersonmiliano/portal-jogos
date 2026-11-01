@@ -13,8 +13,8 @@ const SPRITES = {
     '...ssssss...',
     '....ssss....',
     '..dccccccd..',
-    '.s.cccccc.s.',
-    '.s.cbbbbc.s.',
+    '.g.cccccc.g.',
+    '.g.cbbbbc.g.',
     '...pppppp...',
     '...pp..pp...',
     '...kk..kk...',
@@ -495,6 +495,86 @@ const SPRITES = {
     '...gg...',
     '........',
   ],
+  i_helmet: [
+    '........',
+    '..mmmm..',
+    '.mlmmmm.',
+    '.mmmmmm.',
+    '.m.kk.m.',
+    '.m.kk.m.',
+    '.mm..mm.',
+    '........',
+  ],
+  i_gloves: [
+    '........',
+    '.m.m.m..',
+    '.m.m.m..',
+    '.mmmmm.m',
+    '.mlmmmmm',
+    '.mmmmmm.',
+    '..bbbb..',
+    '........',
+  ],
+  i_boots: [
+    '........',
+    '..mmm...',
+    '..mlm...',
+    '..mmm...',
+    '..mmmmm.',
+    '.mmmmmmm',
+    '.bbbbbbb',
+    '........',
+  ],
+  i_amulet: [
+    'g......g',
+    '.g....g.',
+    '..g..g..',
+    '...gg...',
+    '..rrrr..',
+    '..rlrr..',
+    '..rrrr..',
+    '...rr...',
+  ],
+  i_wings: [
+    '........',
+    'mm....mm',
+    'mlm..mlm',
+    'mmmkkmmm',
+    '.mmkkmm.',
+    '.mm..mm.',
+    'm......m',
+    '........',
+  ],
+  i_bow: [
+    '..hh...w',
+    '.h....w.',
+    'h....w..',
+    'h...m...',
+    'h..w....',
+    'h.w.....',
+    '.h......',
+    '..hh....',
+  ],
+  i_staff: [
+    '.....ll.',
+    '....lgl.',
+    '.....lh.',
+    '....h...',
+    '...h....',
+    '..h.....',
+    '.h......',
+    'h.......',
+  ],
+  i_hammer: [
+    '...mmmm.',
+    '...mllm.',
+    '...mmmm.',
+    '....h...',
+    '...h....',
+    '..h.....',
+    '.h......',
+    'h.......',
+  ],
   i_treasure: [
     '........',
     '..gggg..',
@@ -553,8 +633,8 @@ const SPRITES = {
   const frame = (changes) => h.map((row, i) => changes[i] !== undefined ? changes[i] : row);
   SPRITES.hero_walk1 = frame({ 10: '..pp....pp..', 11: '.kk......kk.' });
   SPRITES.hero_walk2 = frame({ 10: '....pppp....', 11: '....kkkk....' });
-  SPRITES.hero_atk = frame({ 7: '.s.ccccccss.', 8: '...cbbbbc...', 10: '..pp...pp...', 11: '..kk...kk...' });
-  SPRITES.hero_hurt = frame({ 3: '...sksksss..', 5: '....skks....', 7: 's..cccccc..s' });
+  SPRITES.hero_atk = frame({ 7: '.g.ccccccgg.', 8: '...cbbbbc...', 10: '..pp...pp...', 11: '..kk...kk...' });
+  SPRITES.hero_hurt = frame({ 3: '...sksksss..', 5: '....skks....', 7: 'g..cccccc..g' });
   SPRITES.crabShell = [
     '............', '............', '............', '............', '............',
     '..aaaaaaaa..', '.alaaaaaaaa.', 'aaaaaaaaaaab', '.bbbbbbbbbb.',
@@ -564,7 +644,7 @@ const SPRITES = {
 
 const DEFAULT_PAL = {
   hero_walk1: null, hero_walk2: null, hero_atk: null, hero_hurt: null,
-  hero: { h: '#6b3e1f', s: '#f1c27d', e: '#1a1a1a', c: '#3b82f6', d: '#1d4ed8', b: '#7c4a1e', p: '#4b3621', k: '#2b1d10' },
+  hero: { h: '#6b3e1f', s: '#f1c27d', g: '#f1c27d', e: '#1a1a1a', c: '#3b82f6', d: '#1d4ed8', b: '#7c4a1e', p: '#4b3621', k: '#2b1d10' },
   chest: { d: '#4a2e14', w: '#9a6a34', m: '#e0b040' },
   chestOpen: { d: '#4a2e14', w: '#9a6a34', m: '#e0b040', k: '#1a0f06' },
   tomb: { s: '#8a8a94', k: '#4a4a52', d: '#3a2e22' },
@@ -573,6 +653,14 @@ const DEFAULT_PAL = {
   i_armor: { m: '#94a3b8', l: '#e2e8f0' },
   i_ring: { g: '#facc15', l: '#fff7c2' },
   i_treasure: { g: '#22d3ee', l: '#cffafe' },
+  i_helmet: { m: '#94a3b8', l: '#e2e8f0', k: '#1e293b' },
+  i_gloves: { m: '#a16207', l: '#eab308', b: '#78350f' },
+  i_boots: { m: '#78350f', l: '#b45309', b: '#3f2410' },
+  i_amulet: { g: '#facc15', r: '#a855f7', l: '#e9d5ff' },
+  i_wings: { m: '#a78bfa', l: '#ede9fe', k: '#4c1d95' },
+  i_bow: { h: '#8b5a2b', w: '#e5e7eb', m: '#cbd5e1' },
+  i_staff: { h: '#8b5a2b', l: '#a5f3fc', g: '#22d3ee' },
+  i_hammer: { m: '#94a3b8', l: '#e2e8f0', h: '#8b5a2b' },
   i_potion: { c: '#8b5a2b', g: '#cbd5e1', r: '#ef4444', l: '#fecaca' },
   i_food: { b: '#a16207', l: '#eab308' },
   i_scroll: { p: '#a16207', w: '#f5e6c8', k: '#6b4a2b' },
@@ -594,7 +682,7 @@ function getSprite(name, pal, flash) {
     for (let i = 0; i < rows[j].length; i++) {
       const ch = rows[j][i];
       if (ch === '.') continue;
-      x.fillStyle = flash === 'red' ? '#ff4d4d' : flash ? '#ffffff' : (p[ch] || '#ff00ff');
+      x.fillStyle = flash === 'red' ? '#ff4d4d' : flash ? '#ffffff' : (p[ch] || (ch === 'g' && name.startsWith('hero') && p.s) || '#ff00ff');
       x.fillRect(i, j, 1, 1);
     }
   }
@@ -603,6 +691,12 @@ function getSprite(name, pal, flash) {
 }
 
 function itemIconName(item) {
+  if (item.kind === 'weapon') {
+    const t = weaponType(item);
+    if (t === 'arco') return 'i_bow';
+    if (t === 'cajado') return 'i_staff';
+    if (t === 'martelo') return 'i_hammer';
+  }
   return 'i_' + item.kind;
 }
 
@@ -613,7 +707,46 @@ function itemIconPal(item) {
     const g = cols[Math.max(0, idx) % cols.length];
     return { g, l: '#ffffff' };
   }
+  if (item.kind === 'wings' && WINGS[item.wing]) { const w = WINGS[item.wing]; return { m: w.color, l: w.edge, k: shade(w.color, -40) }; }
   return null;
+}
+
+// Paleta do herói conforme o equipamento (elmo, armadura, luvas, botas)
+const GEAR_COLORS = {
+  'Capuz': '#3f6212', 'Elmo': '#9ca3af', 'Elmo de Placas': '#e5e7eb',
+  'Roupa de Couro': ['#a16207', '#713f12'], 'Cota de Malha': ['#94a3b8', '#475569'], 'Peitoral': ['#cbd5e1', '#64748b'],
+  'Luvas de Couro': '#92400e', 'Manoplas': '#94a3b8', 'Luvas de Garra': '#57534e',
+  'Botas de Couro': '#78350f', 'Botas de Ferro': '#64748b', 'Grevas': '#cbd5e1',
+};
+function heroPal(p) {
+  const pal = Object.assign({}, DEFAULT_PAL.hero);
+  if (!p || !p.eq) return pal;
+  const col = it => it && (it.rarity === 4 ? RARITIES[4].color : GEAR_COLORS[it.name]);
+  const h = col(p.eq.helmet); if (h) pal.h = h;
+  const a = p.eq.armor && p.eq.armor.rarity === 4 ? [RARITIES[4].color, shade(RARITIES[4].color, -40)] : p.eq.armor && GEAR_COLORS[p.eq.armor.name];
+  if (a) { pal.c = a[0]; pal.d = a[1]; }
+  const g = col(p.eq.gloves); if (g) pal.g = g;
+  const b = col(p.eq.boots); if (b) pal.k = b;
+  return pal;
+}
+function heroPalKey(p) { return EQUIP_SLOTS.map(s => p.eq[s] ? p.eq[s].name + p.eq[s].rarity : '-').join('|'); }
+
+// Retrato do herói para a mochila
+const _dollCache = {};
+function heroPortraitURL(p) {
+  const key = heroPalKey(p);
+  if (_dollCache[key]) return _dollCache[key];
+  const c = document.createElement('canvas');
+  c.width = 96; c.height = 84;
+  const x = c.getContext('2d');
+  x.imageSmoothingEnabled = false;
+  x.scale(6, 6);
+  x.translate(8, 1);
+  if (p.eq.wings && typeof drawWings === 'function') { x.save(); x.translate(0, 7); drawWings(x, p.eq.wings.wing, 0.6); x.restore(); }
+  x.drawImage(getSprite('hero', heroPal(p)), -6, 1);
+  if (p.eq.weapon && typeof drawWeaponInHand === 'function') { x.save(); x.translate(0, 1); drawWeaponInHand(x, p.eq.weapon, false); x.restore(); }
+  _dollCache[key] = c.toDataURL();
+  return _dollCache[key];
 }
 
 // Ícone como dataURL (para a interface em HTML)

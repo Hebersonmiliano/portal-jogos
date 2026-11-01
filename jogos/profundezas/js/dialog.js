@@ -39,18 +39,19 @@ const PEOPLE = {
 
 const _portraitCache = {};
 function portraitURL(who) {
-  if (_portraitCache[who]) return _portraitCache[who];
+  const key = PEOPLE[who] || who.startsWith('boss') || !G.p ? who : who + heroPalKey(G.p);
+  if (_portraitCache[key]) return _portraitCache[key];
   let spr;
   if (PEOPLE[who]) spr = getSprite(PEOPLE[who].face, PEOPLE[who].pal);
   else if (who.startsWith('boss')) { const b = BIOMES[+who.slice(4)].boss; spr = getSprite(b.sprite, b.pal); }
-  else spr = getSprite('hero');
+  else spr = getSprite('hero', G.p ? heroPal(G.p) : null);
   const c = document.createElement('canvas'); c.width = 64; c.height = 64;
   const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
   x.fillStyle = '#0e0c12'; x.fillRect(0, 0, 64, 64);
   const s = spr.width >= 16 ? 4 : 5, w = spr.width * s, h = spr.height * s;
   x.drawImage(spr, (64 - w) / 2, 64 - h, w, h);
-  _portraitCache[who] = c.toDataURL();
-  return _portraitCache[who];
+  _portraitCache[key] = c.toDataURL();
+  return _portraitCache[key];
 }
 function personName(who) {
   if (PEOPLE[who]) return PEOPLE[who].name;
