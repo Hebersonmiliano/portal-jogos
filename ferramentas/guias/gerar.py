@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Gera a página do guia de um jogo a partir do GUIA.md do repositório do jogo.
 
-Uso:  python3 ferramentas/guias/gerar.py <caminho/do/GUIA.md> <id-do-jogo>
+Uso:  python3 ferramentas/guias/gerar.py <caminho/do/GUIA.md> <id-do-jogo> ["descrição da página"]
 Saída: guias/<id>.html  (imagens "imagens/x.jpg" do Markdown viram "assets/<id>/x.jpg")
 Precisa do pacote Python "markdown".
 """
@@ -14,6 +14,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 
 def main():
     origem, ident = Path(sys.argv[1]), sys.argv[2]
+    descricao = sys.argv[3] if len(sys.argv) > 3 else 'Guia completo: controles, contratos, automação, qualidade, energia e estratégias.'
     texto = origem.read_text(encoding='utf-8')
     titulo = texto.splitlines()[0].lstrip('# ').strip()
     # O sumário do Markdown é substituído pelo índice lateral da página.
@@ -30,7 +31,7 @@ def main():
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(titulo)} · Portal Pixel</title>
-  <meta name="description" content="Guia completo: controles, contratos, automação, qualidade, energia e estratégias.">
+  <meta name="description" content="{html.escape(descricao)}">
   <link rel="icon" type="image/svg+xml" href="../assets/marca/icone.svg">
   <meta name="theme-color" content="#0f1020">
   <link rel="preconnect" href="https://fonts.googleapis.com">

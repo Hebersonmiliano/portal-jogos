@@ -153,6 +153,14 @@ if (!jogo) {
     if (quadro && quadro.requestFullscreen) quadro.requestFullscreen();
   };
 
+  // Guia do jogo (campo "guia" no catálogo): botão na linha de ações
+  const acoes = document.querySelector(".acoes");
+  if (jogo.guia && acoes && !acoes.querySelector(".botao-guia")) {
+    const g = el("a", "botao botao-sec botao-guia", "📖 Guia");
+    g.href = jogo.guia;
+    if (acoes.prepend) acoes.prepend(g); else acoes.append(g);
+  }
+
   // Compartilhar: usa o link curto j/<id>/, que mostra a prévia com imagem no WhatsApp.
   const botaoComp = document.getElementById("compartilhar");
   if (botaoComp) {

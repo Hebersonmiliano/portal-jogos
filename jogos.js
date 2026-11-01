@@ -44,6 +44,7 @@ window.JOGOS = [
     url: "jogos/profundezas/index.html",
     versao: "1.3.0",
     capa: "jogos/profundezas/capa.png",
+    guia: "guias/profundezas.html",
     cor: "#e9b44c",
     icone: "⛏️",
     engine: "HTML5",
