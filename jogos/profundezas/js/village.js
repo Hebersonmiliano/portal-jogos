@@ -264,6 +264,12 @@ function npcTalk(id) {
     b.includes(10) ? 'Você derrotou o Rei Goblin?! Uau! Me ensina a lutar?' : 'Dizem que tem um Rei Goblin no andar 10. Ele usa coroa de verdade?',
     'Se você ficar parado e apertar R, você volta pra cá! O Ancião chama de Runa de Retorno.',
   ]) }];
+  if (id === 'tobias' && p.flameKeeper && !p.flameTalked) {
+    p.flameTalked = true;
+    return [{ who: 'tobias', text: 'Guardião da Chama... Nunca pensei que diria esse nome a alguém de verdade. A fonte está fervendo de calor!' },
+      { who: 'pedrinho', text: 'Você foi até o andar 100?! Quando eu crescer, vou ser igualzinho!' },
+      { who: 'tobias', text: 'Pedra Funda deve tudo a você. As Profundezas continuam lá embaixo, mas agora elas é que têm medo de você.' }];
+  }
   if (id === 'tobias') {
     const chs = STORY.chapters.filter(c => b.includes(c.floor));
     const seen = p.chaptersTalked || 0;

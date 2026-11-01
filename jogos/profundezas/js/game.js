@@ -111,6 +111,7 @@ function resize() {
 function enterFloor(floor, viaStairs) {
   const p = G.p;
   elixirOnFloor(p);
+  p.reviveUsed = false;
   G.level = generateFloor(floor);
   G.floorCanvas = renderFloorCanvas(G.level);
   G.enemies = []; G.projectiles = []; G.drops = []; G.chests = []; G.props = []; G.hazards = []; G.traps = [];
@@ -222,7 +223,8 @@ function onEnemyDeath(e) {
     G.drops.push(makeDrop(e.x, e.y + 10, makeConsumable('potion', 2), 0.5));
     { const sp = genItem(f, 3, pick(SET_KINDS), st.luck); if (!sp.effect && (sp.set === undefined || sp.set === null)) rollSet(sp, f, setForFloor(f)); sp.value = Math.round(itemValue(sp) * 1.5); G.drops.push(makeDrop(e.x + 12, e.y + 10, sp, 0.5)); } // chefe sempre deixa uma peça de conjunto
     const first = !p.beaten.includes(f);
-    const wings = bossWingDrop(f, first);
+    endgameDrops(e, f); endgameRecords(p, f);
+    const wings = e.final ? null : bossWingDrop(f, first);
     if (wings) { G.drops.push(makeDrop(e.x, e.y - 12, wings, 0.5)); setTimeout(() => UI.toast(`${e.name} deixou cair ${wings.name}! A esquiva vira um voo.`, WINGS[wings.wing].edge), 1600); }
     if (first) { p.beaten.push(f); p.skillPts = (p.skillPts || 0) + 1; setTimeout(() => UI.toast('Chefe derrotado pela primeira vez: +1 ponto de habilidade!', '#a78bfa'), 900); }
     G.level.stairs = { x: e.x, y: e.y + 24 };
@@ -795,7 +797,7 @@ function villagePause(msg) {
     cls: 'village',
     back: () => UI.close(),
     backLabel: 'Voltar a andar pela vila',
-    text: `${msg ? `<span style="color:#fde68a">${msg}</span><br>` : ''}Vida ${Math.ceil(p.hp)}/${st.maxHp} · Fome ${Math.ceil(p.hunger)} · Cansaço ${Math.floor(p.fatigue)} · ◆ ${p.gold} ouro · Mais fundo: andar ${p.maxFloor}${tombLine}`,
+    text: `${msg ? `<span style="color:#fde68a">${msg}</span><br>` : ''}Vida ${Math.ceil(p.hp)}/${st.maxHp} · Fome ${Math.ceil(p.hunger)} · Cansaço ${Math.floor(p.fatigue)} · ◆ ${p.gold} ouro · Recordes: ${recordsLine(p)}${p.title ? ` · <span style="color:#f0abfc">${p.title}</span>` : ''}${tombLine}`,
     items: [
       { label: 'Descer à masmorra', sub: p.portal ? `Portal de Retorno aberto no andar ${p.portal}` : 'Escolha o elevador de partida', act: descendMenu },
       { label: 'Ancião Tobias', sub: `Objetivo: ${STORY.elder(p).goal}`, color: '#fde68a', act: elderMenu },

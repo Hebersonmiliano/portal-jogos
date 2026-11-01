@@ -161,7 +161,7 @@ const UI = {
       <div class="invgrid">
         <div class="col-left">
           <div class="doll">${eqSlots.map((s, i) => `<div class="eqc d-${s}">${slotHtml(p.eq[s], 'eq', i, eqLabels[s])}<small>${eqLabels[s]}</small></div>`).join('')}
-            <div class="d-hero"><img src="${heroPortraitURL(p)}" alt="Herói"><small>${p.cls ? CLASS_INFO[p.cls].name : playerTitle(p) || 'Aventureiro'}</small></div></div>
+            <div class="d-hero"><img src="${heroPortraitURL(p)}" alt="Herói"><small>${p.cls ? CLASS_INFO[p.cls].name : playerTitle(p) || 'Aventureiro'}${p.title ? `<br><span style="color:#f0abfc">${p.title}</span>` : ''}</small></div></div>
           <div class="attrs">
             <p class="lvl">Nível ${p.level} · XP ${p.xp}/${xpNext(p.level)}${p.points > 0 ? ` · <span class="pts">${p.points} pontos!</span>` : ''}</p>
             ${attr('str', 'Força', 'dano')}

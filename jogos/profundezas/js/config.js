@@ -6,7 +6,7 @@
 const TILE = 16;
 const MAP_W = 64;
 const MAP_H = 48;
-const VERSION = 'v1.3.1';
+const VERSION = 'v1.4';
 const SAVE_KEY = 'profundezas_save_v1';
 const MAX_FLOOR = 50;
 const BAG_START = 24;   // espaços da mochila no começo
@@ -167,6 +167,7 @@ const WINGS = [
   { name: 'Asas Espectrais',  color: '#c7c7e0', edge: '#ffffff', desc: 'O voo recarrega 40% mais rápido.' },
   { name: 'Asas de Fogo',     color: '#c2410c', edge: '#fde047', desc: 'Por onde você voa, o chão pega fogo e queima os inimigos.' },
   { name: 'Asas Abissais',    color: '#1e1b4b', edge: '#f43f5e', desc: 'Reúne o poder de todas as asas.' },
+  { name: 'Asas da Chama',    color: '#c026d3', edge: '#fff7ed', desc: 'Todos os poderes das asas, mais fortes: o voo cura 6% da vida.' },
 ];
 
 const TREASURES = [

@@ -523,6 +523,7 @@ class Boss extends Enemy {
     this.hidden = false;  // o verme fica embaixo da terra
     this.phase = 1;
     this.proj = biomeOf(floor).proj;
+    setupEndgameBoss(this, floor);
   }
 
   arena() { return G.level.rooms[1] || G.level.rooms[0]; }
@@ -558,8 +559,8 @@ class Boss extends Enemy {
     this.actCd -= dt;
     if (this.actCd <= 0) {
       const moves = BOSS_MOVES[this.kind] || BOSS_MOVES[0];
-      const act = pick(this.phase === 2 ? moves.p2 : moves.p1);
-      this.actCd = this.phase === 2 ? 2.1 : 3.0;
+      const act = endgameMove(this) || pick(this.phase >= 2 ? moves.p2 : moves.p1);
+      this.actCd = this.corrupt ? endgameCooldown(this) : this.phase === 2 ? 2.1 : 3.0;
       this.start(act, ax, ay);
     }
   }
@@ -569,6 +570,7 @@ class Boss extends Enemy {
     if (act === 'slam') { this.slam = { x: p.x, y: p.y, t: 0.9 }; return; }
     if (act === 'ring') { this.ring(this.phase === 2 ? 14 : 10, 85); return; }
     if (act === 'summon') { this.summon(); return; }
+    if (endgameStart(this, act)) return;
     // ---- Rei Goblin ----
     if (act === 'volley') {          // chuva de flechas: círculos marcados em volta do jogador
       const n = this.phase === 2 ? 9 : 6;
@@ -670,9 +672,10 @@ class Boss extends Enemy {
       }
     } else if (m.type === 'streams') {
       m.next -= dt;
-      if (m.next <= 0 && m.shots < 9) {
+      const heads = m.heads || 3;
+      if (m.next <= 0 && m.shots < (m.max || 9)) {
         m.next = 0.12; m.shots++;
-        const head = (m.shots - 1) % 3, hx = this.x + (head - 1) * 14, hy = this.y - 30;
+        const head = (m.shots - 1) % heads, hx = this.x + (head - (heads - 1) / 2) * 14, hy = this.y - 30;
         const a = Math.atan2(p.y - 6 - hy, p.x - hx);
         G.projectiles.push(new Projectile(hx, hy, Math.cos(a) * 130, Math.sin(a) * 130, this.dmg * 0.7, false, '#5eead4', 3));
         Sfx.shoot();
@@ -681,7 +684,7 @@ class Boss extends Enemy {
       m.emit -= dt;
       while (m.emit <= 0) {
         m.emit += 0.09; m.ang += 0.42;
-        for (const off of [0, Math.PI]) {
+        for (const off of (m.arms === 4 ? [0, Math.PI / 2, Math.PI, Math.PI * 1.5] : [0, Math.PI])) {
           const a = m.ang + off;
           G.projectiles.push(new Projectile(this.x, this.y - 14, Math.cos(a) * 62, Math.sin(a) * 62, this.dmg * 0.6, false, '#c084fc', 3));
         }
@@ -701,6 +704,7 @@ class Boss extends Enemy {
 
   summon() {
     const types = this.kind === 0 ? ['shooter', 'shooter'] : this.kind === 3 ? ['chaser', 'chaser', 'chaser'] : ['chaser', 'fast'];
+    if (this.final) types.push('tank');
     for (const t of types) {
       const e = new Enemy(t, this.floor, this.x + rr(-24, 24), this.y + rr(-12, 12));
       e.aware = true; e.xp = Math.round(e.xp / 2);
@@ -896,7 +900,7 @@ function hurtPlayer(amount, source) {
   addText(p.x, p.y - 16, '-' + Math.round(dmg), '#f87171');
   Sfx.hurt();
   if (st.effects.espinhos && source && !source.dead) source.hurt(amount * 0.4, p.x, p.y, false);
-  if (p.hp <= 0) { p.hp = 0; playerDie(); }
+  if (p.hp <= 0 && !endgameCheatDeath(p)) { p.hp = 0; playerDie(); }
 }
 
 function playerAttack(aimAngle, assist) {

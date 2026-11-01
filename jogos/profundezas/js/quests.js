@@ -24,6 +24,11 @@ const STORY = {
     if (!b.includes(30)) return { goal: 'Derrote a Hidra das Marés no andar 30.', talk: '"Alguém bebendo da Chama? Abaixo das minas ficam as ruínas do povo antigo. Eles sabiam mais do que nós. Desça até o andar 30."' };
     if (!b.includes(40)) return { goal: 'Derrote o Lich Ancestral no andar 40.', talk: '"Um rei que desceu com o fogo e nunca voltou... As lendas falam da Cripta, no andar 40. Tome cuidado: o que está morto lá embaixo não descansa."' };
     if (!b.includes(50)) return { goal: 'Derrote o Senhor do Abismo no andar 50.', talk: '"Então é isso. A Chama caiu no Abismo e alimenta uma criatura. Ela está no andar 50. Pedra Funda inteira está com você."' };
+    if (!p.flameKeeper) {
+      const next = Math.max(60, Math.ceil(((p.maxFloor || 50) + 1) / 10) * 10);
+      return { goal: next >= FINAL_FLOOR ? 'Derrote a Chama Corrompida no andar 100.' : `Derrote o chefe corrompido do andar ${next} (a Chama Corrompida espera no andar 100).`,
+        talk: '"A Chama voltou, mas não inteira. Sinto um pedaço dela lá no fundo, retorcido. Os chefes que você venceu estão voltando, corrompidos, a cada dez andares. E no andar 100... algo chama por você."' };
+    }
     return { goal: 'Explore as Profundezas Infinitas (além do andar 50).', talk: `"A Chama voltou a arder graças a você. Dizem que abaixo do Abismo os andares não acabam nunca. Seu recorde é o andar ${p.maxFloor}. Até onde você vai?"` };
   },
 };
@@ -161,6 +166,7 @@ function elderMenu() {
     items: [
       { label: 'Ouvir a história de novo', sub: 'Como tudo começou', act: () => showStory(STORY.intro.title, STORY.intro.text, elderMenu) },
       ...chapters.map(c => ({ label: c.title, sub: 'Capítulo já descoberto', act: () => showStory(c.title, c.text, elderMenu, SCENE_OF[c.floor]) })),
+      ...(p.flameKeeper ? [{ label: FINAL_STORY.title, sub: 'Epílogo: a Chama Corrompida', act: () => showStory(FINAL_STORY.title, FINAL_STORY.text, elderMenu, 'ch5') }] : []),
       { label: 'Esquecer habilidades', color: '#a78bfa', right: respecCost(p) + ' ◆',
         sub: skillPointsSpent(p) ? `Devolve os ${skillPointsSpent(p)} pontos gastos para você montar outra árvore` : 'Você ainda não gastou pontos na árvore',
         disabled: !skillPointsSpent(p) || p.gold < respecCost(p),
@@ -204,6 +210,7 @@ const MINERS = {
 function bossIntro(boss) {
   const p = G.p;
   if (!Array.isArray(p.bossMet)) p.bossMet = [];
+  if (boss.final) { if (p.bossMet.includes(FINAL_FLOOR)) return; p.bossMet.push(FINAL_FLOOR); Dialog.play(FINAL_TAUNT.map(t => ({ who: 'boss5', text: t }))); return; }
   if (boss.floor > MAX_FLOOR || p.bossMet.includes(boss.floor)) return;
   p.bossMet.push(boss.floor);
   Dialog.play((BOSS_TAUNT[boss.kind] || []).map(t => ({ who: 'boss' + boss.kind, text: t })));

@@ -5,7 +5,7 @@
 'use strict';
 
 function wingIdx(p) { return p && p.eq && p.eq.wings ? p.eq.wings.wing : -1; }
-function wingHas(p, i) { const w = wingIdx(p); return w === i || w === 5; }
+function wingHas(p, i) { const w = wingIdx(p); return w === i || w >= 5; }
 
 const FLY_TIME = 0.3;
 function flyTime(p) { return wingHas(p, 0) ? 0.42 : FLY_TIME; }
@@ -18,7 +18,7 @@ function startDodge(p, dx, dy) {
     p.vx = dx / d * sp; p.vy = dy / d * sp;
     p.dodgeT = flyTime(p); p.flyT = p.dodgeT; p.flyHit = new Set();
     p.dodgeCd = 0.22;
-    if (wingHas(p, 2)) { const st = playerStats(p); p.hp = Math.min(st.maxHp, p.hp + st.maxHp * 0.03); addText(p.x, p.y - 18, '+' + Math.round(st.maxHp * 0.03), '#5eead4', 0.6); }
+    if (wingHas(p, 2)) { const st = playerStats(p), k = wingIdx(p) === 6 ? 0.06 : 0.03; p.hp = Math.min(st.maxHp, p.hp + st.maxHp * k); addText(p.x, p.y - 18, '+' + Math.round(st.maxHp * k), '#5eead4', 0.6); }
     Sfx.flap();
   } else {
     p.vx = dx / d * 230; p.vy = dy / d * 230;
@@ -74,9 +74,9 @@ function drawWings(ctx, wi, t, flying) {
         ctx.fillRect(x, y - (k >= 6 ? 2 : k >= 3 ? 1 : 0) - (flying && k >= 4 ? Math.round(flap) : 0), 1, 1);
       }
     });
-    if (wi === 4 || wi === 5) { // brilho
+    if (wi >= 4) { // brilho
       ctx.globalAlpha = 0.5 + 0.4 * Math.sin(t * 9);
-      ctx.fillStyle = wi === 4 ? '#fde047' : '#f43f5e';
+      ctx.fillStyle = wi === 4 ? '#fde047' : wi === 6 ? '#ffffff' : '#f43f5e';
       ctx.fillRect(side > 0 ? 2 + Math.round(7 * spread) : -3 - Math.round(7 * spread), -3 + lift, 1, 1);
     }
     ctx.globalAlpha = 1;

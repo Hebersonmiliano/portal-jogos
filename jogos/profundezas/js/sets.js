@@ -16,10 +16,12 @@ const SETS = [
     b2: '+8% de chance de crítico', b4: 'Cada inimigo derrotado adianta as habilidades em 0,6 s' },
   { id: 4, name: 'Brasa', suffix: 'da Brasa', color: '#f97316', biome: 'Coração do Abismo',
     b2: '+12% de dano', b4: 'Golpes têm 15% de chance de explodir em fogo' },
+  { id: 5, name: 'Guardião da Chama', suffix: 'do Guardião da Chama', color: '#f0abfc', biome: 'chefes corrompidos (andares 60 a 100)',
+    b2: '+10% de dano e +10% de vida', b4: 'Ao levar um golpe fatal, renasce com 40% da vida (uma vez por andar)' },
 ];
 
 // Conjunto do andar (depois do 50, qualquer um)
-function setForFloor(floor) { return floor > MAX_FLOOR ? ri(SETS.length) : Math.min(SETS.length - 1, Math.floor((floor - 1) / 10)); }
+function setForFloor(floor) { return floor > MAX_FLOOR ? ri(5) : Math.min(SETS.length - 1, Math.floor((floor - 1) / 10)); }
 
 // Chamado por genItem: transforma a peça numa peça de conjunto (às vezes)
 function rollSet(item, floor, force) {
@@ -43,6 +45,7 @@ function applySetStats(p, st) {
   if (setHas(p, 2, 2)) st.maxHp = Math.round(st.maxHp * 1.15);
   if (setHas(p, 3, 2)) st.crit = Math.min(0.8, st.crit + 0.08);
   if (setHas(p, 4, 2)) st.dmgMul *= 1.12;
+  if (setHas(p, 5, 2)) { st.dmgMul *= 1.1; st.maxHp = Math.round(st.maxHp * 1.1); }
   return st;
 }
 

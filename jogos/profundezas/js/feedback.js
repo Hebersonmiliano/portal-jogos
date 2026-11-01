@@ -21,7 +21,7 @@ function fbGameLine(p) {
   if (!p) return 'Ainda não jogou.';
   const cls = p.cls ? CLASS_INFO[p.cls].name : 'sem classe';
   const deaths = p.deaths ? `${p.deaths} (${(p.deathLog || []).slice(-4).map(d => `andar ${d.f}: ${d.by}`).join('; ')})` : '0';
-  return `${cls} nível ${p.level} · andar mais fundo ${p.maxFloor || 1} · chefes ${(p.beaten || []).length} · mortes ${deaths} · tempo ${fbTime(p.playTime)}`;
+  return `${cls} nível ${p.level} · andar mais fundo ${p.maxFloor || 1} · chefes ${(p.beaten || []).length} · mortes ${deaths} · tempo ${fbTime(p.playTime)}${p.time50 ? ` · recorde: ${recordsLine(p)}` : ''}${p.flameKeeper ? ' · Guardião da Chama' : ''}`;
 }
 
 // ---------- Formulário ----------
