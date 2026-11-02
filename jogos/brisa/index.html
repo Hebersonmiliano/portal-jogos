@@ -289,6 +289,7 @@ const RECIPES_OUT = [
   {k:'casinha',name:'Casinha de passarinho',cost:{madeira:3,fibra:2}},
   {k:'galinheiro',name:'Galinheiro',cost:{madeira:8,tabua:4,fibra:2}},
   {k:'estabulo',name:'Estábulo',cost:{tabua:12,madeira:6,pedra:6}},
+  {k:'chiqueiro',name:'Chiqueiro',cost:{madeira:10,pedra:4,tabua:2}},
   {k:'comedouro',name:'Comedouro',cost:{madeira:4,tabua:2}},
   {k:'aspersor',name:'Aspersor',cost:{cobre:2,ferro:1}},
   {k:'barco',name:'Barco',cost:{tabua:16,ferro:3,fibra:4}},
@@ -385,7 +386,7 @@ const QUESTS = [
   {id:'f1',text:'Construa um Aspersor perto da horta (2 cobre + 1 ferro)', p:()=>[G.built.aspersor||0,1], reward:()=>{G.coins+=40;return '+40 moedas'}},
   {id:'f2',text:'Plante uma árvore frutífera (mudas no Mercado)', p:()=>[G.stats.arvores||0,1], reward:()=>{G.inv.mLaranja+=1;return '+1 muda de laranjeira'}},
   {id:'f3',text:'Colha frutas de uma árvore frutífera', p:()=>[G.stats.frutas?1:0,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
-  {id:'f4',text:'Compre um porco e ache uma trufa', p:()=>[G.stats.trufa||0,1], reward:()=>{G.coins+=60;return '+60 moedas'}},
+  {id:'f4',text:'Construa um Chiqueiro, compre um porco e ache uma trufa', p:()=>[G.stats.trufa||0,1], reward:()=>{G.coins+=60;return '+60 moedas'}},
   {id:'f5',text:'Cozinhe um arroz com pequi no Fogão', p:()=>[G.stats.arrozPequi||0,1], reward:()=>{G.coins+=80;return '+80 moedas'}},
   {id:'s1',text:'Colha um morango (primavera) ou uma melancia (verão)', p:()=>[Math.min(1,(G.stats.morango||0)+(G.stats.melancia||0)),1], reward:()=>{G.coins+=60;return '+60 moedas'}},
   {id:'s2',text:'Pesque uma truta ou um bacalhau no inverno', p:()=>[(G.fishLog.truta||G.fishLog.bacalhau)?1:0,1], reward:()=>{G.coins+=80;return '+80 moedas'}},
@@ -672,7 +673,7 @@ function canAct(tool,t,x,y){
   if(!t)return false;
   if(isMature(t))return true;
   switch(tool){
-    case 'mao': return ['bush','flower','bancada','forno','fogao','cama','estante','casa','galinheiro','estabulo','comedouro','barraca','poco','chale','barco','concha','bau','arvoreEstelar','frutifera','trufa'].includes(t.o)||PICKUP.has(t.o)||t.path;
+    case 'mao': return ['bush','flower','bancada','forno','fogao','cama','estante','casa','galinheiro','estabulo','chiqueiro','comedouro','barraca','poco','chale','barco','concha','bau','arvoreEstelar','frutifera','trufa'].includes(t.o)||PICKUP.has(t.o)||t.path;
     case 'machado': return ['tree','pine','stump','palmeira','tocoPalmeira'].includes(t.o);
     case 'picareta': return t.o==='rock'||t.o==='veio';
     case 'enxada': return (t.g==='grass'&&!t.o&&!t.path)||(t.g==='sand'&&!t.o&&!t.path&&t.t<=0);
@@ -706,7 +707,7 @@ function instant(t,x,y){
   if(G.tool!=='mao')return false;
   if(t.o==='bancada'||t.o==='forno'||t.o==='fogao'){openStation(t.o,x,y);return true}
   if(t.o==='estante'){openPanel('diario');return true}
-  if(t.o==='galinheiro'||t.o==='estabulo'){openHome(x,y);return true}
+  if(t.o==='galinheiro'||t.o==='estabulo'||t.o==='chiqueiro'){openHome(x,y);return true}
   if(t.o==='barraca'){openPanel('mercado');return true}
   if(t.o==='barco'){setSail();return true}
   if(t.o==='bau'){if(t.fruit){toast('O baú está vazio. Você já pegou o tesouro.');return true}
@@ -987,10 +988,12 @@ const ANIMALS={
   galinha:{name:'Galinha',home:'galinheiro',price:60,prod:'ovo',food:1,speed:1.3,names:['Pipoca','Clarinha','Paçoca','Pitica','Cocada','Jujuba']},
   vaca:{name:'Vaca',home:'estabulo',price:180,prod:'leite',food:2,speed:.8,names:['Mimosa','Estrela','Malhada','Docinho','Lua']},
   ovelha:{name:'Ovelha',home:'estabulo',price:140,prod:'la',food:2,speed:.9,names:['Nuvem','Algodão','Fofura','Neve','Bolota']},
-  porco:{name:'Porco',home:'estabulo',price:160,prod:'trufa',food:2,speed:.9,names:['Torresmo','Bacon','Rosinha','Petúnia','Bolinha']}
+  porco:{name:'Porco',home:'chiqueiro',price:160,prod:'trufa',food:2,speed:.9,names:['Torresmo','Bacon','Rosinha','Petúnia','Bolinha']}
 };
 const PETS={gato:{name:'Gato',price:40,names:['Mingau','Pituco','Tigrinho','Farofa']},cachorro:{name:'Cachorro',price:40,names:['Biscoito','Caramelo','Bob','Pingo']}};
-const HOME_CAP={galinheiro:4,estabulo:3};
+const HOME_CAP={galinheiro:4,estabulo:3,chiqueiro:4};
+const HOME_NAME={galinheiro:'Galinheiro',estabulo:'Estábulo',chiqueiro:'Chiqueiro'};
+const HOME_WHO={galinheiro:'galinhas',estabulo:'vacas ou ovelhas',chiqueiro:'porcos'};
 const SPR={
   galinha:{c:{W:'#ffffff',w:'#d8d4cc',r:'#e4506a',e:'#2a2a3a',o:'#f2a33c',y:'#e89a2c'},f:[[
     '......rr...','.....rWWW..','.....WWWeo.','w....WWWWo.','ww..WWWWW..','wWWWWWWWW..','.WWWwwwWW..','..WWWWWW...','....y..y...','...yy.yy...'],[
@@ -1031,7 +1034,7 @@ function buyAnimal(k){
   const A=ANIMALS[k];
   if(G.coins<A.price){toast('Moedas insuficientes.');return}
   const spot=findHomeSpot(A.home);
-  if(!spot){toast(homeCount(A.home)?`O ${A.home==='galinheiro'?'galinheiro':'estábulo'} está cheio. Construa outro.`:`Construa um ${A.home==='galinheiro'?'Galinheiro':'Estábulo'} primeiro (Construir).`);return}
+  if(!spot){toast(homeCount(A.home)?`O ${HOME_NAME[A.home].toLowerCase()} está cheio. Construa outro.`:`Construa um ${HOME_NAME[A.home]} primeiro (Construir).`);return}
   G.coins-=A.price;
   const used=new Set(G.animals.map(a=>a.name));const nm=A.names.find(n=>!used.has(n))||A.names[(Math.random()*A.names.length)|0];
   G.animals.push({k,name:nm,x:spot.pos[0],y:spot.pos[1],home:spot.home,love:0,fedDay:-9,petDay:-9,ready:false,face:1});
@@ -1187,6 +1190,16 @@ function drawBarn(g,x,y){
   poly(g,[d1[0]+1,d1[1],d2[0]-1,d2[1],d2[0]-1,d2[1]-9,d1[0]+1,d1[1]-9],'#6e3428');
   g.beginPath();g.moveTo(d1[0]+1,d1[1]-9);g.lineTo(d2[0]-1,d2[1]);g.moveTo(d2[0]-1,d2[1]-9);g.lineTo(d1[0]+1,d1[1]);g.stroke();
   const wn=mid(Ft,M2);px(g,wn[0],wn[1]-1,3,3,'#f3eee4');px(g,wn[0]+1,wn[1],1,1,'#3b2a22');
+}
+function drawPigsty(g,x,y){
+  // lama, cerquinha e abrigo
+  diamond(g,x,y,'#8a6646',-2);ell(g,x-3,y+1,5,2,'#6f4b33');ell(g,x+4,y-1,3,1.5,'#6f4b33');
+  const post=(px2,py2)=>{px(g,px2-1,py2-7,2,7,'#a7774b');px(g,px2-1,py2-8,2,1,'#d4a774')};
+  g.strokeStyle='#b8865a';g.lineWidth=1;g.beginPath();
+  g.moveTo(x-15.5,y-4.5);g.lineTo(x+.5,y+3.5);g.lineTo(x+15.5,y-4.5);g.moveTo(x-15.5,y-1.5);g.lineTo(x+.5,y+6.5);g.lineTo(x+15.5,y-1.5);g.stroke();
+  post(x-15,y);post(x,y+8);post(x+15,y);post(x-7,y+4);post(x+8,y+4);
+  // abrigo no fundo
+  isoBox(g,x+1,y-6,.42,7,'#c99a66','#9a6c44','#86593a');poly(g,[x-9,y-13,x+1,y-19,x+11,y-13,x+1,y-8],'#d0604a');px(g,x-3,y-9,3,3,'#3b2a22');
 }
 function drawTrough(g,x,y,feed){shadow(g,x,y,8);poly(g,[x-8,y-3,x,y+1,x,y+3,x-8,y-1],'#8a5a3a');poly(g,[x,y+1,x+8,y-3,x+8,y-1,x,y+3],'#7a4a30');poly(g,[x,y-7,x+8,y-3,x,y+1,x-8,y-3],'#5a3a20');
   if(feed>0){poly(g,[x,y-6,x+6,y-3,x,y,x-6,y-3],'#e9c766');px(g,x-3,y-5,2,1,'#c9a24a');px(g,x+1,y-3,2,1,'#c9a24a')}
@@ -1508,7 +1521,7 @@ const GUIDE=[
   {grp:'Pomar',k:'pera',tool:'Mão (1)',where:'Pereira adulta no outono.',find:t=>t.o==='frutifera'&&t.ore==='pera'&&t.fruit},
   {grp:'Pomar',k:'uva',tool:'Mão (1)',where:'Parreira adulta no verão e no outono.',find:t=>t.o==='frutifera'&&t.ore==='uva'&&t.fruit},
   {grp:'Pomar',k:'abacaxi',tool:'Sementes (6)',where:'Plante semente de abacaxi na terra arada no verão.',find:t=>t.crop&&t.crop.type==='abacaxi'&&isMature(t)},
-  {grp:'Pomar',k:'trufa',tool:'Mão (1)',where:'Porcos alimentados fuçam trufas na grama perto do Estábulo (não no inverno).',find:t=>t.o==='trufa'},
+  {grp:'Pomar',k:'trufa',tool:'Mão (1)',where:'Porcos alimentados fuçam trufas na grama perto do Chiqueiro (não no inverno).',find:t=>t.o==='trufa'},
   {grp:'Ilhota do Leste',k:'coco',tool:'Machado (2)',where:'Palmeiras da ilhota (metade das vezes).',find:t=>t.o==='palmeira',onlyIn:'ilhota'},
   {grp:'Ilhota do Leste',k:'concha',tool:'Mão (1)',where:'Na areia da ilhota. Renascem com o tempo.',find:t=>t.o==='concha',onlyIn:'ilhota'},
   {grp:'Ilhota do Leste',k:'frutaEstelar',tool:'Mão (1)',where:'Árvore Estelar no meio da ilhota, uma vez por dia.',find:t=>t.o==='arvoreEstelar'&&t.fruit,onlyIn:'ilhota'}
@@ -2177,6 +2190,7 @@ function drawObj(g,t,x,y,sx,sy,time,lights){
     case 'luminaria':drawCrystalLamp(g,sx,sy,time,lights);break;
     case 'galinheiro':drawCoop(g,sx,sy);break;
     case 'estabulo':drawBarn(g,sx,sy);break;
+    case 'chiqueiro':drawPigsty(g,sx,sy);break;
     case 'comedouro':drawTrough(g,sx,sy,t.feed||0);break;
     case 'almofada':drawPillow(g,sx,sy);break;
     case 'poco':drawWell(g,sx,sy);break;
@@ -2455,6 +2469,7 @@ function iconURL(key){
     case 'luminaria':drawCrystalLamp(g,16,28,0,lights);break;
     case 'galinheiro':drawCoop(g,16,28);break;
     case 'estabulo':drawBarn(g,16,30);break;
+    case 'chiqueiro':drawPigsty(g,16,26);break;
     case 'comedouro':drawTrough(g,16,22,5);break;
     case 'almofada':drawPillow(g,16,24);break;
     case 'abacaxi':ell(g,16,20,6,8,'#e8b84a');for(let i=-4;i<=4;i+=2)px(g,16+i,14,1,12,'#c4952f');poly(g,[10,12,16,2,22,12],'#5fae55');break;
@@ -2608,12 +2623,12 @@ function renderPanel(){
   if(tk){h=talkPanel(tk)}
   else if(hm){
     const tl=tile(hm[0],hm[1]),kind=tl&&tl.o,list=G.animals.filter(a=>a.home[0]===hm[0]&&a.home[1]===hm[1]);
-    $('#sheetTitle').textContent=kind==='galinheiro'?'Galinheiro':'Estábulo';
-    if(!list.length)h+=`<div class="row"><span class="nm">Ninguém mora aqui ainda.<small>Compre ${kind==='galinheiro'?'galinhas':'vacas ou ovelhas'} no Mercado (tecla M). Cabem ${HOME_CAP[kind]}.</small></span></div>`;
+    $('#sheetTitle').textContent=HOME_NAME[kind]||'Casa dos animais';
+    if(!list.length)h+=`<div class="row"><span class="nm">Ninguém mora aqui ainda.<small>Compre ${HOME_WHO[kind]} no Mercado (tecla M). Cabem ${HOME_CAP[kind]}.</small></span></div>`;
     for(const a of list){const A=ANIMALS[a.k],hearts=Math.floor(a.love/2);
       const st2=a.ready?`${NAMES[A.prod]} pronto para coletar`:a.fedDay===G.day?'Alimentada hoje':`Com fome · ${A.food} ração`;
       h+=`<div class="row"><img alt="" src="${iconURL('a_'+a.k)}"><span class="nm">${a.name} <span style="color:#ff8fb0">${'♥'.repeat(hearts)}</span><span style="color:var(--muted)">${'♡'.repeat(5-hearts)}</span><small>${A.name} · ${st2}${a.petDay===G.day?' · carinho feito':''}</small></span></div>`}
-    h+=`<h3>Como cuidar</h3><div class="row"><span class="nm"><small style="font-size:12px;line-height:1.45">Toque no animal: se tiver ração na mochila, ele come; toque de novo para fazer carinho. No dia seguinte ele dá ${kind==='galinheiro'?'ovo':'leite ou lã'} (aparece um balão em cima dele). Comida e carinho todo dia enchem os corações e às vezes rendem produto em dobro. Um Comedouro cheio por perto alimenta todo mundo sozinho.</small></span></div>`;
+    h+=`<h3>Como cuidar</h3><div class="row"><span class="nm"><small style="font-size:12px;line-height:1.45">Toque no animal: se tiver ração na mochila, ele come; toque de novo para fazer carinho. ${kind==='chiqueiro'?'No dia seguinte o porco fuça uma trufa na grama aqui perto (menos no inverno): pegue com a Mão.':`No dia seguinte ele dá ${kind==='galinheiro'?'ovo':'leite ou lã'} (aparece um balão em cima dele).`} Comida e carinho todo dia enchem os corações e às vezes rendem produto em dobro. Um Comedouro cheio por perto alimenta todo mundo sozinho.</small></span></div>`;
     h+=`<div class="foot"><span>Ração: ${G.inv.racao||0}</span><button type="button" class="mini" id="stowHome">Guardar</button></div>`;
   } else if(st){
     const S=STATIONS[st];$('#sheetTitle').textContent=S.name;
@@ -2644,7 +2659,7 @@ function renderPanel(){
       for(const it of BUY){const locked=it.lock&&!G.unlocked[it.lock];h+=`<div class="row"><img alt="" src="${iconURL(it.k)}"><span class="nm">${NAMES[it.k]}<small>${locked?'Libera ao colher 3 nabos':'você tem '+(G.inv[it.k]||0)}</small></span><span class="price">${it.price}</span><button type="button" class="mini" data-buy="${it.k}" ${(!locked&&G.coins>=it.price)?'':'disabled'}>Comprar</button></div>`}
       if(!G.unlocked.barco&&G.village&&G.village.npcs.caio)h+=`<h3>Especial</h3><div class="row"><img alt="" src="${iconURL('plantaBarco')}"><span class="nm">Planta do barco<small>Ou ganhe do Caio com 3 corações</small></span><span class="price">400</span><button type="button" class="mini" id="buyPlan" ${G.coins>=400?'':'disabled'}>Comprar</button></div>`;
       h+='<h3>Animais</h3>';
-      for(const [k,A] of Object.entries(ANIMALS)){const cap=homeCap(A.home),used=homeUsed(A.home),hn=A.home==='galinheiro'?'Galinheiro':'Estábulo';
+      for(const [k,A] of Object.entries(ANIMALS)){const cap=homeCap(A.home),used=homeUsed(A.home),hn=HOME_NAME[A.home];
         h+=`<div class="row"><img alt="" src="${iconURL('a_'+k)}"><span class="nm">${A.name}<small>${cap?`${hn}: ${used} / ${cap} vagas · dá ${NAMES[A.prod].toLowerCase()}`:`Precisa de um ${hn} (Construir)`}</small></span><span class="price">${A.price}</span><button type="button" class="mini" data-animal="${k}" ${cap>used&&G.coins>=A.price?'':'disabled'}>Comprar</button></div>`}
       h+='<h3>Bichinho de estimação</h3>';
       for(const [k,A] of Object.entries(PETS)){h+=`<div class="row"><img alt="" src="${iconURL('a_'+k)}"><span class="nm">${A.name}<small>${G.pet?(G.pet.k===k?`${G.pet.name} já mora com você`:'Você já tem um bichinho'):'Segue você e às vezes traz presentes'}</small></span><span class="price">${A.price}</span><button type="button" class="mini" data-pet="${k}" ${!G.pet&&G.coins>=A.price?'':'disabled'}>Adotar</button></div>`}
@@ -2704,7 +2719,7 @@ $('#startBtn').addEventListener('click',()=>{$('#intro').hidden=true;G.helpSeen=
 // ENTRADA
 // =====================================================================
 const OBJ_BOX={tree:[-9,-26,9,2],pine:[-8,-29,8,2],rock:[-7,-9,7,2],veio:[-7,-13,7,2],bush:[-7,-11,7,2],stump:[-4,-6,4,2],cerca:[-4,-12,4,2],lanterna:[-4,-21,4,2],banco:[-8,-12,8,2],canteiro:[-8,-12,8,3],casinha:[-6,-24,6,2],flower:[-6,-8,6,3],
-  bancada:[-11,-14,11,3],forno:[-11,-21,11,3],cama:[-12,-15,12,4],mesa:[-10,-14,10,3],cadeira:[-6,-14,6,3],estante:[-10,-30,10,4],fogao:[-10,-22,10,4],vaso:[-5,-14,5,2],luminaria:[-4,-15,4,2],casa:[-16,-42,16,6],galinheiro:[-12,-23,12,3],estabulo:[-15,-34,15,4],comedouro:[-9,-8,9,3],almofada:[-7,-9,7,2],frutifera:[-11,-26,11,2],aspersor:[-4,-12,4,2],trufa:[-5,-5,5,2],palmeira:[-12,-27,12,2],tocoPalmeira:[-4,-6,4,2],concha:[-5,-6,5,3],bau:[-8,-12,8,3],arvoreEstelar:[-16,-38,16,3],barco:[-13,-28,13,8],estatua:[-6,-20,6,2],mural:[-8,-17,8,2],poco:[-10,-23,10,3],barraca:[-12,-24,12,3],poste:[-4,-21,4,2],chale:[-15,-34,15,4]};
+  bancada:[-11,-14,11,3],forno:[-11,-21,11,3],cama:[-12,-15,12,4],mesa:[-10,-14,10,3],cadeira:[-6,-14,6,3],estante:[-10,-30,10,4],fogao:[-10,-22,10,4],vaso:[-5,-14,5,2],luminaria:[-4,-15,4,2],casa:[-16,-42,16,6],galinheiro:[-12,-23,12,3],chiqueiro:[-13,-18,13,4],estabulo:[-15,-34,15,4],comedouro:[-9,-8,9,3],almofada:[-7,-9,7,2],frutifera:[-11,-26,11,2],aspersor:[-4,-12,4,2],trufa:[-5,-5,5,2],palmeira:[-12,-27,12,2],tocoPalmeira:[-4,-6,4,2],concha:[-5,-6,5,3],bau:[-8,-12,8,3],arvoreEstelar:[-16,-38,16,3],barco:[-13,-28,13,8],estatua:[-6,-20,6,2],mural:[-8,-17,8,2],poco:[-10,-23,10,3],barraca:[-12,-24,12,3],poste:[-4,-21,4,2],chale:[-15,-34,15,4]};
 function pickTile(cx,cy){
   const wx=cx/SC-ox,wy=cy/SC-oy;
   const fx=Math.round((wx/(TW/2)+wy/(TH/2))/2),fy=Math.round((wy/(TH/2)-wx/(TW/2))/2);
