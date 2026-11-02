@@ -55,8 +55,10 @@ button:focus-visible{outline:2px solid var(--butter);outline-offset:2px}
 .btn kbd{font-family:var(--display);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 4px;margin-left:auto}
 .btn.off{color:var(--muted)}
 .res{flex:1;min-width:0;max-width:640px;display:flex;flex-wrap:wrap;justify-content:center;gap:2px 4px;padding:6px 8px;pointer-events:auto;align-self:flex-start}
-.ri{display:flex;align-items:center;gap:3px;padding:2px 6px 2px 2px;border-radius:4px;font-family:var(--display);font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ri{display:flex;align-items:center;gap:3px;padding:2px 6px 2px 2px;border-radius:4px;cursor:pointer;border:1px solid transparent;font-family:var(--display);font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink)}
 .ri img{width:22px;height:22px;image-rendering:pixelated}
+.ri:hover{background:rgba(255,255,255,.08)}
+.ri.track{border-color:var(--butter);background:rgba(255,212,107,.16)}
 .ri.zero{color:var(--muted);opacity:.55}
 .ri.bump{animation:bump .45s}
 @keyframes bump{30%{background:rgba(255,212,107,.35);transform:scale(1.12)}}
@@ -192,7 +194,7 @@ h3:first-child{margin-top:0}
     <div class="toast" id="toast" role="status"></div>
     <div class="subbar" id="subbar"></div>
     <div class="hotbar card" id="hotbar"></div>
-    <div class="hint"><span class="keys">WASD anda · Espaço usa · 1–8 ferramentas · R troca item · + e − ou rodinha dão zoom · clique no mapa também funciona</span><span class="touch">Toque no mapa para andar e usar a ferramenta · pinça com dois dedos dá zoom</span></div>
+    <div class="hint"><span class="keys">WASD anda · Espaço usa · 1–8 ferramentas · R troca item · G onde achar · + e − ou rodinha dão zoom · clique no mapa também funciona</span><span class="touch">Toque no mapa para andar e usar a ferramenta · pinça com dois dedos dá zoom</span></div>
   </div>
 </div>
 <div id="fade"></div>
@@ -200,7 +202,7 @@ h3:first-child{margin-top:0}
 <div class="overlay" id="panel" hidden>
   <div class="sheet">
     <div class="sheet-head">
-      <div class="tabs" id="tabs"><button class="tab" data-tab="mochila" type="button">Mochila</button><button class="tab" data-tab="mercado" type="button">Mercado</button><button class="tab" data-tab="casa" type="button">Casa</button><button class="tab" data-tab="diario" type="button">Diário</button></div>
+      <div class="tabs" id="tabs"><button class="tab" data-tab="mochila" type="button">Mochila</button><button class="tab" data-tab="mercado" type="button">Mercado</button><button class="tab" data-tab="casa" type="button">Casa</button><button class="tab" data-tab="diario" type="button">Diário</button><button class="tab" data-tab="guia" type="button">Onde achar</button></div>
       <div class="sheet-title" id="sheetTitle" hidden></div>
       <button class="close" id="closePanel" type="button">Fechar</button>
     </div>
@@ -220,6 +222,7 @@ h3:first-child{margin-top:0}
       <li><b>Construir</b> coloca bancada, forno, cais, a placa da sua casa e muito mais. Toque na obra com a <b>Mão</b> para martelar.</li>
       <li>Na <b>praça da vila</b> moram vizinhos: converse, cumpra pedidos (o "!" amarelo) e dê presentes para ganhar amizade.</li>
       <li>Cada <b>estação</b> dura 7 dias e muda a horta, os peixes e a paisagem. Na chuva, a horta se rega sozinha.</li>
+      <li>Não sabe onde achar algo? Toque no recurso na <b>barra do topo</b> ou abra <b>Onde achar</b> (tecla G): uma seta amarela aponta o mais perto.</li>
       <li>O jogo salva sozinho neste navegador.</li>
     </ul>
     <button class="go" id="startBtn" type="button">Começar</button>
@@ -463,10 +466,16 @@ function carveLake(r){
     return;
   }
 }
+const ORE_MIN={cobre:4,ferro:4,cristal:2};
+function oreFreeTile(r,hillFirst){
+  const T=G.tiles,ok=(x,y,t)=>t&&t.g==='grass'&&!t.o&&!t.path&&!t.crop&&Math.hypot(x-G.px,y-G.py)>4&&!(G.house&&x>=G.house.x-1&&x<=G.house.x+3&&y>=G.house.y-1&&y<=G.house.y+3)&&!(G.village&&Math.abs(x-G.village.x)<=4&&Math.abs(y-G.village.y)<=4);
+  for(let pass=0;pass<2;pass++)for(let i=0;i<3000;i++){const x=(r()*N)|0,y=(r()*N)|0,t=T[y*N+x];if(ok(x,y,t)&&(pass===1||!hillFirst||t.h===2))return t}
+  return null;
+}
 function ensureOres(r){
-  if(G.tiles.some(t=>t.o==='veio'))return;
-  let n=0;
-  for(let i=0;i<4000&&n<8;i++){const x=(r()*N)|0,y=(r()*N)|0,t=tile(x,y);if(t&&t.g==='grass'&&!t.o&&!t.path&&(t.h===2||r()<.15)&&Math.hypot(x-G.px,y-G.py)>4){t.o='veio';t.ore=oreKind(r());n++}}
+  const cnt={cobre:0,ferro:0,cristal:0};for(const t of G.tiles)if(t.o==='veio'&&cnt[t.ore]!==undefined)cnt[t.ore]++;
+  for(const [k,m] of Object.entries(ORE_MIN)){for(let i=cnt[k];i<m;i++){const t=oreFreeTile(r,true);if(!t)break;t.o='veio';t.ore=k}}
+  G.veios0=Math.max(G.veios0||0,G.tiles.filter(t=>t.o==='veio').length);
 }
 function computeSea(){
   const T=G.tiles; for(const t of T)t.sea=false;
@@ -480,6 +489,7 @@ function makeInterior(){
   G.inside=T;
 }
 function setScene(kind){
+  track=null;
   if(kind==='casa'){if(!G.inside)makeInterior();MAP=INSIDE={kind:'casa',w:7,h:7,tiles:G.inside}}
   else if(kind==='ilhota'){if(!G.islet)genIslet();MAP={kind:'ilhota',w:IW,h:IW,tiles:G.islet}}
   else MAP=ISLAND={kind:'ilha',w:N,h:N,tiles:G.tiles};
@@ -532,6 +542,7 @@ function afterLoad(){
   if(!hasLake())carveLake(r);
   ensureOres(r);
   if(!G.veios0)G.veios0=Math.max(6,G.tiles.filter(t=>t.o==='veio').length);
+  ensureOres(Math.random);
   computeSea();
   placeVillage();
   if(G.scene==='casa'&&G.inside)setScene('casa');else if(G.scene==='ilhota'&&G.islet)setScene('ilhota');else setScene('ilha');
@@ -706,7 +717,7 @@ function startAct(x,y){
     if(G.tool==='regador'&&t.g==='soil'&&G.water<=0){toast('O regador está vazio. Toque na água para encher.');return}
     if(G.tool==='construir'&&MAP.kind==='ilhota'){toast('A ilhota é selvagem: construa na sua ilha.');return}
     if(G.tool==='construir'&&curRecipe().k==='barco'&&!placeOK(curRecipe(),t,x,y)){toast('O barco vai na água do mar, encostado num cais.');return}
-    if(G.tool==='construir'){const R=curRecipe();if(!hasCost(R.cost)){toast(`${R.name}: falta ${missingText(R.cost)}.`);return}}
+    if(G.tool==='construir'){const R=curRecipe();if(!hasCost(R.cost)){toast(`${R.name}: falta ${missingText(R.cost)}. Toque no recurso na barra do topo para ver onde achar.`,3600);return}}
     if(G.tool==='mao'&&t.o==='bush'&&!t.fruit){toast('As frutinhas ainda estão crescendo.');return}
     if(G.tool==='mao'&&t.o==='casa'){
       const ph=PHASES[G.house.fase];
@@ -1436,6 +1447,98 @@ function drawBoat(g,x,y,time){
   poly(g,[x+1,y-29,x+11,y-9,x+1,y-9],'#f6f1e6');poly(g,[x-1,y-26,x-9,y-10,x-1,y-10],'#e9785b');
   px(g,x+1,y-31,6,2,'#4f8ad1')}
 // =====================================================================
+// GUIA DE RECURSOS ("Onde achar") E SETA NO MAPA
+// =====================================================================
+const isVein=o=>t=>t.o==='veio'&&t.ore===o;
+const GUIDE=[
+  {grp:'Básicos',k:'madeira',tool:'Machado (2)',where:'Árvores, pinheiros e tocos. Na ilhota, palmeiras.',find:t=>['tree','pine','stump','palmeira'].includes(t.o)},
+  {grp:'Básicos',k:'pedra',tool:'Picareta (3)',where:'Pedras cinzas espalhadas pela ilha. Todo veio também dá 1 pedra.',find:t=>t.o==='rock'},
+  {grp:'Básicos',k:'fibra',tool:'Mão (1)',where:'Arbustos com frutinhas vermelhas (2 frutinhas + 1 fibra). Às vezes ao cortar árvores ou pescar a bota velha.',find:t=>t.o==='bush'&&t.fruit},
+  {grp:'Básicos',k:'flor',tool:'Mão (1)',where:'Flores do campo na grama. Renascem sozinhas, menos no inverno.',find:t=>t.o==='flower'},
+  {grp:'Básicos',k:'frutinha',tool:'Mão (1)',where:'Arbustos com frutinhas vermelhas. Voltam em uns 45 segundos; param no inverno.',find:t=>t.o==='bush'&&t.fruit},
+  {grp:'Básicos',k:'argila',tool:'Enxada (4)',where:'Areia encostada na água (praia ou beira do lago).',find:t=>t.g==='sand'&&!t.o&&!t.path&&t.t<=0&&nearWaterT(t)},
+  {grp:'Básicos',k:'areia',tool:'Enxada (4)',where:'Areia longe da água.',find:t=>t.g==='sand'&&!t.o&&!t.path&&t.t<=0&&!nearWaterT(t)},
+  {grp:'Minérios',k:'cobre',tool:'Picareta (3)',where:'Veios com pontinhos laranja nas colinas (partes altas e verde-claras). Pedra comum às vezes dá 1.',find:isVein('cobre')},
+  {grp:'Minérios',k:'ferro',tool:'Picareta (3)',where:'Veios com pontinhos prateados nas colinas. Cada um dá 2 ferros.',find:isVein('ferro')},
+  {grp:'Minérios',k:'cristal',tool:'Picareta (3)',where:'Veios com pontas roxas, nas colinas e na Ilhota do Leste.',find:isVein('cristal')},
+  {grp:'Minérios',k:'ouro',tool:'Picareta (3)',where:'Só na Ilhota do Leste: veios com pontinhos dourados. O baú escondido de lá também dá ouro.',find:isVein('ouro'),onlyIn:'ilhota'},
+  {grp:'Feitos por você',k:'tabua',tool:'Bancada',where:'Na Bancada: 2 madeira = 1 tábua. Construa a Bancada com 6 madeira + 2 pedra.',find:t=>t.o==='bancada'},
+  {grp:'Feitos por você',k:'tijolo',tool:'Forno',where:'No Forno: 2 argila + 1 madeira = 2 tijolos. Forno: 8 pedra + 2 argila.',find:t=>t.o==='forno'},
+  {grp:'Feitos por você',k:'telha',tool:'Forno',where:'No Forno: 1 argila = 2 telhas.',find:t=>t.o==='forno'},
+  {grp:'Feitos por você',k:'vidro',tool:'Forno',where:'No Forno: 2 areia = 1 vidro.',find:t=>t.o==='forno'},
+  {grp:'Feitos por você',k:'racao',tool:'Bancada ou Mercado',where:'Bancada: 2 fibra = 4 ração. Ou compre no Mercado por 3 moedas.',find:t=>t.o==='bancada'||t.o==='barraca'},
+  {grp:'Feitos por você',k:'isca',tool:'Bancada ou Mercado',where:'Bancada: 2 frutinha = 3 iscas. Ao arar a grama às vezes aparece minhoca.',find:t=>t.o==='bancada'||t.o==='barraca'},
+  {grp:'Horta e animais',k:'nabo',tool:'Sementes (6)',where:'Plante semente de nabo na terra arada e regue. Primavera, verão e outono.',find:t=>t.crop&&t.crop.type==='nabo'&&isMature(t)},
+  {grp:'Horta e animais',k:'milho',tool:'Sementes (6)',where:'Plante semente de milho e regue. Verão e outono.',find:t=>t.crop&&t.crop.type==='milho'&&isMature(t)},
+  {grp:'Horta e animais',k:'abobora',tool:'Sementes (6)',where:'Plante semente de abóbora e regue. Verão e outono.',find:t=>t.crop&&t.crop.type==='abobora'&&isMature(t)},
+  {grp:'Horta e animais',k:'morango',tool:'Sementes (6)',where:'Plante semente de morango na primavera. Rebrota 3 vezes.',find:t=>t.crop&&t.crop.type==='morango'&&isMature(t)},
+  {grp:'Horta e animais',k:'melancia',tool:'Sementes (6)',where:'Plante semente de melancia no verão.',find:t=>t.crop&&t.crop.type==='melancia'&&isMature(t)},
+  {grp:'Horta e animais',k:'ovo',tool:'Mão (1)',where:'Galinhas alimentadas botam um ovo no dia seguinte.',find:t=>t.o==='galinheiro'},
+  {grp:'Horta e animais',k:'leite',tool:'Mão (1)',where:'Vacas alimentadas dão leite no dia seguinte.',find:t=>t.o==='estabulo'},
+  {grp:'Horta e animais',k:'la',tool:'Mão (1)',where:'Ovelhas alimentadas dão lã no dia seguinte.',find:t=>t.o==='estabulo'},
+  {grp:'Ilhota do Leste',k:'coco',tool:'Machado (2)',where:'Palmeiras da ilhota (metade das vezes).',find:t=>t.o==='palmeira',onlyIn:'ilhota'},
+  {grp:'Ilhota do Leste',k:'concha',tool:'Mão (1)',where:'Na areia da ilhota. Renascem com o tempo.',find:t=>t.o==='concha',onlyIn:'ilhota'},
+  {grp:'Ilhota do Leste',k:'frutaEstelar',tool:'Mão (1)',where:'Árvore Estelar no meio da ilhota, uma vez por dia.',find:t=>t.o==='arvoreEstelar'&&t.fruit,onlyIn:'ilhota'}
+];
+const GUIDE_BY=Object.fromEntries(GUIDE.map(g=>[g.k,g]));
+function nearWaterT(t){const i=MAP.tiles.indexOf(t);if(i<0)return false;return nearWater(i%MAP.w,(i/MAP.w)|0)}
+let track=null,trackT=0;
+function findNearest(k){
+  const gd=GUIDE_BY[k];if(!gd||!gd.find)return null;
+  let best=null,bd=1e9;
+  for(let i=0;i<MAP.tiles.length;i++){const t=MAP.tiles[i];if(!gd.find(t))continue;const x=i%MAP.w,y=(i/MAP.w)|0,d=Math.hypot(x-P.x,y-P.y);if(d<bd){bd=d;best=[x,y]}}
+  return best;
+}
+function setTrack(k){
+  if(track&&track.k===k){track=null;toast('Seta desligada.');refreshRes();return}
+  const gd=GUIDE_BY[k];if(!gd)return;
+  const pos=findNearest(k);
+  if(!pos){
+    const why=gd.onlyIn==='ilhota'&&MAP.kind!=='ilhota'?'precisa do barco para chegar lá.':MAP.kind==='casa'?'saia de casa para procurar.':'nenhum por perto agora, volte daqui a pouco.';
+    track=null;toast(`${NAMES[k]}: ${gd.where} Agora: ${why}`,5000);refreshRes();return;
+  }
+  track={k,pos};trackT=.5;toast(`${NAMES[k]} · ${gd.tool}: ${gd.where} A seta mostra o mais perto.`,4600);refreshRes();sfx('ui');
+}
+function updateTrack(dt){
+  if(!track)return;trackT-=dt;if(trackT>0)return;trackT=.5;
+  const pos=findNearest(track.k);
+  if(!pos){toast(`Não há mais ${NAMES[track.k].toLowerCase()} por aqui.`);track=null;refreshRes();return}
+  track.pos=pos;
+}
+function drawTrack(time){
+  if(!track||!track.pos)return;
+  const [x,y]=track.pos,t=tile(x,y);if(!t)return;
+  const box=OBJ_BOX[t.o];const top=box?box[1]:-6;
+  const sx=((x-y)*TW/2+ox)*SC,sy=((x+y)*TH/2-t.h*HZ+oy+top-6)*SC;
+  const m=40,inside=sx>m&&sx<W-m&&sy>m+60&&sy<H-m-140;
+  ctx.save();
+  if(inside){
+    const b=Math.abs(Math.sin(time*5))*8;
+    ctx.translate(sx,sy-b);
+    ctx.fillStyle='rgba(30,22,48,.85)';ctx.beginPath();ctx.moveTo(-11,-14);ctx.lineTo(11,-14);ctx.lineTo(0,2);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#ffd46b';ctx.beginPath();ctx.moveTo(-8,-12);ctx.lineTo(8,-12);ctx.lineTo(0,-1);ctx.closePath();ctx.fill();
+  } else {
+    const cx=W/2,cy=H/2,ang=Math.atan2(sy-cy,sx-cx);
+    const ex=clamp(sx,m,W-m),ey=clamp(sy,m+60,H-m-140);
+    ctx.translate(ex,ey);ctx.rotate(ang);
+    ctx.fillStyle='rgba(30,22,48,.85)';ctx.beginPath();ctx.moveTo(16,0);ctx.lineTo(-10,-12);ctx.lineTo(-10,12);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#ffd46b';ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(-7,-8);ctx.lineTo(-7,8);ctx.closePath();ctx.fill();
+    ctx.rotate(-ang);ctx.font='800 11px Nunito, system-ui, sans-serif';ctx.textAlign='center';ctx.fillStyle='#f8f0de';
+    const d=Math.round(Math.hypot(x-P.x,y-P.y));ctx.fillText(`${NAMES[track.k]} · ${d} passos`,0,26);
+  }
+  ctx.restore();
+}
+function guidePanel(){
+  let h='<div class="row"><span class="nm"><small style="font-size:12px;line-height:1.45">Toque em <b>Mostrar</b> para uma seta amarela apontar o mais perto. Os ícones da barra do topo também funcionam. Toque de novo para desligar.</small></span></div>';
+  let grp='';
+  for(const g of GUIDE){
+    if(g.grp!==grp){grp=g.grp;h+=`<h3>${grp}</h3>`}
+    const on=track&&track.k===g.k;
+    h+=`<div class="row"><img alt="" src="${iconURL(g.k)}"><span class="nm">${NAMES[g.k]} <span style="color:var(--muted);font-weight:700">· você tem ${G.inv[g.k]||0}</span><small><b style="color:var(--butter)">${g.tool}</b> · ${g.where}</small></span>${g.find?`<button type="button" class="mini ${on?'on':''}" data-track="${g.k}">${on?'Seguindo':'Mostrar'}</button>`:''}</div>`;
+  }
+  return h;
+}
+// =====================================================================
 // SIMULAÇÃO
 // =====================================================================
 function update(dt){
@@ -1450,6 +1553,7 @@ function update(dt){
   if(G.weather==='chuva'){rainT-=dt;if(rainT<=0){rainT=1;for(const t of G.tiles)if(t.g==='soil'&&!t.wet)t.wet=true}}
   music.setRain(G.weather==='chuva'&&MAP.kind!=='casa');
   movePlayer(dt);
+  updateTrack(dt);
   updateAnimals(dt);
   updateNpcs(dt);
   updateAnim(dt);
@@ -1474,7 +1578,9 @@ function respawn(){
     if(t.g==='grass'&&!t.o&&!t.path&&!t.crop&&(!hill||t.h===2)&&Math.hypot(x-P.tx,y-P.ty)>5)return t}return null};
   if(count('flower')<G.flowers0&&season()!==3){const t=pick();if(t)t.o='flower'}
   if(count('rock')<G.rocks0&&Math.random()<.5){const t=pick();if(t)t.o='rock'}
-  if(count('veio')<G.veios0&&Math.random()<.4){const t=pick(true)||pick();if(t){t.o='veio';t.ore=oreKind(Math.random())}}
+  if(count('veio')<G.veios0&&Math.random()<.4){const t=pick(true)||pick();if(t){t.o='veio';
+    const c={cobre:0,ferro:0,cristal:0};for(const q of G.tiles)if(q.o==='veio'&&c[q.ore]!==undefined)c[q.ore]++;
+    const lack=Object.keys(ORE_MIN).find(k=>c[k]<ORE_MIN[k]);t.ore=lack||oreKind(Math.random())}}
 }
 function hour(){return (6+G.time*24)%24}
 function season(){return Math.floor((G.day-1+(G.sOff||0))/SEASON_LEN)%4}
@@ -2066,6 +2172,7 @@ function render(time){
   ctx.font='700 14px "Pixelify Sans", ui-monospace, monospace';
   for(const f of floaters){const a=Math.min(1,f.life*1.6),x=(f.x+ox)*SC,y=(f.y+oy)*SC;ctx.globalAlpha=a;ctx.fillStyle='rgba(30,22,48,.85)';ctx.fillText(f.text,x+1,y+1);ctx.fillStyle=f.c;ctx.fillText(f.text,x,y)}
   ctx.globalAlpha=1;
+  drawTrack(time);
   if(F&&F.phase==='reel'&&rig)drawReelUI(rig.sx*SC,rig.sy*SC,F);
   if(F&&F.phase==='bite'&&rig){ctx.font='700 34px "Pixelify Sans", ui-monospace, monospace';const y=(rig.sy-34)*SC-Math.abs(Math.sin(time*12))*6;ctx.fillStyle='rgba(30,22,48,.85)';ctx.fillText('!',rig.sx*SC+1,y+1);ctx.fillStyle='#ffd46b';ctx.fillText('!',rig.sx*SC,y)}
 }
@@ -2309,10 +2416,10 @@ const RES_BAR=['madeira','tabua','pedra','argila','areia','tijolo','telha','vidr
 let resLast={};
 function refreshRes(){
   const el=$('#resbar');
-  if(!el.childElementCount){el.innerHTML=RES_BAR.map(k=>`<span class="ri" data-r="${k}" title="${NAMES[k]}"><img alt="${NAMES[k]}" src="${iconURL(k)}"><b>0</b></span>`).join('')}
+  if(!el.childElementCount){el.innerHTML=RES_BAR.map(k=>`<span class="ri" data-r="${k}" title="${NAMES[k]}: toque para ver onde achar" role="button" tabindex="0"><img alt="${NAMES[k]}" src="${iconURL(k)}"><b>0</b></span>`).join('')}
   for(const k of RES_BAR){
     const n=G.inv[k]||0,sp=el.querySelector(`[data-r="${k}"]`);
-    sp.querySelector('b').textContent=n;sp.classList.toggle('zero',!n);
+    sp.querySelector('b').textContent=n;sp.classList.toggle('zero',!n);sp.classList.toggle('track',!!(track&&track.k===k));
     if(resLast[k]!==undefined&&n>resLast[k]){sp.classList.remove('bump');void sp.offsetWidth;sp.classList.add('bump')}
     resLast[k]=n;
   }
@@ -2427,6 +2534,8 @@ function renderPanel(){
       h+='<h3>Bichinho de estimação</h3>';
       for(const [k,A] of Object.entries(PETS)){h+=`<div class="row"><img alt="" src="${iconURL('a_'+k)}"><span class="nm">${A.name}<small>${G.pet?(G.pet.k===k?`${G.pet.name} já mora com você`:'Você já tem um bichinho'):'Segue você e às vezes traz presentes'}</small></span><span class="price">${A.price}</span><button type="button" class="mini" data-pet="${k}" ${!G.pet&&G.coins>=A.price?'':'disabled'}>Adotar</button></div>`}
       h+=`<div class="foot"><span>Moedas: ${G.coins}</span></div>`;
+    } else if(panelMode.tab==='guia'){
+      h+=guidePanel();
     } else if(panelMode.tab==='casa'){
       h+=houseGuide();
     } else {
@@ -2443,6 +2552,7 @@ $('#panelBody').addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
   if(t.dataset.sell){const k=t.dataset.sell;if(G.inv[k]>0){G.inv[k]--;G.coins+=price(k);sfx('coin')}}
   else if(t.dataset.sellall){const k=t.dataset.sellall,n=G.inv[k];G.coins+=n*price(k);G.inv[k]=0;if(n){toast(`Vendeu ${n} × ${NAMES[k].toLowerCase()} por ${n*price(k)} moedas.`);sfx('coin')}}
+  else if(t.dataset.track){setTrack(t.dataset.track);closePanel();return}
   else if(t.id==='buyPlan'){if(G.coins>=400&&!G.unlocked.barco){G.coins-=400;G.unlocked.barco=true;toast('Planta do barco comprada! Construa o barco no mar, ao lado de um cais.',3600);sfx('coin')}}
   else if(t.id==='deliverBtn'){deliver(panelMode.talk)}
   else if(t.dataset.gift){giveGift(panelMode.talk,t.dataset.gift)}
@@ -2467,6 +2577,8 @@ document.querySelectorAll('.tab').forEach(x=>x.addEventListener('click',()=>{pan
 $('#closePanel').addEventListener('click',closePanel);
 $('#panel').addEventListener('click',e=>{if(e.target.id==='panel')closePanel()});
 $('#bagBtn').addEventListener('click',()=>openPanel('mochila'));
+$('#resbar').addEventListener('click',e=>{const r=e.target.closest('[data-r]');if(r)setTrack(r.dataset.r)});
+$('#resbar').addEventListener('keydown',e=>{if(e.key==='Enter'){const r=e.target.closest('[data-r]');if(r)setTrack(r.dataset.r)}});
 $('#shopBtn').addEventListener('click',()=>openPanel('mercado'));
 $('#houseBtn').addEventListener('click',()=>openPanel('casa'));
 $('#helpBtn').addEventListener('click',()=>{$('#intro').hidden=false});
@@ -2508,7 +2620,8 @@ cv.addEventListener('pointerleave',()=>{P.hover=null});
 addEventListener('keydown',e=>{
   if(!$('#intro').hidden){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#startBtn').click()}return}
   const k=e.key.toLowerCase();
-  if(k==='escape'){closePanel();return}
+  if(k==='escape'){if($('#panel').hidden&&track){track=null;toast('Seta desligada.');refreshRes();return}closePanel();return}
+  if(k==='g'){$('#panel').hidden||panelMode.tab!=='guia'?openPanel('guia'):closePanel();return}
   if(k==='b'||k==='i'){$('#panel').hidden||panelMode.station?openPanel('mochila'):closePanel();return}
   if(k==='m'){$('#panel').hidden||panelMode.tab!=='mercado'?openPanel('mercado'):closePanel();return}
   if(k==='c'){$('#panel').hidden||panelMode.tab!=='casa'?openPanel('casa'):closePanel();return}
@@ -2589,7 +2702,7 @@ function start(data){
   buildHotbar();refreshUI();
   if(!G.helpSeen)$('#intro').hidden=false;
   try{window.claude?.hot?.snapshot?.(()=>({save:serialize()}))}catch(e){}
-  window.__brisa={setSail,genIslet,get npcs(){return npcs},openTalk,deliver,giveGift,checkArrivals,placeVillage,season,newDay,applySeason,deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
+  window.__brisa={setTrack,get track(){return track},setSail,genIslet,get npcs(){return npcs},openTalk,deliver,giveGift,checkArrivals,placeVillage,season,newDay,applySeason,deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
   requestAnimationFrame(t=>{last=t;frame(t)});
 }
 const hot=window.claude?.hot;
