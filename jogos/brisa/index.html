@@ -448,6 +448,8 @@ const QUESTS = [
   {id:'r1',text:'Amplie a casa com o Tobias (painel Casa, tecla C)', p:()=>[G.stats.reforma1||0,1], reward:()=>{G.inv.la+=3;return '+3 lã'}},
   {id:'r2',text:'Construa o segundo andar da casa', p:()=>[G.stats.reforma2||0,1], reward:()=>{G.coins+=200;return '+200 moedas'}},
   {id:'r3',text:'Mobilie a casa com 10 móveis', p:()=>[Math.min(10,furnCount()),10], reward:()=>{G.coins+=150;return '+150 moedas'}},
+  {id:'h1',text:'Contrate o Juca, o ajudante (Mercado, com a casa pronta)', p:()=>[G.stats.ajudante||0,1], reward:()=>{G.inv.racao+=10;return '+10 rações'}},
+  {id:'h2',text:'Deixe o Juca trabalhar por 5 manhãs', p:()=>[Math.min(5,G.stats.ajudaDias||0),5], reward:()=>{G.coins+=100;return '+100 moedas'}},
   {id:'e1',text:'Participe de um festival na praça (último dia da estação)', p:()=>[G.stats.festas||0,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
   {id:'e2',text:'Ganhe o prêmio de ouro num festival (20 pontos)', p:()=>[G.stats.festOuro||0,1], reward:()=>{G.coins+=150;return '+150 moedas'}},
   {id:'s1',text:'Colha um morango (primavera) ou uma melancia (verão)', p:()=>[Math.min(1,(G.stats.morango||0)+(G.stats.melancia||0)),1], reward:()=>{G.coins+=60;return '+60 moedas'}},
@@ -568,7 +570,7 @@ function defaults(){
     water:WMAX, tool:'mao', seedSel:'nabo', recipe:'cerca', recipeIn:'cama', quest:0,
     stats:{madeira:0,tilled:0,nabo:0,abobora:0,milho:0,tabua:0,dormiu:0,cristal:0,sopa:0,fed:0,ovo:0,leite:0,la:0,bolo:0,petted:0,encheu:0},
     built:{}, unlocked:{}, px:0, py:0, facing:[1,1], helpSeen:false, rocks0:0, flowers0:0, veios0:0,
-    house:null, upstairs:null, inFloor:1, chest:{}, relocate:null, tl:{machado:0,picareta:0,enxada:0,regador:0}, upg:null, fest:{}, islet:null, isletDock:null, lastBoat:null, fishLog:{}, animals:[], pet:null, qdone:{}, village:null, sellBonus:1, waterMax:WMAX, scene:'ilha', look:{shirt:0,hat:0}, sound:true, zoom:0, tiles:[], inside:null};
+    house:null, helper:null, upstairs:null, inFloor:1, chest:{}, relocate:null, tl:{machado:0,picareta:0,enxada:0,regador:0}, upg:null, fest:{}, islet:null, isletDock:null, lastBoat:null, fishLog:{}, animals:[], pet:null, qdone:{}, village:null, sellBonus:1, waterMax:WMAX, scene:'ilha', look:{shirt:0,hat:0}, sound:true, zoom:0, tiles:[], inside:null};
   fixInv(D.inv);return D;
 }
 function newGame(seed){G=defaults();G.seed=seed;genWorld();}
@@ -716,6 +718,7 @@ function afterLoad(){
   computeSea();
   placeVillage();
   ensureMine();
+  helperSpawn();
   if(G.scene==='mina'&&G.mineAt){G.px=G.mineAt[0];G.py=G.mineAt[1]+1;G.scene='ilha'}
   if(G.scene==='casa'&&G.inside)setScene('casa');else if(G.scene==='ilhota'&&G.islet)setScene('ilhota');else setScene('ilha');
   if(G._invFixed){const n=G._invFixed;setTimeout(()=>toast(`Corrigido: itens novos que sumiam da mochila agora contam. Você recebeu ${n} item(ns) de volta.`,5000),1200)}
@@ -1395,7 +1398,7 @@ function interactPet(p){
   if(p.petDay!==G.day){p.petDay=G.day;p.love=Math.min(10,p.love+1);G.stats.petted=(G.stats.petted||0)+1}
   floaters.push({x:sx,y:sy-14,text:'♥',c:'#ff8fb0',life:1.2});sfx(p.k);
 }
-function creatureList(){return (MAP.kind==='ilha'?G.animals.concat(npcs):[]).concat(G.pet&&G.pet.scene===MAP.kind?[G.pet]:[])}
+function creatureList(){return (MAP.kind==='ilha'?G.animals.concat(npcs,helperEnt&&!helperEnt.hidden?[helperEnt]:[]):[]).concat(G.pet&&G.pet.scene===MAP.kind?[G.pet]:[])}
 function creatureAt(cx,cy){
   const wx=cx/SC-ox,wy=cy/SC-oy;let best=null,bd=1e9;
   for(const a of creatureList()){
@@ -1418,6 +1421,7 @@ function tapCreature(a){
 }
 function startCreatureAct(a){
   if(P.busy)return;face(Math.round(a.x),Math.round(a.y));
+  if(a.helper){a.hold=8;a.path=null;openHelper();return}
   if(a.npc){a.hold=8;a.path=null;a.tx=null;const dx=Math.round(P.x)-Math.round(a.x),dy=Math.round(P.y)-Math.round(a.y);a.facing=[sign(dx),sign(dy)];if(!dx&&!dy)a.facing=[1,1];openTalk(a.id);return}
   P.act={x:Math.round(a.x),y:Math.round(a.y),tool:'mao',reps:1,creature:a};
   setAnim(a.k==='galinha'||a.k==='gato'||a.k==='cachorro'?'agachar':'coletar');P.busy=true;
@@ -1499,6 +1503,72 @@ const NPCS={
     gift:{need:3,text:'Desenhei uma coisa para você: a planta de um barco! Com ela você constrói um barco no cais e navega até a ilhota do leste.',give:()=>{G.unlocked.barco=true;return 'Planta do barco'}}}
 };
 const NPC_ORDER=['lia','tobias','rosa','caio'];
+NPCS.juca={name:'Juca',role:'Ajudante',pal:{s:'#b97a52',S:'#9a6040',h:'#3a2a20',H:'#2a1c14',c:'#e9b44a',C:'#c9962f',p:'#6b5a3a',P:'#54462c',k:'#5a3a20',K:'#432a16'},hat:'bone',likes:[],greet:[],season:[]};
+// ----- ajudante: cuida dos animais e da horta toda manhã, por uma diária
+const HELP_TASKS={animais:{name:'Animais',desc:'Alimenta, faz carinho e coleta ovo, leite, lã e trufas',fee:15},regar:{name:'Regar a horta',desc:'Rega toda a terra plantada',fee:10},colher:{name:'Colher',desc:'Colhe o que estiver maduro, frutas do pomar também',fee:10}};
+const HELP_BASE=20;
+function plName(k,n){const w=NAMES[k].toLowerCase();if(n<2||['leite','lã'].includes(w))return w;return w.split(' ').map((p,i)=>i===0&&/[aeiou]$/.test(p)?p+'s':p).join(' ')}
+function helpFee(){const H=G.helper;if(!H)return 0;let f=HELP_BASE;for(const k of Object.keys(HELP_TASKS))if(H.tasks[k])f+=HELP_TASKS[k].fee;return f}
+function helperWork(){
+  const H=G.helper;if(!H||!H.on)return null;
+  const fee=helpFee();if(G.coins<fee){H.last={day:G.day,skip:true,fee};return `${H.name} não veio hoje: faltaram moedas para a diária (${fee}).`}
+  G.coins-=fee;const R={fed:0,col:{},wet:0,har:{},racao:0,buy:0};const add=(o,k,n)=>{o[k]=(o[k]||0)+n};
+  if(H.tasks.animais){
+    for(const a of G.animals){const A=ANIMALS[a.k];
+      if(a.ready){a.ready=false;add(R.col,A.prod,1);G.inv[A.prod]=(G.inv[A.prod]||0)+1;G.stats[A.prod]=(G.stats[A.prod]||0)+1}
+      if(a.fedDay!==G.day){const need=A.food;const have_=Math.min(need,G.inv.racao||0);G.inv.racao-=have_;R.racao+=have_;const miss=need-have_;if(miss>0){G.coins-=miss*3;R.buy+=miss*3}a.fedDay=G.day;R.fed++}
+      a.petDay=G.day}
+    for(const t of G.tiles)if(t.o==='trufa'){t.o=null;add(R.col,'trufa',1);G.inv.trufa=(G.inv.trufa||0)+1}
+  }
+  if(H.tasks.colher){
+    for(const t of G.tiles){
+      if(t.crop&&t.crop.stage>=CROPS[t.crop.type].stages){const c=CROPS[t.crop.type];add(R.har,c.item,1);G.inv[c.item]=(G.inv[c.item]||0)+1;G.stats[t.crop.type]=(G.stats[t.crop.type]||0)+1;
+        if(c.regrow&&(t.crop.h||0)+1<c.regrow)t.crop={type:t.crop.type,stage:1,g:0,h:(t.crop.h||0)+1};else t.crop=null;t.wet=false}
+      if(t.o==='frutifera'&&t.fruit){const c=CROPS[t.ore];add(R.har,c.item,c.n);G.inv[c.item]=(G.inv[c.item]||0)+c.n;G.stats.frutas=(G.stats.frutas||0)+c.n;t.fruit=false;t.t=DAY*.6}
+    }
+  }
+  if(H.tasks.regar&&G.weather!=='chuva'){for(const t of G.tiles)if(t.g==='soil'&&t.crop&&!t.wet){t.wet=true;R.wet++}}
+  H.last=Object.assign({day:G.day,fee},R);G.stats.ajudaDias=(G.stats.ajudaDias||0)+1;
+  const parts=[];if(R.fed)parts.push(`alimentou ${R.fed} animais`);const col=Object.entries(R.col).map(([k,n])=>`${n} ${plName(k,n)}`);if(col.length)parts.push('coletou '+col.join(', '));
+  const har=Object.entries(R.har).map(([k,n])=>`${n} ${plName(k,n)}`);if(har.length)parts.push('colheu '+har.join(', '));if(R.wet)parts.push(`regou ${R.wet} terras`);
+  return `${H.name} ${parts.length?parts.join(', '):'deu uma volta e estava tudo em ordem'}. Diária: ${fee} moedas${R.buy?` + ${R.buy} de ração`:''}.`;
+}
+function hireHelper(){if(G.helper){G.helper.on=true;return}G.helper={name:'Juca',on:true,tasks:{animais:true,regar:true,colher:false},since:G.day};G.stats.ajudante=1;helperSpawn();toast('O Juca começa amanhã cedo! Ele aparece na fazenda de dia; toque nele para mudar as tarefas.',4600);after()}
+let helperEnt=null;
+function helperSpawn(){
+  if(!G.helper||!G.helper.on){helperEnt=null;return}
+  const c=G.house?[G.house.x+1,G.house.y+4]:[G.px,G.py];
+  helperEnt={npc:true,helper:true,id:'juca',x:c[0],y:c[1],at:0,blink:3,wait:1,facing:[1,1],anim:'parado',path:null,tx:null};
+}
+function updateHelper(dt){
+  const n=helperEnt;if(!n||MAP.kind!=='ilha')return;
+  const h=hour();n.hidden=!(h>=7&&h<18);if(n.hidden)return;
+  n.at+=dt;n.blink-=dt;if(n.blink<-.12)n.blink=rnd(2.5,5);
+  if(n.hold>0){n.hold-=dt;n.anim='parado';return}
+  if(!n.path||!n.path.length){n.wait-=dt;if(n.wait<=0){n.wait=rnd(3,7);
+    // passeia entre a horta e os bichos
+    const spots=[];for(let i=0;i<G.tiles.length;i+=3){const t=G.tiles[i];if(t.g==='soil'||t.o==='galinheiro'||t.o==='estabulo'||t.o==='chiqueiro'||t.o==='frutifera')spots.push(i)}
+    const pick=spots.length?spots[(Math.random()*spots.length)|0]:null;
+    if(pick!=null){const x=pick%N,y=(pick/N)|0;const p=bfs(Math.round(n.x),Math.round(n.y),(xx,yy)=>Math.max(Math.abs(xx-x),Math.abs(yy-y))<=1&&!(xx===P.tx&&yy===P.ty));if(p&&p.length<40)n.path=p}}}
+  n.moving=false;
+  if(n.path&&n.path.length){const [nx,ny]=n.path[0],dx=nx-n.x,dy=ny-n.y,d=Math.hypot(dx,dy),st=2*dt;
+    if(dx-dy!==0)n.facing=[sign(Math.round(dx*2)),sign(Math.round(dy*2))];
+    if(d<=st){n.x=nx;n.y=ny;n.path.shift()}else{n.x+=dx/d*st;n.y+=dy/d*st}n.moving=true}
+  n.anim=n.moving?'andar':'parado';
+  const t=tile(Math.round(n.x),Math.round(n.y));n.z=lerp(n.z==null?HZ:n.z,(t?t.h:1)*HZ,Math.min(1,dt*10));
+}
+function openHelper(){panelMode={tab:null,helper:true};$('#panel').hidden=false;renderPanel();sfx('ui')}
+function helperPanel(){
+  const H=G.helper;$('#sheetTitle').textContent=`${H.name} · ajudante`;
+  let h=`<div class="row"><span class="nm">"Pode deixar comigo, chego bem cedinho!"<small>Toda manhã ele faz as tarefas marcadas e cobra a diária. Usa a ração da mochila; se faltar, compra (3 moedas cada).</small></span></div><h3>Tarefas</h3>`;
+  for(const [k,T] of Object.entries(HELP_TASKS))h+=`<div class="row"><span class="nm">${T.name} <span style="color:var(--muted)">+${T.fee}</span><small>${T.desc}</small></span><button type="button" class="mini" data-htask="${k}">${H.tasks[k]?'Ligada ✓':'Desligada'}</button></div>`;
+  const L=H.last;
+  if(L&&!L.skip){const col=Object.entries(L.col||{}).map(([k,n])=>`${n} ${plName(k,n)}`).join(', '),har=Object.entries(L.har||{}).map(([k,n])=>`${n} ${plName(k,n)}`).join(', ');
+    h+=`<h3>Hoje de manhã</h3><div class="row"><span class="nm"><small style="font-size:12px;line-height:1.5">Animais alimentados: ${L.fed||0}${col?`<br>Coletou: ${col}`:''}${har?`<br>Colheu: ${har}`:''}<br>Terras regadas: ${L.wet||0}<br>Pago: ${L.fee} moedas${L.buy?` + ${L.buy} de ração`:''}</small></span></div>`}
+  else if(L&&L.skip)h+=`<h3>Hoje de manhã</h3><div class="row"><span class="nm"><small>Não veio: faltaram moedas para a diária.</small></span></div>`;
+  h+=`<div class="foot"><span>Diária: ${helpFee()} moedas</span><button type="button" class="mini" id="helperToggle">${H.on?'Dar folga':'Chamar de volta'}</button></div>`;
+  return h;
+}
 const REQ_POOL={
   lia:[['tabua',5],['tijolo',4],['vidro',2],['ovo',3],['queijo',1],['cobre',3],['telha',6],['leite',2]],
   tobias:'fish',
@@ -2026,7 +2096,7 @@ function update(dt){
   festTick();
   updateTrack(dt);
   updateAnimals(dt);
-  updateNpcs(dt);
+  updateNpcs(dt);updateHelper(dt);
   updateAnim(dt);
   updateFishing(dt);
   for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=60*dt;p.life-=dt}
@@ -2082,6 +2152,7 @@ function newDay(){
   if(after_!==before){G.seasonsSeen=(G.seasonsSeen||1)+1;seasonBanner();for(const t of G.tiles)if(t.o==='frutifera'&&(t.feed||0)>=2){if(!inSeason(t.ore))t.fruit=false;else if(!t.fruit)t.t=Math.min(t.t||1,1)}}
   if(G.upg&&G.day>=G.upg.day){const k=G.upg.k;G.tl[k]=(G.tl[k]||0)+1;G.upg=null;G.stats.melhorias=(G.stats.melhorias||0)+1;G.stats['up'+tlv(k)]=1;buildHotbar();setTimeout(()=>{toast(`${TOOLS.find(t=>t.k===k).name} de ${TIER[tlv(k)].n.toLowerCase()} pronta! ${UP_DESC[k][tlv(k)-1]}.`,4600);sfx('quest')},2800)}
   animalsNewDay();
+  {const msg=helperWork();if(msg)setTimeout(()=>toast(msg,5200),G.upg?7600:2800)}
   if(G.weather==='chuva'){for(const t of G.tiles)if(t.g==='soil')t.wet=true}
 }
 function seasonBanner(){
@@ -3177,10 +3248,11 @@ function houseGuide(){
   return h;
 }
 function renderPanel(){
-  const st=panelMode.station,hm=panelMode.home,tk=panelMode.talk,fe=panelMode.fest||panelMode.anvil||panelMode.mine||panelMode.chest;
+  const st=panelMode.station,hm=panelMode.home,tk=panelMode.talk,fe=panelMode.fest||panelMode.anvil||panelMode.mine||panelMode.chest||panelMode.helper;
   $('#tabs').hidden=!!(st||hm||tk||fe);$('#sheetTitle').hidden=!(st||hm||tk||fe);
   const body=$('#panelBody');let h='';
-  if(panelMode.chest){h=chestPanel()}
+  if(panelMode.helper){h=helperPanel()}
+  else if(panelMode.chest){h=chestPanel()}
   else if(panelMode.mine){h=minePanel()}
   else if(panelMode.anvil){h=anvilPanel()}
   else if(panelMode.fest){h=festPanel()}
@@ -3226,6 +3298,8 @@ function renderPanel(){
       h+='<h3>Animais</h3>';
       for(const [k,A] of Object.entries(ANIMALS)){const cap=homeCap(A.home),used=homeUsed(A.home),hn=HOME_NAME[A.home];
         h+=`<div class="row"><img alt="" src="${iconURL('a_'+k)}"><span class="nm">${A.name}<small>${cap?`${hn}: ${used} / ${cap} vagas · dá ${NAMES[A.prod].toLowerCase()}`:`Precisa de um ${hn} (Construir)`}</small></span><span class="price">${A.price}</span><button type="button" class="mini" data-animal="${k}" ${cap>used&&G.coins>=A.price?'':'disabled'}>Comprar</button></div>`}
+      h+='<h3>Serviços</h3>';
+      {const H=G.helper,ok=G.house&&G.house.fase>=6;h+=`<div class="row"><span class="nm">Ajudante (Juca)<small>${!ok?'Termine a casa para ter onde receber um ajudante.':H&&H.on?`Trabalhando · diária ${helpFee()} moedas. Toque nele na fazenda para ver as tarefas.`:'Cuida dos animais, rega e colhe toda manhã. Diária a partir de 20 moedas.'}</small></span>${ok&&!(H&&H.on)?'<button type="button" class="mini" id="hireHelper">Contratar</button>':''}</div>`}
       h+='<h3>Bichinho de estimação</h3>';
       for(const [k,A] of Object.entries(PETS)){h+=`<div class="row"><img alt="" src="${iconURL('a_'+k)}"><span class="nm">${A.name}<small>${G.pet?(G.pet.k===k?`${G.pet.name} já mora com você`:'Você já tem um bichinho'):'Segue você e às vezes traz presentes'}</small></span><span class="price">${A.price}</span><button type="button" class="mini" data-pet="${k}" ${!G.pet&&G.coins>=A.price?'':'disabled'}>Adotar</button></div>`}
       h+=`<div class="foot"><span>Moedas: ${G.coins}</span></div>`;
@@ -3264,6 +3338,9 @@ $('#panelBody').addEventListener('click',e=>{
     for(let i=0;i<times&&hasCost(r.cost);i++){if(r.once&&G.inv[k]>0)break;pay(r.cost);G.inv[k]=(G.inv[k]||0)+r.out;n+=r.out;if(k==='tabua')G.stats.tabua+=r.out;if(k==='sopa')G.stats.sopa+=r.out;if(k==='arrozPequi')G.stats.arrozPequi=(G.stats.arrozPequi||0)+r.out}
     if(n){toast(`+${n} ${NAMES[k].toLowerCase()}`);sfx(panelMode.station==='forno'?'hammer':'pick')}
   }
+  else if(t.dataset.htask){const k=t.dataset.htask;G.helper.tasks[k]=!G.helper.tasks[k];sfx('ui');dirty=true;renderPanel()}
+  else if(t.id==='helperToggle'){G.helper.on=!G.helper.on;helperSpawn();toast(G.helper.on?'O Juca volta amanhã cedo.':'O Juca está de folga. Chame de volta pelo Mercado.');dirty=true;closePanel()}
+  else if(t.id==='hireHelper'){hireHelper();renderPanel()}
   else if(t.dataset.ctake){const k=t.dataset.ctake;G.inv[k]=(G.inv[k]||0)+(G.chest[k]||0);delete G.chest[k];sfx('pick');dirty=true;refreshUI();renderPanel()}
   else if(t.dataset.cput){const k=t.dataset.cput;G.chest[k]=(G.chest[k]||0)+(G.inv[k]||0);G.inv[k]=0;sfx('pick');dirty=true;refreshUI();renderPanel()}
   else if(t.id==='stowChest'){const [x,y]=panelMode.chest,tl=tile(x,y);if(Object.values(G.chest||{}).some(v=>v>0)){toast('Esvazie o baú antes de guardar.')}else if(tl&&tl.o==='bauCasa'){tl.o=null;G.inv.tabua+=6;G.inv.ferro+=1;toast('Baú guardado: +6 tábua e +1 ferro.');closePanel()}}
@@ -3411,7 +3488,7 @@ function start(data){
   buildHotbar();refreshUI();
   if(!G.helpSeen)$('#intro').hidden=false;
   try{window.claude?.hot?.snapshot?.(()=>({save:serialize()}))}catch(e){}
-  window.__brisa={doReform,goFloor,enterHouse,openChest,furnCount,enterMine,leaveMine,get MINE(){return MINE},get MAP(){return MAP},openHome,homeRegion,regionCache,openPanel,openFest,festGive,festClaim,festOn,seasonDay,setTrack,get track(){return track},setSail,genIslet,get npcs(){return npcs},openTalk,deliver,giveGift,checkArrivals,placeVillage,season,newDay,applySeason,deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
+  window.__brisa={hireHelper,get helperEnt(){return helperEnt},openHelper,doReform,goFloor,enterHouse,openChest,furnCount,enterMine,leaveMine,get MINE(){return MINE},get MAP(){return MAP},openHome,homeRegion,regionCache,openPanel,openFest,festGive,festClaim,festOn,seasonDay,setTrack,get track(){return track},setSail,genIslet,get npcs(){return npcs},openTalk,deliver,giveGift,checkArrivals,placeVillage,season,newDay,applySeason,deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
   requestAnimationFrame(t=>{last=t;frame(t)});
 }
 const hot=window.claude?.hot;
