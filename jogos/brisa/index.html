@@ -52,6 +52,8 @@ button:focus-visible{outline:2px solid var(--butter);outline-offset:2px}
 .btn:hover{border-color:rgba(255,212,107,.6)}
 .btn kbd{font-family:var(--display);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 4px;margin-left:auto}
 .btn.off{color:var(--muted)}
+.zoom{display:flex;gap:6px}
+.zoom .btn{flex:1;justify-content:center;font-family:var(--display);font-size:18px;padding:4px 10px;line-height:1}
 
 .bottom{display:flex;flex-direction:column;align-items:center;gap:8px}
 .toast{pointer-events:none;font-weight:800;font-size:14px;padding:8px 14px;border-radius:999px;background:var(--panel-solid);border:1px solid var(--line);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;max-width:100%;text-align:center}
@@ -159,6 +161,7 @@ h3:first-child{margin-top:0}
       <button class="btn" id="bagBtn" type="button"><span>Mochila</span><kbd>B</kbd></button>
       <button class="btn" id="shopBtn" type="button"><span>Mercado</span><kbd>M</kbd></button>
       <button class="btn" id="soundBtn" type="button"><span id="soundLbl">Som ligado</span></button>
+      <div class="zoom"><button class="btn" id="zoomOut" type="button" aria-label="Afastar">−</button><button class="btn" id="zoomIn" type="button" aria-label="Aproximar">+</button></div>
       <button class="btn" id="helpBtn" type="button" aria-label="Ajuda"><span>?</span><span class="lbl">Ajuda</span></button>
     </div>
   </div>
@@ -166,7 +169,7 @@ h3:first-child{margin-top:0}
     <div class="toast" id="toast" role="status"></div>
     <div class="subbar" id="subbar"></div>
     <div class="hotbar card" id="hotbar"></div>
-    <div class="hint"><span class="keys">WASD anda · Espaço usa · 1–8 ferramentas · R troca item · clique no mapa também funciona</span><span class="touch">Toque no mapa para andar e usar a ferramenta escolhida</span></div>
+    <div class="hint"><span class="keys">WASD anda · Espaço usa · 1–8 ferramentas · R troca item · + e − ou rodinha dão zoom · clique no mapa também funciona</span><span class="touch">Toque no mapa para andar e usar a ferramenta · pinça com dois dedos dá zoom</span></div>
   </div>
 </div>
 <div id="fade"></div>
@@ -341,7 +344,7 @@ function defaults(){
     water:WMAX, tool:'mao', seedSel:'nabo', recipe:'cerca', recipeIn:'cama', quest:0,
     stats:{madeira:0,tilled:0,nabo:0,abobora:0,milho:0,tabua:0,dormiu:0,cristal:0,sopa:0},
     built:{}, unlocked:{}, px:0, py:0, facing:[1,1], helpSeen:false, rocks0:0, flowers0:0, veios0:0,
-    house:null, fishLog:{}, scene:'ilha', look:{shirt:0,hat:0}, sound:true, tiles:[], inside:null};
+    house:null, fishLog:{}, scene:'ilha', look:{shirt:0,hat:0}, sound:true, zoom:0, tiles:[], inside:null};
 }
 function newGame(seed){G=defaults();G.seed=seed;genWorld();}
 function genWorld(){
@@ -1708,7 +1711,7 @@ cv.addEventListener('pointerdown',e=>{
   downAt=[e.clientX,e.clientY];
 });
 addEventListener('pointerup',()=>{P.hold=false});
-cv.addEventListener('pointerup',e=>{if(!downAt)return;const moved=Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1]);downAt=null;if(moved>12)return;const t=pickTile(e.clientX,e.clientY);if(t)onTap(t[0],t[1])});
+cv.addEventListener('pointerup',e=>{if(!downAt||touches.size>1)return;const moved=Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1]);downAt=null;if(moved>12)return;const t=pickTile(e.clientX,e.clientY);if(t)onTap(t[0],t[1])});
 cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')P.hover=pickTile(e.clientX,e.clientY)});
 cv.addEventListener('pointerleave',()=>{P.hover=null});
 addEventListener('keydown',e=>{
@@ -1723,6 +1726,8 @@ addEventListener('keydown',e=>{
   if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)){e.preventDefault();keys.add(k);return}
   if(k>='1'&&k<='8'){setTool(TOOLS[+k-1].k);return}
   if(k==='r'){cycleSub();return}
+  if(k==='+'||k==='='){setZoom(1);return}
+  if(k==='-'||k==='_'){setZoom(-1);return}
   if(k===' '||k==='f'||k==='e'){
     e.preventDefault();if(P.path.length||P.busy)return;
     const fx=P.tx+G.facing[0],fy=P.ty+G.facing[1],t=tile(fx,fy);
@@ -1736,12 +1741,30 @@ addEventListener('keyup',e=>{const k=e.key.toLowerCase();keys.delete(k);if(k==='
 addEventListener('blur',()=>{keys.clear();P.hold=false});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 
+const ZMIN=1,ZMAX=6;
+function autoZoom(){return Math.min(W,H)>720?3:2}
 function resize(){
-  W=innerWidth;H=innerHeight;DPR=Math.min(2,devicePixelRatio||1);SC=Math.min(W,H)>720?3:2;
+  W=innerWidth;H=innerHeight;DPR=Math.min(2,devicePixelRatio||1);SC=clamp((G&&G.zoom)||autoZoom(),ZMIN,ZMAX);
   cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
   BW=Math.ceil(W/SC);BH=Math.ceil(H/SC);buf.width=BW;buf.height=BH;
 }
 addEventListener('resize',resize);
+function setZoom(d){
+  const nz=clamp(SC+d,ZMIN,ZMAX);if(nz===SC)return;
+  G.zoom=nz;dirty=true;resize();
+  ox=Math.round(BW/2-camX);oy=Math.round(BH/2-camY+8);
+  toast(`Zoom ${nz}×`,900);
+}
+let wheelT=0;
+cv.addEventListener('wheel',e=>{e.preventDefault();const now=performance.now();if(now-wheelT<120)return;wheelT=now;setZoom(e.deltaY<0?1:-1)},{passive:false});
+$('#zoomIn').addEventListener('click',()=>setZoom(1));
+$('#zoomOut').addEventListener('click',()=>setZoom(-1));
+// pinça com dois dedos
+const touches=new Map();let pinch0=0;
+cv.addEventListener('pointerdown',e=>{touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===2){const [a,c]=[...touches.values()];pinch0=Math.hypot(a[0]-c[0],a[1]-c[1]);downAt=null}});
+cv.addEventListener('pointermove',e=>{if(!touches.has(e.pointerId))return;touches.set(e.pointerId,[e.clientX,e.clientY]);if(touches.size===2&&pinch0){const [a,c]=[...touches.values()],d=Math.hypot(a[0]-c[0],a[1]-c[1]);if(d/pinch0>1.35){setZoom(1);pinch0=d}else if(d/pinch0<.74){setZoom(-1);pinch0=d}}});
+const endTouch=e=>{touches.delete(e.pointerId);if(touches.size<2)pinch0=0};
+cv.addEventListener('pointerup',endTouch);cv.addEventListener('pointercancel',endTouch);
 function placeAt(x,y){
   P.x=P.tx=x;P.y=P.ty=y;P.path=[];P.pending=null;P.busy=false;P.act=null;P.fish=null;setAnim('parado');
   const t=tile(x,y);P.z=(t?t.h:1)*HZ;
@@ -1763,6 +1786,7 @@ function start(data){
   try{if(data&&data.save)g=deserialize(data.save)}catch(e){}
   G=g||load();
   if(G)afterLoad();else newGame((Math.random()*1e9)|0);
+  resize();
   buildParts();
   placeAt(G.px,G.py);
   if(!walkable(P.tx,P.ty)){outer:for(let r=1;r<6;r++)for(const [dx,dy] of DIRS){if(walkable(P.tx+dx*r,P.ty+dy*r)){placeAt(P.tx+dx*r,P.ty+dy*r);break outer}}}
