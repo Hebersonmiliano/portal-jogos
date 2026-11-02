@@ -41,6 +41,8 @@ button:focus-visible{outline:2px solid var(--butter);outline-offset:2px}
 .period{color:var(--muted);font-family:var(--body);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
 .coins{margin-left:auto;display:flex;align-items:center;gap:6px;color:var(--butter)}
 .coin{width:12px;height:12px;border-radius:50%;background:var(--butter);box-shadow:inset -2px -2px 0 #d9a63a}
+.season{font-size:12px;font-weight:800;color:var(--muted);margin-top:-4px}
+.season b{color:var(--butter);font-weight:800}
 .quest{border-top:1px solid var(--line);padding-top:8px;display:grid;gap:4px;min-width:0}
 .quest-label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mint)}
 .quest-text{font-size:14px;font-weight:700;line-height:1.3}
@@ -163,6 +165,7 @@ h3:first-child{margin-top:0}
   <div class="top">
     <div class="hud card">
       <div class="hud-row"><span id="clock">Dia 1 · 08:00</span><span class="period" id="period">manhã</span><span class="coins"><i class="coin"></i><span id="coins">0</span></span></div>
+      <div class="season" id="season"></div>
       <div class="quest">
         <span class="quest-label">Tarefa</span>
         <span class="quest-text" id="questText"></span>
@@ -210,6 +213,7 @@ h3:first-child{margin-top:0}
       <li><b>Regador</b> molha a terra (a planta só cresce molhada). Encha tocando na água.</li>
       <li><b>Vara</b> pesca: espere a boia afundar, toque no "!" e segure para manter o peixe na faixa verde.</li>
       <li><b>Construir</b> coloca bancada, forno, cais, a placa da sua casa e muito mais. Toque na obra com a <b>Mão</b> para martelar.</li>
+      <li>Cada <b>estação</b> dura 7 dias e muda a horta, os peixes e a paisagem. Na chuva, a horta se rega sozinha.</li>
       <li>O jogo salva sozinho neste navegador.</li>
     </ul>
     <button class="go" id="startBtn" type="button">Começar</button>
@@ -226,29 +230,35 @@ const TW = 32, TH = 16, HZ = 6, N = 48, DAY = 240, WMAX = 12, SPEED = 4.2;
 const SAVE_KEY = 'brisa-save-v2', OLD_KEYS = ['brisa-save-v1','raizes-save-v1'];
 const NAMES = {madeira:'Madeira',pedra:'Pedra',fibra:'Fibra',flor:'Flor',frutinha:'Frutinha',nabo:'Nabo',abobora:'Abóbora',milho:'Milho',
   sNabo:'Semente de nabo',sAbobora:'Semente de abóbora',sMilho:'Semente de milho',argila:'Argila',areia:'Areia',tabua:'Tábua',tijolo:'Tijolo',telha:'Telha',vidro:'Vidro',
-  cobre:'Cobre',ferro:'Ferro',cristal:'Cristal',racao:'Ração',ovo:'Ovo',leite:'Leite',la:'Lã',omelete:'Omelete',bolo:'Bolo de milho',queijo:'Queijo',isca:'Isca',sopa:'Sopa de peixe',torta:'Torta de abóbora',vara:'Vara de bambu',varaCarvalho:'Vara de carvalho'};
-const ITEM_ORDER = ['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','cobre','ferro','cristal','fibra','flor','frutinha','nabo','milho','abobora','sNabo','sMilho','sAbobora','isca','racao','ovo','leite','la','sopa','torta','omelete','queijo','bolo'];
+  cobre:'Cobre',ferro:'Ferro',cristal:'Cristal',racao:'Ração',morango:'Morango',melancia:'Melancia',sMorango:'Semente de morango',sMelancia:'Semente de melancia',ovo:'Ovo',leite:'Leite',la:'Lã',omelete:'Omelete',bolo:'Bolo de milho',queijo:'Queijo',isca:'Isca',sopa:'Sopa de peixe',torta:'Torta de abóbora',vara:'Vara de bambu',varaCarvalho:'Vara de carvalho'};
+const ITEM_ORDER = ['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','cobre','ferro','cristal','fibra','flor','frutinha','nabo','milho','abobora','morango','melancia','sNabo','sMilho','sAbobora','sMorango','sMelancia','isca','racao','ovo','leite','la','sopa','torta','omelete','queijo','bolo'];
 const CROPS = {
-  nabo:{stages:3,time:14,seed:'sNabo',item:'nabo',name:'Nabo'},
-  milho:{stages:3,time:20,seed:'sMilho',item:'milho',name:'Milho'},
-  abobora:{stages:3,time:30,seed:'sAbobora',item:'abobora',name:'Abóbora'}
+  nabo:{stages:3,time:14,seed:'sNabo',item:'nabo',name:'Nabo',seasons:[0,1,2]},
+  milho:{stages:3,time:20,seed:'sMilho',item:'milho',name:'Milho',seasons:[1,2]},
+  abobora:{stages:3,time:30,seed:'sAbobora',item:'abobora',name:'Abóbora',seasons:[1,2]},
+  morango:{stages:3,time:18,seed:'sMorango',item:'morango',name:'Morango',seasons:[0],regrow:3},
+  melancia:{stages:3,time:28,seed:'sMelancia',item:'melancia',name:'Melancia',seasons:[1]}
 };
+const SEASONS=[{k:'primavera',name:'Primavera'},{k:'verao',name:'Verão'},{k:'outono',name:'Outono'},{k:'inverno',name:'Inverno'}];
+const SEASON_LEN=7;
 const FISH = [
   {id:'lambari',name:'Lambari',where:'lago',h:null,d:1,price:8,size:10,c:'#c9d3dc'},
   {id:'sardinha',name:'Sardinha',where:'mar',h:[6,12],d:1,price:6,size:14,c:'#9fb8d6'},
   {id:'tilapia',name:'Tilápia',where:'lago',h:[6,18],d:2,price:15,size:26,c:'#a7b39a'},
   {id:'robalo',name:'Robalo',where:'mar',h:null,d:3,price:28,size:45,c:'#b8c4c9'},
   {id:'traira',name:'Traíra',where:'lago',h:[18,4],d:3,price:30,size:40,c:'#6f7a52'},
-  {id:'linguado',name:'Linguado',where:'mar',h:[18,4],d:3,price:35,size:36,c:'#b39a7a'},
-  {id:'tucunare',name:'Tucunaré',where:'lago',h:[6,18],d:4,price:45,size:42,c:'#d9b54a'},
-  {id:'peixelua',name:'Peixe-lua',where:'mar',h:[12,18],d:4,price:60,size:80,c:'#c8c2d8'},
-  {id:'carpa',name:'Carpa dourada',where:'lago',h:[5,7.5],d:5,price:120,size:50,c:'#f2a33c'},
+  {id:'linguado',name:'Linguado',where:'mar',h:[18,4],d:3,price:35,size:36,c:'#b39a7a',s:[2,3]},
+  {id:'tucunare',name:'Tucunaré',where:'lago',h:[6,18],d:4,price:45,size:42,c:'#d9b54a',s:[1]},
+  {id:'peixelua',name:'Peixe-lua',where:'mar',h:[12,18],d:4,price:60,size:80,c:'#c8c2d8',s:[1]},
+  {id:'carpa',name:'Carpa dourada',where:'lago',h:[5,7.5],d:5,price:120,size:50,c:'#f2a33c',s:[0]},
+  {id:'truta',name:'Truta prateada',where:'lago',h:null,d:3,price:40,size:35,c:'#d8e2ea',s:[3]},
+  {id:'bacalhau',name:'Bacalhau',where:'mar',h:null,d:3,price:45,size:60,c:'#b8b09a',s:[3]},
   {id:'espada',name:'Peixe-espada lunar',where:'mar',h:[22,2],d:5,price:200,size:95,c:'#a9c7f0'}
 ];
 for(const f of FISH)NAMES[f.id]=f.name;
-const SELL = {nabo:15,milho:30,abobora:70,frutinha:4,flor:3,madeira:2,pedra:2,fibra:1,argila:2,areia:1,tabua:6,tijolo:6,telha:3,vidro:10,cobre:10,ferro:18,cristal:45,sopa:45,torta:140,racao:1,ovo:12,leite:25,la:30,omelete:40,queijo:70,bolo:110};
+const SELL = {nabo:15,milho:30,abobora:70,frutinha:4,flor:3,madeira:2,pedra:2,fibra:1,argila:2,areia:1,tabua:6,tijolo:6,telha:3,vidro:10,cobre:10,ferro:18,cristal:45,sopa:45,torta:140,racao:1,morango:12,melancia:90,ovo:12,leite:25,la:30,omelete:40,queijo:70,bolo:110};
 for(const f of FISH)SELL[f.id]=f.price;
-const BUY = [{k:'sNabo',price:6},{k:'sMilho',price:10},{k:'sAbobora',price:25,lock:'abobora'},{k:'isca',price:4},{k:'racao',price:3}];
+const BUY = [{k:'sNabo',price:6},{k:'sMilho',price:10},{k:'sAbobora',price:25,lock:'abobora'},{k:'sMorango',price:15},{k:'sMelancia',price:30},{k:'isca',price:4},{k:'racao',price:3}];
 const TOOLS = [{k:'mao',name:'Mão'},{k:'machado',name:'Machado'},{k:'picareta',name:'Picareta'},{k:'enxada',name:'Enxada'},{k:'regador',name:'Regador'},{k:'semente',name:'Sementes'},{k:'vara',name:'Vara'},{k:'construir',name:'Construir'}];
 const RECIPES_OUT = [
   {k:'caminho',name:'Caminho',cost:{pedra:1}},
@@ -338,6 +348,9 @@ const QUESTS = [
   {id:'q21',text:'Cozinhe uma sopa de peixe no Fogão', p:()=>[G.stats.sopa,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
   {id:'a8',text:'Faça um bolo de milho no Fogão (ovo, leite e milho)', p:()=>[G.stats.bolo||0,1], reward:()=>{G.coins+=80;return '+80 moedas'}},
   {id:'a9',text:'Deixe um animal com 3 corações (comida + carinho todo dia)', p:()=>[Math.max(0,...G.animals.map(a=>Math.floor(a.love/2))),3], reward:()=>{G.coins+=100;return '+100 moedas'}},
+  {id:'s1',text:'Colha um morango (primavera) ou uma melancia (verão)', p:()=>[Math.min(1,(G.stats.morango||0)+(G.stats.melancia||0)),1], reward:()=>{G.coins+=60;return '+60 moedas'}},
+  {id:'s2',text:'Pesque uma truta ou um bacalhau no inverno', p:()=>[(G.fishLog.truta||G.fishLog.bacalhau)?1:0,1], reward:()=>{G.coins+=80;return '+80 moedas'}},
+  {id:'s3',text:'Viva as quatro estações na ilha', p:()=>[Math.min(4,G.seasonsSeen||1),4], reward:()=>{G.coins+=200;return '+200 moedas'}},
   {id:'q22',text:'Complete o Diário de Pesca', p:()=>[Object.keys(G.fishLog).length,FISH.length], reward:()=>{G.coins+=300;return '+300 moedas'}}
 ];
 
@@ -347,7 +360,7 @@ const buf = document.createElement('canvas'), b = buf.getContext('2d');
 let W, H, DPR, SC, BW, BH;
 let G = null, MAP = null, ISLAND = null, INSIDE = null;
 const P = {x:0,y:0,tx:0,ty:0,z:HZ,path:[],pending:null,walk:0,hover:null,anim:'parado',at:0,busy:false,act:null,evDone:false,queued:null,blink:3,fish:null,hold:false,lock:false};
-let particles = [], floaters = [], critters = [], smoke = [];
+let particles = [], floaters = [], critters = [], smoke = [], rainT = 0, drops = [];
 let ox = 0, oy = 0, camX = 0, camY = 0, spawnT = 18, saveT = 5, dirty = false, clockT = 0, smokeT = 0, chimney = null;
 const keys = new Set();
 
@@ -371,8 +384,8 @@ const newTile = (g,h,o,v) => ({g,h,o,path:false,wet:false,crop:null,t:0,fruit:o=
 // MUNDO
 // =====================================================================
 function defaults(){
-  return {v:2, seed:0, day:1, time:2/24, coins:20,
-    inv:{madeira:0,pedra:0,fibra:0,flor:0,frutinha:0,nabo:0,abobora:0,milho:0,sNabo:6,sAbobora:0,sMilho:2,argila:0,areia:0,tabua:0,tijolo:0,telha:0,vidro:0,cobre:0,ferro:0,cristal:0,isca:0,sopa:0,torta:0,vara:0,varaCarvalho:0},
+  return {v:3, sOff:0, weather:'sol', seasonsSeen:1, seed:0, day:1, time:2/24, coins:20,
+    inv:{madeira:0,pedra:0,fibra:0,flor:0,frutinha:0,nabo:0,abobora:0,milho:0,sNabo:6,sAbobora:0,sMilho:2,sMorango:0,sMelancia:0,morango:0,melancia:0,argila:0,areia:0,tabua:0,tijolo:0,telha:0,vidro:0,cobre:0,ferro:0,cristal:0,isca:0,sopa:0,torta:0,vara:0,varaCarvalho:0},
     water:WMAX, tool:'mao', seedSel:'nabo', recipe:'cerca', recipeIn:'cama', quest:0,
     stats:{madeira:0,tilled:0,nabo:0,abobora:0,milho:0,tabua:0,dormiu:0,cristal:0,sopa:0,fed:0,ovo:0,leite:0,la:0,bolo:0,petted:0,encheu:0},
     built:{}, unlocked:{}, px:0, py:0, facing:[1,1], helpSeen:false, rocks0:0, flowers0:0, veios0:0,
@@ -452,8 +465,8 @@ function setScene(kind){
 }
 
 // ---------- salvar ----------
-const packTile = t => [t.g,t.h,t.o,t.path?1:0,t.wet?1:0,t.crop?[t.crop.type,t.crop.stage,Math.round(t.crop.g*10)/10]:0,Math.round(t.t),t.fruit?1:0,t.v,t.ore||0,t.door?1:0,t.feed||0];
-const unpackTile = a => {const t=newTile(a[0],a[1],a[2],a[8]);t.path=!!a[3];t.wet=!!a[4];t.crop=a[5]?{type:a[5][0],stage:a[5][1],g:a[5][2]}:null;t.t=a[6]||0;t.fruit=!!a[7];t.ore=a[9]||null;t.door=!!a[10];t.feed=a[11]||0;return t};
+const packTile = t => [t.g,t.h,t.o,t.path?1:0,t.wet?1:0,t.crop?[t.crop.type,t.crop.stage,Math.round(t.crop.g*10)/10,t.crop.h||0]:0,Math.round(t.t),t.fruit?1:0,t.v,t.ore||0,t.door?1:0,t.feed||0];
+const unpackTile = a => {const t=newTile(a[0],a[1],a[2],a[8]);t.path=!!a[3];t.wet=!!a[4];t.crop=a[5]?{type:a[5][0],stage:a[5][1],g:a[5][2],h:a[5][3]||0}:null;t.t=a[6]||0;t.fruit=!!a[7];t.ore=a[9]||null;t.door=!!a[10];t.feed=a[11]||0;return t};
 function serialize(){
   G.px=P.tx; G.py=P.ty;
   const o=Object.assign({},G);
@@ -475,6 +488,9 @@ function deserialize(s){
   for(const a of g.animals){a.tx=null;a.hold=0}if(g.pet){g.pet.tx=null}
   g.tiles=o.tiles.map(unpackTile);
   g.inside=o.inside?o.inside.map(unpackTile):null;
+  if((o.v||1)<3){ // migração: começa no início do verão, a estação mais generosa
+    g.sOff=((7-(g.day-1))%28+28)%28; g.weather='sol'; g.seasonsSeen=1;
+  }
   if(!o.v||o.v<2){ // migração da v0.1
     g.v=2; g.scene='ilha'; g.inv.sMilho=(g.inv.sMilho||0)+2;
     if(!TOOLS.some(t=>t.k===g.tool))g.tool='mao';
@@ -651,7 +667,7 @@ function startAct(x,y){
   if(instant(t,x,y))return;
   if(!canAct(G.tool,t,x,y))return;
   if(!isMature(t)){
-    if(G.tool==='semente'){const c=CROPS[G.seedSel];if(have(c.seed)<=0){toast(`Você não tem ${NAMES[c.seed].toLowerCase()}. Compre no Mercado.`);return}}
+    if(G.tool==='semente'){const c=CROPS[G.seedSel];if(!inSeason(G.seedSel)){toast(`${c.name} só cresce ${seasonList(c.seasons)}. Agora é ${SEASONS[season()].name.toLowerCase()}.`,3200);return}if(have(c.seed)<=0){toast(`Você não tem ${NAMES[c.seed].toLowerCase()}. Compre no Mercado.`);return}}
     if(G.tool==='regador'&&t.g==='soil'&&G.water<=0){toast('O regador está vazio. Toque na água para encher.');return}
     if(G.tool==='construir'){const R=curRecipe();if(!hasCost(R.cost)){toast(`${R.name}: falta ${missingText(R.cost)}.`);return}}
     if(G.tool==='mao'&&t.o==='bush'&&!t.fruit){toast('As frutinhas ainda estão crescendo.');return}
@@ -671,7 +687,8 @@ function onAnimEvent(){
   const t=tile(a.x,a.y);if(!t)return;
   if(isMature(t)){
     const c=CROPS[t.crop.type];give(c.item,1);G.stats[t.crop.type]=(G.stats[t.crop.type]||0)+1;
-    burst(a.x,a.y,t.crop.type==='abobora'?'#f6a04d':t.crop.type==='milho'?'#f2d35b':'#f1e4f0',8);t.crop=null;t.wet=false;sfx('pick');
+    burst(a.x,a.y,{abobora:'#f6a04d',milho:'#f2d35b',morango:'#e4506a',melancia:'#5fae55'}[t.crop.type]||'#f1e4f0',8);
+    if(c.regrow&&(t.crop.h||0)+1<c.regrow){t.crop={type:t.crop.type,stage:1,g:0,h:(t.crop.h||0)+1};floatText('Vai dar mais!','#ffd6e4')}else t.crop=null;t.wet=false;sfx('pick');
     return after();
   }
   switch(a.tool){
@@ -819,9 +836,10 @@ function exitHouse(){
 }
 function sleep(){
   transition(()=>{
-    const h=hour();if(h>=6){G.day++;animalsNewDay()}G.time=0;
-    for(const t of G.tiles){if(t.crop&&t.wet){const c=CROPS[t.crop.type];if(t.crop.stage<c.stages){t.crop.stage++;t.crop.g=0;t.wet=false}}}
-    G.stats.dormiu++;G.water=WMAX;save();toast(`Bom dia! Dia ${G.day}.`,2600);after();
+    const h=hour(),s0=season();
+    for(const t of G.tiles){if(t.crop&&t.wet&&inSeason(t.crop.type)){const c=CROPS[t.crop.type];if(t.crop.stage<c.stages){t.crop.stage++;t.crop.g=0;t.wet=false}}}
+    if(h>=6)newDay();G.time=0;
+    G.stats.dormiu++;G.water=WMAX;save();if(season()===s0)toast(`Bom dia! Dia ${G.day}.${G.weather==='chuva'?' Chovendo: a horta se rega sozinha.':''}`,2600);after();
   });
 }
 function dustHouse(){const h=G.house;for(const [x,y] of houseTiles(h))burst(x,y,'#e9e0cf',4,-8)}
@@ -832,7 +850,7 @@ function dustHouse(){const h=G.house;for(const [x,y] of houseTiles(h))burst(x,y,
 const inHours=(h,r)=>!r||(r[0]<r[1]?h>=r[0]&&h<r[1]:h>=r[0]||h<r[1]);
 function pickFish(t){
   const where=t.sea?'mar':'lago',h=hour(),isca=P.fish&&P.fish.isca;
-  const pool=FISH.filter(f=>f.where===where&&inHours(h,f.h));
+  const pool=FISH.filter(f=>f.where===where&&inHours(h,f.h)&&(!f.s||f.s.includes(season())));
   const list=pool.map(f=>[f,(6-f.d)*(isca&&f.d>=3?2:1)]);
   list.push([null,1]);
   let tot=list.reduce((s,[,w])=>s+w,0),r=Math.random()*tot;
@@ -1099,12 +1117,15 @@ function drawPillow(g,x,y){shadow(g,x,y,6);ell(g,x,y-4,7,4,'#e98fb0');ell(g,x,y-
 // =====================================================================
 function update(dt){
   G.time+=dt/DAY;
-  if(G.time>=1){G.time-=1;G.day++;animalsNewDay();toast(`Dia ${G.day}. Bom dia!`);dirty=true}
+  if(G.time>=1){G.time-=1;const s0=season();newDay();if(season()===s0)toast(`Dia ${G.day}. Bom dia!${G.weather==='chuva'?' Está chovendo: a horta se rega sozinha.':G.weather==='neve'?' Está nevando.':''}`);dirty=true}
   for(const t of G.tiles){
-    if(t.crop&&t.wet){const c=CROPS[t.crop.type];if(t.crop.stage<c.stages){t.crop.g+=dt;if(t.crop.g>=c.time){t.crop.g=0;t.crop.stage++;t.wet=false;dirty=true}}}
-    if(t.t>0){t.t-=dt;if(t.t<=0){t.t=0;if(t.o==='stump')t.o=t.h===2?'pine':'tree';else if(t.o==='bush')t.fruit=true;dirty=true}}
+    if(t.crop&&t.wet&&inSeason(t.crop.type)){const c=CROPS[t.crop.type];if(t.crop.stage<c.stages){t.crop.g+=dt;if(t.crop.g>=c.time){t.crop.g=0;t.crop.stage++;t.wet=false;dirty=true}}}
+    if(t.t>0&&!(t.o==='bush'&&season()===3)){t.t-=dt;if(t.t<=0){t.t=0;if(t.o==='stump')t.o=t.h===2?'pine':'tree';else if(t.o==='bush')t.fruit=true;dirty=true}}
   }
   spawnT-=dt;if(spawnT<=0){spawnT=18;respawn()}
+  applySeason();
+  if(G.weather==='chuva'){rainT-=dt;if(rainT<=0){rainT=1;for(const t of G.tiles)if(t.g==='soil'&&!t.wet)t.wet=true}}
+  music.setRain(G.weather==='chuva'&&MAP.kind==='ilha');
   movePlayer(dt);
   updateAnimals(dt);
   updateAnim(dt);
@@ -1126,11 +1147,42 @@ function respawn(){
   const count=k=>G.tiles.reduce((n,t)=>n+(t.o===k),0);
   const pick=hill=>{for(let i=0;i<60;i++){const x=(Math.random()*N)|0,y=(Math.random()*N)|0,t=tile(x,y);
     if(t.g==='grass'&&!t.o&&!t.path&&!t.crop&&(!hill||t.h===2)&&Math.hypot(x-P.tx,y-P.ty)>5)return t}return null};
-  if(count('flower')<G.flowers0){const t=pick();if(t)t.o='flower'}
+  if(count('flower')<G.flowers0&&season()!==3){const t=pick();if(t)t.o='flower'}
   if(count('rock')<G.rocks0&&Math.random()<.5){const t=pick();if(t)t.o='rock'}
   if(count('veio')<G.veios0&&Math.random()<.4){const t=pick(true)||pick();if(t){t.o='veio';t.ore=oreKind(Math.random())}}
 }
 function hour(){return (6+G.time*24)%24}
+function season(){return Math.floor((G.day-1+(G.sOff||0))/SEASON_LEN)%4}
+function seasonDay(){return (G.day-1+(G.sOff||0))%SEASON_LEN+1}
+function inSeason(type){return CROPS[type].seasons.includes(season())}
+function seasonList(arr){return arr.map(i=>['na primavera','no verão','no outono','no inverno'][i]).join(', ').replace(/, ([^,]*)$/,' e $1')}
+let curPal=-1;
+function applySeason(){
+  const s=season();if(s===curPal)return;curPal=s;
+  const P_=[
+    {grass:['#8ccf6b','#84c764','#93d672'],hill:['#a6d97a','#9ed173','#acde80'],L:'#68a14f',R:'#578c43'},
+    {grass:['#9fcf5a','#97c753','#a8d662'],hill:['#b9d86a','#b1d062','#c1df72'],L:'#78a043',R:'#668c37'},
+    {grass:['#c7b562','#bdab58','#cfbe6b'],hill:['#d4ba68','#cbb15f','#dcc271'],L:'#9a8a46',R:'#86783b'},
+    {grass:['#eef3f7','#e6edf3','#f5f8fb'],hill:['#f4f7fa','#ecf1f6','#fbfdff'],L:'#c9d4de',R:'#b6c3cf'}][s];
+  C.grass=P_.grass;C.hill=P_.hill;C.grassL=P_.L;C.grassR=P_.R;
+}
+function rollWeather(){
+  const s=season(),r=Math.random();
+  G.weather=s===3?(r<.45?'neve':'sol'):s===1?(r<.12?'chuva':'sol'):(r<.3?'chuva':'sol');
+}
+function newDay(){
+  const before=season();
+  G.day++;
+  const after_=season();
+  rollWeather();
+  if(after_!==before){G.seasonsSeen=(G.seasonsSeen||1)+1;seasonBanner()}
+  animalsNewDay();
+  if(G.weather==='chuva'){for(const t of G.tiles)if(t.g==='soil')t.wet=true}
+}
+function seasonBanner(){
+  const s=season(),msg=['Chegou a primavera! Morango e nabo na horta, carpa dourada ao amanhecer.','Chegou o verão! Melancia, milho e abóbora crescem bem, e o tucunaré aparece no lago.','Chegou o outono! Folhas douradas, chuva frequente e a última colheita de milho e abóbora.','Chegou o inverno! A horta descansa, o lago congela e a truta e o bacalhau aparecem.'][s];
+  toast(msg,5000);sfx('quest');
+}
 function darkness(){
   const h=hour();
   if(h>=6.5&&h<18)return 0;
@@ -1365,6 +1417,7 @@ function isoBox(g,sx,sy,k,hgt,top,L,R){
 }
 function drawGround(g,t,x,y,sx,sy,time){
   if(t.g==='water'){
+    if(!t.sea&&curPal===3){diamond(g,sx,sy+3,(t.v%2)?'#cfe6ef':'#c4dfea');if(t.v%4===0){px(g,sx-5,sy+2,6,1,'#ffffff');px(g,sx+1,sy+3,1,1,'#ffffff')}if(t.v%5===2)px(g,sx+2,sy+5,4,1,'#a9cbd9');return}
     diamond(g,sx,sy+3,t.sea?((t.v%2)?C.water:'#5db2c9'):((t.v%2)?C.lake:'#66bccb'));
     const ph=Math.sin(time*1.5+t.v)*.5+.5;
     if(t.v%3===0)px(g,sx-4+ph*6,sy+2,4,1,'rgba(255,255,255,.45)');
@@ -1393,6 +1446,7 @@ function drawGround(g,t,x,y,sx,sy,time){
   sides(g,sx,sy,3,C.grassL,C.grassR);
   if(t.g==='soil'){
     diamond(g,sx,sy,t.wet?C.soilWet:C.soil);
+    if(curPal===3){diamond(g,sx,sy,'rgba(238,243,247,.55)',-3)}
     const dk=t.wet?'#5a3c28':'#8f6140';
     for(let k=-1;k<=1;k++){g.fillStyle=dk;g.fillRect(Math.round(sx-6+k*4),Math.round(sy-2+k*2),8,1)}
     return;
@@ -1402,15 +1456,24 @@ function drawGround(g,t,x,y,sx,sy,time){
     diamond(g,sx,sy+.5,C.pathD,-1.5);diamond(g,sx,sy,C.path,-2.5);
     px(g,sx-5,sy-1,2,1,C.pathD);px(g,sx+3,sy+1,2,1,C.pathD);px(g,sx-1,sy-4,2,1,C.pathD);px(g,sx,sy+3,2,1,C.pathD);
   } else if(t.o!=='casa'){
-    if(t.v%4===0){px(g,sx-6+(t.v%9),sy-1+(t.v%3),1,2,'#6fb355');px(g,sx-5+(t.v%9),sy+(t.v%3),1,1,'#6fb355')}
+    if(t.v%4===0){const tc=curPal===3?'#c9d4de':curPal===2?'#a89a4c':'#6fb355';px(g,sx-6+(t.v%9),sy-1+(t.v%3),1,2,tc);px(g,sx-5+(t.v%9),sy+(t.v%3),1,1,tc)}
     else if(t.v%7===1){px(g,sx+2,sy+1,1,1,'#ffffff');px(g,sx-6,sy-2,1,1,'#f6a6c1')}
   }
 }
+const LEAVES=[['#3f8a45','#4c9b4c','#63b558','#57a94f'],['#3a8a3a','#47a043','#62bb4f','#55ad47'],['#c0632c','#d9822f','#f0a43c','#e3923a'],null];
 function drawTree(g,x,y,v){shadow(g,x,y,7);px(g,x-1,y-9,3,9,'#7a5235');px(g,x-1,y-9,1,9,'#94663f');
-  circ(g,x-4,y-12,5,'#3f8a45');circ(g,x+4,y-12,5,'#3f8a45');circ(g,x,y-16,7,'#4c9b4c');circ(g,x-2,y-18,4,'#63b558');circ(g,x+3,y-14,3,'#57a94f');
-  if(v%3===0){px(g,x+2,y-13,2,2,'#e8667a');px(g,x-5,y-16,2,2,'#e8667a');px(g,x+4,y-19,2,2,'#e8667a')}}
+  const s=curPal<0?0:curPal;
+  if(s===3){ // galhos nus com neve
+    g.strokeStyle='#7a5235';g.lineWidth=1;g.beginPath();
+    g.moveTo(x+.5,y-9);g.lineTo(x-4.5,y-16);g.moveTo(x+.5,y-11);g.lineTo(x+5.5,y-18);g.moveTo(x+.5,y-9);g.lineTo(x+.5,y-21);g.moveTo(x-2.5,y-13);g.lineTo(x-6.5,y-14);g.moveTo(x+3.5,y-15);g.lineTo(x+7.5,y-15);g.stroke();
+    px(g,x-5,y-17,3,1,'#ffffff');px(g,x+4,y-19,3,1,'#ffffff');px(g,x-1,y-22,3,1,'#ffffff');px(g,x-7,y-15,2,1,'#ffffff');return}
+  const L=LEAVES[s];
+  circ(g,x-4,y-12,5,L[0]);circ(g,x+4,y-12,5,L[0]);circ(g,x,y-16,7,L[1]);circ(g,x-2,y-18,4,L[2]);circ(g,x+3,y-14,3,L[3]);
+  if(s===2&&v%4===1){px(g,x-6,y-4,2,1,'#e3923a');px(g,x+5,y-2,2,1,'#c0632c')}
+  if(v%3===0&&s<2){px(g,x+2,y-13,2,2,'#e8667a');px(g,x-5,y-16,2,2,'#e8667a');px(g,x+4,y-19,2,2,'#e8667a')}}
 function drawPine(g,x,y){shadow(g,x,y,6);px(g,x-1,y-5,3,5,'#6e4a30');
-  poly(g,[x,y-20,x-8,y-6,x+8,y-6],'#2f7550');poly(g,[x,y-25,x-6,y-12,x+6,y-12],'#3b8a5e');poly(g,[x,y-29,x-4,y-18,x+4,y-18],'#4ea06f')}
+  poly(g,[x,y-20,x-8,y-6,x+8,y-6],'#2f7550');poly(g,[x,y-25,x-6,y-12,x+6,y-12],'#3b8a5e');poly(g,[x,y-29,x-4,y-18,x+4,y-18],'#4ea06f');
+  if(curPal===3){poly(g,[x,y-29,x-3,y-22,x+3,y-22],'#ffffff');px(g,x-6,y-13,4,1,'#ffffff');px(g,x+3,y-13,3,1,'#ffffff');px(g,x-8,y-7,4,1,'#f1f5f9');px(g,x+4,y-7,4,1,'#f1f5f9')}}
 function drawStump(g,x,y){shadow(g,x,y,4);px(g,x-3,y-4,6,4,'#8a5f3c');ell(g,x,y-4,3,1.5,'#c99a66')}
 function drawRock(g,x,y,dark){shadow(g,x,y,6);poly(g,[x-6,y,x-5,y-5,x-1,y-8,x+4,y-7,x+6,y-2,x+4,y+1,x-3,y+1],dark?'#7d7f8c':'#9aa0ab');poly(g,[x-4,y-5,x-1,y-7,x+2,y-6,x-1,y-4],dark?'#9a9caa':'#c6cad3');px(g,x+2,y-2,2,1,'#80868f')}
 function drawVein(g,x,y,ore,time){
@@ -1418,12 +1481,13 @@ function drawVein(g,x,y,ore,time){
   if(ore==='cristal'){poly(g,[x-3,y-4,x-1,y-12,x+1,y-4],'#b28cf0');poly(g,[x+1,y-3,x+3,y-9,x+5,y-3],'#9a72e0');px(g,x-1,y-10,1,3,'#e6dbff');if(Math.sin(time*3+x)>.8)px(g,x+3,y-9,1,1,'#ffffff')}
   else{const c=ore==='cobre'?'#e08a4a':'#e4e8ef',d=ore==='cobre'?'#b8642c':'#a3a9b5';px(g,x-3,y-5,2,2,c);px(g,x+1,y-6,2,2,c);px(g,x+3,y-3,2,1,d);px(g,x-1,y-2,2,1,d)}
 }
-function drawBush(g,x,y,fruit){shadow(g,x,y,6);circ(g,x-3,y-4,4,'#4a9446');circ(g,x+3,y-4,4,'#4a9446');circ(g,x,y-7,4,'#5fae55');px(g,x-2,y-9,2,1,'#7cc46c');
+function drawBush(g,x,y,fruit){shadow(g,x,y,6);const w=curPal===3,a=curPal===2;circ(g,x-3,y-4,4,a?'#9a7a3a':'#4a9446');circ(g,x+3,y-4,4,a?'#9a7a3a':'#4a9446');circ(g,x,y-7,4,a?'#b8923f':'#5fae55');px(g,x-2,y-9,2,1,a?'#d4ad55':'#7cc46c');
+  if(w){ell(g,x,y-9,4,2,'#ffffff');ell(g,x-4,y-6,2,1,'#f4f8fb');ell(g,x+4,y-6,2,1,'#f4f8fb')}
   if(fruit){for(const [a,c] of [[-4,-5],[1,-8],[4,-4],[-1,-3]]){px(g,x+a,y+c,2,2,'#e4506a');px(g,x+a,y+c,1,1,'#ff8d9f')}}}
 const FLOWER_C=['#f6a6c1','#ffd36b','#c9a3f2','#ffffff'];
 function drawFlower(g,x,y,v,time){
   const sway=Math.round(Math.sin(time*2+v)*.6);
-  for(const [a,c,k] of [[-4,0,0],[3,-2,1],[0,2,2]]){const col=FLOWER_C[(v+k)%4];px(g,x+a,y+c-3,1,3,'#4f9a46');px(g,x+a+sway-1,y+c-5,3,1,col);px(g,x+a+sway,y+c-6,1,3,col);px(g,x+a+sway,y+c-5,1,1,'#ffd36b')}}
+  for(const [a,c,k] of [[-4,0,0],[3,-2,1],[0,2,2]]){const col=curPal===3?'#ffffff':curPal===2?['#e3923a','#c0563f','#f2c94c','#ffffff'][(v+k)%4]:FLOWER_C[(v+k)%4];px(g,x+a,y+c-3,1,3,'#4f9a46');px(g,x+a+sway-1,y+c-5,3,1,col);px(g,x+a+sway,y+c-6,1,3,col);px(g,x+a+sway,y+c-5,1,1,'#ffd36b')}}
 function drawCrop(g,x,y,c,time){
   const s=c.stage,ty=c.type;
   if(s===0){px(g,x-3,y,2,1,'#5a3c28');px(g,x+2,y-1,2,1,'#5a3c28');px(g,x-1,y-2,1,2,'#7fbf5f');return}
@@ -1434,7 +1498,9 @@ function drawCrop(g,x,y,c,time){
     else{px(g,x,y-7,1,7,'#5fae55');px(g,x-3,y-8,3,3,'#7fcb63');px(g,x+1,y-9,3,3,'#7fcb63');px(g,x-1,y-2,3,2,'#efe4ee')}
     return;
   }
-  if(ty==='abobora'){shadow(g,x,y,6);ell(g,x,y-4,6,4,'#ee8e3c');px(g,x-2,y-7,1,6,'#d27329');px(g,x+2,y-7,1,6,'#d27329');px(g,x-3,y-6,2,1,'#f7b36d');px(g,x,y-10,2,3,'#5d8a3a');px(g,x+2,y-10,3,2,'#7fcb63')}
+  if(ty==='morango'){shadow(g,x,y,5);circ(g,x-2,y-4,3,'#4a9446');circ(g,x+3,y-4,3,'#4a9446');circ(g,x,y-6,3,'#5fae55');for(const [a,b2] of [[-3,-3],[2,-6],[4,-2],[-1,-1]]){px(g,x+a,y+b2,2,2,'#e4506a');px(g,x+a,y+b2,1,1,'#ff8d9f')}}
+  else if(ty==='melancia'){shadow(g,x,y,7);ell(g,x,y-4,7,4,'#3f8a45');for(let i=-5;i<=5;i+=3)px(g,x+i,y-7,1,6,'#2f6e36');ell(g,x-2,y-6,2,1,'#6fbd58');px(g,x+3,y-10,3,2,'#7fcb63')}
+  else if(ty==='abobora'){shadow(g,x,y,6);ell(g,x,y-4,6,4,'#ee8e3c');px(g,x-2,y-7,1,6,'#d27329');px(g,x+2,y-7,1,6,'#d27329');px(g,x-3,y-6,2,1,'#f7b36d');px(g,x,y-10,2,3,'#5d8a3a');px(g,x+2,y-10,3,2,'#7fcb63')}
   else if(ty==='milho'){shadow(g,x,y,3);px(g,x,y-14,1,14,'#5fae55');px(g,x-4,y-9,4,1,'#7fcb63');px(g,x+1,y-6,4,1,'#7fcb63');px(g,x+1,y-12,2,5,'#f2d35b');px(g,x+1,y-12,1,5,'#e0b93a');px(g,x-1,y-16,1,3,'#d9b07a')}
   else{shadow(g,x,y,4);circ(g,x,y-3,3,'#f3e8f2');px(g,x-3,y-5,6,2,'#b05ca8');px(g,x-1,y-7,1,3,'#5fae55');px(g,x-4,y-10,3,4,'#7fcb63');px(g,x+1,y-11,3,5,'#6fbd58')}
   if(Math.sin(time*3+x)>.85)px(g,x+4,y-9,1,1,'#ffffff');
@@ -1516,7 +1582,7 @@ function drawHouse(g,h,time,lights){
     poly(g,P2([Bt[0],Bt[1]-1],[Rt[0]+o,Rt[1]],M2,M1),'#a8473a');
     poly(g,P2(Ft,Rt,M2),'#b8885a');
     const Lo=[Lt[0]-o,Lt[1]+2],Fo=[Ft[0]+o,Ft[1]+2];
-    poly(g,P2(Lo,Fo,[M2[0]+o,M2[1]],[M1[0]-o,M1[1]]),'#d0604a');
+    poly(g,P2(Lo,Fo,[M2[0]+o,M2[1]],[M1[0]-o,M1[1]]),curPal===3?'#eef3f7':'#d0604a');
     g.fillStyle='#b24f3f';for(let k=1;k<5;k++){const a=L2p(Lo,[M1[0]-o,M1[1]],k/5),c=L2p(Fo,[M2[0]+o,M2[1]],k/5);g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(c[0],c[1]);g.lineTo(c[0],c[1]+1);g.lineTo(a[0],a[1]+1);g.fill()}
     g.strokeStyle='#8f3a2f';g.lineWidth=1;g.beginPath();g.moveTo(M1[0]-o,M1[1]);g.lineTo(M2[0]+o,M2[1]);g.stroke();
     const ch=L2p(M1,M2,.72);px(g,ch[0]-2,ch[1]-9,5,9,'#9a5240');px(g,ch[0]-3,ch[1]-10,7,2,'#77716a');
@@ -1625,8 +1691,18 @@ function render(time){
   for(const p of particles)px(g,p.x+ox,p.y+oy,1,1,p.c);
   for(const s of smoke){const a=Math.min(.5,s.life/3);g.fillStyle=`rgba(230,230,235,${a})`;g.fillRect(Math.round(s.x+ox),Math.round(s.y+oy),2,2)}
   let dk=darkness();if(inside)dk*=.55;
-  if(!inside)for(const c of critters){if(c.night)continue;const x=c.x+ox,y=c.y+oy,w=Math.sin(c.ph)>0?1:0;px(g,x-1-w,y,1+w,1,c.c);px(g,x+1,y,1+w,1,c.c);px(g,x,y,1,1,'#3a2b2b')}
+  if(!inside&&curPal<3&&G.weather!=='chuva')for(const c of critters){if(c.night)continue;const x=c.x+ox,y=c.y+oy,w=Math.sin(c.ph)>0?1:0,col=curPal===2?['#e3923a','#c0632c','#f2c94c','#d9822f'][Math.abs(Math.round(c.ph))%4]:c.c;px(g,x-1-w,y,1+w,1,col);px(g,x+1,y,1+w,1,col);px(g,x,y,1,1,'#3a2b2b')}
   const h=hour();
+  if(!inside&&G.weather!=='sol'){
+    const rain=G.weather==='chuva',n=rain?110:80;
+    while(drops.length<n)drops.push({x:Math.random()*BW,y:Math.random()*BH,v:rain?rnd(150,220):rnd(10,22),p:Math.random()*6});
+    if(rain){g.fillStyle='rgba(40,55,90,.16)';g.fillRect(0,0,BW,BH)}
+    for(const d of drops){
+      if(rain){d.y+=d.v/60;d.x-=d.v/240;g.fillStyle='rgba(200,220,255,.55)';g.fillRect(Math.round(d.x),Math.round(d.y),1,3)}
+      else{d.y+=d.v/60;d.x+=Math.sin(time+d.p)*.25;g.fillStyle='rgba(255,255,255,.9)';g.fillRect(Math.round(d.x),Math.round(d.y),d.p>4?2:1,d.p>4?2:1)}
+      if(d.y>BH){d.y=-4;d.x=Math.random()*(BW+40)}if(d.x<-4)d.x=BW;
+    }
+  } else drops.length=0;
   if(!inside&&h>16.5&&h<19.5){g.fillStyle=`rgba(255,150,80,${.12*(1-Math.abs(h-18)/1.5)})`;g.fillRect(0,0,BW,BH)}
   if(dk>0){
     g.fillStyle=`rgba(24,22,70,${dk})`;g.fillRect(0,0,BW,BH);
@@ -1759,9 +1835,14 @@ const music = (() => {
       case 'cachorro':noiseHit(t,'bandpass',600,.3,.08,S,2);tone(t,260,'square',.07,.08,180);noiseHit(t+.16,'bandpass',600,.25,.08,S,2);tone(t+.16,260,'square',.06,.08,180);break;
     }
   }
+  function setRain(on){
+    if(!A.ac||A.ac.state!=='running')return;
+    if(!A.rain){const s=A.ac.createBufferSource();s.buffer=A.noise;s.loop=true;const f=A.ac.createBiquadFilter();f.type='lowpass';f.frequency.value=1600;A.rainG=A.ac.createGain();A.rainG.gain.value=0;s.connect(f);f.connect(A.rainG);A.rainG.connect(A.sfxBus);s.start();A.rain=s}
+    const target=on&&G.sound?.09:0;if(A.rainOn!==target){A.rainOn=target;A.rainG.gain.setTargetAtTime(target,A.ac.currentTime,.8)}
+  }
   function setOn(on){if(A.master&&A.ac)A.master.gain.setTargetAtTime(on?1:0,A.ac.currentTime,.05)}
   function resume(){init();if(A.ac&&A.ac.state==='suspended')A.ac.resume()}
-  return {tick,sfx,setOn,resume};
+  return {tick,sfx,setOn,resume,setRain};
 })();
 const sfx=n=>music.sfx(n);
 
@@ -1791,9 +1872,11 @@ function iconURL(key){
     case 'flor':px(g,15,14,2,14,'#4f9a46');circ(g,16,11,6,'#f6a6c1');circ(g,16,11,2,'#ffd36b');break;
     case 'frutinha':for(const [a,c2] of [[11,18],[19,16],[15,23]]){circ(g,a,c2,4,'#e4506a');px(g,a-2,c2-2,2,2,'#ff8d9f')}px(g,14,8,2,6,'#4f9a46');break;
     case 'nabo':drawCrop(g,16,28,{type:'nabo',stage:3},0);break;
+    case 'morango':poly(g,[9,12,23,12,16,27],'#e4506a');for(const [a,b2] of [[12,15],[17,14],[14,19],[19,18],[16,23]])px(g,a,b2,1,1,'#ffe08a');poly(g,[11,12,21,12,16,8],'#5fae55');break;
+    case 'melancia':ell(g,16,18,11,9,'#3f8a45');for(let i=-8;i<=8;i+=4)px(g,16+i,11,1,14,'#2f6e36');ell(g,13,14,3,2,'#6fbd58');break;
     case 'milho':px(g,13,6,6,20,'#f2d35b');px(g,13,6,2,20,'#e0b93a');poly(g,[10,26,13,12,14,26],'#7fcb63');poly(g,[22,26,19,12,18,26],'#7fcb63');break;
     case 'abobora':drawCrop(g,16,27,{type:'abobora',stage:3},0);break;
-    case 'sNabo':case 'sAbobora':case 'sMilho':ell(g,16,20,8,8,'#d9b07a');px(g,12,9,8,5,'#c49a62');px(g,11,13,10,2,'#8a6646');circ(g,16,21,3,key==='sNabo'?'#b05ca8':key==='sMilho'?'#f2d35b':'#ee8e3c');break;
+    case 'sNabo':case 'sAbobora':case 'sMilho':case 'sMorango':case 'sMelancia':ell(g,16,20,8,8,'#d9b07a');px(g,12,9,8,5,'#c49a62');px(g,11,13,10,2,'#8a6646');circ(g,16,21,3,{sNabo:'#b05ca8',sMilho:'#f2d35b',sAbobora:'#ee8e3c',sMorango:'#e4506a',sMelancia:'#3f8a45'}[key]);break;
     case 'isca':g.strokeStyle='#e98a9a';g.lineWidth=3;g.beginPath();g.moveTo(7,20);g.quadraticCurveTo(12,10,17,18);g.quadraticCurveTo(22,26,26,14);g.stroke();break;
     case 'sopa':ell(g,16,19,11,6,'#e9e3d6');ell(g,16,17,9,4,'#e0a24a');px(g,12,16,2,1,'#5fae55');px(g,18,17,3,1,'#f3e8f2');px(g,8,22,16,3,'#c9c2b4');break;
     case 'torta':ell(g,16,20,11,6,'#c98a4a');ell(g,16,18,10,5,'#ee8e3c');for(let i=0;i<4;i++)px(g,9+i*4,17,3,1,'#f7b36d');break;
@@ -1865,6 +1948,8 @@ function refreshClock(){
   const h=hour(),hh=Math.floor(h),mm=Math.floor((h-hh)*6)*10;
   $('#clock').textContent=`Dia ${G.day} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
   $('#period').textContent=h>=5&&h<12?'manhã':h>=12&&h<18?'tarde':'noite';
+  const wx={sol:'Sol',chuva:'Chuva',neve:'Neve'}[G.weather]||'Sol';
+  $('#season').innerHTML=`<b>${SEASONS[season()].name}</b> · dia ${seasonDay()} de ${SEASON_LEN} · ${wx}`;
 }
 const RES_BAR=['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','fibra','flor','cobre','ferro','cristal'];
 let resLast={};
@@ -1896,7 +1981,8 @@ function refreshUI(){
     case 'picareta':html=info('Pedras dão pedra e às vezes cobre. Veios coloridos nas colinas dão cobre, ferro e cristal.');break;
     case 'enxada':html=info('Grama vira terra para plantar. Na areia: argila perto da água, areia longe dela.');break;
     case 'regador':html=`<span class="chip info">Água <span class="meter">${Array.from({length:WMAX},(_,i)=>`<i class="${i<G.water?'f':''}"></i>`).join('')}</span>&nbsp; Encha tocando na água</span>`;break;
-    case 'semente':for(const k of seedOptions()){const c=CROPS[k];html+=`<button type="button" class="chip ${G.seedSel===k?'on':''}" data-seed="${k}"><img alt="" src="${iconURL(c.seed)}">${c.name} <small>×${G.inv[c.seed]||0}</small></button>`}break;
+    case 'semente':if(season()===3)html+=`<span class="chip info">Inverno: a horta descansa. Pesque no gelo, minere e cuide dos animais.</span>`;
+      for(const k of seedOptions()){const c=CROPS[k],ok=inSeason(k);html+=`<button type="button" class="chip ${G.seedSel===k?'on':''} ${ok?'':'lack'}" data-seed="${k}"><img alt="" src="${iconURL(c.seed)}">${c.name} <small>×${G.inv[c.seed]||0}${ok?'':' · só '+seasonList(c.seasons)}</small></button>`}break;
     case 'vara':html=G.inv.vara||G.inv.varaCarvalho?`<span class="chip info"><img alt="" src="${iconURL(G.inv.varaCarvalho?'varaCarvalho':'vara')}">Toque na água para lançar · iscas ×${G.inv.isca} · lago e mar têm peixes diferentes</span>`:info('Faça uma vara de bambu na Bancada: 3 madeira + 2 fibra.');break;
     case 'construir':{const cur=curRecipe();for(const r of recipeList())html+=`<button type="button" class="chip ${cur===r?'on':''} ${hasCost(r.cost)?'':'lack'}" data-recipe="${r.k}"><img alt="" src="${iconURL(r.k)}">${r.name} <small>${costText(r.cost)}</small></button>`;break}
   }
@@ -1991,7 +2077,7 @@ function renderPanel(){
       const n=Object.keys(G.fishLog).length;
       h+=`<h3>Diário de Pesca · ${n} / ${FISH.length}</h3><div class="grid">`;
       for(const f of FISH){const rec=G.fishLog[f.id];const hrs=f.h?`${String(Math.floor(f.h[0])).padStart(2,'0')}h às ${String(Math.floor(f.h[1])).padStart(2,'0')}h`:'qualquer hora';
-        h+=`<div class="fish ${rec?'':'unk'}"><img alt="" src="${iconURL(f.id)}"><div><strong>${rec?f.name:'???'}</strong>${f.where==='lago'?'Lago':'Mar'} · ${hrs}${rec?`<br>${rec.n} pescados · recorde ${rec.max} cm`:''}</div></div>`}
+        h+=`<div class="fish ${rec?'':'unk'}"><img alt="" src="${iconURL(f.id)}"><div><strong>${rec?f.name:'???'}</strong>${f.where==='lago'?'Lago':'Mar'} · ${hrs}${f.s?' · só '+seasonList(f.s):''}${rec?`<br>${rec.n} pescados · recorde ${rec.max} cm`:''}</div></div>`}
       h+='</div>';
     }
   }
@@ -2143,7 +2229,7 @@ function start(data){
   buildHotbar();refreshUI();
   if(!G.helpSeen)$('#intro').hidden=false;
   try{window.claude?.hot?.snapshot?.(()=>({save:serialize()}))}catch(e){}
-  window.__brisa={deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
+  window.__brisa={season,newDay,applySeason,deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
   requestAnimationFrame(t=>{last=t;frame(t)});
 }
 const hot=window.claude?.hot;
