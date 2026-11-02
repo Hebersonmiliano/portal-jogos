@@ -240,8 +240,8 @@ const TW = 32, TH = 16, HZ = 6, N = 48, DAY = 240, WMAX = 12, SPEED = 4.2;
 const SAVE_KEY = 'brisa-save-v2', OLD_KEYS = ['brisa-save-v1','raizes-save-v1'];
 const NAMES = {madeira:'Madeira',pedra:'Pedra',fibra:'Fibra',flor:'Flor',frutinha:'Frutinha',nabo:'Nabo',abobora:'Abóbora',milho:'Milho',
   sNabo:'Semente de nabo',sAbobora:'Semente de abóbora',sMilho:'Semente de milho',argila:'Argila',areia:'Areia',tabua:'Tábua',tijolo:'Tijolo',telha:'Telha',vidro:'Vidro',
-  cobre:'Cobre',ferro:'Ferro',cristal:'Cristal',racao:'Ração',dArco:'Arco de flores',dGuardaSol:'Guarda-sol',dEspantalho:'Espantalho',dPinheiro:'Pinheiro de luzes',trofeu:'Troféu do festival',abacaxi:'Abacaxi',sAbacaxi:'Semente de abacaxi',caju:'Caju',pequi:'Pequi',laranja:'Laranja',pera:'Pera',uva:'Uva',mCaju:'Muda de cajueiro',mPequi:'Muda de pequizeiro',mLaranja:'Muda de laranjeira',mPera:'Muda de pereira',mUva:'Muda de parreira',trufa:'Trufa',aspersor:'Aspersor',sucoLaranja:'Suco de laranja',arrozPequi:'Arroz com pequi',geleiaUva:'Geleia de uva',doceCaju:'Doce de caju',coco:'Coco',concha:'Concha',ouro:'Ouro',frutaEstelar:'Fruta estelar',estatua:'Estátua dourada',mural:'Mural de conchas',plantaBarco:'Planta do barco',morango:'Morango',melancia:'Melancia',sMorango:'Semente de morango',sMelancia:'Semente de melancia',ovo:'Ovo',leite:'Leite',la:'Lã',omelete:'Omelete',bolo:'Bolo de milho',queijo:'Queijo',isca:'Isca',sopa:'Sopa de peixe',torta:'Torta de abóbora',vara:'Vara de bambu',varaCarvalho:'Vara de carvalho',varaDourada:'Vara dourada'};
-const ITEM_ORDER = ['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','cobre','ferro','cristal','fibra','flor','frutinha','nabo','milho','abobora','morango','melancia','abacaxi','caju','pequi','laranja','pera','uva','trufa','sNabo','sMilho','sAbobora','sMorango','sMelancia','sAbacaxi','mCaju','mPequi','mLaranja','mPera','mUva','isca','racao','ovo','leite','la','coco','concha','ouro','frutaEstelar','sopa','torta','omelete','queijo','bolo','sucoLaranja','arrozPequi','geleiaUva','doceCaju'];
+  cobre:'Cobre',ferro:'Ferro',cristal:'Cristal',racao:'Ração',dArco:'Arco de flores',dGuardaSol:'Guarda-sol',dEspantalho:'Espantalho',dPinheiro:'Pinheiro de luzes',trofeu:'Troféu do festival',abacaxi:'Abacaxi',sAbacaxi:'Semente de abacaxi',caju:'Caju',pequi:'Pequi',laranja:'Laranja',pera:'Pera',uva:'Uva',mCaju:'Muda de cajueiro',mPequi:'Muda de pequizeiro',mLaranja:'Muda de laranjeira',mPera:'Muda de pereira',mUva:'Muda de parreira',mArbusto:'Muda de frutinha',trufa:'Trufa',aspersor:'Aspersor',sucoLaranja:'Suco de laranja',arrozPequi:'Arroz com pequi',geleiaUva:'Geleia de uva',doceCaju:'Doce de caju',coco:'Coco',concha:'Concha',ouro:'Ouro',frutaEstelar:'Fruta estelar',estatua:'Estátua dourada',mural:'Mural de conchas',plantaBarco:'Planta do barco',morango:'Morango',melancia:'Melancia',sMorango:'Semente de morango',sMelancia:'Semente de melancia',ovo:'Ovo',leite:'Leite',la:'Lã',omelete:'Omelete',bolo:'Bolo de milho',queijo:'Queijo',isca:'Isca',sopa:'Sopa de peixe',torta:'Torta de abóbora',vara:'Vara de bambu',varaCarvalho:'Vara de carvalho',varaDourada:'Vara dourada'};
+const ITEM_ORDER = ['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','cobre','ferro','cristal','fibra','flor','frutinha','nabo','milho','abobora','morango','melancia','abacaxi','caju','pequi','laranja','pera','uva','trufa','sNabo','sMilho','sAbobora','sMorango','sMelancia','sAbacaxi','mCaju','mPequi','mLaranja','mPera','mUva','mArbusto','isca','racao','ovo','leite','la','coco','concha','ouro','frutaEstelar','sopa','torta','omelete','queijo','bolo','sucoLaranja','arrozPequi','geleiaUva','doceCaju'];
 const CROPS = {
   nabo:{stages:3,time:14,seed:'sNabo',item:'nabo',name:'Nabo',seasons:[0,1,2]},
   milho:{stages:3,time:20,seed:'sMilho',item:'milho',name:'Milho',seasons:[1,2]},
@@ -253,7 +253,8 @@ const CROPS = {
   pequi:{tree:true,seed:'mPequi',item:'pequi',name:'Pequi',seasons:[1,2],n:2},
   laranja:{tree:true,seed:'mLaranja',item:'laranja',name:'Laranja',seasons:[3,0],n:3},
   pera:{tree:true,seed:'mPera',item:'pera',name:'Pera',seasons:[2],n:3},
-  uva:{tree:true,seed:'mUva',item:'uva',name:'Uva',seasons:[1,2],n:4}
+  uva:{tree:true,seed:'mUva',item:'uva',name:'Uva',seasons:[1,2],n:4},
+  arbusto:{tree:true,bush:true,seed:'mArbusto',item:'frutinha',name:'Frutinha',seasons:[0,1,2]}
 };
 const SEASONS=[{k:'primavera',name:'Primavera'},{k:'verao',name:'Verão'},{k:'outono',name:'Outono'},{k:'inverno',name:'Inverno'}];
 const SEASON_LEN=7;
@@ -695,7 +696,7 @@ function canAct(tool,t,x,y){
   if(isMature(t))return true;
   switch(tool){
     case 'mao': return ['bush','flower','bancada','forno','fogao','cama','estante','casa','galinheiro','estabulo','chiqueiro','comedouro','barraca','poco','chale','barco','concha','bau','arvoreEstelar','frutifera','trufa','festa'].includes(t.o)||PICKUP.has(t.o)||t.path;
-    case 'machado': return ['tree','pine','stump','palmeira','tocoPalmeira'].includes(t.o);
+    case 'machado': return ['tree','pine','stump','palmeira','tocoPalmeira','bush'].includes(t.o);
     case 'picareta': return t.o==='rock'||t.o==='veio';
     case 'enxada': return (t.g==='grass'&&!t.o&&!t.path)||(t.g==='sand'&&!t.o&&!t.path&&t.t<=0);
     case 'regador': return t.g==='water'||t.o==='poco'||(t.g==='soil'&&!t.wet);
@@ -800,7 +801,8 @@ function onAnimEvent(){
       else if(t.path){G.inv.pedra+=1;t.path=false;toast('Caminho recolhido.')}
       break;
     case 'machado':
-      if(t.o==='palmeira'){give('madeira',2);if(Math.random()<.5)give('coco',1);burst(a.x,a.y,'#57a94f',10,-18);t.o='tocoPalmeira';t.t=90;sfx('chop')}
+      if(t.o==='bush'){t.o=null;t.fruit=false;t.t=0;t.cool=0;give('mArbusto',1);give('fibra',1);burst(a.x,a.y,'#7fcb63',10,-6);sfx('chop');floatText('+1 muda de frutinha','#c8f0b0');if(!G.stats.arrancou){G.stats.arrancou=1;toast('Você arrancou o arbusto com raiz! Plante a muda com Sementes (6) em qualquer grama.',4200)}}
+      else if(t.o==='palmeira'){give('madeira',2);if(Math.random()<.5)give('coco',1);burst(a.x,a.y,'#57a94f',10,-18);t.o='tocoPalmeira';t.t=90;sfx('chop')}
       else if(t.o==='tocoPalmeira'){give('madeira',1);t.o=null;t.t=0;sfx('chop')}
       else if(t.o==='stump'){give('madeira',1);t.o=null;t.t=0;burst(a.x,a.y,'#a07040',6,-2);sfx('chop')}
       else{give('madeira',2);G.stats.madeira+=2;if(Math.random()<.3)give('fibra',1);burst(a.x,a.y,t.o==='pine'?'#3b8a5e':'#4c9b4c',12,-16);t.o='stump';t.t=80;sfx('chop')}
@@ -819,7 +821,8 @@ function onAnimEvent(){
       break;
     case 'semente': {
       const c=CROPS[G.seedSel];
-      if(c.tree&&t.g==='grass'&&!t.o&&have(c.seed)>0){G.inv[c.seed]--;t.o='frutifera';t.ore=G.seedSel;t.feed=0;t.t=DAY;t.fruit=false;G.stats.arvores=(G.stats.arvores||0)+1;burst(a.x,a.y,'#7fcb63',6,-2);sfx('plop');floatText(`${treeName(G.seedSel)} plantado!`,'#c8f0b0')}
+      if(c.bush&&t.g==='grass'&&!t.o&&!t.path&&have(c.seed)>0){G.inv[c.seed]--;t.o='bush';t.fruit=false;t.t=60;t.cool=0;burst(a.x,a.y,'#7fcb63',6,-2);sfx('plop');floatText('Arbusto plantado! Frutinhas logo','#c8f0b0')}
+      else if(c.tree&&t.g==='grass'&&!t.o&&have(c.seed)>0){G.inv[c.seed]--;t.o='frutifera';t.ore=G.seedSel;t.feed=0;t.t=DAY;t.fruit=false;G.stats.arvores=(G.stats.arvores||0)+1;burst(a.x,a.y,'#7fcb63',6,-2);sfx('plop');floatText(`${treeName(G.seedSel)} plantado!`,'#c8f0b0')}
       else if(!c.tree&&t.g==='soil'&&!t.crop&&!t.o&&have(c.seed)>0){G.inv[c.seed]--;t.crop={type:G.seedSel,stage:0,g:0};burst(a.x,a.y,'#d9b07a',4,-1);sfx('plop');if(!t.wet)floatText('Agora regue','#9fdcf2')}
       break;
     }
@@ -1517,7 +1520,7 @@ const GUIDE=[
   {grp:'Básicos',k:'pedra',tool:'Picareta (3)',where:'Pedras cinzas espalhadas pela ilha. Todo veio também dá 1 pedra.',find:t=>t.o==='rock'},
   {grp:'Básicos',k:'fibra',tool:'Mão (1) ou Mercado',where:'Qualquer arbusto dá 1 fibra (cada um de novo em uns 40 segundos). Também ao cortar árvores, na bota velha da pesca e no Mercado por 3 moedas.',find:t=>t.o==='bush'&&nowT()>=(t.cool||0)},
   {grp:'Básicos',k:'flor',tool:'Mão (1)',where:'Flores do campo na grama. Renascem sozinhas, menos no inverno.',find:t=>t.o==='flower'},
-  {grp:'Básicos',k:'frutinha',tool:'Mão (1)',where:'Arbustos com frutinhas vermelhas. Voltam em uns 45 segundos; param no inverno.',find:t=>t.o==='bush'&&t.fruit},
+  {grp:'Básicos',k:'frutinha',tool:'Mão (1)',where:'Arbustos com frutinhas vermelhas. Voltam em uns 45 segundos; param no inverno. Para mudar um arbusto de lugar, arranque com o Machado e plante a muda na grama.',find:t=>t.o==='bush'&&t.fruit},
   {grp:'Básicos',k:'argila',tool:'Enxada (4)',where:'Areia encostada na água (praia ou beira do lago).',find:t=>t.g==='sand'&&!t.o&&!t.path&&t.t<=0&&nearWaterT(t)},
   {grp:'Básicos',k:'areia',tool:'Enxada (4)',where:'Areia longe da água.',find:t=>t.g==='sand'&&!t.o&&!t.path&&t.t<=0&&!nearWaterT(t)},
   {grp:'Minérios',k:'cobre',tool:'Picareta (3)',where:'Veios com pontinhos laranja nas colinas (partes altas e verde-claras). Pedra comum às vezes dá 1.',find:isVein('cobre')},
@@ -2596,7 +2599,7 @@ function iconURL(key){
     case 'laranja':circ(g,16,18,8,'#f29a2c');circ(g,13,15,3,'#ffb84d');px(g,15,9,2,3,'#5fae55');px(g,17,8,3,2,'#7fcb63');break;
     case 'pera':ell(g,16,21,7,6,'#c9d65a');ell(g,16,13,4,5,'#c9d65a');ell(g,14,18,2,3,'#e3eb8a');px(g,16,6,1,3,'#7a5235');break;
     case 'uva':for(const [a,b2] of [[12,10],[17,10],[22,10],[14,15],[19,15],[16,20],[12,15],[21,15],[17,25]])circ(g,a-1,b2+2,3,(a+b2)%2?'#7a3f8f':'#9b5fb0');px(g,16,4,1,4,'#7a5235');break;
-    case 'mCaju':case 'mPequi':case 'mLaranja':case 'mPera':case 'mUva':poly(g,[9,28,23,28,21,19,11,19],'#c1704a');px(g,9,19,14,2,'#d98a5f');px(g,15,8,2,12,'#7a5235');circ(g,12,10,4,'#5fae55');circ(g,20,9,4,'#7fcb63');circ(g,16,6,3,{mCaju:'#e4503a',mPequi:'#c9c23a',mLaranja:'#f29a2c',mPera:'#c9d65a',mUva:'#9b5fb0'}[key]);break;
+    case 'mCaju':case 'mPequi':case 'mLaranja':case 'mPera':case 'mUva':case 'mArbusto':poly(g,[9,28,23,28,21,19,11,19],'#c1704a');px(g,9,19,14,2,'#d98a5f');px(g,15,8,2,12,'#7a5235');circ(g,12,10,4,'#5fae55');circ(g,20,9,4,'#7fcb63');circ(g,16,6,3,{mCaju:'#e4503a',mPequi:'#c9c23a',mLaranja:'#f29a2c',mPera:'#c9d65a',mUva:'#9b5fb0',mArbusto:'#e4506a'}[key]);break;
     case 'sAbacaxi':ell(g,16,20,8,8,'#d9b07a');px(g,12,9,8,5,'#c49a62');px(g,11,13,10,2,'#8a6646');circ(g,16,21,3,'#e8b84a');break;
     case 'trufa':circ(g,16,18,8,'#4a3428');circ(g,13,15,3,'#6b4a3a');px(g,18,20,2,2,'#2f2018');break;
     case 'aspersor':px(g,15,10,3,16,'#8c857d');px(g,10,8,12,3,'#c3c9d4');px(g,15,6,3,2,'#e08a4a');for(let i=0;i<5;i++)px(g,6+i*5,4+(i%2)*2,1,2,'#7cc8e8');break;
@@ -2686,7 +2689,7 @@ function refreshUI(){
       if(G.house&&G.house.fase<6){const ph=PHASES[G.house.fase];html=`<button type="button" class="chip ${hasCost(ph.cost)?'on':'lack'}" data-guide="1">Casa ${G.house.fase}/6 · ${ph.name}: <small>${hasCost(ph.cost)?'pronto, toque na obra!':'falta '+missingText(ph.cost)}</small></button>`}
       else html=info('Colha, abra estações e o galinheiro, guarde construções e entre em casa. Toque nos animais para alimentar e fazer carinho.')+`<button type="button" class="chip" data-guide="1">Guia da casa</button>`;
       break;
-    case 'machado':html=info('Toque numa árvore para cortar. Tocos também viram madeira.');break;
+    case 'machado':html=info('Toque numa árvore para cortar. Tocos também viram madeira. Num arbusto, arranca com raiz e vira muda.');break;
     case 'picareta':html=info('Pedras dão pedra e às vezes cobre. Veios coloridos nas colinas dão cobre, ferro e cristal.');break;
     case 'enxada':html=info('Grama vira terra para plantar. Na areia: argila perto da água, areia longe dela.');break;
     case 'regador':html=`<span class="chip info">Água <span class="meter">${Array.from({length:G.waterMax||WMAX},(_,i)=>`<i class="${i<G.water?'f':''}"></i>`).join('')}</span>&nbsp; Encha tocando na água</span>`;break;
