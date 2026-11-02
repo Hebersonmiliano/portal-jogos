@@ -268,7 +268,7 @@ const FISH = [
 for(const f of FISH)NAMES[f.id]=f.name;
 const SELL = {nabo:15,milho:30,abobora:70,frutinha:4,flor:3,madeira:2,pedra:2,fibra:1,argila:2,areia:1,tabua:6,tijolo:6,telha:3,vidro:10,cobre:10,ferro:18,cristal:45,sopa:45,torta:140,racao:1,coco:20,concha:8,ouro:80,frutaEstelar:60,morango:12,melancia:90,ovo:12,leite:25,la:30,omelete:40,queijo:70,bolo:110};
 for(const f of FISH)SELL[f.id]=f.price;
-const BUY = [{k:'sNabo',price:6},{k:'sMilho',price:10},{k:'sAbobora',price:25,lock:'abobora'},{k:'sMorango',price:15},{k:'sMelancia',price:30},{k:'isca',price:4},{k:'racao',price:3}];
+const BUY = [{k:'sNabo',price:6},{k:'sMilho',price:10},{k:'sAbobora',price:25,lock:'abobora'},{k:'sMorango',price:15},{k:'sMelancia',price:30},{k:'isca',price:4},{k:'racao',price:3},{k:'fibra',price:3}];
 const TOOLS = [{k:'mao',name:'Mão'},{k:'machado',name:'Machado'},{k:'picareta',name:'Picareta'},{k:'enxada',name:'Enxada'},{k:'regador',name:'Regador'},{k:'semente',name:'Sementes'},{k:'vara',name:'Vara'},{k:'construir',name:'Construir'}];
 const RECIPES_OUT = [
   {k:'caminho',name:'Caminho',cost:{pedra:1}},
@@ -284,7 +284,7 @@ const RECIPES_OUT = [
   {k:'galinheiro',name:'Galinheiro',cost:{madeira:8,tabua:4,fibra:2}},
   {k:'estabulo',name:'Estábulo',cost:{tabua:12,madeira:6,pedra:6}},
   {k:'comedouro',name:'Comedouro',cost:{madeira:4,tabua:2}},
-  {k:'barco',name:'Barco',cost:{tabua:20,ferro:4,fibra:8}},
+  {k:'barco',name:'Barco',cost:{tabua:16,ferro:3,fibra:4}},
   {k:'estatua',name:'Estátua dourada',cost:{ouro:3,pedra:5}}
 ];
 const RECIPES_IN = [
@@ -321,8 +321,8 @@ const STATIONS = {
 const PHASES = [
   {name:'Fundação',cost:{pedra:10,tijolo:6}},
   {name:'Estrutura',cost:{madeira:12,tabua:6}},
-  {name:'Paredes',cost:{tabua:16,fibra:4}},
-  {name:'Telhado',cost:{telha:20,tijolo:4}},
+  {name:'Paredes',cost:{tabua:14,fibra:4}},
+  {name:'Telhado',cost:{telha:16,tijolo:4}},
   {name:'Porta e janelas',cost:{tabua:4,vidro:2}},
   {name:'Acabamento',cost:{flor:3,fibra:2,cobre:1}}
 ];
@@ -446,7 +446,7 @@ function genWorld(){
   computeSea();
   placeVillage();
 }
-function oreKind(q){return q<.6?'cobre':q<.9?'ferro':'cristal'}
+function oreKind(q){return q<.55?'cobre':q<.85?'ferro':q<.93?'cristal':'ouro'}
 function countBase(){const T=G.tiles;G.rocks0=T.filter(t=>t.o==='rock').length;G.flowers0=T.filter(t=>t.o==='flower').length;G.veios0=Math.max(6,T.filter(t=>t.o==='veio').length)}
 function hasLake(){computeSea();return G.tiles.some(t=>t.g==='water'&&!t.sea)}
 function carveLake(r){
@@ -466,14 +466,14 @@ function carveLake(r){
     return;
   }
 }
-const ORE_MIN={cobre:4,ferro:4,cristal:2};
+const ORE_MIN={cobre:4,ferro:4,cristal:2,ouro:1};
 function oreFreeTile(r,hillFirst){
   const T=G.tiles,ok=(x,y,t)=>t&&t.g==='grass'&&!t.o&&!t.path&&!t.crop&&Math.hypot(x-G.px,y-G.py)>4&&!(G.house&&x>=G.house.x-1&&x<=G.house.x+3&&y>=G.house.y-1&&y<=G.house.y+3)&&!(G.village&&Math.abs(x-G.village.x)<=4&&Math.abs(y-G.village.y)<=4);
   for(let pass=0;pass<2;pass++)for(let i=0;i<3000;i++){const x=(r()*N)|0,y=(r()*N)|0,t=T[y*N+x];if(ok(x,y,t)&&(pass===1||!hillFirst||t.h===2))return t}
   return null;
 }
 function ensureOres(r){
-  const cnt={cobre:0,ferro:0,cristal:0};for(const t of G.tiles)if(t.o==='veio'&&cnt[t.ore]!==undefined)cnt[t.ore]++;
+  const cnt={cobre:0,ferro:0,cristal:0,ouro:0};for(const t of G.tiles)if(t.o==='veio'&&cnt[t.ore]!==undefined)cnt[t.ore]++;
   for(const [k,m] of Object.entries(ORE_MIN)){for(let i=cnt[k];i<m;i++){const t=oreFreeTile(r,true);if(!t)break;t.o='veio';t.ore=k}}
   G.veios0=Math.max(G.veios0||0,G.tiles.filter(t=>t.o==='veio').length);
 }
@@ -497,8 +497,8 @@ function setScene(kind){
 }
 
 // ---------- salvar ----------
-const packTile = t => [t.g,t.h,t.o,t.path?1:0,t.wet?1:0,t.crop?[t.crop.type,t.crop.stage,Math.round(t.crop.g*10)/10,t.crop.h||0]:0,Math.round(t.t),t.fruit?1:0,t.v,t.ore||0,t.door?1:0,t.feed||0];
-const unpackTile = a => {const t=newTile(a[0],a[1],a[2],a[8]);t.path=!!a[3];t.wet=!!a[4];t.crop=a[5]?{type:a[5][0],stage:a[5][1],g:a[5][2],h:a[5][3]||0}:null;t.t=a[6]||0;t.fruit=!!a[7];t.ore=a[9]||null;t.door=!!a[10];t.feed=a[11]||0;return t};
+const packTile = t => [t.g,t.h,t.o,t.path?1:0,t.wet?1:0,t.crop?[t.crop.type,t.crop.stage,Math.round(t.crop.g*10)/10,t.crop.h||0]:0,Math.round(t.t),t.fruit?1:0,t.v,t.ore||0,t.door?1:0,t.feed||0,t.cool||0];
+const unpackTile = a => {const t=newTile(a[0],a[1],a[2],a[8]);t.path=!!a[3];t.wet=!!a[4];t.crop=a[5]?{type:a[5][0],stage:a[5][1],g:a[5][2],h:a[5][3]||0}:null;t.t=a[6]||0;t.fruit=!!a[7];t.ore=a[9]||null;t.door=!!a[10];t.feed=a[11]||0;t.cool=a[12]||0;return t};
 function serialize(){
   G.px=P.tx; G.py=P.ty;
   const o=Object.assign({},G);
@@ -619,6 +619,7 @@ function face(x,y){const fx=sign(x-P.tx),fy=sign(y-P.ty);if(fx||fy)G.facing=[fx,
 // AÇÕES
 // =====================================================================
 function price(k){return Math.round(SELL[k]*(G.sellBonus||1))}
+function nowT(){return (G.day*DAY+G.time*DAY)|0}
 function hasRod(){return !!(G.inv.vara||G.inv.varaCarvalho||G.inv.varaDourada)}
 function give(k,n,quiet){G.inv[k]=(G.inv[k]||0)+n;if(!quiet)floatText(`+${n} ${NAMES[k]}`,'#ffe9a8')}
 function fishCount(){return FISH.reduce((s,f)=>s+(G.inv[f.id]||0),0)}
@@ -718,7 +719,7 @@ function startAct(x,y){
     if(G.tool==='construir'&&MAP.kind==='ilhota'){toast('A ilhota é selvagem: construa na sua ilha.');return}
     if(G.tool==='construir'&&curRecipe().k==='barco'&&!placeOK(curRecipe(),t,x,y)){toast('O barco vai na água do mar, encostado num cais.');return}
     if(G.tool==='construir'){const R=curRecipe();if(!hasCost(R.cost)){toast(`${R.name}: falta ${missingText(R.cost)}. Toque no recurso na barra do topo para ver onde achar.`,3600);return}}
-    if(G.tool==='mao'&&t.o==='bush'&&!t.fruit){toast('As frutinhas ainda estão crescendo.');return}
+    if(G.tool==='mao'&&t.o==='bush'&&!t.fruit&&nowT()<(t.cool||0)){toast('Esse arbusto já deu fibra. Tente outro ou volte daqui a pouco.');return}
     if(G.tool==='mao'&&t.o==='casa'){
       const ph=PHASES[G.house.fase];
       if(!ph){toast('A casa já está pronta.');return}
@@ -741,7 +742,8 @@ function onAnimEvent(){
   }
   switch(a.tool){
     case 'mao':
-      if(t.o==='bush'){give('frutinha',2);give('fibra',1);t.fruit=false;t.t=45;burst(a.x,a.y,'#e4506a',6,-6);sfx('pick')}
+      if(t.o==='bush'&&t.fruit){give('frutinha',2);give('fibra',1);t.fruit=false;t.t=45;t.cool=nowT()+40;burst(a.x,a.y,'#e4506a',6,-6);sfx('pick')}
+      else if(t.o==='bush'){give('fibra',1);t.cool=nowT()+40;burst(a.x,a.y,'#7fcb63',6,-6);sfx('pick')}
       else if(t.o==='concha'){give('concha',1);t.o=null;burst(a.x,a.y,'#f6c1d0',5,-2);sfx('pick')}
       else if(t.o==='flower'){give('flor',1);if(Math.random()<.3)give('sNabo',1);burst(a.x,a.y,'#f6a6c1',6,-3);t.o=null;sfx('pick')}
       else if(t.o==='casa'){
@@ -1453,7 +1455,7 @@ const isVein=o=>t=>t.o==='veio'&&t.ore===o;
 const GUIDE=[
   {grp:'Básicos',k:'madeira',tool:'Machado (2)',where:'Árvores, pinheiros e tocos. Na ilhota, palmeiras.',find:t=>['tree','pine','stump','palmeira'].includes(t.o)},
   {grp:'Básicos',k:'pedra',tool:'Picareta (3)',where:'Pedras cinzas espalhadas pela ilha. Todo veio também dá 1 pedra.',find:t=>t.o==='rock'},
-  {grp:'Básicos',k:'fibra',tool:'Mão (1)',where:'Arbustos com frutinhas vermelhas (2 frutinhas + 1 fibra). Às vezes ao cortar árvores ou pescar a bota velha.',find:t=>t.o==='bush'&&t.fruit},
+  {grp:'Básicos',k:'fibra',tool:'Mão (1) ou Mercado',where:'Qualquer arbusto dá 1 fibra (cada um de novo em uns 40 segundos). Também ao cortar árvores, na bota velha da pesca e no Mercado por 3 moedas.',find:t=>t.o==='bush'&&nowT()>=(t.cool||0)},
   {grp:'Básicos',k:'flor',tool:'Mão (1)',where:'Flores do campo na grama. Renascem sozinhas, menos no inverno.',find:t=>t.o==='flower'},
   {grp:'Básicos',k:'frutinha',tool:'Mão (1)',where:'Arbustos com frutinhas vermelhas. Voltam em uns 45 segundos; param no inverno.',find:t=>t.o==='bush'&&t.fruit},
   {grp:'Básicos',k:'argila',tool:'Enxada (4)',where:'Areia encostada na água (praia ou beira do lago).',find:t=>t.g==='sand'&&!t.o&&!t.path&&t.t<=0&&nearWaterT(t)},
@@ -1461,7 +1463,7 @@ const GUIDE=[
   {grp:'Minérios',k:'cobre',tool:'Picareta (3)',where:'Veios com pontinhos laranja nas colinas (partes altas e verde-claras). Pedra comum às vezes dá 1.',find:isVein('cobre')},
   {grp:'Minérios',k:'ferro',tool:'Picareta (3)',where:'Veios com pontinhos prateados nas colinas. Cada um dá 2 ferros.',find:isVein('ferro')},
   {grp:'Minérios',k:'cristal',tool:'Picareta (3)',where:'Veios com pontas roxas, nas colinas e na Ilhota do Leste.',find:isVein('cristal')},
-  {grp:'Minérios',k:'ouro',tool:'Picareta (3)',where:'Só na Ilhota do Leste: veios com pontinhos dourados. O baú escondido de lá também dá ouro.',find:isVein('ouro'),onlyIn:'ilhota'},
+  {grp:'Minérios',k:'ouro',tool:'Picareta (3)',where:'Veios com pontinhos dourados: raros nas colinas da ilha (sempre pelo menos 1) e comuns na Ilhota do Leste. O baú da ilhota também dá ouro.',find:isVein('ouro')},
   {grp:'Feitos por você',k:'tabua',tool:'Bancada',where:'Na Bancada: 2 madeira = 1 tábua. Construa a Bancada com 6 madeira + 2 pedra.',find:t=>t.o==='bancada'},
   {grp:'Feitos por você',k:'tijolo',tool:'Forno',where:'No Forno: 2 argila + 1 madeira = 2 tijolos. Forno: 8 pedra + 2 argila.',find:t=>t.o==='forno'},
   {grp:'Feitos por você',k:'telha',tool:'Forno',where:'No Forno: 1 argila = 2 telhas.',find:t=>t.o==='forno'},
@@ -1579,7 +1581,7 @@ function respawn(){
   if(count('flower')<G.flowers0&&season()!==3){const t=pick();if(t)t.o='flower'}
   if(count('rock')<G.rocks0&&Math.random()<.5){const t=pick();if(t)t.o='rock'}
   if(count('veio')<G.veios0&&Math.random()<.4){const t=pick(true)||pick();if(t){t.o='veio';
-    const c={cobre:0,ferro:0,cristal:0};for(const q of G.tiles)if(q.o==='veio'&&c[q.ore]!==undefined)c[q.ore]++;
+    const c={cobre:0,ferro:0,cristal:0,ouro:0};for(const q of G.tiles)if(q.o==='veio'&&c[q.ore]!==undefined)c[q.ore]++;
     const lack=Object.keys(ORE_MIN).find(k=>c[k]<ORE_MIN[k]);t.ore=lack||oreKind(Math.random())}}
 }
 function hour(){return (6+G.time*24)%24}
