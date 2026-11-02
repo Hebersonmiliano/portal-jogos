@@ -22,10 +22,39 @@ function fixture(page='index.html',game='ultima-transmissao'){
  const selectors=new Map(),storage=new Map();
  const document={getElementById:id=>{if(!nodes.has(id))throw Error('ID ausente: '+id);return nodes.get(id);},querySelector:s=>{if(!selectors.has(s))selectors.set(s,new Node());return selectors.get(s);},querySelectorAll:()=>[],createElement:tag=>new Node(tag),documentElement:new Node('html')};
  const context=vm.createContext({window:{addEventListener(){}},document,location:{search:'?id='+game},URLSearchParams,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},console});
- for(const script of ['jogos.js','assets/faisca.js','assets/lenda-da-brasa.js','assets/imperio-industrial.js','assets/comum.js','assets/setor404.js','assets/cafe-com-patas.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
+ for(const script of ['jogos.js','assets/faisca.js','assets/faisca2.js','assets/lenda-da-brasa.js','assets/imperio-industrial.js','assets/comum.js','assets/setor404.js','assets/cafe-com-patas.js'])vm.runInContext(fs.readFileSync(path.join(root,script),'utf8'),context,{filename:script});
  return {context,document,run:file=>vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file}),storage};
 }
 function descendants(node,tag){return node.children.flatMap(n=>[...(n.tagName===tag?[n]:[]),...descendants(n,tag)]);}
+
+test('Faísca 2 aparece no destaque, na busca e na vitrine com capturas próprias',()=>{
+ const f=fixture();f.run('assets/vitrine.js');
+ assert.match(f.document.getElementById('destaque').children[0].children[0].textContent,/FAÍSCA 2/);
+ assert.match(f.document.getElementById('paineis').textContent,/Um lenço\. Oito desafios/);
+ f.document.getElementById('busca').handlers.input({target:{value:'Castelo das Cinzas'}});
+ assert.match(f.document.getElementById('conteudo').textContent,/FAÍSCA 2/);
+ const jogo=f.context.window.JOGOS.find(j=>j.id==='faisca-2');
+ assert.equal(jogo.versao,'0.5.0');assert.equal(jogo.mobile,false);
+ assert.ok(fs.existsSync(path.join(root,jogo.capa)));
+ const compartilhar=fs.readFileSync(path.join(root,'j/faisca-2/index.html'),'utf8');
+ assert.match(compartilhar,/og:image/);assert.match(compartilhar,/previas\/faisca-2.jpg/);
+});
+
+test('Faísca 2 oferece oito capturas e inicia somente um jogador local versionado',()=>{
+ const f=fixture('jogo.html','faisca-2');f.run('assets/pagina-jogo.js');
+ const wrapper=f.document.getElementById('apresentacao-faisca2');assert.equal(wrapper.hidden,false);
+ assert.equal(descendants(wrapper,'img').length,9);
+ for(const img of descendants(wrapper,'img'))assert.ok(fs.existsSync(path.join(root,img.src)),img.src);
+ const palco=f.document.getElementById('palco');assert.equal(descendants(palco,'iframe').length,0);
+ wrapper.querySelector('button').click();assert.equal(wrapper.hidden,true);
+ assert.equal(descendants(palco,'iframe').length,1);
+ assert.equal(palco.querySelector('iframe').src,'jogos/faisca-2/index.html?v=0.5.0');
+ assert.equal(f.document.getElementById('tela-cheia').disabled,false);
+ const dir=path.join(root,'jogos/faisca-2');const html=fs.readFileSync(path.join(dir,'index.html'),'utf8');
+ assert.match(html,/"executable":"faisca2_050"/);
+ for(const ext of ['js','wasm','pck'])assert.ok(fs.statSync(path.join(dir,'faisca2_050.'+ext)).size>0);
+ assert.ok(fs.readdirSync(dir).every(n=>!n.endsWith('.gd')&&!n.endsWith('.import')&&n!=='.git'));
+});
 
 test('Café com Patas aparece na busca e oferece capturas, equipe e guia local',()=>{
  const f=fixture();f.run('assets/vitrine.js');
@@ -140,10 +169,11 @@ test('Império Industrial apresenta história e seis etapas, com prévias locais
  assert.ok(!h.document.getElementById('conteudo').textContent.includes('Uma bancada'));
 });
 
-test('Lenda da Brasa ocupa o destaque do topo com herói, elenco e fotos dos lugares',()=>{
+test('Lenda da Brasa continua no carrossel com herói, elenco e fotos dos lugares',()=>{
  const h=fixture();h.run('assets/vitrine.js');const carrossel=h.document.getElementById('destaque');
- assert.match(carrossel.children[0].children[0].textContent,/Lenda da Brasa/);
- const topo=h.document.getElementById('paineis').children[0];assert.equal(topo.hidden,false);
+ assert.ok(carrossel.children[0].children.some(n=>/Lenda da Brasa/.test(n.textContent)));
+ const topo=h.document.getElementById('paineis').children.find(n=>n.id==='painel-lenda-da-brasa');
+ h.context.abrirVitrine('lenda-da-brasa',false);assert.equal(topo.hidden,false);
  assert.match(topo.textContent,/LUME/);assert.match(topo.textContent,/LUGARES DA JORNADA/);
  const imgs=descendants(topo,'img');assert.equal(imgs.length,11);
  h.document.getElementById('busca').handlers.input({target:{value:'lenda'}});assert.equal(h.document.getElementById('vitrines').hidden,true);

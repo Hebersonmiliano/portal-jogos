@@ -15,7 +15,7 @@ window.SITE = {
   // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
   estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
-  carrossel: ["lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
+  carrossel: ["faisca-2", "lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -33,6 +33,28 @@ window.GENEROS = [
 ];
 
 window.JOGOS = [
+  {
+    id: "faisca-2",
+    titulo: "FAÍSCA 2 — Castelo das Cinzas",
+    tituloCompartilhar: "FAÍSCA 2",
+    chamadaCompartilhar: "Castelo das Cinzas. Um lenço. Oito desafios. Um castelo vivo.",
+    chamada: "Um lenço. Oito desafios. Um castelo vivo.",
+    genero: ["Ação", "Aventura", "Plataforma"],
+    tags: ["cartoon", "castelo", "8 fases", "8 chefes", "lenço", "controle", "exploração"],
+    descricao: "O Castelo das Cinzas está roubando o calor do mundo. Guie Faísca por oito capítulos conectados, com cenários, inimigos e músicas próprios. Use o lenço amarelo em oito direções, colete seus três níveis, conquiste o salto duplo e enfrente oito chefes com personalidades e estratégias diferentes. Checkpoints e salvamento local permitem continuar a aventura. Campanha jogável na versão 0.5.0, em polimento.",
+    controles: "Computador: A/D ou setas movem; WASD/setas miram; Espaço pula; J ataca com o lenço; C/Ctrl/baixo agacha; K/Shift esquiva; E descansa nos braseiros e interage com válvulas; Esc pausa; M alterna o som. Controle: analógico/direcional move, analógico direito mira, A pula, X ataca, B esquiva, Y interage e Start pausa. A mira afeta os ataques, não a direção do salto. O progresso fica neste navegador e dispositivo. Sem controles de toque.",
+    url: "jogos/faisca-2/index.html",
+    versao: "0.5.0",
+    versaoJogo: "0.5.0",
+    capa: "assets/faisca-2/capa.jpg",
+    cor: "#ffc778",
+    icone: "🔥",
+    engine: "Godot · Web",
+    mobile: false,
+    status: "disponivel",
+    lancamento: "2026-11-02",
+    destaque: true,
+  },
   {
     id: "brisa",
     titulo: "Brisa",

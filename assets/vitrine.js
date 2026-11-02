@@ -111,6 +111,7 @@ function desenharDestaque() {
 
 // ---------- Vitrines em abas ----------
 const VITRINES = [
+  { id: "faisca-2", criar: (j) => criarVitrineFaisca2(j) },
   { id: "lenda-da-brasa", criar: (j) => criarVitrineLenda(j) },
   { id: "cafe-com-patas", criar: (j) => criarVitrineCafe(j) },
   { id: "imperio-industrial-2", criar: (j) => criarVitrineImperio2(j) },

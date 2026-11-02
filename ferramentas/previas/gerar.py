@@ -19,7 +19,7 @@ def catalogo():
     js = ("const vm=require('vm'),fs=require('fs');const c={window:{}};vm.createContext(c);"
           "vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),c);"
           "process.stdout.write(JSON.stringify({site:c.window.SITE,jogos:c.window.JOGOS}))")
-    out = subprocess.run(['node', '-e', js, os.path.join(RAIZ, 'jogos.js')], capture_output=True, text=True, check=True).stdout
+    out = subprocess.run(['node', '-e', js, os.path.join(RAIZ, 'jogos.js')], capture_output=True, text=True, encoding='utf-8', check=True).stdout
     return json.loads(out)
 
 def fonte(nome, tam): return ImageFont.truetype(os.path.join(FONTES, nome), tam)
@@ -103,10 +103,10 @@ def imagem_jogo(jogo, site):
         larg = 640
     d = ImageDraw.Draw(base)
     y = 150
-    for l in quebra(d, jogo['titulo'], FORTE(60), larg, 2):
+    for l in quebra(d, jogo.get('tituloCompartilhar') or jogo['titulo'], FORTE(60), larg, 2):
         d.text((60, y), l, font=FORTE(60), fill=(255, 255, 255, 255)); y += 70
     y += 12
-    chamada = jogo.get('chamada') or jogo.get('descricao', '')
+    chamada = jogo.get('chamadaCompartilhar') or jogo.get('chamada') or jogo.get('descricao', '')
     for l in quebra(d, chamada, TEXTO(28), larg, 4 if y < 260 else 3):
         d.text((60, y), l, font=TEXTO(28), fill=(222, 220, 255, 255)); y += 38
     gen = ' · '.join(jogo.get('genero', []))

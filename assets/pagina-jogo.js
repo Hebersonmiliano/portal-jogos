@@ -55,6 +55,11 @@ if (!jogo) {
     const capa = criarCapa(jogo);
     capa.append(iniciar);
     palco.replaceChildren(capa);
+    if (jogo.id === "faisca-2") {
+      const apresentacao = document.getElementById("apresentacao-faisca2");
+      apresentacao.hidden = false;
+      apresentacao.append(criarVitrineFaisca2(jogo, () => iniciar.click(), true));
+    }
     if (jogo.vitrineCafe) {
       const apresentacao = document.getElementById("apresentacao-cafe");
       apresentacao.hidden = false;
@@ -93,6 +98,10 @@ if (!jogo) {
       quadro.allow = "fullscreen; autoplay; gamepad; clipboard-write";
       quadro.allowFullscreen = true;
       palco.replaceChildren(quadro);
+      if (jogo.id === "faisca-2") {
+        document.getElementById("apresentacao-faisca2").hidden = true;
+        palco.scrollIntoView({block:"start",behavior:"auto"});
+      }
       if (jogo.vitrineCafe) {
         document.getElementById("apresentacao-cafe").hidden = true;
         palco.scrollIntoView({block:"start",behavior:"auto"});

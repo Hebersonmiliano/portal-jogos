@@ -17,6 +17,12 @@ _headers              cabeçalhos COOP/COEP (Cloudflare Pages / Netlify) para Go
 
 ## Adicionar um jogo
 
+### FAÍSCA 2 — Castelo das Cinzas
+
+Campanha Web 0.5.0 em jogos/faisca-2/, com execução JS/WASM/PCK versionada. O projeto Godot permanece no repositório privado; esta é a cópia de distribuição autorizada para jogar no portal. O catálogo, carrossel e aba de apresentação incluem o jogo, com oito capturas, arte do Faísca, história sem revelar o desfecho e explicações das mecânicas. assets/faisca2.js e assets/faisca2.css compõem a apresentação; as imagens ficam em assets/faisca-2/.
+
+O iframe só é criado após clicar em jogar. Recomendado para computador; sem controles de toque. A campanha está em polimento. O link j/faisca-2/ contém os metadados para divulgação com a imagem previas/faisca-2.jpg. A versão publicada é copiada do pacote builds/FAISCA2-CAMPANHA-WEB.zip do projeto, sem .git, scripts de desenvolvimento ou arquivos .import. Testes: node --test tests/apresentacao.test.cjs.
+
 1. Coloque o jogo em `jogos/<id>/` (ou adicione a origem em `atualizar-jogos.ps1` e rode o script).
 2. Adicione uma entrada em `jogos.js` copiando uma existente.
 3. Opcional: uma imagem `capa.png` (16:9, por exemplo 640×360) e o caminho dela no campo `capa`.
