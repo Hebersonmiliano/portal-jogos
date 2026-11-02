@@ -52,6 +52,7 @@ button:focus-visible{outline:2px solid var(--butter);outline-offset:2px}
 .side{display:flex;flex-direction:column;gap:8px;pointer-events:auto;align-items:stretch}
 .btn{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .btn:hover{border-color:rgba(255,212,107,.6)}
+.btn.on{background:#ffd46b;color:#2a1f3d;border-color:#ffd46b}
 .btn kbd{font-family:var(--display);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 4px;margin-left:auto}
 .btn.off{color:var(--muted)}
 .res{flex:1;min-width:0;max-width:640px;display:flex;flex-wrap:wrap;justify-content:center;gap:2px 4px;padding:6px 8px;pointer-events:auto;align-self:flex-start}
@@ -187,6 +188,7 @@ h3:first-child{margin-top:0}
       <button class="btn" id="houseBtn" type="button"><span>Casa</span><kbd>C</kbd></button>
       <button class="btn" id="soundBtn" type="button"><span id="soundLbl">Som ligado</span></button>
       <div class="zoom"><button class="btn" id="zoomOut" type="button" aria-label="Afastar">−</button><button class="btn" id="zoomIn" type="button" aria-label="Aproximar">+</button></div>
+      <button class="btn" id="seeBtn" type="button" aria-pressed="false"><span>Ver atrás</span><kbd>V</kbd></button>
       <button class="btn" id="helpBtn" type="button" aria-label="Ajuda"><span>?</span><span class="lbl">Ajuda</span></button>
     </div>
   </div>
@@ -2279,8 +2281,28 @@ function drawInteriorWalls(g){
   poly(g,[q1[0]+2,q1[1]-25,q2[0]-2,q2[1]-25,q2[0]-2,q2[1]-18,q1[0]+2,q1[1]-18],'#8ccf6b');
   const sun=L2p(q1,q2,.5);px(g,sun[0],sun[1]-23,2,2,'#ffd46b');
 }
+// objetos altos ficam transparentes quando o personagem passa atrás (ou sempre, com a tecla V)
+const TALL={tree:[12,40],pine:[12,44],palmeira:[14,44],frutifera:[12,36],arvoreEstelar:[14,44],galinheiro:[14,26],estabulo:[18,32],chiqueiro:[16,24],chale:[22,40],barraca:[16,30],casa:[50,74],bancada:[10,16],forno:[10,22],estante:[10,30],dPinheiro:[10,36],dArco:[12,30],festa:[14,24]};
+let seeThrough=false;
+function tallAlpha(t,x,y,sx,sy){
+  const T=TALL[t.o];if(!T)return 1;
+  let cx=sx,cy=sy,depth=x+y;
+  if(t.o==='casa'){if(!G.house||MAP.kind!=='ilha')return 1;const ht=tile(G.house.x,G.house.y),z=(ht?ht.h:1)*HZ;cx=(G.house.x-G.house.y)*TW/2+ox;cy=(G.house.x+G.house.y+2)*TH/2-z+oy+TH*1.5;depth=G.house.x+G.house.y+4}
+  if(seeThrough)return .35;
+  if(Math.round(P.x)+Math.round(P.y)>=depth)return 1;
+  const psx=(P.x-P.y)*TW/2+ox,psy=(P.x+P.y)*TH/2-P.z+oy;
+  if(Math.abs(psx-cx)<T[0]+4&&psy<cy+2&&psy>cy-T[1]-6)return .4;
+  // bichos e moradores atrás também
+  return 1;
+}
 function drawObj(g,t,x,y,sx,sy,time,lights){
   if(t.crop)drawCrop(g,sx,sy,t.crop,time);
+  const al=t.o?tallAlpha(t,x,y,sx,sy):1;
+  if(al<1){g.save();g.globalAlpha=al}
+  drawObjInner(g,t,x,y,sx,sy,time,lights);
+  if(al<1)g.restore();
+}
+function drawObjInner(g,t,x,y,sx,sy,time,lights){
   switch(t.o){
     case 'tree':drawTree(g,sx,sy,t.v);break;
     case 'pine':drawPine(g,sx,sy);break;
@@ -2875,6 +2897,7 @@ addEventListener('keydown',e=>{
   if(!$('#intro').hidden){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#startBtn').click()}return}
   const k=e.key.toLowerCase();
   if(k==='escape'){if($('#panel').hidden&&track){track=null;toast('Seta desligada.');refreshRes();return}closePanel();return}
+  if(k==='v'){seeThrough=!seeThrough;toast(seeThrough?'Ver através ligado: árvores e construções ficam transparentes (V desliga).':'Ver através desligado.');refreshSee();return}
   if(k==='g'){$('#panel').hidden||panelMode.tab!=='guia'?openPanel('guia'):closePanel();return}
   if(k==='b'||k==='i'){$('#panel').hidden||panelMode.station?openPanel('mochila'):closePanel();return}
   if(k==='m'){$('#panel').hidden||panelMode.tab!=='mercado'?openPanel('mercado'):closePanel();return}
@@ -2919,6 +2942,8 @@ function setZoom(d){
 let wheelT=0;
 cv.addEventListener('wheel',e=>{e.preventDefault();const now=performance.now();if(now-wheelT<120)return;wheelT=now;setZoom(e.deltaY<0?1:-1)},{passive:false});
 $('#zoomIn').addEventListener('click',()=>setZoom(1));
+function refreshSee(){const b=$('#seeBtn');if(b){b.setAttribute('aria-pressed',seeThrough);b.classList.toggle('on',seeThrough)}}
+$('#seeBtn').addEventListener('click',()=>{seeThrough=!seeThrough;toast(seeThrough?'Ver através ligado: árvores e construções ficam transparentes.':'Ver através desligado.');refreshSee()});
 $('#zoomOut').addEventListener('click',()=>setZoom(-1));
 // pinça com dois dedos
 const touches=new Map();let pinch0=0;
