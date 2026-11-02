@@ -54,6 +54,14 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ## Publicar
 
+### Brisa
+
+Disponível em `jogo.html?id=brisa`, com a cópia de distribuição em `jogos/brisa/` (um único `index.html`, HTML5 com Canvas 2D e Web Audio, sem bibliotecas). Versão 0.2.0: jogo cozy de sobrevivência e crafting em pixel art isométrica, com personagem articulado, casa em seis fases com interior, pesca no lago e no mar, machado, picareta e minérios, Bancada, Forno e Fogão, horta e trilha lo-fi gerada no navegador. Funciona no computador e no celular e salva no `localStorage`.
+
+A capa `jogos/brisa/capa.png` é uma captura real do jogo (casa pronta, horta e lago no fim da tarde). O link de compartilhamento fica em `j/brisa/`.
+
+Fonte do jogo: https://github.com/Hebersonmiliano/Brisa . Para atualizar, copie o `index.html` do repositório para `jogos/brisa/` (a capa fica preservada), aumente `versao` no catálogo, acrescente a versão em `novidades` e atualize a chave de cache de `jogos.js` nas duas páginas.
+
 ### Profundezas
 
 Disponível em `jogo.html?id=profundezas`, com a cópia de distribuição em `jogos/profundezas/` (`index.html`, `css/` e `js/`, HTML5 puro, sem bibliotecas). Versão 1.5.0: baú novo com abas, organizar e favoritos, chefes corrompidos e a Chama Corrompida no andar 100, guia completo, formulário Dar opinião, alquimista e joalheiro com ingredientes, elixires e gemas, conjuntos de equipamento com bônus de 2 e 4 peças, você escolhe o que vestir (equipar automático opcional), escolha de classe, arco, cajado e martelo com ataques próprios, 9 espaços de equipamento (capacete, luvas, botas, amuleto, dois anéis e asas), asas dos chefes que transformam a esquiva num voo, árvore de habilidades com degraus e supremas, nova curva de dificuldade, chave do andar, efeitos especiais nos itens, modificadores nas Profundezas Infinitas, vila explorável com moradores, diálogos com retratos, cenas ilustradas, história com capítulos, quadro de missões, Profundezas Infinitas, decoração e iluminação por bioma, mochila maior, equipar melhores, vender tudo, Runa e Portal de Retorno, suporte a controle (Xbox, PlayStation e genéricos), inimigos que contornam paredes, tutorial com dicas, comportamentos próprios para os 20 inimigos, mapas variados com armadilhas, salas secretas e salas especiais, animações, sprites próprios para 20 inimigos e 5 chefes, árvore de habilidades (Guerreiro, Caçador e Arcano), ataques exclusivos dos chefes, trilha sonora original em chiptune (vila, cinco biomas e chefes, tecla M liga/desliga), 50 andares procedurais em cinco biomas, chefe a cada 10 andares, loot em cinco raridades, vila com estalagem, mercado, ferreiro, alfaiate e baú. Funciona no computador e no celular (controles de toque) e salva o progresso no `localStorage` do navegador.

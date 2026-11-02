@@ -15,7 +15,7 @@ window.SITE = {
   // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
   estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
-  carrossel: ["lenda-da-brasa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
+  carrossel: ["lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -33,6 +33,26 @@ window.GENEROS = [
 ];
 
 window.JOGOS = [
+  {
+    id: "brisa",
+    titulo: "Brisa",
+    chamada: "Uma ilha tranquila, só sua. Corte madeira, pesque no lago, cuide da horta e construa sua casa no seu ritmo.",
+    genero: ["Simulação", "Aventura"],
+    tags: ["cozy", "pixel art", "isométrico", "fazenda", "pesca", "crafting", "construção", "sobrevivência"],
+    descricao: "Você chega a uma ilha vazia gerada na hora e, sem pressa e sem monstros, faz dela o seu lugar. Corte árvores com o machado, quebre pedras e veios de cobre, ferro e cristal com a picareta, cave argila e areia na praia e cultive nabo, milho e abóbora, que só crescem com a terra regada. Monte a Bancada e o Forno para fazer tábuas, tijolos, telhas, vidro e iscas. Escolha um terreno, coloque a placa e erga sua casa em seis fases, da fundação ao acabamento, com fumaça na chaminé e janelas acesas à noite. Lá dentro, decore com cama, mesa, tapete, estante, fogão e luminária de cristal, e durma para pular a noite. Pesque no lago e no mar: dez espécies que mudam com a hora, um minigame de puxar a linha e um diário com recordes. O personagem é articulado, com animações para cada ferramenta, e a trilha lo-fi muda de clima ao anoitecer. Vinte e duas tarefas guiam do primeiro tronco até completar o diário. Versão 0.2.",
+    controles: "Teclado: WASD ou setas andam, Espaço (ou F/E) usa a ferramenta no tile à frente, 1 a 8 trocam a ferramenta (Mão, Machado, Picareta, Enxada, Regador, Sementes, Vara e Construir) e R troca a semente ou a construção escolhida. B abre a Mochila e M o Mercado. Mouse ou toque: toque no mapa para andar e usar a ferramenta no alvo destacado. Na pesca, espere a boia afundar, toque no \"!\" e segure para manter o peixe na faixa verde. A música começa no primeiro clique e o botão Som desliga. O progresso é salvo no navegador.",
+    url: "jogos/brisa/index.html",
+    versao: "0.2.0",
+    capa: "jogos/brisa/capa.png",
+    cor: "#8ccf6b",
+    icone: "🌿",
+    engine: "HTML5 · Canvas 2D",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-11-01",
+    destaque: true,
+    novidades: [{ versao: "0.2", data: "2026-11-01", itens: ["Personagem articulado com 15 peças e animações para cada ferramenta", "Casa em seis fases com interior, móveis e cama; Bancada, Forno e Fogão", "Pesca no lago e no mar com dez peixes, minigame e diário; machado, picareta e minérios", "Trilha lo-fi gerada no navegador e efeitos sonoros"] }, { versao: "0.1", data: "2026-11-01", itens: ["Primeira versão: ilha gerada na hora, horta, mercado, construções e ciclo de dia e noite"] }],
+  },
   {
     id: "profundezas",
     titulo: "Profundezas",
