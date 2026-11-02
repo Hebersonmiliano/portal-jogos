@@ -389,7 +389,7 @@ const QUESTS = [
   {id:'b3',text:'Navegue até a Ilhota do Leste (Mão no barco)', p:()=>[G.stats.viagens||0,1], reward:()=>{G.inv.isca+=5;return '+5 iscas'}},
   {id:'b4',text:'Encontre o baú escondido na ilhota', p:()=>[G.stats.bau||0,1], reward:()=>{G.coins+=100;return '+100 moedas'}},
   {id:'b5',text:'Pesque o peixe-arco-íris no mar da ilhota', p:()=>[G.fishLog.arcoiris?1:0,1], reward:()=>{G.coins+=150;return '+150 moedas'}},
-  {id:'f1',text:'Construa um Aspersor perto da horta (2 cobre + 1 ferro)', p:()=>[G.built.aspersor||0,1], reward:()=>{G.coins+=40;return '+40 moedas'}},
+  {id:'f1',text:'Construa um Aspersor no meio da horta (2 cobre + 1 ferro)', p:()=>[G.built.aspersor||0,1], reward:()=>{G.coins+=40;return '+40 moedas'}},
   {id:'f2',text:'Plante uma árvore frutífera (mudas no Mercado)', p:()=>[G.stats.arvores||0,1], reward:()=>{G.inv.mLaranja+=1;return '+1 muda de laranjeira'}},
   {id:'f3',text:'Colha frutas de uma árvore frutífera', p:()=>[G.stats.frutas?1:0,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
   {id:'f4',text:'Construa um Chiqueiro, compre um porco e ache uma trufa', p:()=>[G.stats.trufa||0,1], reward:()=>{G.coins+=60;return '+60 moedas'}},
@@ -680,6 +680,7 @@ function placeOK(R,t,x,y){
     for(let yy=y-1;yy<=y+1;yy++)for(let xx=x-1;xx<=x+1;xx++){const n=tile(xx,yy);if(!n||n.g!=='grass'||n.h!==t.h||n.o||n.path||(xx===P.tx&&yy===P.ty))return false}
     const door=tile(x,y+2);return !!door&&door.g!=='water';
   }
+  if(R.k==='aspersor'&&t.g==='soil')return !t.o&&!t.crop&&!(x===P.tx&&y===P.ty);
   if(!(t.g==='grass'||t.g==='sand')||t.o||t.crop)return false;
   if(R.k==='caminho')return !t.path;
   return !(x===P.tx&&y===P.ty);
@@ -698,7 +699,7 @@ function canAct(tool,t,x,y){
     case 'picareta': return t.o==='rock'||t.o==='veio';
     case 'enxada': return (t.g==='grass'&&!t.o&&!t.path)||(t.g==='sand'&&!t.o&&!t.path&&t.t<=0);
     case 'regador': return t.g==='water'||t.o==='poco'||(t.g==='soil'&&!t.wet);
-    case 'semente': {const c=CROPS[G.seedSel];return c&&c.tree?(t.g==='grass'&&!t.o&&!t.path&&!t.crop):(t.g==='soil'&&!t.crop)}
+    case 'semente': {const c=CROPS[G.seedSel];return c&&c.tree?(t.g==='grass'&&!t.o&&!t.path&&!t.crop):(t.g==='soil'&&!t.crop&&!t.o)}
     case 'vara': return t.g==='water';
     case 'construir': return placeOK(curRecipe(),t,x,y);
   }
@@ -819,7 +820,7 @@ function onAnimEvent(){
     case 'semente': {
       const c=CROPS[G.seedSel];
       if(c.tree&&t.g==='grass'&&!t.o&&have(c.seed)>0){G.inv[c.seed]--;t.o='frutifera';t.ore=G.seedSel;t.feed=0;t.t=DAY;t.fruit=false;G.stats.arvores=(G.stats.arvores||0)+1;burst(a.x,a.y,'#7fcb63',6,-2);sfx('plop');floatText(`${treeName(G.seedSel)} plantado!`,'#c8f0b0')}
-      else if(!c.tree&&t.g==='soil'&&!t.crop&&have(c.seed)>0){G.inv[c.seed]--;t.crop={type:G.seedSel,stage:0,g:0};burst(a.x,a.y,'#d9b07a',4,-1);sfx('plop');if(!t.wet)floatText('Agora regue','#9fdcf2')}
+      else if(!c.tree&&t.g==='soil'&&!t.crop&&!t.o&&have(c.seed)>0){G.inv[c.seed]--;t.crop={type:G.seedSel,stage:0,g:0};burst(a.x,a.y,'#d9b07a',4,-1);sfx('plop');if(!t.wet)floatText('Agora regue','#9fdcf2')}
       break;
     }
     case 'construir': {
@@ -881,6 +882,7 @@ function onTap(tx,ty){
     if(!P.path.length){P.pending=null;enterHouse()}
     return;
   }
+  if(G.tool==='construir'&&curRecipe().k==='aspersor'&&t.g==='soil'&&t.crop){toast('Esse quadrado tem planta. Deixe um quadrado de terra vazio no meio da horta (ou colha um) e coloque o Aspersor nele.',4200);return}
   if(G.tool==='construir'&&curRecipe().k==='placa'&&MAP.kind==='ilha'){
     // a placa ocupa 3 × 3: o personagem para do lado de fora
     if(!placeOKIgnoringPlayer(tx,ty)){toast('A casa precisa de um terreno plano 3 × 3 de grama livre, com espaço na frente da porta.');return}
