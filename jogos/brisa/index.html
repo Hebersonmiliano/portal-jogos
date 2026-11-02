@@ -160,6 +160,7 @@ h3:first-child{margin-top:0}
     <div class="side">
       <button class="btn" id="bagBtn" type="button"><span>Mochila</span><kbd>B</kbd></button>
       <button class="btn" id="shopBtn" type="button"><span>Mercado</span><kbd>M</kbd></button>
+      <button class="btn" id="houseBtn" type="button"><span>Casa</span><kbd>C</kbd></button>
       <button class="btn" id="soundBtn" type="button"><span id="soundLbl">Som ligado</span></button>
       <div class="zoom"><button class="btn" id="zoomOut" type="button" aria-label="Afastar">−</button><button class="btn" id="zoomIn" type="button" aria-label="Aproximar">+</button></div>
       <button class="btn" id="helpBtn" type="button" aria-label="Ajuda"><span>?</span><span class="lbl">Ajuda</span></button>
@@ -177,7 +178,7 @@ h3:first-child{margin-top:0}
 <div class="overlay" id="panel" hidden>
   <div class="sheet">
     <div class="sheet-head">
-      <div class="tabs" id="tabs"><button class="tab" data-tab="mochila" type="button">Mochila</button><button class="tab" data-tab="mercado" type="button">Mercado</button><button class="tab" data-tab="diario" type="button">Diário</button></div>
+      <div class="tabs" id="tabs"><button class="tab" data-tab="mochila" type="button">Mochila</button><button class="tab" data-tab="mercado" type="button">Mercado</button><button class="tab" data-tab="casa" type="button">Casa</button><button class="tab" data-tab="diario" type="button">Diário</button></div>
       <div class="sheet-title" id="sheetTitle" hidden></div>
       <button class="close" id="closePanel" type="button">Fechar</button>
     </div>
@@ -614,7 +615,7 @@ function startAct(x,y){
     if(G.tool==='mao'&&t.o==='casa'){
       const ph=PHASES[G.house.fase];
       if(!ph){toast('A casa já está pronta.');return}
-      if(!hasCost(ph.cost)){toast(`${ph.name}: falta ${missingText(ph.cost)}.`);return}
+      if(!hasCost(ph.cost)){toast(`${ph.name}: falta ${missingText(ph.cost)}.`);openPanel('casa');return}
     }
   }
   const anim=animFor(t);
@@ -1597,7 +1598,10 @@ function refreshUI(){
   const sb=$('#subbar');let html='';
   const info=t=>`<span class="chip info">${t}</span>`;
   switch(G.tool){
-    case 'mao':html=info(G.house&&G.house.fase<6?`Colha flores e frutinhas, abra a Bancada e o Forno, martele a obra da casa (${G.house.fase}/6).`:'Colha flores e frutinhas, abra estações, guarde construções e entre em casa.');break;
+    case 'mao':
+      if(G.house&&G.house.fase<6){const ph=PHASES[G.house.fase];html=`<button type="button" class="chip ${hasCost(ph.cost)?'on':'lack'}" data-guide="1">Casa ${G.house.fase}/6 · ${ph.name}: <small>${hasCost(ph.cost)?'pronto, toque na obra!':'falta '+missingText(ph.cost)}</small></button>`}
+      else html=info('Colha flores e frutinhas, abra estações, guarde construções e entre em casa.')+`<button type="button" class="chip" data-guide="1">Guia da casa</button>`;
+      break;
     case 'machado':html=info('Toque numa árvore para cortar. Tocos também viram madeira.');break;
     case 'picareta':html=info('Pedras dão pedra e às vezes cobre. Veios coloridos nas colinas dão cobre, ferro e cristal.');break;
     case 'enxada':html=info('Grama vira terra para plantar. Na areia: argila perto da água, areia longe dela.');break;
@@ -1613,6 +1617,37 @@ let panelMode={tab:'mochila',station:null},resetArmed=false;
 function openPanel(t){panelMode={tab:t,station:null};resetArmed=false;$('#panel').hidden=false;renderPanel();sfx('ui')}
 function openStation(kind,x,y){panelMode={tab:null,station:kind,at:[x,y]};$('#panel').hidden=false;renderPanel();sfx('ui')}
 function closePanel(){$('#panel').hidden=true}
+const SOURCE={
+  madeira:'Machado (2) nas árvores',pedra:'Picareta (3) nas pedras cinzas',fibra:'Mão nos arbustos com frutinha; às vezes nas árvores',
+  flor:'Mão nas flores do campo',cobre:'Picareta (3) nos veios laranja das colinas',ferro:'Picareta (3) nos veios prateados das colinas',
+  argila:'Enxada (4) na areia encostada na água',areia:'Enxada (4) na areia longe da água',
+  tabua:'Bancada: 2 madeira = 1 tábua',tijolo:'Forno: 2 argila + 1 madeira = 2 tijolos',telha:'Forno: 1 argila = 2 telhas',vidro:'Forno: 2 areia = 1 vidro'};
+function costRows(cost){
+  let h='';
+  for(const [k,v] of Object.entries(cost)){const n=have(k),ok=n>=v;
+    h+=`<div class="row"><img alt="" src="${iconURL(k)}"><span class="nm">${NAMES[k]} <span style="color:${ok?'var(--mint)':'var(--soft)'}">${Math.min(n,v)} / ${v}${ok?' ✓':''}</span><small>${SOURCE[k]||''}</small></span></div>`}
+  return h;
+}
+function houseGuide(){
+  let h='';
+  const hasB=G.tiles.some(t=>t.o==='bancada'),hasF=G.tiles.some(t=>t.o==='forno');
+  h+='<h3>Como construir</h3><div class="row"><span class="nm">';
+  const step=(done,txt)=>`<div style="padding:3px 0;color:${done?'var(--mint)':'var(--ink)'}">${done?'✓':'○'} ${txt}</div>`;
+  h+=step(hasB,'Construa a <b>Bancada</b> (Construir, tecla 8): 6 madeira + 2 pedra. Ela faz tábuas.');
+  h+=step(hasF,'Construa o <b>Forno</b> (Construir): 8 pedra + 2 argila. Ele faz tijolos, telhas e vidro.');
+  h+=step(!!G.house,'Coloque a <b>Placa da casa</b> (Construir): 4 madeira, numa grama plana 3 × 3 sem árvores nem pedras.');
+  h+=step(G.house&&G.house.fase>=6,'Junte o material de cada fase e toque na obra com a <b>Mão</b> (tecla 1) para martelar.');
+  h+='</span></div>';
+  if(!G.house){h+='<h3>Placa da casa</h3>'+costRows({madeira:4});}
+  const f=G.house?G.house.fase:0;
+  PHASES.forEach((ph,i)=>{
+    const done=f>i,cur=f===i;
+    h+=`<h3>${i+1}. ${ph.name} ${done?'· pronta ✓':cur&&G.house?'· próxima':''}</h3>`;
+    if(!done)h+=costRows(ph.cost);
+  });
+  h+=`<div class="foot"><span>Fase 5 pronta = já dá para entrar. Dentro, use Construir para fazer a cama.</span></div>`;
+  return h;
+}
 function renderPanel(){
   const st=panelMode.station;
   $('#tabs').hidden=!!st;$('#sheetTitle').hidden=!st;
@@ -1645,6 +1680,8 @@ function renderPanel(){
       h+='<h3>Comprar</h3>';
       for(const it of BUY){const locked=it.lock&&!G.unlocked[it.lock];h+=`<div class="row"><img alt="" src="${iconURL(it.k)}"><span class="nm">${NAMES[it.k]}<small>${locked?'Libera ao colher 3 nabos':'você tem '+(G.inv[it.k]||0)}</small></span><span class="price">${it.price}</span><button type="button" class="mini" data-buy="${it.k}" ${(!locked&&G.coins>=it.price)?'':'disabled'}>Comprar</button></div>`}
       h+=`<div class="foot"><span>Moedas: ${G.coins}</span></div>`;
+    } else if(panelMode.tab==='casa'){
+      h+=houseGuide();
     } else {
       const n=Object.keys(G.fishLog).length;
       h+=`<h3>Diário de Pesca · ${n} / ${FISH.length}</h3><div class="grid">`;
@@ -1672,12 +1709,13 @@ $('#panelBody').addEventListener('click',e=>{
     const keepSound=G.sound;newGame((Math.random()*1e9)|0);G.helpSeen=true;G.sound=keepSound;buildParts();placeAt(G.px,G.py);closePanel();save();toast('Uma ilha nova apareceu no mapa.');}
   after();
 });
-$('#subbar').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.seed)G.seedSel=t.dataset.seed;if(t.dataset.recipe){if(MAP.kind==='casa')G.recipeIn=t.dataset.recipe;else G.recipe=t.dataset.recipe}sfx('ui');dirty=true;refreshUI()});
+$('#subbar').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.guide){openPanel('casa');return}if(t.dataset.seed)G.seedSel=t.dataset.seed;if(t.dataset.recipe){if(MAP.kind==='casa')G.recipeIn=t.dataset.recipe;else G.recipe=t.dataset.recipe}sfx('ui');dirty=true;refreshUI()});
 document.querySelectorAll('.tab').forEach(x=>x.addEventListener('click',()=>{panelMode={tab:x.dataset.tab,station:null};resetArmed=false;renderPanel();sfx('ui')}));
 $('#closePanel').addEventListener('click',closePanel);
 $('#panel').addEventListener('click',e=>{if(e.target.id==='panel')closePanel()});
 $('#bagBtn').addEventListener('click',()=>openPanel('mochila'));
 $('#shopBtn').addEventListener('click',()=>openPanel('mercado'));
+$('#houseBtn').addEventListener('click',()=>openPanel('casa'));
 $('#helpBtn').addEventListener('click',()=>{$('#intro').hidden=false});
 $('#soundBtn').addEventListener('click',()=>{G.sound=!G.sound;music.resume();music.setOn(G.sound);dirty=true;refreshUI()});
 $('#startBtn').addEventListener('click',()=>{$('#intro').hidden=true;G.helpSeen=true;dirty=true;music.resume();music.setOn(G.sound)});
@@ -1720,6 +1758,7 @@ addEventListener('keydown',e=>{
   if(k==='escape'){closePanel();return}
   if(k==='b'||k==='i'){$('#panel').hidden||panelMode.station?openPanel('mochila'):closePanel();return}
   if(k==='m'){$('#panel').hidden||panelMode.tab!=='mercado'?openPanel('mercado'):closePanel();return}
+  if(k==='c'){$('#panel').hidden||panelMode.tab!=='casa'?openPanel('casa'):closePanel();return}
   if(!$('#panel').hidden)return;
   music.resume();
   if(P.fish){if(k===' '||k==='f'||k==='e'){e.preventDefault();if(!e.repeat)fishTap();P.hold=true}return}
