@@ -226,8 +226,8 @@ const TW = 32, TH = 16, HZ = 6, N = 48, DAY = 240, WMAX = 12, SPEED = 4.2;
 const SAVE_KEY = 'brisa-save-v2', OLD_KEYS = ['brisa-save-v1','raizes-save-v1'];
 const NAMES = {madeira:'Madeira',pedra:'Pedra',fibra:'Fibra',flor:'Flor',frutinha:'Frutinha',nabo:'Nabo',abobora:'Abóbora',milho:'Milho',
   sNabo:'Semente de nabo',sAbobora:'Semente de abóbora',sMilho:'Semente de milho',argila:'Argila',areia:'Areia',tabua:'Tábua',tijolo:'Tijolo',telha:'Telha',vidro:'Vidro',
-  cobre:'Cobre',ferro:'Ferro',cristal:'Cristal',isca:'Isca',sopa:'Sopa de peixe',torta:'Torta de abóbora',vara:'Vara de bambu',varaCarvalho:'Vara de carvalho'};
-const ITEM_ORDER = ['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','cobre','ferro','cristal','fibra','flor','frutinha','nabo','milho','abobora','sNabo','sMilho','sAbobora','isca','sopa','torta'];
+  cobre:'Cobre',ferro:'Ferro',cristal:'Cristal',racao:'Ração',ovo:'Ovo',leite:'Leite',la:'Lã',omelete:'Omelete',bolo:'Bolo de milho',queijo:'Queijo',isca:'Isca',sopa:'Sopa de peixe',torta:'Torta de abóbora',vara:'Vara de bambu',varaCarvalho:'Vara de carvalho'};
+const ITEM_ORDER = ['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','cobre','ferro','cristal','fibra','flor','frutinha','nabo','milho','abobora','sNabo','sMilho','sAbobora','isca','racao','ovo','leite','la','sopa','torta','omelete','queijo','bolo'];
 const CROPS = {
   nabo:{stages:3,time:14,seed:'sNabo',item:'nabo',name:'Nabo'},
   milho:{stages:3,time:20,seed:'sMilho',item:'milho',name:'Milho'},
@@ -246,9 +246,9 @@ const FISH = [
   {id:'espada',name:'Peixe-espada lunar',where:'mar',h:[22,2],d:5,price:200,size:95,c:'#a9c7f0'}
 ];
 for(const f of FISH)NAMES[f.id]=f.name;
-const SELL = {nabo:15,milho:30,abobora:70,frutinha:4,flor:3,madeira:2,pedra:2,fibra:1,argila:2,areia:1,tabua:6,tijolo:6,telha:3,vidro:10,cobre:10,ferro:18,cristal:45,sopa:45,torta:140};
+const SELL = {nabo:15,milho:30,abobora:70,frutinha:4,flor:3,madeira:2,pedra:2,fibra:1,argila:2,areia:1,tabua:6,tijolo:6,telha:3,vidro:10,cobre:10,ferro:18,cristal:45,sopa:45,torta:140,racao:1,ovo:12,leite:25,la:30,omelete:40,queijo:70,bolo:110};
 for(const f of FISH)SELL[f.id]=f.price;
-const BUY = [{k:'sNabo',price:6},{k:'sMilho',price:10},{k:'sAbobora',price:25,lock:'abobora'},{k:'isca',price:4}];
+const BUY = [{k:'sNabo',price:6},{k:'sMilho',price:10},{k:'sAbobora',price:25,lock:'abobora'},{k:'isca',price:4},{k:'racao',price:3}];
 const TOOLS = [{k:'mao',name:'Mão'},{k:'machado',name:'Machado'},{k:'picareta',name:'Picareta'},{k:'enxada',name:'Enxada'},{k:'regador',name:'Regador'},{k:'semente',name:'Sementes'},{k:'vara',name:'Vara'},{k:'construir',name:'Construir'}];
 const RECIPES_OUT = [
   {k:'caminho',name:'Caminho',cost:{pedra:1}},
@@ -260,7 +260,10 @@ const RECIPES_OUT = [
   {k:'cais',name:'Cais',cost:{tabua:2}},
   {k:'banco',name:'Banco',cost:{madeira:4}},
   {k:'canteiro',name:'Canteiro',cost:{flor:3,fibra:1}},
-  {k:'casinha',name:'Casinha de passarinho',cost:{madeira:3,fibra:2}}
+  {k:'casinha',name:'Casinha de passarinho',cost:{madeira:3,fibra:2}},
+  {k:'galinheiro',name:'Galinheiro',cost:{madeira:8,tabua:4,fibra:2}},
+  {k:'estabulo',name:'Estábulo',cost:{tabua:12,madeira:6,pedra:6}},
+  {k:'comedouro',name:'Comedouro',cost:{madeira:4,tabua:2}}
 ];
 const RECIPES_IN = [
   {k:'cama',name:'Cama',cost:{tabua:6,fibra:4}},
@@ -270,13 +273,15 @@ const RECIPES_IN = [
   {k:'estante',name:'Estante',cost:{tabua:5}},
   {k:'fogao',name:'Fogão',cost:{tijolo:6,ferro:2}},
   {k:'vaso',name:'Vaso',cost:{argila:1,flor:1}},
-  {k:'luminaria',name:'Luminária de cristal',cost:{cristal:1,cobre:1}}
+  {k:'luminaria',name:'Luminária de cristal',cost:{cristal:1,cobre:1}},
+  {k:'almofada',name:'Almofada de lã',cost:{la:2,tabua:1}}
 ];
 const ALL_RECIPES = [...RECIPES_OUT,...RECIPES_IN];
 const STATIONS = {
   bancada:{name:'Bancada',recipes:[
     {k:'tabua',out:1,cost:{madeira:2}},
     {k:'isca',out:3,cost:{frutinha:2}},
+    {k:'racao',out:4,cost:{fibra:2}},
     {k:'vara',out:1,cost:{madeira:3,fibra:2},once:true},
     {k:'varaCarvalho',out:1,cost:{tabua:8,fibra:4},once:true}]},
   forno:{name:'Forno',recipes:[
@@ -285,7 +290,10 @@ const STATIONS = {
     {k:'vidro',out:1,cost:{areia:2}}]},
   fogao:{name:'Fogão',recipes:[
     {k:'sopa',out:1,cost:{peixe:1,nabo:1}},
-    {k:'torta',out:1,cost:{abobora:1,frutinha:2,milho:1}}]}
+    {k:'torta',out:1,cost:{abobora:1,frutinha:2,milho:1}},
+    {k:'omelete',out:1,cost:{ovo:2,milho:1}},
+    {k:'queijo',out:1,cost:{leite:2}},
+    {k:'bolo',out:1,cost:{ovo:2,leite:1,milho:1}}]}
 };
 const PHASES = [
   {name:'Fundação',cost:{pedra:10,tijolo:6}},
@@ -295,33 +303,42 @@ const PHASES = [
   {name:'Porta e janelas',cost:{tabua:4,vidro:2}},
   {name:'Acabamento',cost:{flor:3,fibra:2,cobre:1}}
 ];
-const PICKUP = new Set(['cerca','lanterna','banco','canteiro','casinha','mesa','cadeira','tapete','vaso','luminaria']);
+const PICKUP = new Set(['cerca','lanterna','banco','canteiro','casinha','mesa','cadeira','tapete','vaso','luminaria','almofada']);
 const NONBLOCK = new Set(['flower','tapete']);
 const SHIRTS = [['#3fa79f','#2f8a83'],['#e9785b','#c95a40'],['#9b7fd1','#7a5fb0'],['#e8b84a','#c4952f'],['#4f8ad1','#3a6cb0'],['#6fae4f','#548f3a']];
 const HATS = [['palha','Chapéu de palha'],['bone','Boné'],['nada','Sem chapéu']];
 const QUESTS = [
-  {text:'Junte 5 madeiras com o Machado', p:()=>[G.stats.madeira,5], reward:()=>{G.coins+=20;return '+20 moedas'}},
-  {text:'Are 4 pedaços de grama com a Enxada', p:()=>[G.stats.tilled,4], reward:()=>{G.inv.sNabo+=3;return '+3 sementes de nabo'}},
-  {text:'Plante, regue e colha 3 nabos', p:()=>[G.stats.nabo,3], reward:()=>{G.coins+=30;G.unlocked.abobora=true;return '+30 moedas e abóbora no Mercado'}},
-  {text:'Construa uma lanterna para as noites', p:()=>[G.built.lanterna||0,1], reward:()=>{G.coins+=20;return '+20 moedas'}},
-  {text:'Junte 150 moedas vendendo no Mercado', p:()=>[G.coins,150], reward:()=>{G.inv.sAbobora+=1;return '+1 semente de abóbora'}},
-  {text:'Coloque 6 cercas em volta da horta', p:()=>[G.built.cerca||0,6], reward:()=>{G.coins+=40;return '+40 moedas'}},
-  {text:'Colha uma abóbora', p:()=>[G.stats.abobora,1], reward:()=>{G.coins+=60;return '+60 moedas'}},
-  {text:'Monte um cantinho: um banco e um canteiro de flores', p:()=>[Math.min(1,G.built.banco||0)+Math.min(1,G.built.canteiro||0),2], reward:()=>{G.coins+=100;return '+100 moedas'}},
-  {text:'Construa uma Bancada (Construir)', p:()=>[G.built.bancada||0,1], reward:()=>{G.coins+=20;return '+20 moedas'}},
-  {text:'Faça 6 tábuas na Bancada', p:()=>[G.stats.tabua,6], reward:()=>{G.inv.argila+=4;return '+4 argila'}},
-  {text:'Construa um Forno (argila: enxada na areia perto da água)', p:()=>[G.built.forno||0,1], reward:()=>{G.coins+=30;return '+30 moedas'}},
-  {text:'Coloque a Placa da casa num terreno plano 3 × 3', p:()=>[G.house?1:0,1], reward:()=>{G.inv.tijolo+=6;return '+6 tijolos'}},
-  {text:'Termine a fundação da casa (Mão na obra)', p:()=>[G.house?G.house.fase:0,1], reward:()=>{G.coins+=40;return '+40 moedas'}},
-  {text:'Levante as paredes da casa', p:()=>[G.house?G.house.fase:0,3], reward:()=>{G.inv.vidro+=2;return '+2 vidros'}},
-  {text:'Termine a casa com porta e janelas', p:()=>[G.house?G.house.fase:0,5], reward:()=>{G.inv.tabua+=6;G.inv.fibra+=4;return 'material para a cama'}},
-  {text:'Faça uma cama e durma nela', p:()=>[G.stats.dormiu,1], reward:()=>{G.inv.isca+=5;return '+5 iscas'}},
-  {text:'Pesque 3 espécies diferentes (faça a vara na Bancada)', p:()=>[Object.keys(G.fishLog).length,3], reward:()=>{G.coins+=50;return '+50 moedas'}},
-  {text:'Construa um cais sobre a água', p:()=>[G.built.cais||0,1], reward:()=>{G.coins+=40;return '+40 moedas'}},
-  {text:'Pesque uma traíra no lago à noite', p:()=>[G.fishLog.traira?1:0,1], reward:()=>{G.inv.isca+=3;return '+3 iscas'}},
-  {text:'Minere um cristal nas colinas', p:()=>[G.stats.cristal,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
-  {text:'Cozinhe uma sopa de peixe no Fogão', p:()=>[G.stats.sopa,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
-  {text:'Complete o Diário de Pesca', p:()=>[Object.keys(G.fishLog).length,FISH.length], reward:()=>{G.coins+=300;return '+300 moedas'}}
+  {id:'q1',text:'Junte 5 madeiras com o Machado', p:()=>[G.stats.madeira,5], reward:()=>{G.coins+=20;return '+20 moedas'}},
+  {id:'q2',text:'Are 4 pedaços de grama com a Enxada', p:()=>[G.stats.tilled,4], reward:()=>{G.inv.sNabo+=3;return '+3 sementes de nabo'}},
+  {id:'q3',text:'Plante, regue e colha 3 nabos', p:()=>[G.stats.nabo,3], reward:()=>{G.coins+=30;G.unlocked.abobora=true;return '+30 moedas e abóbora no Mercado'}},
+  {id:'q4',text:'Construa uma lanterna para as noites', p:()=>[G.built.lanterna||0,1], reward:()=>{G.coins+=20;return '+20 moedas'}},
+  {id:'q5',text:'Junte 150 moedas vendendo no Mercado', p:()=>[G.coins,150], reward:()=>{G.inv.sAbobora+=1;return '+1 semente de abóbora'}},
+  {id:'q6',text:'Coloque 6 cercas em volta da horta', p:()=>[G.built.cerca||0,6], reward:()=>{G.coins+=40;return '+40 moedas'}},
+  {id:'q7',text:'Colha uma abóbora', p:()=>[G.stats.abobora,1], reward:()=>{G.coins+=60;return '+60 moedas'}},
+  {id:'q8',text:'Monte um cantinho: um banco e um canteiro de flores', p:()=>[Math.min(1,G.built.banco||0)+Math.min(1,G.built.canteiro||0),2], reward:()=>{G.coins+=100;return '+100 moedas'}},
+  {id:'q9',text:'Construa uma Bancada (Construir)', p:()=>[G.built.bancada||0,1], reward:()=>{G.coins+=20;return '+20 moedas'}},
+  {id:'q10',text:'Faça 6 tábuas na Bancada', p:()=>[G.stats.tabua,6], reward:()=>{G.inv.argila+=4;return '+4 argila'}},
+  {id:'a1',text:'Construa um Galinheiro (Construir)', p:()=>[G.built.galinheiro||0,1], reward:()=>{G.inv.racao+=8;return '+8 ração'}},
+  {id:'a2',text:'Compre uma galinha no Mercado', p:()=>[G.animals.filter(a=>a.k==='galinha').length,1], reward:()=>{G.coins+=20;return '+20 moedas'}},
+  {id:'a3',text:'Dê ração para um animal (toque nele)', p:()=>[G.stats.fed||0,1], reward:()=>{G.inv.racao+=4;return '+4 ração'}},
+  {id:'a4',text:'Colete um ovo (a galinha alimentada bota no dia seguinte)', p:()=>[G.stats.ovo||0,1], reward:()=>{G.coins+=30;return '+30 moedas'}},
+  {id:'a5',text:'Adote um gato ou cachorro no Mercado', p:()=>[G.pet?1:0,1], reward:()=>{G.inv.racao+=6;return '+6 ração'}},
+  {id:'q11',text:'Construa um Forno (argila: enxada na areia perto da água)', p:()=>[G.built.forno||0,1], reward:()=>{G.coins+=30;return '+30 moedas'}},
+  {id:'q12',text:'Coloque a Placa da casa num terreno plano 3 × 3', p:()=>[G.house?1:0,1], reward:()=>{G.inv.tijolo+=6;return '+6 tijolos'}},
+  {id:'q13',text:'Termine a fundação da casa (Mão na obra)', p:()=>[G.house?G.house.fase:0,1], reward:()=>{G.coins+=40;return '+40 moedas'}},
+  {id:'q14',text:'Levante as paredes da casa', p:()=>[G.house?G.house.fase:0,3], reward:()=>{G.inv.vidro+=2;return '+2 vidros'}},
+  {id:'q15',text:'Termine a casa com porta e janelas', p:()=>[G.house?G.house.fase:0,5], reward:()=>{G.inv.tabua+=6;G.inv.fibra+=4;return 'material para a cama'}},
+  {id:'q16',text:'Faça uma cama e durma nela', p:()=>[G.stats.dormiu,1], reward:()=>{G.inv.isca+=5;return '+5 iscas'}},
+  {id:'a6',text:'Construa um Estábulo e compre uma vaca ou ovelha', p:()=>[G.animals.filter(a=>a.k!=='galinha').length,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
+  {id:'a7',text:'Construa um Comedouro e encha com ração (Mão)', p:()=>[G.stats.encheu||0,1], reward:()=>{G.coins+=30;return '+30 moedas'}},
+  {id:'q17',text:'Pesque 3 espécies diferentes (faça a vara na Bancada)', p:()=>[Object.keys(G.fishLog).length,3], reward:()=>{G.coins+=50;return '+50 moedas'}},
+  {id:'q18',text:'Construa um cais sobre a água', p:()=>[G.built.cais||0,1], reward:()=>{G.coins+=40;return '+40 moedas'}},
+  {id:'q19',text:'Pesque uma traíra no lago à noite', p:()=>[G.fishLog.traira?1:0,1], reward:()=>{G.inv.isca+=3;return '+3 iscas'}},
+  {id:'q20',text:'Minere um cristal nas colinas', p:()=>[G.stats.cristal,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
+  {id:'q21',text:'Cozinhe uma sopa de peixe no Fogão', p:()=>[G.stats.sopa,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
+  {id:'a8',text:'Faça um bolo de milho no Fogão (ovo, leite e milho)', p:()=>[G.stats.bolo||0,1], reward:()=>{G.coins+=80;return '+80 moedas'}},
+  {id:'a9',text:'Deixe um animal com 3 corações (comida + carinho todo dia)', p:()=>[Math.max(0,...G.animals.map(a=>Math.floor(a.love/2))),3], reward:()=>{G.coins+=100;return '+100 moedas'}},
+  {id:'q22',text:'Complete o Diário de Pesca', p:()=>[Object.keys(G.fishLog).length,FISH.length], reward:()=>{G.coins+=300;return '+300 moedas'}}
 ];
 
 const $ = s => document.querySelector(s);
@@ -357,9 +374,9 @@ function defaults(){
   return {v:2, seed:0, day:1, time:2/24, coins:20,
     inv:{madeira:0,pedra:0,fibra:0,flor:0,frutinha:0,nabo:0,abobora:0,milho:0,sNabo:6,sAbobora:0,sMilho:2,argila:0,areia:0,tabua:0,tijolo:0,telha:0,vidro:0,cobre:0,ferro:0,cristal:0,isca:0,sopa:0,torta:0,vara:0,varaCarvalho:0},
     water:WMAX, tool:'mao', seedSel:'nabo', recipe:'cerca', recipeIn:'cama', quest:0,
-    stats:{madeira:0,tilled:0,nabo:0,abobora:0,milho:0,tabua:0,dormiu:0,cristal:0,sopa:0},
+    stats:{madeira:0,tilled:0,nabo:0,abobora:0,milho:0,tabua:0,dormiu:0,cristal:0,sopa:0,fed:0,ovo:0,leite:0,la:0,bolo:0,petted:0,encheu:0},
     built:{}, unlocked:{}, px:0, py:0, facing:[1,1], helpSeen:false, rocks0:0, flowers0:0, veios0:0,
-    house:null, fishLog:{}, scene:'ilha', look:{shirt:0,hat:0}, sound:true, zoom:0, tiles:[], inside:null};
+    house:null, fishLog:{}, animals:[], pet:null, qdone:{}, scene:'ilha', look:{shirt:0,hat:0}, sound:true, zoom:0, tiles:[], inside:null};
 }
 function newGame(seed){G=defaults();G.seed=seed;genWorld();}
 function genWorld(){
@@ -435,11 +452,13 @@ function setScene(kind){
 }
 
 // ---------- salvar ----------
-const packTile = t => [t.g,t.h,t.o,t.path?1:0,t.wet?1:0,t.crop?[t.crop.type,t.crop.stage,Math.round(t.crop.g*10)/10]:0,Math.round(t.t),t.fruit?1:0,t.v,t.ore||0,t.door?1:0];
-const unpackTile = a => {const t=newTile(a[0],a[1],a[2],a[8]);t.path=!!a[3];t.wet=!!a[4];t.crop=a[5]?{type:a[5][0],stage:a[5][1],g:a[5][2]}:null;t.t=a[6]||0;t.fruit=!!a[7];t.ore=a[9]||null;t.door=!!a[10];return t};
+const packTile = t => [t.g,t.h,t.o,t.path?1:0,t.wet?1:0,t.crop?[t.crop.type,t.crop.stage,Math.round(t.crop.g*10)/10]:0,Math.round(t.t),t.fruit?1:0,t.v,t.ore||0,t.door?1:0,t.feed||0];
+const unpackTile = a => {const t=newTile(a[0],a[1],a[2],a[8]);t.path=!!a[3];t.wet=!!a[4];t.crop=a[5]?{type:a[5][0],stage:a[5][1],g:a[5][2]}:null;t.t=a[6]||0;t.fruit=!!a[7];t.ore=a[9]||null;t.door=!!a[10];t.feed=a[11]||0;return t};
 function serialize(){
   G.px=P.tx; G.py=P.ty;
   const o=Object.assign({},G);
+  o.animals=G.animals.map(a=>({k:a.k,name:a.name,x:Math.round(a.x),y:Math.round(a.y),home:a.home,love:a.love,fedDay:a.fedDay,petDay:a.petDay,ready:a.ready,face:a.face}));
+  o.pet=G.pet?{k:G.pet.k,name:G.pet.name,x:Math.round(G.pet.x),y:Math.round(G.pet.y),love:G.pet.love,petDay:G.pet.petDay,giftDay:G.pet.giftDay,gift:G.pet.gift||null,face:G.pet.face,scene:G.pet.scene}:null;
   o.tiles=G.tiles.map(packTile);
   o.inside=G.inside?G.inside.map(packTile):null;
   return JSON.stringify(o);
@@ -451,6 +470,9 @@ function deserialize(s){
   g.stats=Object.assign(defaults().stats,o.stats||{});
   g.look=Object.assign(defaults().look,o.look||{});
   g.fishLog=o.fishLog||{}; g.built=o.built||{}; g.unlocked=o.unlocked||{};
+  g.animals=o.animals||[]; g.pet=o.pet||null; g.qdone=o.qdone||{};
+  if(!o.qdone){for(let i=0;i<(o.quest||0);i++)g.qdone['q'+(i+1)]=1}
+  for(const a of g.animals){a.tx=null;a.hold=0}if(g.pet){g.pet.tx=null}
   g.tiles=o.tiles.map(unpackTile);
   g.inside=o.inside?o.inside.map(unpackTile):null;
   if(!o.v||o.v<2){ // migração da v0.1
@@ -532,7 +554,7 @@ function movePlayer(dt){
       P.x=nx;P.y=ny;P.tx=nx;P.ty=ny;P.path.shift();
       const here=tile(nx,ny);
       if(MAP.kind==='casa'&&here&&here.door&&!P.path.length){exitHouse();return}
-      if(!P.path.length&&P.pending){const p=P.pending;P.pending=null;face(p.x,p.y);if(p.fish)startFishing(p.x,p.y);else startAct(p.x,p.y)}
+      if(!P.path.length&&P.pending){const p=P.pending;P.pending=null;face(p.x,p.y);if(p.creature)startCreatureAct(p.creature);else if(p.fish)startFishing(p.x,p.y);else startAct(p.x,p.y)}
     } else {P.x+=dx/dist*step;P.y+=dy/dist*step}
   } else P.walk=0;
   const th=tile(Math.round(P.x),Math.round(P.y));
@@ -578,7 +600,7 @@ function canAct(tool,t,x,y){
   if(!t)return false;
   if(isMature(t))return true;
   switch(tool){
-    case 'mao': return ['bush','flower','bancada','forno','fogao','cama','estante','casa'].includes(t.o)||PICKUP.has(t.o)||t.path;
+    case 'mao': return ['bush','flower','bancada','forno','fogao','cama','estante','casa','galinheiro','estabulo','comedouro'].includes(t.o)||PICKUP.has(t.o)||t.path;
     case 'machado': return ['tree','pine','stump'].includes(t.o);
     case 'picareta': return t.o==='rock'||t.o==='veio';
     case 'enxada': return (t.g==='grass'&&!t.o&&!t.path)||(t.g==='sand'&&!t.o&&!t.path&&t.t<=0);
@@ -612,6 +634,13 @@ function instant(t,x,y){
   if(G.tool!=='mao')return false;
   if(t.o==='bancada'||t.o==='forno'||t.o==='fogao'){openStation(t.o,x,y);return true}
   if(t.o==='estante'){openPanel('diario');return true}
+  if(t.o==='galinheiro'||t.o==='estabulo'){openHome(x,y);return true}
+  if(t.o==='comedouro'){
+    const room=30-(t.feed||0),n=Math.min(room,G.inv.racao||0);
+    if(n>0){G.inv.racao-=n;t.feed=(t.feed||0)+n;G.stats.encheu=(G.stats.encheu||0)+1;toast(`Comedouro com ${t.feed} ração. Os animais por perto comem sozinhos.`,3000);sfx('pick');after()}
+    else if(room<=0)toast('O comedouro está cheio (30).');
+    else toast(`Comedouro com ${t.feed||0} ração. Faça ração na Bancada (2 fibra = 4) ou compre no Mercado.`,3200);
+    return true}
   if(t.o==='cama'){sleep();return true}
   if(t.o==='casa'&&G.house&&G.house.fase>=5){enterHouse();return true}
   return false;
@@ -638,6 +667,7 @@ function startAct(x,y){
 }
 function onAnimEvent(){
   const a=P.act;if(!a)return;
+  if(a.creature){if(G.animals.includes(a.creature))interactAnimal(a.creature);else if(G.pet===a.creature)interactPet(a.creature);return after()}
   const t=tile(a.x,a.y);if(!t)return;
   if(isMature(t)){
     const c=CROPS[t.crop.type];give(c.item,1);G.stats[t.crop.type]=(G.stats[t.crop.type]||0)+1;
@@ -699,13 +729,16 @@ function onAnimEnd(){
   if(a&&a.reps>1){a.reps--;P.evDone=false;P.at=0;return}
   P.busy=false;P.act=null;setAnim('parado');
   if(P.queued){const q=P.queued;P.queued=null;onTap(q[0],q[1])}
+  else if(P.queuedA){const q=P.queuedA;P.queuedA=null;tapCreature(q)}
 }
 function after(){checkQuest();dirty=true;refreshUI()}
+function curQuest(){return QUESTS.find(q=>!G.qdone[q.id])||null}
 function checkQuest(){
-  while(G.quest<QUESTS.length){
-    const [c,tot]=QUESTS[G.quest].p();
+  for(let guard=0;guard<QUESTS.length;guard++){
+    const q=curQuest();if(!q)break;
+    const [c,tot]=q.p();
     if(c<tot)break;
-    const msg=QUESTS[G.quest].reward();G.quest++;
+    const msg=q.reward();G.qdone[q.id]=1;
     toast(`Tarefa concluída! ${msg}`,3200);sfx('quest');
     if(!P.busy&&!P.fish){setAnim('comemorar');P.busy=true;P.act=null}
   }
@@ -786,7 +819,7 @@ function exitHouse(){
 }
 function sleep(){
   transition(()=>{
-    const h=hour();if(h>=6)G.day++;G.time=0;
+    const h=hour();if(h>=6){G.day++;animalsNewDay()}G.time=0;
     for(const t of G.tiles){if(t.crop&&t.wet){const c=CROPS[t.crop.type];if(t.crop.stage<c.stages){t.crop.stage++;t.crop.g=0;t.wet=false}}}
     G.stats.dormiu++;G.water=WMAX;save();toast(`Bom dia! Dia ${G.day}.`,2600);after();
   });
@@ -856,17 +889,224 @@ function updateFishing(dt){
 }
 
 // =====================================================================
+// ANIMAIS
+// =====================================================================
+const ANIMALS={
+  galinha:{name:'Galinha',home:'galinheiro',price:60,prod:'ovo',food:1,speed:1.3,names:['Pipoca','Clarinha','Paçoca','Pitica','Cocada','Jujuba']},
+  vaca:{name:'Vaca',home:'estabulo',price:180,prod:'leite',food:2,speed:.8,names:['Mimosa','Estrela','Malhada','Docinho','Lua']},
+  ovelha:{name:'Ovelha',home:'estabulo',price:140,prod:'la',food:2,speed:.9,names:['Nuvem','Algodão','Fofura','Neve','Bolota']}
+};
+const PETS={gato:{name:'Gato',price:40,names:['Mingau','Pituco','Tigrinho','Farofa']},cachorro:{name:'Cachorro',price:40,names:['Biscoito','Caramelo','Bob','Pingo']}};
+const HOME_CAP={galinheiro:4,estabulo:3};
+const SPR={
+  galinha:{c:{W:'#ffffff',w:'#d8d4cc',r:'#e4506a',e:'#2a2a3a',o:'#f2a33c',y:'#e89a2c'},f:[[
+    '......rr...','.....rWWW..','.....WWWeo.','w....WWWWo.','ww..WWWWW..','wWWWWWWWW..','.WWWwwwWW..','..WWWWWW...','....y..y...','...yy.yy...'],[
+    '......rr...','.....rWWW..','.....WWWeo.','w....WWWWo.','ww..WWWWW..','wWWWWWWWW..','.WWWwwwWW..','..WWWWWW...','....y.y....','....yyyy...']]},
+  vaca:{c:{W:'#f6f2ea',w:'#d9d2c4',K:'#3b3346',c:'#efe1b8',e:'#2a2a3a',p:'#f1a7b5',h:'#4a3a2c'},f:[[
+    '..............c..c.','.............WWWWW.','.KKKWWWWWKKWWWeWWpp','KKKKWWWWWKKKWWWWppp','WWWWWWWKKKWWWWWWpp.','WWKKWWWWKKWWWWW....','WKKKWWWWWWWWWWW....','.WWWWWWWWWWWWWW....','.WWWwwwwwwwWWWW....','.WW.WW.pp.WW.WW....','.WW.WW....WW.WW....','.hh.hh....hh.hh....'],[
+    '..............c..c.','.............WWWWW.','.KKKWWWWWKKWWWeWWpp','KKKKWWWWWKKKWWWWppp','WWWWWWWKKKWWWWWWpp.','WWKKWWWWKKWWWWW....','WKKKWWWWWWWWWWW....','.WWWWWWWWWWWWWW....','.WWWwwwwwwwWWWW....','..WW.WW.pp.WW.WW...','..WW.WW...WW.WW....','..hh.hh...hh.hh....']]},
+  ovelha:{c:{w:'#f6f1e6',v:'#dcd4c4',F:'#3b3346',e:'#f6f1e6'},f:[[
+    '...vwwv.vwv....','.vwwwwwwwwwwFF.','vwwwwwwwwwwFFFF','wwwwwwwwwwwFeFF','wwwwwwwwwwwwFF.','vwwwwwwwwwwv...','.vwwwvvwwwv....','..F.F...F.F....','..F.F...F.F....'],[
+    '...vwwv.vwv....','.vwwwwwwwwwwFF.','vwwwwwwwwwwFFFF','wwwwwwwwwwwFeFF','wwwwwwwwwwwwFF.','vwwwwwwwwwwv...','.vwwwvvwwwv....','...F.F.F.F.....','...F.F.F.F.....']]},
+  gato:{c:{o:'#f0a04b',O:'#c97a2c',e:'#2a2a3a',p:'#f1a7b5',w:'#fff3e0'},f:[[
+    '........o..o','........oooo','o.......oeop','o......ooooo','.oooooooooo.','.ooOooOoow..','.oooooooww..','.o.o...o.o..','.o.o...o.o..'],[
+    '........o..o','........oooo','o.......oeop','o......ooooo','.oooooooooo.','.ooOooOoow..','.oooooooww..','..o.o.o.o...','..o.o.o.o...']]},
+  cachorro:{c:{b:'#b9824f',B:'#7a5235',e:'#2a2a3a',k:'#2a2a3a',w:'#f3e3c9'},f:[[
+    '.........bbb..','b.......bbbebk','b.......Bbbbbb','.b......Bbbbw.','.bbbbbbbbbbb..','.bbbbbbbbbb...','.bwwwwwwbbb...','.b.b....b.b...','.b.b....b.b...'],[
+    '.........bbb..','b.......bbbebk','b.......Bbbbbb','.b......Bbbbw.','.bbbbbbbbbbb..','.bbbbbbbbbb...','.bwwwwwwbbb...','..b.b..b.b....','..b.b..b.b....']]}
+};
+const SPRC={};
+function animalSprite(k,fr){
+  const id=k+fr;if(SPRC[id])return SPRC[id];
+  const S=SPR[k],rows=S.f[fr],w=Math.max(...rows.map(r=>r.length)),c=document.createElement('canvas');c.width=w;c.height=rows.length;const g=c.getContext('2d');
+  rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch==='.')return;g.fillStyle=S.c[ch];g.fillRect(x,y,1,1)}));
+  return SPRC[id]=c;
+}
+function homeCount(k){return G.tiles.filter(t=>t.o===k).length}
+function homeCap(kindHome){return homeCount(kindHome)*HOME_CAP[kindHome]}
+function homeUsed(kindHome){return G.animals.filter(a=>ANIMALS[a.k].home===kindHome).length}
+function findHomeSpot(kindHome){
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const t=G.tiles[y*N+x];if(t.o!==kindHome)continue;
+    const used=G.animals.filter(a=>a.home[0]===x&&a.home[1]===y).length;if(used>=HOME_CAP[kindHome])continue;
+    for(const [dx,dy] of DIRS){const nx=x+dx,ny=y+dy;const n=ISLAND.tiles[ny*N+nx];if(nx>=0&&ny>=0&&nx<N&&ny<N&&n&&n.g!=='water'&&!(n.o&&!NONBLOCK.has(n.o)))return {home:[x,y],pos:[nx,ny]}}}
+  return null;
+}
+function buyAnimal(k){
+  const A=ANIMALS[k];
+  if(G.coins<A.price){toast('Moedas insuficientes.');return}
+  const spot=findHomeSpot(A.home);
+  if(!spot){toast(homeCount(A.home)?`O ${A.home==='galinheiro'?'galinheiro':'estábulo'} está cheio. Construa outro.`:`Construa um ${A.home==='galinheiro'?'Galinheiro':'Estábulo'} primeiro (Construir).`);return}
+  G.coins-=A.price;
+  const used=new Set(G.animals.map(a=>a.name));const nm=A.names.find(n=>!used.has(n))||A.names[(Math.random()*A.names.length)|0];
+  G.animals.push({k,name:nm,x:spot.pos[0],y:spot.pos[1],home:spot.home,love:0,fedDay:-9,petDay:-9,ready:false,face:1});
+  toast(`${nm} chegou! Toque nela com ração para alimentar.`,3000);sfx(k);G.stats.compras=(G.stats.compras||0)+1;
+}
+function adoptPet(k){
+  if(G.pet){toast('Você já tem um bichinho.');return}
+  const A=PETS[k];if(G.coins<A.price){toast('Moedas insuficientes.');return}
+  G.coins-=A.price;
+  G.pet={k,name:A.names[(Math.random()*A.names.length)|0],x:P.tx,y:P.ty,love:0,petDay:-9,giftDay:-9,face:1,scene:G.scene};
+  placePetNear();toast(`${G.pet.name} agora mora com você!`,3000);sfx(k);
+}
+function placePetNear(){
+  const p=G.pet;if(!p)return;p.scene=MAP.kind;
+  for(const [dx,dy] of [[-1,0],[0,-1],[1,0],[0,1],[-1,-1],[1,1],[-1,1],[1,-1]]){if(walkable(P.tx+dx,P.ty+dy)){p.x=P.tx+dx;p.y=P.ty+dy;p.tx=null;return}}
+  p.x=P.tx;p.y=P.ty;p.tx=null;
+}
+function moveCreature(a,dt,spd){
+  if(a.tx==null)return false;
+  const dx=a.tx-a.x,dy=a.ty-a.y,d=Math.hypot(dx,dy),step=spd*dt;
+  if(dx-dy!==0)a.face=(dx-dy)>0?1:-1;
+  if(d<=step){a.x=a.tx;a.y=a.ty;a.tx=null;return false}
+  const nx=a.x+dx/d*step,ny=a.y+dy/d*step,t=tile(Math.round(nx),Math.round(ny));
+  if(!t||t.g==='water'||(t.o&&!NONBLOCK.has(t.o)&&!(Math.round(nx)===Math.round(a.x)&&Math.round(ny)===Math.round(a.y)))){a.tx=null;return false}
+  a.x=nx;a.y=ny;a.walk=(a.walk||0)+dt;return true;
+}
+function updateAnimals(dt){
+  const night=darkness()>.3;
+  if(MAP.kind==='ilha')for(const a of G.animals){
+    const A=ANIMALS[a.k];a.moving=false;
+    if(a.hold>0){a.hold-=dt;continue}
+    if(night){
+      a.sleep=true;
+      if(a.tx==null&&Math.hypot(a.x-a.home[0],a.y-a.home[1])>1.6){const s=findNear(a.home[0],a.home[1]);if(s){a.tx=s[0];a.ty=s[1]}}
+      a.moving=moveCreature(a,dt,A.speed);continue;
+    }
+    a.sleep=false;
+    if(a.tx==null){a.wait=(a.wait||0)-dt;if(a.wait<=0){a.wait=rnd(1.5,5);
+      for(let i=0;i<8;i++){const x=a.home[0]+Math.round(rnd(-3.5,3.5)),y=a.home[1]+Math.round(rnd(-3.5,3.5));if(walkable(x,y)&&Math.abs(tile(x,y).h-(tile(Math.round(a.x),Math.round(a.y))||{h:1}).h)<=1){a.tx=x;a.ty=y;break}}}}
+    a.moving=moveCreature(a,dt,A.speed);
+    const t=tile(Math.round(a.x),Math.round(a.y));a.z=lerp(a.z==null?(t?t.h*HZ:HZ):a.z,(t?t.h:1)*HZ,Math.min(1,dt*10));
+  }
+  const p=G.pet;
+  if(p){
+    if(p.scene!==MAP.kind)placePetNear();
+    p.moving=false;
+    const d=Math.hypot(p.x-P.x,p.y-P.y);
+    if(d>9)placePetNear();
+    else if(d>1.9&&p.tx==null){const ang=Math.atan2(p.y-P.y,p.x-P.x);const x=Math.round(P.x+Math.cos(ang)*1.2),y=Math.round(P.y+Math.sin(ang)*1.2);if(walkable(x,y)){p.tx=x;p.ty=y}else{p.tx=Math.round(P.x);p.ty=Math.round(P.y)}}
+    p.moving=moveCreature(p,dt,d>4?5.5:3.6);
+    const t=tile(Math.round(p.x),Math.round(p.y));p.z=lerp(p.z==null?HZ:p.z,(t?t.h:1)*HZ,Math.min(1,dt*10));
+    p.sleep=night&&!p.moving&&d<2.5;
+  }
+}
+function findNear(x,y){for(const [dx,dy] of DIRS){if(walkable(x+dx,y+dy))return [x+dx,y+dy]}return null}
+function animalsNewDay(){
+  for(const a of G.animals){
+    const A=ANIMALS[a.k];
+    if(a.fedDay!==G.day-1){ // tenta o comedouro
+      for(let y=a.home[1]-5;y<=a.home[1]+5;y++)for(let x=a.home[0]-5;x<=a.home[0]+5;x++){
+        if(a.fedDay===G.day-1)break;const t=ISLAND.tiles[y*N+x];if(x<0||y<0||x>=N||y>=N||!t||t.o!=='comedouro')continue;
+        if((t.feed||0)>=A.food){t.feed-=A.food;a.fedDay=G.day-1}}
+    }
+    if(a.fedDay===G.day-1){a.ready=true;if(a.petDay===G.day-1)a.love=Math.min(10,a.love+1)}
+    else a.love=Math.max(0,a.love-(a.petDay===G.day-1?0:1));
+  }
+  const p=G.pet;
+  if(p&&p.love>=3&&p.giftDay!==G.day&&Math.random()<.35){p.giftDay=G.day;p.gift=p.k==='gato'?(Math.random()<.5?'lambari':'sardinha'):(['cobre','frutinha','flor','sNabo','isca'][(Math.random()*5)|0])}
+}
+function interactAnimal(a){
+  const A=ANIMALS[a.k];
+  const [sx,sy]=[(a.x-a.y)*TW/2,(a.x+a.y)*TH/2-(a.z||HZ)];
+  const heart=()=>{floaters.push({x:sx,y:sy-18,text:'♥',c:'#ff8fb0',life:1.2})};
+  if(a.ready){
+    let n=1;if(a.love>=6&&Math.random()<.35)n=2;
+    give(A.prod,n);G.stats[A.prod]=(G.stats[A.prod]||0)+n;a.ready=false;sfx('pick');heart();return;
+  }
+  if(a.fedDay!==G.day){
+    if(have('racao')>=A.food){G.inv.racao-=A.food;a.fedDay=G.day;G.stats.fed=(G.stats.fed||0)+1;floatText(`${a.name} comeu ração`,'#ffe9a8');heart();sfx(a.k);
+      if(a.petDay!==G.day){a.petDay=G.day}return}
+    if(a.petDay!==G.day){a.petDay=G.day;heart();sfx(a.k);toast(`${a.name} gostou do carinho, mas está com fome. Precisa de ${A.food} ração (Bancada ou Mercado).`,3200);return}
+    toast(`${a.name} está com fome: ${A.food} ração. Faça na Bancada ou compre no Mercado.`,3000);return;
+  }
+  if(a.petDay!==G.day){a.petDay=G.day;heart();sfx(a.k);floatText(`${a.name} adorou o carinho`,'#ffd6e4');return}
+  toast(`${a.name} já comeu e ganhou carinho hoje. Amanhã tem ${NAMES[A.prod].toLowerCase()}!`);
+}
+function interactPet(p){
+  const [sx,sy]=[(p.x-p.y)*TW/2,(p.x+p.y)*TH/2-(p.z||HZ)];
+  if(p.gift){give(p.gift,1);floatText(`${p.name} trouxe um presente!`,'#ffe9a8');p.gift=null;sfx('pick');return}
+  if(p.petDay!==G.day){p.petDay=G.day;p.love=Math.min(10,p.love+1);G.stats.petted=(G.stats.petted||0)+1}
+  floaters.push({x:sx,y:sy-14,text:'♥',c:'#ff8fb0',life:1.2});sfx(p.k);
+}
+function creatureAt(cx,cy){
+  const wx=cx/SC-ox,wy=cy/SC-oy;let best=null,bd=1e9;
+  const list=(MAP.kind==='ilha'?G.animals:[]).concat(G.pet&&G.pet.scene===MAP.kind?[G.pet]:[]);
+  for(const a of list){
+    const sx=(a.x-a.y)*TW/2,sy=(a.x+a.y)*TH/2-(a.z||HZ),c=animalSprite(a.k,0);
+    if(Math.abs(wx-sx)<=c.width/2+2&&wy<=sy+3&&wy>=sy-c.height-3){const d=Math.abs(wx-sx)+Math.abs(wy-(sy-c.height/2));if(d<bd){bd=d;best=a}}
+  }
+  return best;
+}
+function tapCreature(a){
+  if(P.lock)return;
+  if(P.busy){P.queuedA=a;return}
+  a.hold=6;a.tx=null;
+  const ax=Math.round(a.x),ay=Math.round(a.y);
+  const near=(x,y)=>Math.max(Math.abs(x-ax),Math.abs(y-ay))<=1&&!(x===ax&&y===ay&&false);
+  if(near(P.tx,P.ty)&&!P.path.length){startCreatureAct(a);return}
+  const path=bfs(P.tx,P.ty,(x,y)=>near(x,y));
+  if(path===null){toast('Não dá para chegar lá.');return}
+  P.path=path;P.pending={x:ax,y:ay,creature:a};
+}
+function startCreatureAct(a){
+  if(P.busy)return;face(Math.round(a.x),Math.round(a.y));
+  P.act={x:Math.round(a.x),y:Math.round(a.y),tool:'mao',reps:1,creature:a};
+  setAnim(a.k==='galinha'||a.k==='gato'||a.k==='cachorro'?'agachar':'coletar');P.busy=true;
+}
+function drawCreature(g,a,time){
+  const sx=Math.round((a.x-a.y)*TW/2+ox),sy=Math.round((a.x+a.y)*TH/2-(a.z==null?HZ:a.z)+oy);
+  const fr=a.moving?(Math.floor((a.walk||0)*6)%2):0,c=animalSprite(a.k,fr);
+  shadow(g,sx,sy,Math.ceil(c.width/2.4));
+  const bob=a.sleep?1:0;
+  g.save();g.translate(sx,0);if(a.face<0)g.scale(-1,1);g.drawImage(c,-Math.floor(c.width/2),sy-c.height+1+bob);g.restore();
+  if(a.sleep&&Math.sin(time*2+a.x)>0){px(g,sx+4,sy-c.height-4,3,1,'#e8e6ff');px(g,sx+6,sy-c.height-5,1,1,'#e8e6ff');px(g,sx+4,sy-c.height-6,3,1,'#e8e6ff')}
+  const prod=a.ready?ANIMALS[a.k].prod:(a.gift?'gift':null);
+  if(prod){const by=sy-c.height-12+Math.round(Math.sin(time*3)*1);
+    ell(g,sx,by,7,6,'#3b3346');poly(g,[sx-3,by+4,sx+3,by+4,sx,by+8],'#3b3346');ell(g,sx,by,6,5,'#fffaf0');poly(g,[sx-2,by+4,sx+2,by+4,sx,by+7],'#fffaf0');
+    if(prod==='ovo'){ell(g,sx,by,3,4,'#c9a06a');ell(g,sx,by,2,3,'#f0d8a8');px(g,sx-1,by-2,1,1,'#ffffff')}
+    else if(prod==='leite'){px(g,sx-2,by-3,4,6,'#ffffff');px(g,sx-2,by-3,4,1,'#7cc8e8');px(g,sx-2,by+2,4,1,'#cfd8e0')}
+    else if(prod==='la'){circ(g,sx,by,3,'#f6f1e6');px(g,sx-1,by-1,2,1,'#dcd4c4')}
+    else{px(g,sx-2,by-2,5,4,'#e4506a');px(g,sx,by-2,1,4,'#ffd46b')}}
+  return [sx,sy];
+}
+function drawCoop(g,x,y){shadow(g,x,y,10);px(g,x-7,y-5,1,5,'#6b4528');px(g,x+6,y-3,1,5,'#6b4528');isoBox(g,x,y-4,.62,9,'#c99a66','#c4703f','#a85c33');
+  poly(g,[x-11,y-13,x,y-19,x+11,y-13,x,y-7],'#8a5a3a');poly(g,[x-11,y-13,x,y-7,x,y-5,x-11,y-11],'#7a4a30');
+  poly(g,[x-12,y-13,x+.5,y-22,x+.5,y-19,x-12,y-11],'#d0604a');poly(g,[x+.5,y-22,x+12,y-13,x+12,y-11,x+.5,y-19],'#b24f3f');
+  px(g,x-5,y-10,3,4,'#3b2a22');g.strokeStyle='#a7774b';g.lineWidth=1;g.beginPath();g.moveTo(x-4,y-6);g.lineTo(x-9,y+1);g.stroke()}
+function drawBarn(g,x,y){
+  shadow(g,x,y,13);
+  const k=.92,w=TW/2*k,h=TH/2*k,WH=14,RH=10,o=2;
+  const L=[x-w,y],F=[x,y+h],R=[x+w,y],B=[x,y-h],up=(p,d)=>[p[0],p[1]-d],mid=(p,q)=>[(p[0]+q[0])/2,(p[1]+q[1])/2];
+  poly(g,[...L,...F,...up(F,WH),...up(L,WH)],'#c0563f');poly(g,[...F,...R,...up(R,WH),...up(F,WH)],'#9a4434');
+  g.fillStyle='rgba(0,0,0,.12)';for(let i=3;i<WH;i+=3){g.fillRect(Math.round(x-w),Math.round(y-i),Math.round(w),1)}
+  const M1=up(mid(B,L),WH+RH),M2=up(mid(R,F),WH+RH),Ft=up(F,WH),Rt=up(R,WH),Lt=up(L,WH),Bt=up(B,WH);
+  poly(g,[...Ft,...Rt,...M2],'#a84a38');
+  poly(g,[Bt[0],Bt[1],Rt[0]+o,Rt[1],...M2,...M1],'#5e3a30');
+  poly(g,[Lt[0]-o,Lt[1]+1,Ft[0]+o,Ft[1]+1,M2[0]+o,M2[1],M1[0]-o,M1[1]],'#7a3a30');
+  g.strokeStyle='#f3eee4';g.lineWidth=1;g.beginPath();g.moveTo(Ft[0],Ft[1]);g.lineTo(M2[0],M2[1]);g.lineTo(Rt[0],Rt[1]);g.stroke();
+  const d1=[lerp(L[0],F[0],.3),lerp(L[1],F[1],.3)],d2=[lerp(L[0],F[0],.75),lerp(L[1],F[1],.75)];
+  poly(g,[d1[0],d1[1],d2[0],d2[1],d2[0],d2[1]-10,d1[0],d1[1]-10],'#f3eee4');
+  poly(g,[d1[0]+1,d1[1],d2[0]-1,d2[1],d2[0]-1,d2[1]-9,d1[0]+1,d1[1]-9],'#6e3428');
+  g.beginPath();g.moveTo(d1[0]+1,d1[1]-9);g.lineTo(d2[0]-1,d2[1]);g.moveTo(d2[0]-1,d2[1]-9);g.lineTo(d1[0]+1,d1[1]);g.stroke();
+  const wn=mid(Ft,M2);px(g,wn[0],wn[1]-1,3,3,'#f3eee4');px(g,wn[0]+1,wn[1],1,1,'#3b2a22');
+}
+function drawTrough(g,x,y,feed){shadow(g,x,y,8);poly(g,[x-8,y-3,x,y+1,x,y+3,x-8,y-1],'#8a5a3a');poly(g,[x,y+1,x+8,y-3,x+8,y-1,x,y+3],'#7a4a30');poly(g,[x,y-7,x+8,y-3,x,y+1,x-8,y-3],'#5a3a20');
+  if(feed>0){poly(g,[x,y-6,x+6,y-3,x,y,x-6,y-3],'#e9c766');px(g,x-3,y-5,2,1,'#c9a24a');px(g,x+1,y-3,2,1,'#c9a24a')}
+  px(g,x-9,y-4,1,4,'#6b4528');px(g,x+8,y-4,1,4,'#6b4528')}
+function drawPillow(g,x,y){shadow(g,x,y,6);ell(g,x,y-4,7,4,'#e98fb0');ell(g,x,y-5,6,3,'#f4b3c9');px(g,x-1,y-6,2,1,'#ffffff')}
+// =====================================================================
 // SIMULAÇÃO
 // =====================================================================
 function update(dt){
   G.time+=dt/DAY;
-  if(G.time>=1){G.time-=1;G.day++;toast(`Dia ${G.day}. Bom dia!`);dirty=true}
+  if(G.time>=1){G.time-=1;G.day++;animalsNewDay();toast(`Dia ${G.day}. Bom dia!`);dirty=true}
   for(const t of G.tiles){
     if(t.crop&&t.wet){const c=CROPS[t.crop.type];if(t.crop.stage<c.stages){t.crop.g+=dt;if(t.crop.g>=c.time){t.crop.g=0;t.crop.stage++;t.wet=false;dirty=true}}}
     if(t.t>0){t.t-=dt;if(t.t<=0){t.t=0;if(t.o==='stump')t.o=t.h===2?'pine':'tree';else if(t.o==='bush')t.fruit=true;dirty=true}}
   }
   spawnT-=dt;if(spawnT<=0){spawnT=18;respawn()}
   movePlayer(dt);
+  updateAnimals(dt);
   updateAnim(dt);
   updateFishing(dt);
   for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=60*dt;p.life-=dt}
@@ -1331,6 +1571,10 @@ function drawObj(g,t,x,y,sx,sy,time,lights){
     case 'fogao':drawStove(g,sx,sy,time,lights);break;
     case 'vaso':drawPot(g,sx,sy,t.v);break;
     case 'luminaria':drawCrystalLamp(g,sx,sy,time,lights);break;
+    case 'galinheiro':drawCoop(g,sx,sy);break;
+    case 'estabulo':drawBarn(g,sx,sy);break;
+    case 'comedouro':drawTrough(g,sx,sy,t.feed||0);break;
+    case 'almofada':drawPillow(g,sx,sy);break;
     case 'casa':if(G.house&&x===G.house.x+2&&y===G.house.y+2&&MAP.kind==='ilha')drawHouse(g,G.house,time,lights);break;
   }
 }
@@ -1349,6 +1593,8 @@ function render(time){
   if(inside)drawInteriorWalls(g);
   if(!inside&&G.house&&G.house.fase<4)chimney=null;
   const ps=Math.round(P.x)+Math.round(P.y);
+  const crByS=new Map();
+  for(const a of (MAP.kind==='ilha'?G.animals:[]).concat(G.pet&&G.pet.scene===MAP.kind?[G.pet]:[])){const k=Math.round(a.x)+Math.round(a.y);if(!crByS.has(k))crByS.set(k,[]);crByS.get(k).push(a)}
   let rig=null;
   for(let s=0;s<=MAP.w+MAP.h-2;s++){
     for(let x=Math.max(0,s-MAP.h+1);x<=Math.min(MAP.w-1,s);x++){
@@ -1358,6 +1604,7 @@ function render(time){
       drawGround(g,t,x,y,sx,sy,time);
       if(t.o||t.crop)drawObj(g,t,x,y,sx,sy,time,lights);
     }
+    const crs=crByS.get(s);if(crs)for(const a of crs){const pp=drawCreature(g,a,time);if(P.hoverA===a){px(g,pp[0]-1,pp[1]-animalSprite(a.k,0).height-8,3,3,'#ffd46b');px(g,pp[0],pp[1]-animalSprite(a.k,0).height-5,1,1,'#ffd46b')}}
     if(s===ps){const psx=Math.round((P.x-P.y)*TW/2+ox),psy=Math.round((P.x+P.y)*TH/2-P.z+oy);shadow(g,psx,psy,5);rig=drawRig(g,psx,psy);rig.sx=psx;rig.sy=psy}
   }
   const F=P.fish;
@@ -1505,6 +1752,11 @@ const music = (() => {
       case 'quest':[67,71,74,79].forEach((m,i)=>tone(t+i*.1,mtof(m),'triangle',.12,.4));break;
       case 'door':tone(t,240,'triangle',.12,.15,180);noiseHit(t,'lowpass',600,.1,.12,S);break;
       case 'ui':tone(t,660,'sine',.06,.06);break;
+      case 'galinha':[0,.09,.18].forEach((d,i)=>tone(t+d,i===2?900:700,'square',.04,.05,500));break;
+      case 'vaca':{const ac=A.ac,o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o.frequency.setValueAtTime(140,t);o.frequency.linearRampToValueAtTime(110,t+.7);f.type='lowpass';f.frequency.value=700;env(g,t,.12,.12,.7);o.connect(f);f.connect(g);g.connect(S);o.start(t);o.stop(t+.9);break}
+      case 'ovelha':{const ac=A.ac,o=ac.createOscillator(),l=ac.createOscillator(),lg=ac.createGain(),g=ac.createGain();o.type='triangle';o.frequency.value=420;l.frequency.value=22;lg.gain.value=30;l.connect(lg);lg.connect(o.frequency);env(g,t,.05,.1,.5);o.connect(g);g.connect(S);o.start(t);l.start(t);o.stop(t+.6);l.stop(t+.6);break}
+      case 'gato':tone(t,700,'sine',.1,.35,1100);tone(t+.18,1000,'sine',.06,.25,650);break;
+      case 'cachorro':noiseHit(t,'bandpass',600,.3,.08,S,2);tone(t,260,'square',.07,.08,180);noiseHit(t+.16,'bandpass',600,.25,.08,S,2);tone(t+.16,260,'square',.06,.08,180);break;
     }
   }
   function setOn(on){if(A.master&&A.ac)A.master.gain.setTargetAtTime(on?1:0,A.ac.currentTime,.05)}
@@ -1564,6 +1816,18 @@ function iconURL(key){
     case 'fogao':drawStove(g,16,27,0,lights);break;
     case 'vaso':drawPot(g,16,27,1);break;
     case 'luminaria':drawCrystalLamp(g,16,28,0,lights);break;
+    case 'galinheiro':drawCoop(g,16,28);break;
+    case 'estabulo':drawBarn(g,16,30);break;
+    case 'comedouro':drawTrough(g,16,22,5);break;
+    case 'almofada':drawPillow(g,16,24);break;
+    case 'racao':poly(g,[8,12,24,12,26,27,6,27],'#c9a24a');px(g,8,12,16,3,'#a8802e');px(g,12,17,8,6,'#f3e3c9');px(g,13,19,2,2,'#c98a4a');px(g,17,20,2,2,'#c98a4a');break;
+    case 'ovo':ell(g,16,18,7,9,'#f3e3c9');ell(g,14,15,2,3,'#fffaf0');break;
+    case 'leite':px(g,10,8,12,19,'#ffffff');px(g,10,8,12,3,'#7cc8e8');px(g,12,5,8,3,'#e8e8e8');px(g,20,13,2,10,'#dfe6ec');break;
+    case 'la':circ(g,16,17,8,'#f6f1e6');circ(g,12,14,4,'#ffffff');g.strokeStyle='#dcd4c4';g.lineWidth=1;g.beginPath();g.arc(16,17,5,0,4);g.stroke();break;
+    case 'omelete':ell(g,16,20,11,6,'#e9e3d6');ell(g,16,18,9,4,'#f2d35b');px(g,12,17,2,1,'#5fae55');px(g,18,18,2,1,'#e4506a');break;
+    case 'queijo':poly(g,[6,24,26,24,26,14,6,20],'#f2c94c');poly(g,[6,20,26,14,20,11,6,17],'#f7dc7a');circ(g,12,21,2,'#d9a63a');circ(g,20,19,1,'#d9a63a');break;
+    case 'bolo':ell(g,16,24,11,4,'#c98a4a');px(g,5,14,22,10,'#e9b44a');ell(g,16,14,11,4,'#f7dc7a');px(g,15,6,2,5,'#ffffff');px(g,15,5,2,2,'#ffb347');break;
+    default:if(key.startsWith('a_')){const sp=animalSprite(key.slice(2),0),k=Math.max(1,Math.floor(30/Math.max(sp.width,sp.height)));g.imageSmoothingEnabled=false;g.drawImage(sp,Math.round(16-sp.width*k/2),Math.round(29-sp.height*k),sp.width*k,sp.height*k)}
   }
   return iconCache[key]=c.toDataURL();
 }
@@ -1617,7 +1881,7 @@ function refreshRes(){
 function refreshUI(){
   refreshClock();refreshRes();
   $('#coins').textContent=G.coins;
-  if(G.quest<QUESTS.length){const q=QUESTS[G.quest],[c,t]=q.p();$('#questText').textContent=q.text;$('#questNum').textContent=`${Math.min(c,t)} / ${t}`;$('#questBar').style.width=(Math.min(1,c/t)*100)+'%'}
+  const cq=curQuest();if(cq){const q=cq,[c,t]=q.p();$('#questText').textContent=q.text;$('#questNum').textContent=`${Math.min(c,t)} / ${t}`;$('#questBar').style.width=(Math.min(1,c/t)*100)+'%'}
   else{$('#questText').textContent='Sua ilha está do seu jeito. Continue cuidando dela.';$('#questNum').textContent='Todas as tarefas feitas';$('#questBar').style.width='100%'}
   document.querySelectorAll('.slot').forEach(s=>s.classList.toggle('on',s.dataset.tool===G.tool));
   $('#soundLbl').textContent=G.sound?'Som ligado':'Som desligado';$('#soundBtn').classList.toggle('off',!G.sound);
@@ -1626,7 +1890,7 @@ function refreshUI(){
   switch(G.tool){
     case 'mao':
       if(G.house&&G.house.fase<6){const ph=PHASES[G.house.fase];html=`<button type="button" class="chip ${hasCost(ph.cost)?'on':'lack'}" data-guide="1">Casa ${G.house.fase}/6 · ${ph.name}: <small>${hasCost(ph.cost)?'pronto, toque na obra!':'falta '+missingText(ph.cost)}</small></button>`}
-      else html=info('Colha flores e frutinhas, abra estações, guarde construções e entre em casa.')+`<button type="button" class="chip" data-guide="1">Guia da casa</button>`;
+      else html=info('Colha, abra estações e o galinheiro, guarde construções e entre em casa. Toque nos animais para alimentar e fazer carinho.')+`<button type="button" class="chip" data-guide="1">Guia da casa</button>`;
       break;
     case 'machado':html=info('Toque numa árvore para cortar. Tocos também viram madeira.');break;
     case 'picareta':html=info('Pedras dão pedra e às vezes cobre. Veios coloridos nas colinas dão cobre, ferro e cristal.');break;
@@ -1641,6 +1905,7 @@ function refreshUI(){
 }
 let panelMode={tab:'mochila',station:null},resetArmed=false;
 function openPanel(t){panelMode={tab:t,station:null};resetArmed=false;$('#panel').hidden=false;renderPanel();sfx('ui')}
+function openHome(x,y){panelMode={tab:null,station:null,home:[x,y]};$('#panel').hidden=false;renderPanel();sfx('ui')}
 function openStation(kind,x,y){panelMode={tab:null,station:kind,at:[x,y]};$('#panel').hidden=false;renderPanel();sfx('ui')}
 function closePanel(){$('#panel').hidden=true}
 const SOURCE={
@@ -1675,10 +1940,19 @@ function houseGuide(){
   return h;
 }
 function renderPanel(){
-  const st=panelMode.station;
-  $('#tabs').hidden=!!st;$('#sheetTitle').hidden=!st;
+  const st=panelMode.station,hm=panelMode.home;
+  $('#tabs').hidden=!!(st||hm);$('#sheetTitle').hidden=!(st||hm);
   const body=$('#panelBody');let h='';
-  if(st){
+  if(hm){
+    const tl=tile(hm[0],hm[1]),kind=tl&&tl.o,list=G.animals.filter(a=>a.home[0]===hm[0]&&a.home[1]===hm[1]);
+    $('#sheetTitle').textContent=kind==='galinheiro'?'Galinheiro':'Estábulo';
+    if(!list.length)h+=`<div class="row"><span class="nm">Ninguém mora aqui ainda.<small>Compre ${kind==='galinheiro'?'galinhas':'vacas ou ovelhas'} no Mercado (tecla M). Cabem ${HOME_CAP[kind]}.</small></span></div>`;
+    for(const a of list){const A=ANIMALS[a.k],hearts=Math.floor(a.love/2);
+      const st2=a.ready?`${NAMES[A.prod]} pronto para coletar`:a.fedDay===G.day?'Alimentada hoje':`Com fome · ${A.food} ração`;
+      h+=`<div class="row"><img alt="" src="${iconURL('a_'+a.k)}"><span class="nm">${a.name} <span style="color:#ff8fb0">${'♥'.repeat(hearts)}</span><span style="color:var(--muted)">${'♡'.repeat(5-hearts)}</span><small>${A.name} · ${st2}${a.petDay===G.day?' · carinho feito':''}</small></span></div>`}
+    h+=`<h3>Como cuidar</h3><div class="row"><span class="nm"><small style="font-size:12px;line-height:1.45">Toque no animal: se tiver ração na mochila, ele come; toque de novo para fazer carinho. No dia seguinte ele dá ${kind==='galinheiro'?'ovo':'leite ou lã'} (aparece um balão em cima dele). Comida e carinho todo dia enchem os corações e às vezes rendem produto em dobro. Um Comedouro cheio por perto alimenta todo mundo sozinho.</small></span></div>`;
+    h+=`<div class="foot"><span>Ração: ${G.inv.racao||0}</span><button type="button" class="mini" id="stowHome">Guardar</button></div>`;
+  } else if(st){
     const S=STATIONS[st];$('#sheetTitle').textContent=S.name;
     for(const r of S.recipes){
       if(r.once&&G.inv[r.k]>0){h+=`<div class="row"><img alt="" src="${iconURL(r.k)}"><span class="nm">${NAMES[r.k]}<small>você já tem</small></span></div>`;continue}
@@ -1705,6 +1979,11 @@ function renderPanel(){
       for(const k of sellKeys){const n=G.inv[k]||0;if(!n&&FISH.some(f=>f.id===k))continue;h+=`<div class="row"><img alt="" src="${iconURL(k)}"><span class="nm">${NAMES[k]}<small>você tem ${n}</small></span><span class="price">${SELL[k]}</span><button type="button" class="mini" data-sell="${k}" ${n?'':'disabled'}>Vender 1</button><button type="button" class="mini" data-sellall="${k}" ${n?'':'disabled'}>Tudo</button></div>`}
       h+='<h3>Comprar</h3>';
       for(const it of BUY){const locked=it.lock&&!G.unlocked[it.lock];h+=`<div class="row"><img alt="" src="${iconURL(it.k)}"><span class="nm">${NAMES[it.k]}<small>${locked?'Libera ao colher 3 nabos':'você tem '+(G.inv[it.k]||0)}</small></span><span class="price">${it.price}</span><button type="button" class="mini" data-buy="${it.k}" ${(!locked&&G.coins>=it.price)?'':'disabled'}>Comprar</button></div>`}
+      h+='<h3>Animais</h3>';
+      for(const [k,A] of Object.entries(ANIMALS)){const cap=homeCap(A.home),used=homeUsed(A.home),hn=A.home==='galinheiro'?'Galinheiro':'Estábulo';
+        h+=`<div class="row"><img alt="" src="${iconURL('a_'+k)}"><span class="nm">${A.name}<small>${cap?`${hn}: ${used} / ${cap} vagas · dá ${NAMES[A.prod].toLowerCase()}`:`Precisa de um ${hn} (Construir)`}</small></span><span class="price">${A.price}</span><button type="button" class="mini" data-animal="${k}" ${cap>used&&G.coins>=A.price?'':'disabled'}>Comprar</button></div>`}
+      h+='<h3>Bichinho de estimação</h3>';
+      for(const [k,A] of Object.entries(PETS)){h+=`<div class="row"><img alt="" src="${iconURL('a_'+k)}"><span class="nm">${A.name}<small>${G.pet?(G.pet.k===k?`${G.pet.name} já mora com você`:'Você já tem um bichinho'):'Segue você e às vezes traz presentes'}</small></span><span class="price">${A.price}</span><button type="button" class="mini" data-pet="${k}" ${!G.pet&&G.coins>=A.price?'':'disabled'}>Adotar</button></div>`}
       h+=`<div class="foot"><span>Moedas: ${G.coins}</span></div>`;
     } else if(panelMode.tab==='casa'){
       h+=houseGuide();
@@ -1722,6 +2001,9 @@ $('#panelBody').addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
   if(t.dataset.sell){const k=t.dataset.sell;if(G.inv[k]>0){G.inv[k]--;G.coins+=SELL[k];sfx('coin')}}
   else if(t.dataset.sellall){const k=t.dataset.sellall,n=G.inv[k];G.coins+=n*SELL[k];G.inv[k]=0;if(n){toast(`Vendeu ${n} × ${NAMES[k].toLowerCase()} por ${n*SELL[k]} moedas.`);sfx('coin')}}
+  else if(t.dataset.animal){buyAnimal(t.dataset.animal)}
+  else if(t.dataset.pet){adoptPet(t.dataset.pet)}
+  else if(t.id==='stowHome'){const [x,y]=panelMode.home,tl=tile(x,y);if(G.animals.some(a=>a.home[0]===x&&a.home[1]===y)){toast('Ainda tem animais morando aqui.')}else if(tl){const R=ALL_RECIPES.find(r=>r.k===tl.o);for(const [k,v] of Object.entries(R.cost))G.inv[k]+=v;tl.o=null;toast(`${R.name} guardado na mochila.`);closePanel()}}
   else if(t.dataset.buy){const it=BUY.find(x=>x.k===t.dataset.buy);if(G.coins>=it.price){G.coins-=it.price;G.inv[it.k]++;sfx('coin')}}
   else if(t.dataset.craft||t.dataset.craft5){
     const k=t.dataset.craft||t.dataset.craft5,times=t.dataset.craft5?5:1,r=STATIONS[panelMode.station].recipes.find(x=>x.k===k);let n=0;
@@ -1750,7 +2032,7 @@ $('#startBtn').addEventListener('click',()=>{$('#intro').hidden=true;G.helpSeen=
 // ENTRADA
 // =====================================================================
 const OBJ_BOX={tree:[-9,-26,9,2],pine:[-8,-29,8,2],rock:[-7,-9,7,2],veio:[-7,-13,7,2],bush:[-7,-11,7,2],stump:[-4,-6,4,2],cerca:[-4,-12,4,2],lanterna:[-4,-21,4,2],banco:[-8,-12,8,2],canteiro:[-8,-12,8,3],casinha:[-6,-24,6,2],flower:[-6,-8,6,3],
-  bancada:[-11,-14,11,3],forno:[-11,-21,11,3],cama:[-12,-15,12,4],mesa:[-10,-14,10,3],cadeira:[-6,-14,6,3],estante:[-10,-30,10,4],fogao:[-10,-22,10,4],vaso:[-5,-14,5,2],luminaria:[-4,-15,4,2],casa:[-16,-42,16,6]};
+  bancada:[-11,-14,11,3],forno:[-11,-21,11,3],cama:[-12,-15,12,4],mesa:[-10,-14,10,3],cadeira:[-6,-14,6,3],estante:[-10,-30,10,4],fogao:[-10,-22,10,4],vaso:[-5,-14,5,2],luminaria:[-4,-15,4,2],casa:[-16,-42,16,6],galinheiro:[-12,-23,12,3],estabulo:[-15,-34,15,4],comedouro:[-9,-8,9,3],almofada:[-7,-9,7,2]};
 function pickTile(cx,cy){
   const wx=cx/SC-ox,wy=cy/SC-oy;
   const fx=Math.round((wx/(TW/2)+wy/(TH/2))/2),fy=Math.round((wy/(TH/2)-wx/(TW/2))/2);
@@ -1775,8 +2057,8 @@ cv.addEventListener('pointerdown',e=>{
   downAt=[e.clientX,e.clientY];
 });
 addEventListener('pointerup',()=>{P.hold=false});
-cv.addEventListener('pointerup',e=>{if(!downAt||touches.size>1)return;const moved=Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1]);downAt=null;if(moved>12)return;const t=pickTile(e.clientX,e.clientY);if(t)onTap(t[0],t[1])});
-cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')P.hover=pickTile(e.clientX,e.clientY)});
+cv.addEventListener('pointerup',e=>{if(!downAt||touches.size>1)return;const moved=Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1]);downAt=null;if(moved>12)return;const cr=creatureAt(e.clientX,e.clientY);if(cr){tapCreature(cr);return}const t=pickTile(e.clientX,e.clientY);if(t)onTap(t[0],t[1])});
+cv.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){P.hoverA=creatureAt(e.clientX,e.clientY);P.hover=P.hoverA?null:pickTile(e.clientX,e.clientY)}});
 cv.addEventListener('pointerleave',()=>{P.hover=null});
 addEventListener('keydown',e=>{
   if(!$('#intro').hidden){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#startBtn').click()}return}
@@ -1796,6 +2078,8 @@ addEventListener('keydown',e=>{
   if(k===' '||k==='f'||k==='e'){
     e.preventDefault();if(P.path.length||P.busy)return;
     const fx=P.tx+G.facing[0],fy=P.ty+G.facing[1],t=tile(fx,fy);
+    const crs=(MAP.kind==='ilha'?G.animals:[]).concat(G.pet&&G.pet.scene===MAP.kind?[G.pet]:[]).find(a=>Math.round(a.x)===fx&&Math.round(a.y)===fy);
+    if(crs){crs.hold=4;crs.tx=null;startCreatureAct(crs);return}
     if(G.tool==='vara'){for(let d=1;d<=3;d++){const tx=P.tx+G.facing[0]*d,ty=P.ty+G.facing[1]*d,tt=tile(tx,ty);if(tt&&tt.g==='water'){if(!G.inv.vara&&!G.inv.varaCarvalho){toast('Faça uma vara de bambu na Bancada.');return}startFishing(tx,ty);return}}toast('Fique de frente para a água.');return}
     if(t&&(canAct(G.tool,t,fx,fy)||(G.tool==='mao'&&t.o==='casa')))startAct(fx,fy);
     else if(canAct(G.tool,tile(P.tx,P.ty),P.tx,P.ty))startAct(P.tx,P.ty);
@@ -1834,6 +2118,7 @@ function placeAt(x,y){
   P.x=P.tx=x;P.y=P.ty=y;P.path=[];P.pending=null;P.busy=false;P.act=null;P.fish=null;setAnim('parado');
   const t=tile(x,y);P.z=(t?t.h:1)*HZ;
   camX=(P.x-P.y)*TW/2;camY=(P.x+P.y)*TH/2-P.z;
+  if(G&&G.pet)placePetNear();
 }
 let last=performance.now();
 function frame(now){
@@ -1858,7 +2143,7 @@ function start(data){
   buildHotbar();refreshUI();
   if(!G.helpSeen)$('#intro').hidden=false;
   try{window.claude?.hot?.snapshot?.(()=>({save:serialize()}))}catch(e){}
-  window.__brisa={canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
+  window.__brisa={deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
   requestAnimationFrame(t=>{last=t;frame(t)});
 }
 const hot=window.claude?.hot;
