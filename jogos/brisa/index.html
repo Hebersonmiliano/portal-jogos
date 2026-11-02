@@ -242,7 +242,7 @@ const TW = 32, TH = 16, HZ = 6, N = 48, DAY = 240, WMAX = 12, SPEED = 4.2;
 const SAVE_KEY = 'brisa-save-v2', OLD_KEYS = ['brisa-save-v1','raizes-save-v1'];
 const NAMES = {madeira:'Madeira',pedra:'Pedra',fibra:'Fibra',flor:'Flor',frutinha:'Frutinha',nabo:'Nabo',abobora:'Abóbora',milho:'Milho',
   sNabo:'Semente de nabo',sAbobora:'Semente de abóbora',sMilho:'Semente de milho',argila:'Argila',areia:'Areia',tabua:'Tábua',tijolo:'Tijolo',telha:'Telha',vidro:'Vidro',
-  cobre:'Cobre',ferro:'Ferro',cristal:'Cristal',racao:'Ração',dArco:'Arco de flores',dGuardaSol:'Guarda-sol',dEspantalho:'Espantalho',dPinheiro:'Pinheiro de luzes',trofeu:'Troféu do festival',abacaxi:'Abacaxi',sAbacaxi:'Semente de abacaxi',caju:'Caju',pequi:'Pequi',laranja:'Laranja',pera:'Pera',uva:'Uva',mCaju:'Muda de cajueiro',mPequi:'Muda de pequizeiro',mLaranja:'Muda de laranjeira',mPera:'Muda de pereira',mUva:'Muda de parreira',mArbusto:'Muda de frutinha',trufa:'Trufa',aspersor:'Aspersor',sucoLaranja:'Suco de laranja',arrozPequi:'Arroz com pequi',geleiaUva:'Geleia de uva',doceCaju:'Doce de caju',coco:'Coco',concha:'Concha',ouro:'Ouro',frutaEstelar:'Fruta estelar',estatua:'Estátua dourada',mural:'Mural de conchas',plantaBarco:'Planta do barco',morango:'Morango',melancia:'Melancia',sMorango:'Semente de morango',sMelancia:'Semente de melancia',ovo:'Ovo',leite:'Leite',la:'Lã',omelete:'Omelete',bolo:'Bolo de milho',queijo:'Queijo',isca:'Isca',sopa:'Sopa de peixe',torta:'Torta de abóbora',vara:'Vara de bambu',varaCarvalho:'Vara de carvalho',varaDourada:'Vara dourada'};
+  cobre:'Cobre',ferro:'Ferro',cristal:'Cristal',racao:'Ração',dArco:'Arco de flores',dGuardaSol:'Guarda-sol',dEspantalho:'Espantalho',dPinheiro:'Pinheiro de luzes',trofeu:'Troféu do festival',abacaxi:'Abacaxi',sAbacaxi:'Semente de abacaxi',caju:'Caju',pequi:'Pequi',laranja:'Laranja',pera:'Pera',uva:'Uva',mCaju:'Muda de cajueiro',mPequi:'Muda de pequizeiro',mLaranja:'Muda de laranjeira',mPera:'Muda de pereira',mUva:'Muda de parreira',mArbusto:'Muda de frutinha',porteira:'Porteira',trufa:'Trufa',aspersor:'Aspersor',sucoLaranja:'Suco de laranja',arrozPequi:'Arroz com pequi',geleiaUva:'Geleia de uva',doceCaju:'Doce de caju',coco:'Coco',concha:'Concha',ouro:'Ouro',frutaEstelar:'Fruta estelar',estatua:'Estátua dourada',mural:'Mural de conchas',plantaBarco:'Planta do barco',morango:'Morango',melancia:'Melancia',sMorango:'Semente de morango',sMelancia:'Semente de melancia',ovo:'Ovo',leite:'Leite',la:'Lã',omelete:'Omelete',bolo:'Bolo de milho',queijo:'Queijo',isca:'Isca',sopa:'Sopa de peixe',torta:'Torta de abóbora',vara:'Vara de bambu',varaCarvalho:'Vara de carvalho',varaDourada:'Vara dourada'};
 const ITEM_ORDER = ['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','cobre','ferro','cristal','fibra','flor','frutinha','nabo','milho','abobora','morango','melancia','abacaxi','caju','pequi','laranja','pera','uva','trufa','sNabo','sMilho','sAbobora','sMorango','sMelancia','sAbacaxi','mCaju','mPequi','mLaranja','mPera','mUva','mArbusto','isca','racao','ovo','leite','la','coco','concha','ouro','frutaEstelar','sopa','torta','omelete','queijo','bolo','sucoLaranja','arrozPequi','geleiaUva','doceCaju'];
 const CROPS = {
   nabo:{stages:3,time:14,seed:'sNabo',item:'nabo',name:'Nabo',seasons:[0,1,2]},
@@ -283,6 +283,7 @@ const TOOLS = [{k:'mao',name:'Mão'},{k:'machado',name:'Machado'},{k:'picareta',
 const RECIPES_OUT = [
   {k:'caminho',name:'Caminho',cost:{pedra:1}},
   {k:'cerca',name:'Cerca',cost:{madeira:2}},
+  {k:'porteira',name:'Porteira',cost:{madeira:3,ferro:1}},
   {k:'lanterna',name:'Lanterna',cost:{madeira:1,pedra:2}},
   {k:'bancada',name:'Bancada',cost:{madeira:6,pedra:2}},
   {k:'forno',name:'Forno',cost:{pedra:8,argila:2}},
@@ -348,7 +349,7 @@ const PHASES = [
   {name:'Acabamento',cost:{flor:3,fibra:2,cobre:1}}
 ];
 const PICKUP = new Set(['cerca','lanterna','banco','canteiro','casinha','mesa','cadeira','tapete','vaso','luminaria','almofada','estatua','mural','aspersor','dArco','dGuardaSol','dEspantalho','dPinheiro','trofeu']);
-const NONBLOCK = new Set(['flower','tapete']);
+const NONBLOCK = new Set(['flower','tapete','porteira']);
 const SHIRTS = [['#3fa79f','#2f8a83'],['#e9785b','#c95a40'],['#9b7fd1','#7a5fb0'],['#e8b84a','#c4952f'],['#4f8ad1','#3a6cb0'],['#6fae4f','#548f3a']];
 const HATS = [['palha','Chapéu de palha'],['bone','Boné'],['nada','Sem chapéu']];
 const QUESTS = [
@@ -397,6 +398,7 @@ const QUESTS = [
   {id:'f3',text:'Colha frutas de uma árvore frutífera', p:()=>[G.stats.frutas?1:0,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
   {id:'f4',text:'Construa um Chiqueiro, compre um porco e ache uma trufa', p:()=>[G.stats.trufa||0,1], reward:()=>{G.coins+=60;return '+60 moedas'}},
   {id:'f5',text:'Cozinhe um arroz com pequi no Fogão', p:()=>[G.stats.arrozPequi||0,1], reward:()=>{G.coins+=80;return '+80 moedas'}},
+  {id:'p1',text:'Feche uma casinha de animais com Cerca e Porteira', p:()=>[G.stats.cercado||0,1], reward:()=>{G.coins+=60;return '+60 moedas'}},
   {id:'e1',text:'Participe de um festival na praça (último dia da estação)', p:()=>[G.stats.festas||0,1], reward:()=>{G.coins+=50;return '+50 moedas'}},
   {id:'e2',text:'Ganhe o prêmio de ouro num festival (20 pontos)', p:()=>[G.stats.festOuro||0,1], reward:()=>{G.coins+=150;return '+150 moedas'}},
   {id:'s1',text:'Colha um morango (primavera) ou uma melancia (verão)', p:()=>[Math.min(1,(G.stats.morango||0)+(G.stats.melancia||0)),1], reward:()=>{G.coins+=60;return '+60 moedas'}},
@@ -440,7 +442,7 @@ function defaults(){
     water:WMAX, tool:'mao', seedSel:'nabo', recipe:'cerca', recipeIn:'cama', quest:0,
     stats:{madeira:0,tilled:0,nabo:0,abobora:0,milho:0,tabua:0,dormiu:0,cristal:0,sopa:0,fed:0,ovo:0,leite:0,la:0,bolo:0,petted:0,encheu:0},
     built:{}, unlocked:{}, px:0, py:0, facing:[1,1], helpSeen:false, rocks0:0, flowers0:0, veios0:0,
-    house:null, fest:{}, islet:null, isletDock:null, lastBoat:null, fishLog:{}, animals:[], pet:null, qdone:{}, village:null, sellBonus:1, waterMax:WMAX, scene:'ilha', look:{shirt:0,hat:0}, sound:true, zoom:0, tiles:[], inside:null};
+    house:null, relocate:null, fest:{}, islet:null, isletDock:null, lastBoat:null, fishLog:{}, animals:[], pet:null, qdone:{}, village:null, sellBonus:1, waterMax:WMAX, scene:'ilha', look:{shirt:0,hat:0}, sound:true, zoom:0, tiles:[], inside:null};
   fixInv(D.inv);return D;
 }
 function newGame(seed){G=defaults();G.seed=seed;genWorld();}
@@ -698,7 +700,7 @@ function canAct(tool,t,x,y){
   if(isMature(t))return true;
   switch(tool){
     case 'mao': return ['bush','flower','bancada','forno','fogao','cama','estante','casa','galinheiro','estabulo','chiqueiro','comedouro','barraca','poco','chale','barco','concha','bau','arvoreEstelar','frutifera','trufa','festa'].includes(t.o)||PICKUP.has(t.o)||t.path;
-    case 'machado': return ['tree','pine','stump','palmeira','tocoPalmeira','bush'].includes(t.o);
+    case 'machado': return ['tree','pine','stump','palmeira','tocoPalmeira','bush','porteira'].includes(t.o);
     case 'picareta': return t.o==='rock'||t.o==='veio';
     case 'enxada': return (t.g==='grass'&&!t.o&&!t.path)||(t.g==='sand'&&!t.o&&!t.path&&t.t<=0);
     case 'regador': return t.g==='water'||t.o==='poco'||(t.g==='soil'&&!t.wet);
@@ -760,7 +762,7 @@ function startAct(x,y){
     if(G.tool==='regador'&&t.g==='soil'&&G.water<=0){toast('O regador está vazio. Toque na água para encher.');return}
     if(G.tool==='construir'&&MAP.kind==='ilhota'){toast('A ilhota é selvagem: construa na sua ilha.');return}
     if(G.tool==='construir'&&curRecipe().k==='barco'&&!placeOK(curRecipe(),t,x,y)){toast('O barco vai na água do mar, encostado num cais.');return}
-    if(G.tool==='construir'){const R=curRecipe();if(!hasCost(R.cost)){toast(`${R.name}: falta ${missingText(R.cost)}. Toque no recurso na barra do topo para ver onde achar.`,3600);return}}
+    if(G.tool==='construir'){const R=curRecipe();if(!(G.relocate&&G.relocate.k===R.k)&&!hasCost(R.cost)){toast(`${R.name}: falta ${missingText(R.cost)}. Toque no recurso na barra do topo para ver onde achar.`,3600);return}}
     if(G.tool==='mao'&&t.o==='frutifera'&&!t.fruit){toast(treeStatus(t),3200);return}
     if(G.tool==='mao'&&t.o==='bush'&&!t.fruit&&nowT()<(t.cool||0)){toast('Esse arbusto já deu fibra. Tente outro ou volte daqui a pouco.');return}
     if(G.tool==='mao'&&t.o==='casa'){
@@ -803,7 +805,8 @@ function onAnimEvent(){
       else if(t.path){G.inv.pedra+=1;t.path=false;toast('Caminho recolhido.')}
       break;
     case 'machado':
-      if(t.o==='bush'){t.o=null;t.fruit=false;t.t=0;t.cool=0;give('mArbusto',1);give('fibra',1);burst(a.x,a.y,'#7fcb63',10,-6);sfx('chop');floatText('+1 muda de frutinha','#c8f0b0');if(!G.stats.arrancou){G.stats.arrancou=1;toast('Você arrancou o arbusto com raiz! Plante a muda com Sementes (6) em qualquer grama.',4200)}}
+      if(t.o==='porteira'){t.o=null;give('madeira',3);give('ferro',1);sfx('chop');toast('Porteira desmontada: +3 madeira e +1 ferro.')}
+      else if(t.o==='bush'){t.o=null;t.fruit=false;t.t=0;t.cool=0;give('mArbusto',1);give('fibra',1);burst(a.x,a.y,'#7fcb63',10,-6);sfx('chop');floatText('+1 muda de frutinha','#c8f0b0');if(!G.stats.arrancou){G.stats.arrancou=1;toast('Você arrancou o arbusto com raiz! Plante a muda com Sementes (6) em qualquer grama.',4200)}}
       else if(t.o==='palmeira'){give('madeira',2);if(Math.random()<.5)give('coco',1);burst(a.x,a.y,'#57a94f',10,-18);t.o='tocoPalmeira';t.t=90;sfx('chop')}
       else if(t.o==='tocoPalmeira'){give('madeira',1);t.o=null;t.t=0;sfx('chop')}
       else if(t.o==='stump'){give('madeira',1);t.o=null;t.t=0;burst(a.x,a.y,'#a07040',6,-2);sfx('chop')}
@@ -830,7 +833,9 @@ function onAnimEvent(){
     }
     case 'construir': {
       const R=curRecipe();
-      if(!placeOK(R,t,a.x,a.y)||!hasCost(R.cost))break;
+      const free=G.relocate&&G.relocate.k===R.k;
+      if(!placeOK(R,t,a.x,a.y)||(!free&&!hasCost(R.cost)))break;
+      if(free){t.o=R.k;for(const an of G.animals)if(an.home[0]===G.relocate.x&&an.home[1]===G.relocate.y){an.home=[a.x,a.y];an.path=null;an.tx=null;an.wait=0}G.relocate=null;regionCache.clear();burst(a.x,a.y,'#e9d7b4',6,-4);sfx('hammer');toast('Casa nova! Os bichos estão indo para lá.',3000);break}
       pay(R.cost);
       if(R.k==='caminho')t.path=true;
       else if(R.k==='cais'){t.g='deck';t.h=0;computeSea()}
@@ -1089,20 +1094,63 @@ function moveCreature(a,dt,spd){
   if(!t||t.g==='water'||(t.o&&!NONBLOCK.has(t.o)&&!(Math.round(nx)===Math.round(a.x)&&Math.round(ny)===Math.round(a.y)))){a.tx=null;return false}
   a.x=nx;a.y=ny;a.walk=(a.walk||0)+dt;return true;
 }
+// ----- cercado: cada casinha tem uma "região" alcançável sem passar por cerca nem porteira
+const PEN_R=6, regionCache=new Map();
+function animalPass(x,y,gate){const t=tile(x,y);if(!t||t.g==='water')return false;if(t.o==='porteira')return gate;return !t.o||NONBLOCK.has(t.o)}
+function homeRegion(hx,hy){
+  const key=hx+','+hy,now=performance.now(),c=regionCache.get(key);if(c&&now-c.t<1000)return c;
+  const set=new Set(),q=[],ht=tile(hx,hy);let escaped=false;
+  for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const x=hx+dx,y=hy+dy;if(animalPass(x,y,false)&&ht&&Math.abs(tile(x,y).h-ht.h)<=1){const i=y*N+x;if(!set.has(i)){set.add(i);q.push([x,y])}}}
+  for(let qi=0;qi<q.length;qi++){const [cx,cy]=q[qi],ct=tile(cx,cy);
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const x=cx+dx,y=cy+dy,i=y*N+x;if(set.has(i)||!animalPass(x,y,false))continue;
+      if(Math.abs(tile(x,y).h-ct.h)>1)continue;
+      if(Math.max(Math.abs(x-hx),Math.abs(y-hy))>PEN_R){escaped=true;continue}
+      set.add(i);q.push([x,y])}}
+  const r={t:now,set,closed:!escaped&&set.size>0,size:set.size};regionCache.set(key,r);
+  if(r.closed&&G.animals.some(a=>a.home[0]===hx&&a.home[1]===hy)&&MAP.kind==='ilha'){const hasGate=[...set].some(i=>{const x=i%N,y=(i/N)|0;return [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const n=tile(x+dx,y+dy);return n&&n.o==='porteira'})});if(hasGate&&!G.stats.cercado){G.stats.cercado=1;after()}}
+  return r;
+}
+function bfs4(sx,sy,goal,gate,maxN=900){
+  const start=sy*N+sx,prev=new Map([[start,-1]]),q=[start];
+  if(goal(sx,sy))return [];
+  for(let qi=0;qi<q.length&&qi<maxN;qi++){const c=q[qi],cx=c%N,cy=(c/N)|0,ct=tile(cx,cy);
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const x=cx+dx,y=cy+dy,i=y*N+x;if(x<0||y<0||x>=N||y>=N||prev.has(i)||!animalPass(x,y,gate))continue;
+      if(ct&&Math.abs(tile(x,y).h-ct.h)>1)continue;
+      prev.set(i,c);if(goal(x,y)){const path=[];let k=i;while(k!==start){path.push([k%N,(k/N)|0]);k=prev.get(k)}return path.reverse()}q.push(i)}}
+  return null;
+}
+function animalGo(a,path){a.path=path;a.tx=null;nextStep(a)}
+function nextStep(a){if(a.path&&a.path.length){const [x,y]=a.path.shift();a.tx=x;a.ty=y}}
+function animalBrain(a,night){
+  const reloc=G.relocate&&G.relocate.x===a.home[0]&&G.relocate.y===a.home[1];
+  if(reloc){a.path=null;return} // esperando a casinha nova
+  const R=homeRegion(a.home[0],a.home[1]);
+  const cx=Math.round(a.x),cy=Math.round(a.y),here=cy*N+cx;
+  if(!R.size)return;
+  if(!R.set.has(here)){
+    // fora do cercado da casinha: volta andando (pode passar pela porteira); se não tiver caminho, aparece lá
+    const path=bfs4(cx,cy,(x,y)=>R.set.has(y*N+x),true,2400);
+    if(path&&path.length)animalGo(a,path);
+    else{const arr=[...R.set];const i=arr[(Math.random()*arr.length)|0];a.x=i%N;a.y=(i/N)|0;a.path=null;a.tx=null}
+    return;
+  }
+  const lim=R.closed?PEN_R:3;
+  let goal;
+  if(night){let best=null,bd=99;for(const i of R.set){const x=i%N,y=(i/N)|0,d=Math.hypot(x-a.home[0],y-a.home[1]);if(d<bd){bd=d;best=[x,y]}}if(!best||(best[0]===cx&&best[1]===cy)||Math.hypot(cx-a.home[0],cy-a.home[1])<=1.6)return;goal=best}
+  else{const arr=[...R.set].filter(i=>{const x=i%N,y=(i/N)|0;return Math.max(Math.abs(x-a.home[0]),Math.abs(y-a.home[1]))<=lim});if(!arr.length)return;const i=arr[(Math.random()*arr.length)|0];goal=[i%N,(i/N)|0]}
+  const path=bfs4(cx,cy,(x,y)=>x===goal[0]&&y===goal[1],false,600);
+  if(path&&path.length)animalGo(a,path.slice(0,8));
+}
 function updateAnimals(dt){
   const night=darkness()>.3;
   if(MAP.kind==='ilha')for(const a of G.animals){
     const A=ANIMALS[a.k];a.moving=false;
     if(a.hold>0){a.hold-=dt;continue}
-    if(night){
-      a.sleep=true;
-      if(a.tx==null&&Math.hypot(a.x-a.home[0],a.y-a.home[1])>1.6){const s=findNear(a.home[0],a.home[1]);if(s){a.tx=s[0];a.ty=s[1]}}
-      a.moving=moveCreature(a,dt,A.speed);continue;
-    }
-    a.sleep=false;
-    if(a.tx==null){a.wait=(a.wait||0)-dt;if(a.wait<=0){a.wait=rnd(1.5,5);
-      for(let i=0;i<8;i++){const x=a.home[0]+Math.round(rnd(-3.5,3.5)),y=a.home[1]+Math.round(rnd(-3.5,3.5));if(walkable(x,y)&&Math.abs(tile(x,y).h-(tile(Math.round(a.x),Math.round(a.y))||{h:1}).h)<=1){a.tx=x;a.ty=y;break}}}}
+    a.sleep=night;
+    if(a.tx==null&&a.path&&a.path.length)nextStep(a);
+    if(a.tx==null){a.wait=(a.wait||0)-dt;if(a.wait<=0){a.wait=night?1.5:rnd(1.5,5);animalBrain(a,night)}}
     a.moving=moveCreature(a,dt,A.speed);
+    if(!a.moving&&a.tx==null&&a.path&&a.path.length){nextStep(a);a.moving=true}
     const t=tile(Math.round(a.x),Math.round(a.y));a.z=lerp(a.z==null?(t?t.h*HZ:HZ):a.z,(t?t.h:1)*HZ,Math.min(1,dt*10));
   }
   const p=G.pet;
@@ -2174,6 +2222,25 @@ function drawCrop(g,x,y,c,time){
   else{shadow(g,x,y,4);circ(g,x,y-3,3,'#f3e8f2');px(g,x-3,y-5,6,2,'#b05ca8');px(g,x-1,y-7,1,3,'#5fae55');px(g,x-4,y-10,3,4,'#7fcb63');px(g,x+1,y-11,3,5,'#6fbd58')}
   if(Math.sin(time*3+x)>.85)px(g,x+4,y-9,1,1,'#ffffff');
 }
+function gateAxis(x,y){const f=o=>o==='cerca'||o==='porteira';const a=tile(x+1,y),b=tile(x-1,y),c=tile(x,y+1),d=tile(x,y-1);const nx=(a&&f(a.o)?1:0)+(b&&f(b.o)?1:0),ny=(c&&f(c.o)?1:0)+(d&&f(d.o)?1:0);return ny>nx?'y':'x'}
+function gateOpen(x,y){if(MAP.kind!=='ilha')return false;if(Math.hypot(P.x-x,P.y-y)<1.35)return true;const p=G.pet;return !!p&&Math.hypot(p.x-x,p.y-y)<1.1}
+function drawGatePanel(g,x,y,ex,ey,open){
+  // dois mourões nas pontas e a folha da porteira entre eles
+  const L=[x-ex,y-ey],R=[x+ex,y+ey];
+  for(const q of [L,R]){shadow(g,q[0],q[1],2);px(g,q[0]-1,q[1]-12,3,12,'#8c6038');px(g,q[0]-1,q[1]-13,3,1,'#d4a774')}
+  g.strokeStyle='#c99a62';g.lineWidth=1;g.beginPath();
+  if(open){const hx=L[0]+ex*.25,hy=L[1]+ey*.25-ey*1.4;
+    g.moveTo(L[0]+.5,L[1]-9.5);g.lineTo(L[0]+.5+(ey?ex*.2:0),L[1]-9.5+ey*1.6);g.moveTo(L[0]+.5,L[1]-4.5);g.lineTo(L[0]+.5+(ey?ex*.2:0),L[1]-4.5+ey*1.6);void hx;void hy}
+  else{g.moveTo(L[0]+.5,L[1]-9.5);g.lineTo(R[0]+.5,R[1]-9.5);g.moveTo(L[0]+.5,L[1]-4.5);g.lineTo(R[0]+.5,R[1]-4.5);g.moveTo(L[0]+.5,L[1]-4.5);g.lineTo(R[0]+.5,R[1]-9.5)}
+  g.stroke();
+  if(!open){px(g,Math.round((L[0]+R[0])/2),Math.round((L[1]+R[1])/2)-8,1,2,'#e4c27a')}
+}
+function drawGate(g,t,x,y,sx,sy){
+  const ax=gateAxis(x,y),[ex,ey]=ax==='x'?[TW/4,TH/4]:[-TW/4,TH/4];
+  const open=gateOpen(x,y);
+  if(open!==!!t.open){t.open=open;if(open)sfx('gate')}
+  drawGatePanel(g,sx,sy,ex,ey,open);
+}
 function drawFence(g,x,y,conn){
   g.strokeStyle='#b8865a';g.lineWidth=1;
   for(const [dx,dy] of conn){g.beginPath();g.moveTo(x+.5,y-7.5);g.lineTo(x+dx+.5,y+dy-7.5);g.moveTo(x+.5,y-3.5);g.lineTo(x+dx+.5,y+dy-3.5);g.stroke()}
@@ -2311,7 +2378,8 @@ function drawObjInner(g,t,x,y,sx,sy,time,lights){
     case 'veio':drawVein(g,sx,sy,t.ore,time);break;
     case 'bush':drawBush(g,sx,sy,t.fruit);break;
     case 'flower':drawFlower(g,sx,sy,t.v,time);break;
-    case 'cerca':{const conn=[];for(const [dx,dy,ex,ey] of [[1,0,TW/4,TH/4],[-1,0,-TW/4,-TH/4],[0,1,-TW/4,TH/4],[0,-1,TW/4,-TH/4]]){const n=tile(x+dx,y+dy);if(n&&n.o==='cerca')conn.push([ex,ey-(n.h-t.h)*HZ/2])}drawFence(g,sx,sy,conn);break}
+    case 'cerca':{const conn=[];for(const [dx,dy,ex,ey] of [[1,0,TW/4,TH/4],[-1,0,-TW/4,-TH/4],[0,1,-TW/4,TH/4],[0,-1,TW/4,-TH/4]]){const n=tile(x+dx,y+dy);if(n&&(n.o==='cerca'||n.o==='porteira'))conn.push([ex,ey-(n.h-t.h)*HZ/2])}drawFence(g,sx,sy,conn);break}
+    case 'porteira':drawGate(g,t,x,y,sx,sy);break;
     case 'lanterna':drawLantern(g,sx,sy,darkness()>.15);if(darkness()>.15)lights.push([sx,sy-17,34]);break;
     case 'banco':drawBench(g,sx,sy);break;
     case 'canteiro':drawPlanter(g,sx,sy,t.v);break;
@@ -2378,7 +2446,7 @@ function render(time){
       drawGround(g,t,x,y,sx,sy,time);
       if(t.o||t.crop)drawObj(g,t,x,y,sx,sy,time,lights);
     }
-    const crs=crByS.get(s);if(crs)for(const a of crs){const pp=a.npc?drawNpc(g,a,time):drawCreature(g,a,time);if(!pp)continue;if(P.hoverA===a&&!a.npc){px(g,pp[0]-1,pp[1]-animalSprite(a.k,0).height-8,3,3,'#ffd46b');px(g,pp[0],pp[1]-animalSprite(a.k,0).height-5,1,1,'#ffd46b')}}
+    const crs=crByS.get(s);if(crs)for(const a of crs){const pp=a.npc?drawNpc(g,a,time):drawCreature(g,a,time);if(!pp)continue;if(P.hoverA===a&&!a.npc){px(g,pp[0]-1,pp[1]-animalSprite(a.k,0).height-8,3,3,'#ffd46b');px(g,pp[0],pp[1]-animalSprite(a.k,0).height-5,1,1,'#ffd46b')}if(!a.npc&&a.home&&G.relocate&&G.relocate.x===a.home[0]&&G.relocate.y===a.home[1]){const hy=pp[1]-animalSprite(a.k,0).height-10+Math.round(Math.sin(time*4));px(g,pp[0]-1,hy,3,1,'#ffd46b');px(g,pp[0]+1,hy+1,1,2,'#ffd46b');px(g,pp[0],hy+3,1,1,'#ffd46b');px(g,pp[0],hy+5,1,1,'#ffd46b')}}
     if(s===ps){const psx=Math.round((P.x-P.y)*TW/2+ox),psy=Math.round((P.x+P.y)*TH/2-P.z+oy);shadow(g,psx,psy,5);rig=drawRig(g,psx,psy);rig.sx=psx;rig.sy=psy}
   }
   const F=P.fish;
@@ -2527,6 +2595,7 @@ const music = (() => {
       case 'hoe':noiseHit(t,'lowpass',480,.45,.16,S);break;
       case 'water':noiseHit(t,'bandpass',1400,.18,.45,S,1.5,500);break;
       case 'plop':tone(t,520,'sine',.25,.13,240);break;
+      case 'gate':tone(t,310,'sawtooth',.04,.22,240);tone(t+.12,260,'triangle',.05,.12,210);break;
       case 'pick':tone(t,880,'sine',.14,.08);tone(t+.07,1320,'sine',.12,.1);break;
       case 'coin':tone(t,1320,'triangle',.1,.08);tone(t+.08,1760,'triangle',.1,.14);break;
       case 'hammer':tone(t,190,'square',.12,.06,120);noiseHit(t,'bandpass',2200,.18,.05,S);break;
@@ -2593,6 +2662,7 @@ function iconURL(key){
     case 'vara':case 'varaCarvalho':case 'varaDourada':g.strokeStyle=key==='vara'?'#c9b36a':key==='varaDourada'?'#ffd46b':'#8a5a3a';g.lineWidth=2;g.beginPath();g.moveTo(6,27);g.lineTo(25,6);g.stroke();g.strokeStyle='#e8e8e8';g.lineWidth=1;g.beginPath();g.moveTo(25,6);g.lineTo(27,20);g.stroke();px(g,26,20,3,3,'#e4506a');break;
     case 'caminho':diamond(g,16,20,C.pathD);diamond(g,16,19,C.path,-2);break;
     case 'cerca':drawFence(g,16,24,[[-8,-4],[8,4]]);break;
+    case 'porteira':drawGatePanel(g,16,24,8,4,false);break;
     case 'lanterna':drawLantern(g,16,28,true);break;
     case 'banco':drawBench(g,15,22);break;
     case 'canteiro':drawPlanter(g,16,22,1);break;
@@ -2711,14 +2781,14 @@ function refreshUI(){
       if(G.house&&G.house.fase<6){const ph=PHASES[G.house.fase];html=`<button type="button" class="chip ${hasCost(ph.cost)?'on':'lack'}" data-guide="1">Casa ${G.house.fase}/6 · ${ph.name}: <small>${hasCost(ph.cost)?'pronto, toque na obra!':'falta '+missingText(ph.cost)}</small></button>`}
       else html=info('Colha, abra estações e o galinheiro, guarde construções e entre em casa. Toque nos animais para alimentar e fazer carinho.')+`<button type="button" class="chip" data-guide="1">Guia da casa</button>`;
       break;
-    case 'machado':html=info('Toque numa árvore para cortar. Tocos também viram madeira. Num arbusto, arranca com raiz e vira muda.');break;
+    case 'machado':html=info('Toque numa árvore para cortar. Tocos também viram madeira. Num arbusto, arranca com raiz e vira muda. Na porteira, desmonta.');break;
     case 'picareta':html=info('Pedras dão pedra e às vezes cobre. Veios coloridos nas colinas dão cobre, ferro e cristal.');break;
     case 'enxada':html=info('Grama vira terra para plantar. Na areia: argila perto da água, areia longe dela.');break;
     case 'regador':html=`<span class="chip info">Água <span class="meter">${Array.from({length:G.waterMax||WMAX},(_,i)=>`<i class="${i<G.water?'f':''}"></i>`).join('')}</span>&nbsp; Encha tocando na água</span>`;break;
     case 'semente':if(season()===3)html+=`<span class="chip info">Inverno: a horta descansa. Pesque no gelo, minere e cuide dos animais.</span>`;
       for(const k of seedOptions()){const c=CROPS[k],ok=c.tree||inSeason(k);if(c.tree&&!G.inv[c.seed])continue;html+=`<button type="button" class="chip ${G.seedSel===k?'on':''} ${ok?'':'lack'}" data-seed="${k}"><img alt="" src="${iconURL(c.seed)}">${c.tree?treeName(k):c.name} <small>×${G.inv[c.seed]||0}${c.tree?' · na grama':ok?'':' · só '+seasonList(c.seasons)}</small></button>`}break;
     case 'vara':html=hasRod()?`<span class="chip info"><img alt="" src="${iconURL(G.inv.varaDourada?'varaDourada':G.inv.varaCarvalho?'varaCarvalho':'vara')}">Toque na água para lançar · iscas ×${G.inv.isca} · lago e mar têm peixes diferentes</span>`:info('Faça uma vara de bambu na Bancada: 3 madeira + 2 fibra.');break;
-    case 'construir':{const cur=curRecipe();for(const r of recipeList())html+=`<button type="button" class="chip ${cur===r?'on':''} ${hasCost(r.cost)?'':'lack'}" data-recipe="${r.k}"><img alt="" src="${iconURL(r.k)}">${r.name} <small>${costText(r.cost)}</small></button>`;break}
+    case 'construir':{const cur=curRecipe();for(const r of recipeList())html+=`<button type="button" class="chip ${cur===r?'on':''} ${(hasCost(r.cost)||(G.relocate&&G.relocate.k===r.k))?'':'lack'}" data-recipe="${r.k}"><img alt="" src="${iconURL(r.k)}">${r.name} <small>${G.relocate&&G.relocate.k===r.k?'mudança, grátis':costText(r.cost)}</small></button>`;break}
   }
   sb.innerHTML=html;
   if(!$('#panel').hidden)renderPanel();
@@ -2773,7 +2843,8 @@ function renderPanel(){
       const st2=a.ready?`${NAMES[A.prod]} pronto para coletar`:a.fedDay===G.day?'Alimentada hoje':`Com fome · ${A.food} ração`;
       h+=`<div class="row"><img alt="" src="${iconURL('a_'+a.k)}"><span class="nm">${a.name} <span style="color:#ff8fb0">${'♥'.repeat(hearts)}</span><span style="color:var(--muted)">${'♡'.repeat(5-hearts)}</span><small>${A.name} · ${st2}${a.petDay===G.day?' · carinho feito':''}</small></span></div>`}
     h+=`<h3>Como cuidar</h3><div class="row"><span class="nm"><small style="font-size:12px;line-height:1.45">Toque no animal: se tiver ração na mochila, ele come; toque de novo para fazer carinho. ${kind==='chiqueiro'?'No dia seguinte o porco fuça uma trufa na grama aqui perto (menos no inverno): pegue com a Mão.':`No dia seguinte ele dá ${kind==='galinheiro'?'ovo':'leite ou lã'} (aparece um balão em cima dele).`} Comida e carinho todo dia enchem os corações e às vezes rendem produto em dobro. Um Comedouro cheio por perto alimenta todo mundo sozinho.</small></span></div>`;
-    h+=`<div class="foot"><span>Ração: ${G.inv.racao||0}</span><button type="button" class="mini" id="stowHome">Guardar</button></div>`;
+    {const R=homeRegion(hm[0],hm[1]);h+=`<div class="row"><span class="nm">${R.closed?'Cercado fechado ✓':'Sem cercado fechado'}<small>${R.closed?'Os bichos passeiam só dentro da cerca. Você passa pela porteira, eles não.':'Feche a casinha com Cerca e uma Porteira (Construir) para os bichos ficarem presos. O cercado pode ter até 13 × 13 quadrados.'}</small></span></div>`}
+    h+=`<div class="foot"><span>Ração: ${G.inv.racao||0}</span><span style="display:flex;gap:6px">${list.length?'<button type="button" class="mini" id="moveHome">Mudar de lugar</button>':''}<button type="button" class="mini" id="stowHome">Guardar</button></span></div>`;
   } else if(st){
     const S=STATIONS[st];$('#sheetTitle').textContent=S.name;
     for(const r of S.recipes){
@@ -2834,6 +2905,7 @@ $('#panelBody').addEventListener('click',e=>{
   else if(t.dataset.gift){giveGift(panelMode.talk,t.dataset.gift)}
   else if(t.dataset.animal){buyAnimal(t.dataset.animal)}
   else if(t.dataset.pet){adoptPet(t.dataset.pet)}
+  else if(t.id==='moveHome'){const [x,y]=panelMode.home,tl=tile(x,y);if(tl&&HOME_CAP[tl.o]){if(G.relocate){toast('Termine de colocar a outra casinha primeiro.');return}G.relocate={k:tl.o,x,y};tl.o=null;regionCache.clear();closePanel();G.tool='construir';G.recipe=G.relocate.k;refreshUI();toast(`Escolha o lugar novo do ${HOME_NAME[G.relocate.k]} e toque nele. Os bichos vão andando até lá sozinhos.`,4200)}}
   else if(t.id==='stowHome'){const [x,y]=panelMode.home,tl=tile(x,y);if(G.animals.some(a=>a.home[0]===x&&a.home[1]===y)){toast('Ainda tem animais morando aqui.')}else if(tl){const R=ALL_RECIPES.find(r=>r.k===tl.o);for(const [k,v] of Object.entries(R.cost))G.inv[k]+=v;tl.o=null;toast(`${R.name} guardado na mochila.`);closePanel()}}
   else if(t.dataset.buy){const it=BUY.find(x=>x.k===t.dataset.buy);if(G.coins>=it.price){G.coins-=it.price;G.inv[it.k]++;sfx('coin')}}
   else if(t.dataset.craft||t.dataset.craft5){
@@ -2981,7 +3053,7 @@ function start(data){
   buildHotbar();refreshUI();
   if(!G.helpSeen)$('#intro').hidden=false;
   try{window.claude?.hot?.snapshot?.(()=>({save:serialize()}))}catch(e){}
-  window.__brisa={openFest,festGive,festClaim,festOn,seasonDay,setTrack,get track(){return track},setSail,genIslet,get npcs(){return npcs},openTalk,deliver,giveGift,checkArrivals,placeVillage,season,newDay,applySeason,deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
+  window.__brisa={openHome,homeRegion,regionCache,openPanel,openFest,festGive,festClaim,festOn,seasonDay,setTrack,get track(){return track},setSail,genIslet,get npcs(){return npcs},openTalk,deliver,giveGift,checkArrivals,placeVillage,season,newDay,applySeason,deserialize,serialize,curQuestText:()=>{const q=curQuest();return q&&q.text},get animals(){return G.animals},buyAnimal,adoptPet,animalsNewDay,tapCreature,creatureAt,canAct:(tool,x,y)=>canAct(tool,tile(x,y),x,y),pose(anim,at,facing,tool){P.freeze=true;P.anim=anim;P.at=at;P.busy=true;P.act={tool,x:-9,y:-9,reps:1};P.evDone=true;if(facing)G.facing=facing;P.path=[]},get view(){return [ox,oy,SC]},get G(){return G},P,onTap,startAct,setTool,tile:(x,y)=>tile(x,y),get MAP(){return MAP},enterHouse,exitHouse,startFishing,fishTap,openStation,pickTile,save,placeAt,refreshUI,setScene,makeInterior};
   requestAnimationFrame(t=>{last=t;frame(t)});
 }
 const hot=window.claude?.hot;
