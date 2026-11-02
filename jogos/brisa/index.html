@@ -432,12 +432,13 @@ const newTile = (g,h,o,v) => ({g,h,o,path:false,wet:false,crop:null,t:0,fruit:o=
 // MUNDO
 // =====================================================================
 function defaults(){
-  return {v:3, sOff:0, weather:'sol', seasonsSeen:1, seed:0, day:1, time:2/24, coins:20,
+  const D={v:3, sOff:0, weather:'sol', seasonsSeen:1, seed:0, day:1, time:2/24, coins:20,
     inv:{madeira:0,pedra:0,fibra:0,flor:0,frutinha:0,nabo:0,abobora:0,milho:0,sNabo:6,sAbobora:0,sMilho:2,sMorango:0,sMelancia:0,morango:0,melancia:0,argila:0,areia:0,tabua:0,tijolo:0,telha:0,vidro:0,cobre:0,ferro:0,cristal:0,isca:0,sopa:0,torta:0,vara:0,varaCarvalho:0},
     water:WMAX, tool:'mao', seedSel:'nabo', recipe:'cerca', recipeIn:'cama', quest:0,
     stats:{madeira:0,tilled:0,nabo:0,abobora:0,milho:0,tabua:0,dormiu:0,cristal:0,sopa:0,fed:0,ovo:0,leite:0,la:0,bolo:0,petted:0,encheu:0},
     built:{}, unlocked:{}, px:0, py:0, facing:[1,1], helpSeen:false, rocks0:0, flowers0:0, veios0:0,
     house:null, fest:{}, islet:null, isletDock:null, lastBoat:null, fishLog:{}, animals:[], pet:null, qdone:{}, village:null, sellBonus:1, waterMax:WMAX, scene:'ilha', look:{shirt:0,hat:0}, sound:true, zoom:0, tiles:[], inside:null};
+  fixInv(D.inv);return D;
 }
 function newGame(seed){G=defaults();G.seed=seed;genWorld();}
 function genWorld(){
@@ -534,10 +535,19 @@ function serialize(){
   o.islet=G.islet?G.islet.map(packTile):null;
   return JSON.stringify(o);
 }
+function fixInv(inv,raw){
+  // garante todo item com número (itens novos vinham undefined e viravam NaN ao comprar ou colher)
+  let fixed=0;
+  for(const k of Object.keys(NAMES)){const v=inv[k];if(typeof v!=='number'||!isFinite(v)){
+    // no save, NaN vira null: o jogador comprou ou colheu e perdeu. Devolve 1 de compensação.
+    const lost=!!raw&&Object.prototype.hasOwnProperty.call(raw,k)&&raw[k]===null;inv[k]=lost?1:0;if(lost)fixed++}}
+  return fixed;
+}
 function deserialize(s){
   const o=JSON.parse(s), d=defaults();
   const g=Object.assign(d,o);
   g.inv=Object.assign(defaults().inv,o.inv||{});
+  g._invFixed=fixInv(g.inv,o.inv||{});
   g.stats=Object.assign(defaults().stats,o.stats||{});
   g.look=Object.assign(defaults().look,o.look||{});
   g.fishLog=o.fishLog||{}; g.built=o.built||{}; g.unlocked=o.unlocked||{};
@@ -571,6 +581,8 @@ function afterLoad(){
   computeSea();
   placeVillage();
   if(G.scene==='casa'&&G.inside)setScene('casa');else if(G.scene==='ilhota'&&G.islet)setScene('ilhota');else setScene('ilha');
+  if(G._invFixed){const n=G._invFixed;setTimeout(()=>toast(`Corrigido: itens novos que sumiam da mochila agora contam. Você recebeu ${n} item(ns) de volta.`,5000),1200)}
+  delete G._invFixed;
 }
 
 // =====================================================================
