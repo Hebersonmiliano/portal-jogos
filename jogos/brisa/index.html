@@ -52,6 +52,12 @@ button:focus-visible{outline:2px solid var(--butter);outline-offset:2px}
 .btn:hover{border-color:rgba(255,212,107,.6)}
 .btn kbd{font-family:var(--display);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 4px;margin-left:auto}
 .btn.off{color:var(--muted)}
+.res{flex:1;min-width:0;max-width:640px;display:flex;flex-wrap:wrap;justify-content:center;gap:2px 4px;padding:6px 8px;pointer-events:auto;align-self:flex-start}
+.ri{display:flex;align-items:center;gap:3px;padding:2px 6px 2px 2px;border-radius:4px;font-family:var(--display);font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ri img{width:22px;height:22px;image-rendering:pixelated}
+.ri.zero{color:var(--muted);opacity:.55}
+.ri.bump{animation:bump .45s}
+@keyframes bump{30%{background:rgba(255,212,107,.35);transform:scale(1.12)}}
 .zoom{display:flex;gap:6px}
 .zoom .btn{flex:1;justify-content:center;font-family:var(--display);font-size:18px;padding:4px 10px;line-height:1}
 
@@ -122,7 +128,14 @@ h3:first-child{margin-top:0}
 .intro li b{color:var(--ink)}
 .go{width:100%;background:var(--butter);color:#2b2140;border:none;border-radius:6px;padding:12px;font-family:var(--display);font-size:20px}
 
+@media (max-width:900px){
+  .top{flex-wrap:wrap}
+  .res{order:3;flex-basis:100%;max-width:none;flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scrollbar-width:none}
+  .res::-webkit-scrollbar{display:none}
+  .ri{flex:none}
+}
 @media (max-width:640px){
+  .ri{font-size:12px}.ri img{width:18px;height:18px}
   .hud{max-width:210px;padding:8px 10px;gap:6px}
   .hud-row{font-size:14px;gap:8px;flex-wrap:wrap}
   .period{display:none}
@@ -137,7 +150,7 @@ h3:first-child{margin-top:0}
   .btn{padding:7px 9px}
   .btn .lbl{display:none}
 }
-@media (prefers-reduced-motion:reduce){.toast,.quest-bar i,#fade{transition:none}}
+@media (prefers-reduced-motion:reduce){.toast,.quest-bar i,#fade{transition:none}.ri.bump{animation:none}}
 </style>
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0;font-size:14px}[hidden]{display:none!important}</style>
 </head>
@@ -157,6 +170,7 @@ h3:first-child{margin-top:0}
         <span class="quest-num" id="questNum"></span>
       </div>
     </div>
+    <div class="res card" id="resbar" aria-label="Recursos"></div>
     <div class="side">
       <button class="btn" id="bagBtn" type="button"><span>Mochila</span><kbd>B</kbd></button>
       <button class="btn" id="shopBtn" type="button"><span>Mercado</span><kbd>M</kbd></button>
@@ -1588,8 +1602,20 @@ function refreshClock(){
   $('#clock').textContent=`Dia ${G.day} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
   $('#period').textContent=h>=5&&h<12?'manhã':h>=12&&h<18?'tarde':'noite';
 }
+const RES_BAR=['madeira','tabua','pedra','argila','areia','tijolo','telha','vidro','fibra','flor','cobre','ferro','cristal'];
+let resLast={};
+function refreshRes(){
+  const el=$('#resbar');
+  if(!el.childElementCount){el.innerHTML=RES_BAR.map(k=>`<span class="ri" data-r="${k}" title="${NAMES[k]}"><img alt="${NAMES[k]}" src="${iconURL(k)}"><b>0</b></span>`).join('')}
+  for(const k of RES_BAR){
+    const n=G.inv[k]||0,sp=el.querySelector(`[data-r="${k}"]`);
+    sp.querySelector('b').textContent=n;sp.classList.toggle('zero',!n);
+    if(resLast[k]!==undefined&&n>resLast[k]){sp.classList.remove('bump');void sp.offsetWidth;sp.classList.add('bump')}
+    resLast[k]=n;
+  }
+}
 function refreshUI(){
-  refreshClock();
+  refreshClock();refreshRes();
   $('#coins').textContent=G.coins;
   if(G.quest<QUESTS.length){const q=QUESTS[G.quest],[c,t]=q.p();$('#questText').textContent=q.text;$('#questNum').textContent=`${Math.min(c,t)} / ${t}`;$('#questBar').style.width=(Math.min(1,c/t)*100)+'%'}
   else{$('#questText').textContent='Sua ilha está do seu jeito. Continue cuidando dela.';$('#questNum').textContent='Todas as tarefas feitas';$('#questBar').style.width='100%'}
