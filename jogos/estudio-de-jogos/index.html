@@ -4,14 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Estúdio de jogos — Portal Pixel</title>
-<meta name="description" content="Aprenda conceitos de desenvolvimento de jogos: engines, cenas, sprites, objetos, colisão, variáveis, eventos, estados, checkpoints e loop do jogo.">
+<meta name="description" content="Aprenda conceitos de desenvolvimento de jogos: engines, cenas, sprites, objetos, colisão, variáveis, eventos, estados, checkpoints e loop do jogo. Com ranking e conquistas.">
 <style>
   :root { --bg:#f4f1ea; --card:#ffffff; --ink:#23211d; --muted:#6b665c; --acc:#2f7d6d; --acc-2:#e0a526; --erro:#b5382b; --ok:#2e7d4f; --borda:#d8d2c4; --destaque:#e6f2ec; }
   * { box-sizing: border-box; }
   body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
   header { padding:12px 18px; background:var(--card); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
   header h1 { font-size:1.2rem; margin:0; }
-  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .direita { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  header #aluno-info { font-weight:700; color:var(--acc); }
+  header a, header .link { color:var(--acc); text-decoration:none; font-weight:600; background:none; border:0; font:inherit; cursor:pointer; padding:0; }
   main { max-width:960px; margin:0 auto; padding:16px; display:grid; gap:14px; }
   .card { background:var(--card); border:1px solid var(--borda); border-radius:12px; padding:16px; }
   .card h2 { font-size:1rem; margin:0 0 8px; }
@@ -33,6 +35,7 @@
   .controles button { height:52px; border-radius:10px; border:2px solid var(--acc); background:var(--card); color:var(--acc); font-size:1.3rem; cursor:pointer; font-family:inherit; }
   .controles button:active { background:var(--destaque); }
   .botoes { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .botoes.centro { justify-content:center; }
   button.acao { border:0; border-radius:10px; padding:10px 14px; font:inherit; font-weight:700; cursor:pointer; background:var(--acc); color:#fff; }
   button.acao.sec { background:var(--card); color:var(--acc); border:2px solid var(--acc); }
   button.acao:disabled { opacity:.45; cursor:not-allowed; }
@@ -48,24 +51,67 @@
   .quiz-opcoes button:disabled { cursor:default; }
   .quiz-opcoes button.certa { border-color:var(--ok); background:var(--destaque); }
   .quiz-opcoes button.errada { border-color:var(--erro); }
-  .celebracao { position:fixed; inset:0; background:rgba(20,18,15,.72); z-index:50; display:flex; align-items:center; justify-content:center; padding:16px; }
-  .celebracao[hidden] { display:none; }
+
+  /* Gamificação */
+  .xp-linha { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; font-weight:700; }
+  .barra { height:14px; background:#ebe6da; border-radius:999px; overflow:hidden; margin:8px 0; }
+  #xp-barra { height:100%; width:0; background:linear-gradient(90deg, var(--acc), var(--acc-2)); transition:width .4s; }
+  .xp-regras { color:var(--muted); font-size:.88rem; margin-top:8px; }
+  #conquistas { list-style:none; padding:0; margin:10px 0 0; display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:8px; }
+  #conquistas li { border:2px solid var(--borda); border-radius:10px; padding:8px 10px; font-size:.9rem; }
+  #conquistas li.ganha { border-color:var(--ok); background:var(--destaque); }
+  #conquistas li.falta { opacity:.5; }
+  #conquistas small { display:block; color:var(--muted); }
+
+  /* Ranking */
+  .ranking { width:100%; border-collapse:collapse; font-size:.95rem; }
+  .ranking th, .ranking td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--borda); }
+  .ranking th { color:var(--muted); font-size:.85rem; font-weight:700; }
+  .ranking tr.eu td { background:var(--destaque); font-weight:700; }
+  .ranking td:nth-child(n+3) { text-align:right; }
+  .ranking th:nth-child(n+3) { text-align:right; }
+  .aviso { color:var(--muted); font-size:.88rem; margin:8px 0 0; }
+
+  /* Sobreposições: celebração, início e aviso */
+  .sobreposicao { position:fixed; inset:0; background:rgba(20,18,15,.72); z-index:50; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .sobreposicao[hidden] { display:none; }
+  .sobreposicao.inicio { z-index:60; background:rgba(244,241,234,.97); }
   #fogos { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; }
-  .venceu { position:relative; background:var(--card); border-radius:16px; padding:24px; max-width:420px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.35); }
-  .venceu h2 { font-size:1.6rem; margin:0 0 8px; }
-  .venceu .estrelas { font-size:2rem; letter-spacing:4px; margin:6px 0 10px; }
-  .venceu p { color:var(--muted); line-height:1.45; margin:0 0 16px; }
-  .venceu .botoes { justify-content:center; }
-  @media (max-width:480px) { main { padding:10px; } }
+  .caixa { position:relative; background:var(--card); border-radius:16px; padding:24px; max-width:440px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.3); }
+  .caixa h2 { font-size:1.6rem; margin:0 0 8px; }
+  .caixa .estrelas { font-size:2rem; letter-spacing:4px; margin:6px 0 10px; }
+  .caixa p { color:var(--muted); line-height:1.45; margin:0 0 16px; }
+  .caixa form { display:grid; gap:12px; text-align:left; }
+  .caixa label { font-weight:700; }
+  .caixa input { font:inherit; font-size:1.1rem; padding:10px 12px; border:2px solid var(--borda); border-radius:10px; width:100%; }
+  .caixa input:focus { outline:3px solid var(--acc-2); outline-offset:1px; }
+  .erro-campo { color:var(--erro); font-weight:600; min-height:1.2em; margin:0; }
+  .caixa .botoes { justify-content:center; }
+  .toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:10px; font-weight:600; z-index:70; max-width:calc(100% - 32px); text-align:center; box-shadow:0 6px 18px rgba(0,0,0,.25); }
+  .toast[hidden] { display:none; }
+  @media (max-width:480px) { main { padding:10px; } header #aluno-info { font-size:.9rem; } }
 </style>
 </head>
 <body>
 <header>
   <h1>Estúdio de jogos</h1>
-  <a href="../../index.html">← Portal Pixel</a>
+  <div class="direita">
+    <span id="aluno-info">Sem aluno</span>
+    <button class="link" id="btn-tela" type="button">⛶ Tela cheia</button>
+    <button class="link" id="btn-trocar" type="button">Trocar aluno</button>
+    <a href="../../index.html">← Portal Pixel</a>
+  </div>
 </header>
 
 <main>
+  <section class="card">
+    <h2>Seu progresso</h2>
+    <div class="xp-linha"><span id="xp-nivel">Nível 1</span><span id="xp-texto">0 XP</span></div>
+    <div class="barra" aria-hidden="true"><div id="xp-barra"></div></div>
+    <p class="xp-regras">Ganhe XP: concluir fase +100 · sem perder vida +50 · fortaleza vencida +200 · power-up e checkpoint +10 · acerto no quiz +20.</p>
+    <ul id="conquistas" aria-label="Conquistas"></ul>
+  </section>
+
   <section class="card">
     <h2>Fases</h2>
     <div class="fases" id="fases"></div>
@@ -128,6 +174,15 @@
   </section>
 
   <section class="card">
+    <h2>Ranking da turma (neste navegador)</h2>
+    <table class="ranking">
+      <thead><tr><th>Pos.</th><th>Aluno</th><th>Nível</th><th>XP</th><th>Fases</th><th>Conquistas</th></tr></thead>
+      <tbody id="ranking-corpo"></tbody>
+    </table>
+    <p class="aviso">O ranking fica salvo no navegador deste computador. Em um computador compartilhado, cada aluno deve entrar com o próprio nome.</p>
+  </section>
+
+  <section class="card">
     <h2>Glossário do estúdio</h2>
     <dl class="glossario">
       <dt>Engine</dt><dd>Programa que já traz desenho, física, som e entrada prontos. Ex.: Godot, GDevelop, Unity, Construct.</dd>
@@ -144,16 +199,37 @@
       <dt>Power-up</dt><dd>Item que dá um efeito temporário ao jogador, como o escudo da ⭐.</dd>
       <dt>Checkpoint</dt><dd>Ponto que salva o progresso. Se o jogador perde uma vida, volta até ele.</dd>
       <dt>IA (comportamento)</dt><dd>Regra que faz um inimigo agir sozinho, como perseguir o jogador.</dd>
+      <dt>Ranking</dt><dd>Lista que ordena os jogadores por uma pontuação, como o XP.</dd>
     </dl>
   </section>
 </main>
 
-<div class="celebracao" id="celebracao" hidden>
+<!-- Tela inicial: nome do aluno e tela cheia -->
+<div class="sobreposicao inicio" id="inicio" hidden>
+  <section class="caixa" role="dialog" aria-labelledby="inicio-titulo">
+    <h2 id="inicio-titulo">🎮 Estúdio de jogos</h2>
+    <p>Digite seu nome para começar. Seu XP, suas conquistas e sua posição no ranking ficam salvos com esse nome.</p>
+    <form id="form-inicio" novalidate>
+      <div>
+        <label for="nome">Seu nome</label>
+        <input id="nome" type="text" maxlength="30" autocomplete="off" placeholder="Ex.: Maria Silva">
+        <p class="erro-campo" id="erro-nome" role="alert"></p>
+      </div>
+      <div class="botoes centro">
+        <button class="acao" type="submit">▶ Começar em tela cheia</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<!-- Tela de vitória -->
+<div class="sobreposicao" id="celebracao" hidden>
   <canvas id="fogos"></canvas>
-  <section class="venceu" role="dialog" aria-labelledby="venceu-titulo">
+  <section class="caixa" role="dialog" aria-labelledby="venceu-titulo">
     <h2 id="venceu-titulo">🎉 Parabéns, você venceu!</h2>
     <div class="estrelas" aria-hidden="true">⭐⭐⭐</div>
     <p>Você atravessou a fortaleza do estúdio, concluiu as fases e os desafios. Agora você entende os conceitos básicos de desenvolvimento de jogos.</p>
+    <p id="venceu-xp"></p>
     <div class="botoes">
       <button class="acao" id="btn-reiniciar" type="button">Reiniciar o jogo</button>
       <button class="acao sec" id="btn-fechar" type="button">Ver o jogo</button>
@@ -161,11 +237,24 @@
   </section>
 </div>
 
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
 <script>
-  const CHAVE = "portal-pixel:estudio-de-jogos";
+  const CHAVE_ALUNOS = "portal-pixel:estudio-de-jogos:alunos";
+  const CHAVE_ATUAL = "portal-pixel:estudio-de-jogos:atual";
+  const CHAVE_LEGADO = "portal-pixel:estudio-de-jogos";
   const TAM = 44;
   // Progresso das fases antigas (ids f0 a f5) para os ids atuais.
   const LEGADO = { f0: "sprite", f1: "cenario", f2: "colisao", f3: "variaveis", f4: "eventos", f5: "engines" };
+
+  const BADGES = {
+    primeira: ["🥇", "Primeiro passo", "Concluiu uma fase"],
+    protegido: ["🛡️", "Protegido", "Pegou a estrela de escudo"],
+    checkpoint: ["🚩", "Salvou o progresso", "Usou um checkpoint"],
+    intocavel: ["💚", "Intocável", "Concluiu uma fase sem perder vida"],
+    mestre: ["🧠", "Mente de engine", "Acertou todas as perguntas de um desafio"],
+    campeao: ["🏆", "Campeão do estúdio", "Venceu a fortaleza"]
+  };
 
   // Legenda do mapa: # parede · . chão · P jogador · E inimigo de patrulha · C inimigo que persegue
   // M moeda · K chave · D porta · S power-up · B checkpoint · X saída
@@ -257,7 +346,166 @@
       ] }
   ];
 
-  let progresso = carregarProgresso();
+  // ---------- Armazenamento (alunos, progresso, XP e conquistas) ----------
+  function lerJSON(chave, padrao) {
+    try { const v = JSON.parse(localStorage.getItem(chave)); return v === null || v === undefined ? padrao : v; }
+    catch (e) { return padrao; }
+  }
+  function gravar(chave, valor) {
+    try { localStorage.setItem(chave, JSON.stringify(valor)); } catch (e) { /* sem armazenamento */ }
+  }
+  function migrarFases(p) {
+    const novo = {};
+    Object.keys(p || {}).forEach(k => { novo[LEGADO[k] || k] = p[k]; });
+    return novo;
+  }
+
+  let alunos = lerJSON(CHAVE_ALUNOS, {});
+  let atualId = lerJSON(CHAVE_ATUAL, null);
+  if (!alunos[atualId]) atualId = null;
+
+  function aluno() { return atualId ? alunos[atualId] : null; }
+  let progresso = aluno() ? aluno().fases : {};
+
+  function nivel(xp) { return Math.floor(xp / 200) + 1; }
+
+  function salvarAluno() {
+    const a = aluno();
+    if (a) a.fases = progresso;
+    gravar(CHAVE_ALUNOS, alunos);
+    gravar(CHAVE_ATUAL, atualId);
+    atualizarPainelAluno();
+    atualizarRanking();
+  }
+
+  function entrarAluno(nome) {
+    const nomeLimpo = nome.trim();
+    const id = nomeLimpo.toLowerCase();
+    if (!alunos[id]) {
+      const primeiro = Object.keys(alunos).length === 0;
+      alunos[id] = { nome: nomeLimpo, xp: 0, badges: [], fases: primeiro ? migrarFases(lerJSON(CHAVE_LEGADO, {})) : {} };
+    }
+    alunos[id].nome = nomeLimpo;
+    atualId = id;
+    progresso = alunos[id].fases;
+    salvarAluno();
+    atualizarFases();
+  }
+
+  function ganharXp(n, motivo) {
+    const a = aluno();
+    if (!a) return;
+    const antes = nivel(a.xp);
+    a.xp += n;
+    let texto = "+" + n + " XP · " + motivo;
+    if (nivel(a.xp) > antes) texto += " · ⬆️ nível " + nivel(a.xp) + "!";
+    toast(texto);
+    salvarAluno();
+  }
+
+  function conquistar(id) {
+    const a = aluno();
+    if (!a || a.badges.includes(id)) return;
+    a.badges.push(id);
+    toast(BADGES[id][0] + " Conquista: " + BADGES[id][1] + "!");
+    salvarAluno();
+  }
+
+  function atualizarPainelAluno() {
+    const a = aluno();
+    document.getElementById("aluno-info").textContent = a ? a.nome + " · Nível " + nivel(a.xp) : "Sem aluno";
+    if (!a) return;
+    document.getElementById("xp-nivel").textContent = "Nível " + nivel(a.xp) + " · faltam " + (200 - (a.xp % 200)) + " XP para o próximo";
+    document.getElementById("xp-texto").textContent = a.xp + " XP";
+    document.getElementById("xp-barra").style.width = ((a.xp % 200) / 200 * 100) + "%";
+    const lista = document.getElementById("conquistas");
+    lista.innerHTML = "";
+    Object.keys(BADGES).forEach(id => {
+      const [ico, titulo, desc] = BADGES[id];
+      const ganhou = a.badges.includes(id);
+      const li = document.createElement("li");
+      li.className = ganhou ? "ganha" : "falta";
+      const s1 = document.createElement("span"); s1.textContent = ico + " ";
+      const s2 = document.createElement("strong"); s2.textContent = titulo;
+      const s3 = document.createElement("small"); s3.textContent = ganhou ? desc : "Bloqueada: " + desc;
+      li.append(s1, s2, s3);
+      lista.appendChild(li);
+    });
+  }
+
+  function atualizarRanking() {
+    const linhas = Object.keys(alunos).map(id => {
+      const a = alunos[id];
+      return { id, nome: a.nome, xp: a.xp, badges: a.badges.length, concluidas: Object.values(a.fases || {}).filter(Boolean).length };
+    }).sort((x, y) => y.xp - x.xp || x.nome.localeCompare(y.nome));
+    const corpo = document.getElementById("ranking-corpo");
+    corpo.innerHTML = "";
+    if (!linhas.length) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 6; td.textContent = "Ainda não há alunos neste navegador.";
+      tr.appendChild(td); corpo.appendChild(tr);
+      return;
+    }
+    linhas.slice(0, 10).forEach((l, i) => {
+      const tr = document.createElement("tr");
+      if (l.id === atualId) tr.className = "eu";
+      const valores = [["🥇", "🥈", "🥉"][i] || String(i + 1), l.nome, nivel(l.xp), l.xp, l.concluidas, l.badges];
+      valores.forEach(v => { const td = document.createElement("td"); td.textContent = v; tr.appendChild(td); });
+      corpo.appendChild(tr);
+    });
+  }
+
+  let toastId = null;
+  function toast(texto) {
+    const el = document.getElementById("toast");
+    el.textContent = (el.hidden ? "" : el.textContent + "  ·  ") + texto;
+    el.hidden = false;
+    clearTimeout(toastId);
+    toastId = setTimeout(() => { el.hidden = true; el.textContent = ""; }, 3200);
+  }
+
+  // ---------- Tela cheia ----------
+  function entrarTelaCheia() {
+    const el = document.documentElement;
+    if (!el.requestFullscreen || document.fullscreenElement) return;
+    try { const p = el.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* sem permissão */ }
+  }
+  function alternarTelaCheia() {
+    if (document.fullscreenElement) {
+      if (document.exitFullscreen) { const p = document.exitFullscreen(); if (p && p.catch) p.catch(() => {}); }
+    } else {
+      entrarTelaCheia();
+    }
+  }
+  document.addEventListener("fullscreenchange", () => {
+    document.getElementById("btn-tela").textContent = document.fullscreenElement ? "✕ Sair da tela cheia" : "⛶ Tela cheia";
+  });
+  document.getElementById("btn-tela").addEventListener("click", alternarTelaCheia);
+
+  // ---------- Tela inicial ----------
+  function abrirInicio() {
+    parar();
+    document.getElementById("nome").value = aluno() ? aluno().nome : "";
+    document.getElementById("erro-nome").textContent = "";
+    document.getElementById("inicio").hidden = false;
+    setTimeout(() => document.getElementById("nome").focus(), 50);
+  }
+  document.getElementById("btn-trocar").addEventListener("click", abrirInicio);
+  document.getElementById("form-inicio").addEventListener("submit", e => {
+    e.preventDefault();
+    const nome = document.getElementById("nome").value.trim();
+    if (nome.length < 2) {
+      document.getElementById("erro-nome").textContent = "Digite seu nome, com pelo menos 2 letras.";
+      return;
+    }
+    entrarAluno(nome);
+    entrarTelaCheia();
+    document.getElementById("inicio").hidden = true;
+    carregar(inicialDoAluno());
+  });
+
+  // ---------- Fases ----------
   let fase = 0;
   let grade = [];
   let inimigos = [];
@@ -269,22 +517,14 @@
   let qi = 0;
   let acertos = 0;
 
-  function carregarProgresso() {
-    let p = {};
-    try { p = JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { p = {}; }
-    Object.keys(LEGADO).forEach(k => {
-      if (p[k] !== undefined) {
-        if (p[LEGADO[k]] === undefined) p[LEGADO[k]] = p[k];
-        delete p[k];
-      }
-    });
-    return p;
-  }
-  function salvarProgresso() {
-    try { localStorage.setItem(CHAVE, JSON.stringify(progresso)); } catch (e) { /* sem armazenamento */ }
-  }
   function faseLiberada(i) {
     return i === 0 || progresso[FASES[i - 1].id] !== undefined;
+  }
+  function inicialDoAluno() {
+    for (let i = 0; i < FASES.length; i++) {
+      if (faseLiberada(i) && progresso[FASES[i].id] === undefined) return i;
+    }
+    return 0;
   }
   function mostrar(texto, tipo) {
     const m = document.getElementById("msg");
@@ -303,7 +543,7 @@
     document.getElementById("conceito-texto").textContent = f.conceito;
     document.getElementById("conceito-dica").textContent = "Dica: " + f.dica;
     document.getElementById("btn-proxima").disabled = true;
-    mostrarAtualizarFases();
+    atualizarFases();
 
     if (f.tipo === "quiz") {
       document.getElementById("cartaJogo").hidden = true;
@@ -314,7 +554,7 @@
     document.getElementById("cartaJogo").hidden = false;
     document.getElementById("cartaQuiz").hidden = true;
 
-    vars = { pontos: 0, moedas: 0, vidas: 3, chave: false, quadro: 0, escudo: 0, tempo: f.tempo !== undefined ? f.tempo : null };
+    vars = { pontos: 0, moedas: 0, vidas: 3, perdas: 0, chave: false, quadro: 0, escudo: 0, tempo: f.tempo !== undefined ? f.tempo : null };
     fim = false;
     grade = f.mapa.map(l => l.split(""));
     inimigos = [];
@@ -342,8 +582,12 @@
     return true;
   }
 
+  function telaAberta() {
+    return !document.getElementById("inicio").hidden || !document.getElementById("celebracao").hidden;
+  }
+
   function mover(dx, dy) {
-    if (fim || FASES[fase].tipo === "quiz") return;
+    if (fim || telaAberta() || FASES[fase].tipo === "quiz") return;
     const nx = jog.x + dx, ny = jog.y + dy;
     if (!passavel(nx, ny)) return;
     jog = { x: nx, y: ny };
@@ -367,10 +611,14 @@
       grade[jog.y][jog.x] = ".";
       vars.escudo = 6;
       mostrar("Power-up! Escudo ativo por 6 tiques. O estado mudou.", "ok");
+      conquistar("protegido");
+      ganharXp(10, "power-up");
     } else if (c === "B") {
       if (inicio.x !== jog.x || inicio.y !== jog.y) {
         inicio = { x: jog.x, y: jog.y };
         mostrar("Checkpoint salvo! Se perder uma vida, você volta aqui.", "ok");
+        conquistar("checkpoint");
+        ganharXp(10, "checkpoint");
       }
     } else if (c === "X") {
       const min = FASES[fase].minMoedas;
@@ -388,6 +636,7 @@
       return;
     }
     vars.vidas--;
+    vars.perdas++;
     if (vars.vidas <= 0) { perder("Fim de jogo! Clique em Recomeçar fase."); return; }
     jog = { x: inicio.x, y: inicio.y };
     mostrar("Colisão! Você perdeu uma vida e voltou ao ponto seguro.", "erro");
@@ -459,10 +708,17 @@
     fim = true;
     parar();
     progresso[FASES[fase].id] = true;
-    salvarProgresso();
-    mostrarAtualizarFases();
+    if (vars.perdas === 0) {
+      conquistar("intocavel");
+      ganharXp(50, "sem perder vida");
+    }
+    ganharXp(100, "fase concluída");
+    conquistar("primeira");
+    atualizarFases();
     desenhar();
     if (fase === FASES.length - 1) {
+      conquistar("campeao");
+      ganharXp(200, "fortaleza vencida");
       mostrar("Você venceu o jogo! Sua pontuação foi " + vars.pontos + ".", "ok");
       celebrar();
       return;
@@ -471,11 +727,22 @@
     document.getElementById("btn-proxima").disabled = false;
   }
 
+  function perder(texto) {
+    fim = true;
+    parar();
+    mostrar(texto, "erro");
+    desenhar();
+  }
+
   // Tela de vitória: fogos, estrelas e opção de reiniciar.
   let fogosId = null;
   function celebrar() {
     const ov = document.getElementById("celebracao");
     const cv = document.getElementById("fogos");
+    const a = aluno();
+    document.getElementById("venceu-xp").textContent = a
+      ? a.nome + ", você chegou ao nível " + nivel(a.xp) + " com " + a.xp + " XP e " + a.badges.length + " conquistas."
+      : "";
     ov.hidden = false;
     cv.width = window.innerWidth;
     cv.height = window.innerHeight;
@@ -485,8 +752,8 @@
     const explodir = (x, y) => {
       const cor = cores[Math.floor(Math.random() * cores.length)];
       for (let i = 0; i < 60; i++) {
-        const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 4;
-        parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vida: 60 + Math.random() * 40, max: 100, cor, emoji: null });
+        const ang = Math.random() * Math.PI * 2, v = 2 + Math.random() * 4;
+        parts.push({ x, y, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, vida: 60 + Math.random() * 40, max: 100, cor, emoji: null });
       }
       for (let i = 0; i < 2; i++) {
         parts.push({ x, y, vx: (Math.random() - 0.5) * 2, vy: -1 - Math.random() * 2, vida: 90, max: 90, cor: null, emoji: "⭐" });
@@ -527,13 +794,6 @@
     document.getElementById("celebracao").hidden = true;
   }
 
-  function perder(texto) {
-    fim = true;
-    parar();
-    mostrar(texto, "erro");
-    desenhar();
-  }
-
   function desenharEmoji(g, t, px, py) {
     g.font = Math.floor(TAM * 0.62) + 'px "Segoe UI Emoji", system-ui, sans-serif';
     g.textAlign = "center";
@@ -569,7 +829,7 @@
     document.getElementById("v-quadro").textContent = vars.quadro;
   }
 
-  function mostrarAtualizarFases() {
+  function atualizarFases() {
     const box = document.getElementById("fases");
     box.innerHTML = "";
     FASES.forEach((f, i) => {
@@ -600,9 +860,11 @@
     if (qi >= perguntas.length) {
       document.getElementById("quiz-pergunta").textContent = "Você concluiu o desafio: " + acertos + " de " + perguntas.length + " certas.";
       progresso[FASES[fase].id] = true;
-      salvarProgresso();
+      if (acertos === perguntas.length) conquistar("mestre");
+      conquistar("primeira");
+      ganharXp(100, "desafio concluído");
       document.getElementById("btn-proxima").disabled = fase >= FASES.length - 1;
-      mostrarAtualizarFases();
+      atualizarFases();
       return;
     }
     const q = perguntas[qi];
@@ -622,8 +884,14 @@
     botoes.forEach(b => b.disabled = true);
     botoes[q.c].classList.add("certa");
     const res = document.getElementById("quiz-resultado");
-    if (k === q.c) { acertos++; res.textContent = "Isso mesmo!"; }
-    else { botoes[k].classList.add("errada"); res.textContent = "Resposta certa: " + q.o[q.c] + "."; }
+    if (k === q.c) {
+      acertos++;
+      res.textContent = "Isso mesmo!";
+      ganharXp(20, "acerto no quiz");
+    } else {
+      botoes[k].classList.add("errada");
+      res.textContent = "Resposta certa: " + q.o[q.c] + ".";
+    }
     setTimeout(() => { qi++; mostrarPergunta(); }, 1600);
   }
 
@@ -641,22 +909,22 @@
   });
 
   document.getElementById("btn-recomecar").addEventListener("click", () => carregar(fase));
+  document.getElementById("btn-proxima").addEventListener("click", () => {
+    if (fase < FASES.length - 1) carregar(fase + 1);
+  });
   document.getElementById("btn-fechar").addEventListener("click", fecharCelebracao);
   document.getElementById("btn-reiniciar").addEventListener("click", () => {
     fecharCelebracao();
     progresso = {};
-    salvarProgresso();
+    salvarAluno();
     carregar(0);
   });
-  document.getElementById("btn-proxima").addEventListener("click", () => {
-    if (fase < FASES.length - 1) carregar(fase + 1);
-  });
 
-  let inicial = 0;
-  for (let i = 0; i < FASES.length; i++) {
-    if (faseLiberada(i) && progresso[FASES[i].id] === undefined) { inicial = i; break; }
-  }
-  carregar(inicial);
+  // Início: mostra a tela de nome e carrega a fase de quem já entrou (ou a primeira).
+  atualizarPainelAluno();
+  atualizarRanking();
+  carregar(inicialDoAluno());
+  abrirInicio();
 </script>
 </body>
 </html>
