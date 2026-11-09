@@ -212,9 +212,16 @@
     s.start(t); s.stop(t + 0.06);
   }
 
+  // Tempo da música: mais rápido nos últimos 5 segundos e quando alguém está na frente.
+  function bpmAtual() {
+    if (urgente) return 172;
+    if (pontos[0] !== pontos[1]) return 150;
+    return 132;
+  }
+
   function agendarMusica() {
     if (!ctx) return;
-    const bpm = urgente ? 172 : 132;
+    const bpm = bpmAtual();
     const dur = 60 / bpm / 2;
     while (proximoT < ctx.currentTime + 0.2) {
       const i = passo % 8;
