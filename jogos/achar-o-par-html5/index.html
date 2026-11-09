@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Achar o par: HTML5 — Portal Pixel</title>
+<meta name="description" content="Jogo da memória para iniciantes em HTML5: ache o par entre cada tag e o que ela faz.">
+<style>
+  :root { --bg:#f4f1ea; --card:#ffffff; --ink:#23211d; --muted:#6b665c; --acc:#2f7d6d; --acc-2:#e0a526; --erro:#b5382b; --ok:#2e7d4f; --borda:#d8d2c4; --achada:#e6f2ec; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:12px 18px; background:var(--card); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  header h1 { font-size:1.2rem; margin:0; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  main { max-width:900px; margin:0 auto; padding:16px; display:grid; gap:14px; }
+  .card { background:var(--card); border:1px solid var(--borda); border-radius:12px; padding:16px; }
+  .intro p { margin:0 0 6px; line-height:1.45; }
+  .fases { display:flex; flex-wrap:wrap; gap:8px; }
+  .fase-btn { border:2px solid var(--borda); background:var(--card); border-radius:10px; padding:8px 12px; cursor:pointer; font:inherit; color:var(--ink); text-align:left; }
+  .fase-btn[aria-current="true"] { border-color:var(--acc); background:var(--achada); }
+  .fase-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .fase-btn small { display:block; color:var(--muted); font-size:.8rem; }
+  .placar { display:flex; gap:18px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+  .placar strong { font-size:1.1rem; }
+  .botoes { display:flex; gap:8px; flex-wrap:wrap; }
+  button.acao { border:0; border-radius:10px; padding:10px 14px; font:inherit; font-weight:700; cursor:pointer; background:var(--acc); color:#fff; }
+  button.acao.sec { background:var(--card); color:var(--acc); border:2px solid var(--acc); }
+  button.acao:disabled { opacity:.45; cursor:not-allowed; }
+  .grade { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+  .carta { min-height:92px; border-radius:10px; border:2px solid var(--borda); background:var(--card); cursor:pointer; padding:8px; font:inherit; font-size:.95rem; color:var(--ink); display:flex; align-items:center; justify-content:center; text-align:center; line-height:1.25; word-break:break-word; }
+  .carta.fechada { background:var(--acc); border-color:var(--acc); color:#fff; font-size:1.6rem; font-weight:700; }
+  .carta.aberta.tag { font-family: ui-monospace, Consolas, monospace; font-weight:700; color:var(--acc); }
+  .carta.aberta.sig { color:var(--ink); }
+  .carta.achada { background:var(--achada); border-color:var(--ok); color:var(--ok); }
+  .carta.achada.tag { font-family: ui-monospace, Consolas, monospace; font-weight:700; }
+  .carta:focus-visible { outline:3px solid var(--acc-2); outline-offset:2px; }
+  #msg { min-height:1.4em; font-weight:600; margin:0; }
+  #msg.ok { color:var(--ok); }
+  #msg.erro { color:var(--erro); }
+  @media (max-width:480px) {
+    main { padding:10px; }
+    .grade { gap:6px; }
+    .carta { min-height:78px; font-size:.78rem; padding:6px; }
+    .carta.fechada { font-size:1.3rem; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Achar o par: HTML5</h1>
+  <a href="../../index.html">← Portal Pixel</a>
+</header>
+
+<main>
+  <section class="card intro">
+    <p><strong>Como jogar:</strong> vire duas cartas. Uma mostra uma tag HTML5 e a outra mostra o que ela faz. Quando forem o mesmo par, elas ficam marcadas.</p>
+    <p>Complete a fase achando todos os pares. Menos erros rendem mais estrelas.</p>
+  </section>
+
+  <section class="card">
+    <div class="fases" id="fases"></div>
+  </section>
+
+  <section class="card">
+    <div class="placar">
+      <span>Fase: <strong id="titulo-nivel"></strong></span>
+      <span>Erros: <strong id="erros">0</strong></span>
+      <span>Pares: <strong id="achados">0/0</strong></span>
+    </div>
+    <p id="msg" aria-live="polite"></p>
+    <div class="grade" id="grade" style="margin-top:12px"></div>
+    <div class="botoes" style="margin-top:14px">
+      <button class="acao sec" id="btn-recomecar" type="button">Recomeçar fase</button>
+      <button class="acao" id="btn-proxima" type="button" disabled>Próxima fase</button>
+    </div>
+  </section>
+</main>
+
+<script>
+  const CHAVE = "portal-pixel:achar-o-par-html5";
+
+  // Cada par: [tag HTML5, o que ela faz]
+  const NIVEIS = [
+    { titulo: "Tags básicas", pares: [
+      ["<h1>", "Título principal da página"],
+      ["<p>", "Parágrafo de texto"],
+      ["<img>", "Mostra uma imagem"],
+      ["<a>", "Link para outra página"]
+    ]},
+    { titulo: "Listas e destaques", pares: [
+      ["<ul>", "Lista com marcadores"],
+      ["<ol>", "Lista numerada"],
+      ["<li>", "Um item dentro da lista"],
+      ["<strong>", "Texto em negrito, importante"],
+      ["<em>", "Texto enfatizado, em itálico"],
+      ["<br>", "Quebra de linha"]
+    ]},
+    { titulo: "Estrutura da página", pares: [
+      ["<header>", "Cabeçalho do site"],
+      ["<nav>", "Menu de links"],
+      ["<main>", "Conteúdo principal"],
+      ["<section>", "Seção dentro do conteúdo"],
+      ["<aside>", "Conteúdo ao lado, complementar"],
+      ["<footer>", "Rodapé do site"]
+    ]},
+    { titulo: "Desafio final", pares: [
+      ["<article>", "Texto que faz sentido sozinho, como uma notícia"],
+      ["<video>", "Mostra um vídeo"],
+      ["<audio>", "Toca um som"],
+      ["<table>", "Tabela de linhas e colunas"],
+      ["<form>", "Formulário para enviar dados"],
+      ["<input>", "Campo para digitar"],
+      ["<button>", "Botão clicável"],
+      ["<details>", "Conteúdo que abre ao clicar"]
+    ]}
+  ];
+
+  let progresso = carregarProgresso();
+  let nivelIdx = 0;
+  let cartas = [];
+  let viradas = [];
+  let bloqueado = false;
+  let erros = 0;
+  let achados = 0;
+
+  function carregarProgresso() {
+    try { return JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { return {}; }
+  }
+  function salvarProgresso() {
+    try { localStorage.setItem(CHAVE, JSON.stringify(progresso)); } catch (e) { /* sem armazenamento */ }
+  }
+
+  function embaralhar(lista) {
+    for (let i = lista.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [lista[i], lista[j]] = [lista[j], lista[i]];
+    }
+    return lista;
+  }
+
+  function faseLiberada(i) {
+    return i === 0 || progresso["n" + (i - 1)] !== undefined;
+  }
+
+  function iniciarNivel(i) {
+    nivelIdx = i;
+    const nv = NIVEIS[i];
+    cartas = [];
+    nv.pares.forEach((p, k) => {
+      cartas.push({ par: k, tipo: "tag", texto: p[0], estado: "fechada" });
+      cartas.push({ par: k, tipo: "sig", texto: p[1], estado: "fechada" });
+    });
+    embaralhar(cartas);
+    viradas = [];
+    bloqueado = false;
+    erros = 0;
+    achados = 0;
+    mostrar("", "");
+    document.getElementById("btn-proxima").disabled = true;
+    desenhar();
+  }
+
+  function virar(idx) {
+    const c = cartas[idx];
+    if (bloqueado || c.estado !== "fechada") return;
+    c.estado = "aberta";
+    viradas.push(idx);
+    if (viradas.length < 2) { desenhar(); return; }
+
+    bloqueado = true;
+    const a = cartas[viradas[0]];
+    const b = cartas[viradas[1]];
+    if (a.par === b.par) {
+      a.estado = "achada";
+      b.estado = "achada";
+      achados++;
+      viradas = [];
+      bloqueado = false;
+      desenhar();
+      mostrar("Par encontrado!", "ok");
+      if (achados === NIVEIS[nivelIdx].pares.length) fimDeFase();
+    } else {
+      erros++;
+      mostrar("Não é par. Tente de novo.", "erro");
+      desenhar();
+      setTimeout(() => {
+        a.estado = "fechada";
+        b.estado = "fechada";
+        viradas = [];
+        bloqueado = false;
+        mostrar("", "");
+        desenhar();
+      }, 1000);
+    }
+  }
+
+  function fimDeFase() {
+    const total = NIVEIS[nivelIdx].pares.length;
+    const estrelas = erros <= total / 2 ? 3 : erros <= total ? 2 : 1;
+    const chave = "n" + nivelIdx;
+    progresso[chave] = Math.max(progresso[chave] || 0, estrelas);
+    salvarProgresso();
+    const temProxima = nivelIdx < NIVEIS.length - 1;
+    mostrar("Fase completa! " + "★".repeat(estrelas) + "☆".repeat(3 - estrelas) + (temProxima ? " Você pode ir para a próxima fase." : " Você concluiu todas as fases!"), "ok");
+    document.getElementById("btn-proxima").disabled = !temProxima;
+    atualizarFases();
+  }
+
+  function mostrar(texto, tipo) {
+    const msg = document.getElementById("msg");
+    msg.textContent = texto;
+    msg.className = tipo || "";
+  }
+
+  function atualizarFases() {
+    const box = document.getElementById("fases");
+    box.innerHTML = "";
+    NIVEIS.forEach((nv, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "fase-btn";
+      b.disabled = !faseLiberada(i);
+      b.setAttribute("aria-current", i === nivelIdx ? "true" : "false");
+      const estrelas = progresso["n" + i];
+      const status = estrelas ? "★".repeat(estrelas) + "☆".repeat(3 - estrelas) : (faseLiberada(i) ? "a jogar" : "bloqueada");
+      b.innerHTML = "Fase " + (i + 1) + ": " + nv.titulo + "<small>" + status + "</small>";
+      b.addEventListener("click", () => iniciarNivel(i));
+      box.appendChild(b);
+    });
+  }
+
+  function desenhar() {
+    const nv = NIVEIS[nivelIdx];
+    document.getElementById("titulo-nivel").textContent = nv.titulo;
+    document.getElementById("erros").textContent = erros;
+    document.getElementById("achados").textContent = achados + "/" + nv.pares.length;
+    const grade = document.getElementById("grade");
+    grade.innerHTML = "";
+    cartas.forEach((c, idx) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "carta " + c.estado + " " + c.tipo;
+      const virada = c.estado !== "fechada";
+      b.textContent = virada ? c.texto : "?";
+      b.setAttribute("aria-label", virada ? c.texto : "Carta fechada");
+      b.addEventListener("click", () => virar(idx));
+      grade.appendChild(b);
+    });
+  }
+
+  document.getElementById("btn-recomecar").addEventListener("click", () => iniciarNivel(nivelIdx));
+  document.getElementById("btn-proxima").addEventListener("click", () => {
+    if (nivelIdx < NIVEIS.length - 1) iniciarNivel(nivelIdx + 1);
+  });
+
+  // Começa na primeira fase liberada e não concluída, ou na primeira fase.
+  let inicio = 0;
+  for (let i = 0; i < NIVEIS.length; i++) {
+    if (faseLiberada(i) && progresso["n" + i] === undefined) { inicio = i; break; }
+  }
+  iniciarNivel(inicio);
+  atualizarFases();
+</script>
+</body>
+</html>
