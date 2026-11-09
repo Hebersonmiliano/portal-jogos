@@ -48,6 +48,14 @@
   .quiz-opcoes button:disabled { cursor:default; }
   .quiz-opcoes button.certa { border-color:var(--ok); background:var(--destaque); }
   .quiz-opcoes button.errada { border-color:var(--erro); }
+  .celebracao { position:fixed; inset:0; background:rgba(20,18,15,.72); z-index:50; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .celebracao[hidden] { display:none; }
+  #fogos { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; }
+  .venceu { position:relative; background:var(--card); border-radius:16px; padding:24px; max-width:420px; width:100%; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.35); }
+  .venceu h2 { font-size:1.6rem; margin:0 0 8px; }
+  .venceu .estrelas { font-size:2rem; letter-spacing:4px; margin:6px 0 10px; }
+  .venceu p { color:var(--muted); line-height:1.45; margin:0 0 16px; }
+  .venceu .botoes { justify-content:center; }
   @media (max-width:480px) { main { padding:10px; } }
 </style>
 </head>
@@ -140,6 +148,19 @@
   </section>
 </main>
 
+<div class="celebracao" id="celebracao" hidden>
+  <canvas id="fogos"></canvas>
+  <section class="venceu" role="dialog" aria-labelledby="venceu-titulo">
+    <h2 id="venceu-titulo">🎉 Parabéns, você venceu!</h2>
+    <div class="estrelas" aria-hidden="true">⭐⭐⭐</div>
+    <p>Você atravessou a fortaleza do estúdio, concluiu as fases e os desafios. Agora você entende os conceitos básicos de desenvolvimento de jogos.</p>
+    <div class="botoes">
+      <button class="acao" id="btn-reiniciar" type="button">Reiniciar o jogo</button>
+      <button class="acao sec" id="btn-fechar" type="button">Ver o jogo</button>
+    </div>
+  </section>
+</div>
+
 <script>
   const CHAVE = "portal-pixel:estudio-de-jogos";
   const TAM = 44;
@@ -218,7 +239,22 @@
     { id: "conceitos", titulo: "Desafio: conceitos", tipo: "quiz",
       conceito: "Agora um desafio com os conceitos das fases: sprite, tile, colisão, loop, variável e checkpoint.",
       dica: "Se errar, a resposta certa aparece e você pode revisar o glossário.",
-      perguntas: CONCEITOS }
+      perguntas: CONCEITOS },
+    { id: "fortaleza", titulo: "Fortaleza do estúdio",
+      conceito: "A última fase junta tudo: dois inimigos que patrulham, um 🤖 que persegue você e o cronômetro correndo. Pegue a 🪙, chegue à 🏁 e não perca as três vidas.",
+      dica: "Inimigos de patrulha andam sozinhos. Espere o momento certo para passar por eles.",
+      minMoedas: 1, tempo: 70,
+      mapa: [
+        "###############",
+        "#P............#",
+        "#.#####.#####.#",
+        "#.........E...#",
+        "#.#####.#####.#",
+        "#...C....E....#",
+        "#.#####.#####.#",
+        "#.........M..X#",
+        "###############"
+      ] }
   ];
 
   let progresso = carregarProgresso();
@@ -424,10 +460,71 @@
     parar();
     progresso[FASES[fase].id] = true;
     salvarProgresso();
-    mostrar("Fase concluída! Sua pontuação foi " + vars.pontos + ".", "ok");
-    document.getElementById("btn-proxima").disabled = fase >= FASES.length - 1;
     mostrarAtualizarFases();
     desenhar();
+    if (fase === FASES.length - 1) {
+      mostrar("Você venceu o jogo! Sua pontuação foi " + vars.pontos + ".", "ok");
+      celebrar();
+      return;
+    }
+    mostrar("Fase concluída! Sua pontuação foi " + vars.pontos + ".", "ok");
+    document.getElementById("btn-proxima").disabled = false;
+  }
+
+  // Tela de vitória: fogos, estrelas e opção de reiniciar.
+  let fogosId = null;
+  function celebrar() {
+    const ov = document.getElementById("celebracao");
+    const cv = document.getElementById("fogos");
+    ov.hidden = false;
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+    const g = cv.getContext("2d");
+    const cores = ["#e0a526", "#2f7d6d", "#b5382b", "#3d5a80", "#ffffff", "#e85d9a"];
+    const parts = [];
+    const explodir = (x, y) => {
+      const cor = cores[Math.floor(Math.random() * cores.length)];
+      for (let i = 0; i < 60; i++) {
+        const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 4;
+        parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vida: 60 + Math.random() * 40, max: 100, cor, emoji: null });
+      }
+      for (let i = 0; i < 2; i++) {
+        parts.push({ x, y, vx: (Math.random() - 0.5) * 2, vy: -1 - Math.random() * 2, vida: 90, max: 90, cor: null, emoji: "⭐" });
+      }
+    };
+    let ultimo = 0;
+    const quadro = t => {
+      if (t - ultimo > 450) {
+        explodir(Math.random() * cv.width, Math.random() * cv.height * 0.6 + 40);
+        ultimo = t;
+      }
+      g.clearRect(0, 0, cv.width, cv.height);
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.vx *= 0.985; p.vida--;
+        if (p.vida <= 0) { parts.splice(i, 1); continue; }
+        g.globalAlpha = Math.max(0, p.vida / p.max);
+        if (p.emoji) {
+          g.font = "24px 'Segoe UI Emoji', system-ui, sans-serif";
+          g.fillText(p.emoji, p.x, p.y);
+        } else {
+          g.fillStyle = p.cor;
+          g.beginPath();
+          g.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+          g.fill();
+        }
+      }
+      g.globalAlpha = 1;
+      fogosId = requestAnimationFrame(quadro);
+    };
+    explodir(cv.width / 2, cv.height / 3);
+    fogosId = requestAnimationFrame(quadro);
+  }
+
+  function fecharCelebracao() {
+    if (fogosId !== null) cancelAnimationFrame(fogosId);
+    fogosId = null;
+    document.getElementById("celebracao").hidden = true;
   }
 
   function perder(texto) {
@@ -544,6 +641,13 @@
   });
 
   document.getElementById("btn-recomecar").addEventListener("click", () => carregar(fase));
+  document.getElementById("btn-fechar").addEventListener("click", fecharCelebracao);
+  document.getElementById("btn-reiniciar").addEventListener("click", () => {
+    fecharCelebracao();
+    progresso = {};
+    salvarProgresso();
+    carregar(0);
+  });
   document.getElementById("btn-proxima").addEventListener("click", () => {
     if (fase < FASES.length - 1) carregar(fase + 1);
   });
