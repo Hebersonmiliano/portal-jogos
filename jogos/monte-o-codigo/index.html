@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monte o código — Portal Pixel</title>
+<meta name="description" content="Monte o código de um jogo na ordem certa: loop do jogo, colisão, moedas, pulo, cronômetro e patrulha.">
+<style>
+  :root { --bg:#f4f1ea; --card:#ffffff; --ink:#23211d; --muted:#6b665c; --acc:#2f7d6d; --acc-2:#e0a526; --erro:#b5382b; --ok:#2e7d4f; --borda:#d8d2c4; --destaque:#e6f2ec; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:12px 18px; background:var(--card); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  header h1 { font-size:1.2rem; margin:0; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  main { max-width:900px; margin:0 auto; padding:16px; display:grid; gap:14px; }
+  .card { background:var(--card); border:1px solid var(--borda); border-radius:12px; padding:16px; }
+  .card h2 { font-size:1rem; margin:0 0 8px; }
+  .card p { margin:0 0 6px; line-height:1.45; }
+  .fases { display:flex; flex-wrap:wrap; gap:8px; }
+  .fase-btn { border:2px solid var(--borda); background:var(--card); border-radius:10px; padding:8px 12px; cursor:pointer; font:inherit; color:var(--ink); text-align:left; }
+  .fase-btn[aria-current="true"] { border-color:var(--acc); background:var(--destaque); }
+  .fase-btn:disabled { opacity:.45; cursor:not-allowed; }
+  .fase-btn small { display:block; color:var(--muted); font-size:.8rem; }
+  .objetivo { border-left:5px solid var(--acc-2); }
+  .montagem { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start; }
+  @media (max-width:700px) { .montagem { grid-template-columns:1fr; } }
+  .titulo-col { font-weight:700; margin:0 0 8px; color:var(--muted); font-size:.9rem; text-transform:uppercase; }
+  .peca { display:block; width:100%; text-align:left; padding:10px 12px; margin:0 0 6px; border:2px solid var(--borda); border-radius:10px; background:var(--card); font:inherit; cursor:pointer; color:var(--ink); }
+  .peca:hover { border-color:var(--acc); }
+  .peca:disabled { opacity:.5; cursor:default; }
+  #codigo { list-style:none; padding:0; margin:0; counter-reset:linha; min-height:60px; }
+  #codigo li { display:flex; align-items:center; gap:6px; padding:8px; margin:0 0 6px; border:2px solid var(--borda); border-radius:10px; background:var(--card); counter-increment:linha; }
+  #codigo li::before { content:counter(linha) "."; font-weight:700; color:var(--muted); min-width:1.6em; }
+  #codigo li span.texto { flex:1; }
+  #codigo li.certa { border-color:var(--ok); background:var(--destaque); }
+  #codigo li.errada { border-color:var(--erro); }
+  #codigo button { border:1px solid var(--borda); background:var(--card); border-radius:8px; width:32px; height:32px; cursor:pointer; font:inherit; }
+  .vazio { color:var(--muted); font-style:italic; margin:0; }
+  .botoes { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  button.acao { border:0; border-radius:10px; padding:10px 14px; font:inherit; font-weight:700; cursor:pointer; background:var(--acc); color:#fff; }
+  button.acao.sec { background:var(--card); color:var(--acc); border:2px solid var(--acc); }
+  button.acao:disabled { opacity:.45; cursor:not-allowed; }
+  #msg { min-height:1.4em; font-weight:600; margin:10px 0 0; }
+  #msg.ok { color:var(--ok); }
+  #msg.erro { color:var(--erro); }
+  #explicacao { margin-top:8px; padding:10px 12px; border-radius:10px; background:var(--destaque); display:none; }
+  #explicacao.mostrar { display:block; }
+  .estrelas { font-size:1.4rem; letter-spacing:3px; }
+  @media (max-width:480px) { main { padding:10px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Monte o código</h1>
+  <a href="../../index.html">← Portal Pixel</a>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Fases</h2>
+    <div class="fases" id="fases"></div>
+  </section>
+
+  <section class="card objetivo">
+    <h2 id="titulo-nivel"></h2>
+    <p id="objetivo-texto"></p>
+    <p class="estrelas" id="estrelas-nivel" aria-label="Estrelas da fase"></p>
+  </section>
+
+  <section class="card">
+    <div class="montagem">
+      <div>
+        <p class="titulo-col">Peças disponíveis</p>
+        <div id="banco"></div>
+      </div>
+      <div>
+        <p class="titulo-col">Seu código, na ordem de execução</p>
+        <ol id="codigo"></ol>
+        <p class="vazio" id="vazio">Toque nas peças para montar o código.</p>
+      </div>
+    </div>
+    <div class="botoes">
+      <button class="acao" id="btn-verificar" type="button">Verificar código</button>
+      <button class="acao sec" id="btn-limpar" type="button">Limpar</button>
+      <button class="acao sec" id="btn-proxima" type="button" disabled>Próxima fase</button>
+    </div>
+    <p id="msg" aria-live="polite"></p>
+    <div id="explicacao"></div>
+  </section>
+</main>
+
+<script>
+  const CHAVE = "portal-pixel:monte-o-codigo";
+
+  // Cada fase: o comportamento, as peças corretas na ordem e peças extras que não fazem parte dele.
+  const NIVEIS = [
+    { titulo: "O loop do jogo",
+      objetivo: "Todo jogo repete um ciclo: lê o que o jogador faz, atualiza o mundo, verifica colisões e desenha a tela. Monte esse ciclo na ordem certa.",
+      pecas: ["Ler as teclas do jogador", "Atualizar as posições", "Verificar colisões", "Desenhar a tela"],
+      extras: ["Tocar a música de vitória"],
+      explica: "O loop roda dezenas de vezes por segundo. Ler, atualizar, checar e desenhar é o ciclo básico de quase todo jogo." },
+    { titulo: "Pegar uma moeda",
+      objetivo: "Quando o jogador encosta em uma moeda, ela some e os pontos aumentam em 10.",
+      pecas: ["Verificar se o jogador encostou na moeda", "Somar 10 aos pontos", "Remover a moeda da tela"],
+      extras: ["Desenhar o menu inicial", "Encerrar o programa"],
+      explica: "A colisão vem primeiro. Só depois de saber que houve encontro é que os pontos sobem e a moeda some." },
+    { titulo: "Encostar no inimigo",
+      objetivo: "Ao encostar no inimigo, o jogador perde uma vida. Se não restarem vidas, o jogo acaba; senão, volta ao início.",
+      pecas: ["Verificar colisão com o inimigo", "Diminuir a vida em 1", "Se vidas = 0: mostrar Fim de jogo; senão: voltar ao início"],
+      extras: ["Somar 10 aos pontos", "Tocar o som de moeda"],
+      explica: "A decisão só faz sentido depois que a vida diminui. Por isso a checagem da vida vem depois da perda." },
+    { titulo: "Pular com gravidade",
+      objetivo: "O personagem pula quando a tecla de pulo é apertada. Depois a gravidade o puxa de volta para o chão.",
+      pecas: ["Ler a tecla de pulo", "Se estiver no chão: dar impulso para cima", "Aplicar gravidade (puxar para baixo)", "Parar ao tocar o chão"],
+      extras: ["Tocar o som de tiro"],
+      explica: "Pular é um impulso e a gravidade é uma força aplicada a cada quadro. Por isso o impulso vem antes da gravidade." },
+    { titulo: "Contagem regressiva",
+      objetivo: "A fase tem 60 segundos. A cada segundo o tempo diminui, e quando chega a zero a fase acaba.",
+      pecas: ["Definir tempo = 60", "A cada segundo: diminuir o tempo em 1", "Se tempo = 0: mostrar Fim de jogo"],
+      extras: ["Desenhar o personagem", "Somar 10 aos pontos"],
+      explica: "A variável precisa existir, com um valor inicial, antes de ser usada no laço." },
+    { titulo: "Inimigo que patrulha",
+      objetivo: "O inimigo anda para a direita. Quando bate em uma parede, volta a andar para o lado contrário.",
+      pecas: ["Definir direção = direita", "A cada quadro: mover o inimigo na direção", "Se bateu na parede: inverter a direção"],
+      extras: ["Pegar a chave", "Mostrar a tela de vitória"],
+      explica: "Guardar a direção em uma variável permite inverter o movimento sem reescrever o código." }
+  ];
+
+  let progresso = lerProgresso();
+  let nivel = 0;
+  let peçasBanco = [];
+  let codigo = [];
+  let tentativas = 0;
+
+  function lerProgresso() {
+    try { return JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { return {}; }
+  }
+  function salvarProgresso() {
+    try { localStorage.setItem(CHAVE, JSON.stringify(progresso)); } catch (e) { /* sem armazenamento */ }
+  }
+  function liberada(i) {
+    return i === 0 || progresso[i - 1] !== undefined;
+  }
+  function embaralhar(lista) {
+    const a = lista.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function mostrar(texto, tipo) {
+    const m = document.getElementById("msg");
+    m.textContent = texto;
+    m.className = tipo || "";
+  }
+  function estrelasDe(n) {
+    return "★".repeat(n) + "☆".repeat(3 - n);
+  }
+
+  function carregarNivel(i) {
+    nivel = i;
+    const nv = NIVEIS[i];
+    tentativas = 0;
+    codigo = [];
+    peçasBanco = embaralhar(nv.pecas.concat(nv.extras));
+    document.getElementById("titulo-nivel").textContent = (i + 1) + ". " + nv.titulo;
+    document.getElementById("objetivo-texto").textContent = nv.objetivo;
+    document.getElementById("estrelas-nivel").textContent = progresso[i] !== undefined ? "Melhor resultado: " + estrelasDe(progresso[i]) : "Ainda não concluída";
+    document.getElementById("explicacao").className = "";
+    document.getElementById("explicacao").textContent = "";
+    document.getElementById("btn-proxima").disabled = true;
+    mostrar("", "");
+    desenhar();
+    atualizarFases();
+  }
+
+  function desenhar() {
+    const banco = document.getElementById("banco");
+    banco.innerHTML = "";
+    peçasBanco.forEach((p, idx) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "peca";
+      b.textContent = p;
+      b.addEventListener("click", () => {
+        codigo.push(p);
+        peçasBanco.splice(idx, 1);
+        mostrar("", "");
+        desenhar();
+      });
+      banco.appendChild(b);
+    });
+
+    const lista = document.getElementById("codigo");
+    lista.innerHTML = "";
+    codigo.forEach((p, idx) => {
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.className = "texto";
+      span.textContent = p;
+      li.appendChild(span);
+      li.appendChild(botaoLinha("↑", "Subir", () => trocar(idx, idx - 1), idx === 0));
+      li.appendChild(botaoLinha("↓", "Descer", () => trocar(idx, idx + 1), idx === codigo.length - 1));
+      li.appendChild(botaoLinha("✕", "Remover", () => remover(idx), false));
+      lista.appendChild(li);
+    });
+    document.getElementById("vazio").style.display = codigo.length ? "none" : "block";
+  }
+
+  function botaoLinha(texto, rotulo, acao, desabilitado) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = texto;
+    b.setAttribute("aria-label", rotulo);
+    b.disabled = desabilitado;
+    b.addEventListener("click", acao);
+    return b;
+  }
+
+  function trocar(de, para) {
+    if (para < 0 || para >= codigo.length) return;
+    [codigo[de], codigo[para]] = [codigo[para], codigo[de]];
+    limparMarcas();
+    desenhar();
+  }
+
+  function remover(idx) {
+    peçasBanco.push(codigo.splice(idx, 1)[0]);
+    limparMarcas();
+    desenhar();
+  }
+
+  function limparMarcas() {
+    mostrar("", "");
+    document.querySelectorAll("#codigo li").forEach(li => li.classList.remove("certa", "errada"));
+  }
+
+  function verificar() {
+    const nv = NIVEIS[nivel];
+    if (codigo.length === 0) { mostrar("Monte o código primeiro.", "erro"); return; }
+    tentativas++;
+
+    const extras = codigo.filter(p => !nv.pecas.includes(p));
+    if (extras.length) {
+      marcar(codigo.map(p => !nv.pecas.includes(p)));
+      mostrar("“" + extras[0] + "” não faz parte deste comportamento. Remova essa linha.", "erro");
+      return;
+    }
+    if (codigo.length < nv.pecas.length) {
+      mostrar("Faltam passos. Use todas as peças que fazem parte do comportamento.", "erro");
+      return;
+    }
+    const erradas = codigo.map((p, i) => p !== nv.pecas[i]);
+    if (erradas.some(Boolean)) {
+      marcar(erradas);
+      const primeira = erradas.indexOf(true);
+      mostrar("A linha " + (primeira + 1) + " está fora de ordem. Confira a ordem de execução.", "erro");
+      return;
+    }
+    marcar(codigo.map(() => false));
+    concluir();
+  }
+
+  function marcar(marcas) {
+    document.querySelectorAll("#codigo li").forEach((li, i) => {
+      li.classList.toggle("errada", !!marcas[i]);
+      li.classList.toggle("certa", marcas[i] === false);
+    });
+  }
+
+  function concluir() {
+    const estrelas = tentativas === 1 ? 3 : tentativas <= 3 ? 2 : 1;
+    if (progresso[nivel] === undefined || estrelas > progresso[nivel]) progresso[nivel] = estrelas;
+    salvarProgresso();
+    mostrar("Código certo! " + estrelasDe(estrelas) + " " + (nivel < NIVEIS.length - 1 ? "Você pode ir para a próxima fase." : "Você montou todos os códigos!"), "ok");
+    const ex = document.getElementById("explicacao");
+    ex.textContent = "Por que funciona: " + NIVEIS[nivel].explica;
+    ex.className = "mostrar";
+    document.getElementById("btn-proxima").disabled = nivel >= NIVEIS.length - 1;
+    document.querySelectorAll("#codigo li").forEach(li => li.classList.add("certa"));
+    atualizarFases();
+    document.getElementById("estrelas-nivel").textContent = "Melhor resultado: " + estrelasDe(progresso[nivel]);
+  }
+
+  function atualizarFases() {
+    const box = document.getElementById("fases");
+    box.innerHTML = "";
+    NIVEIS.forEach((nv, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "fase-btn";
+      b.disabled = !liberada(i);
+      b.setAttribute("aria-current", i === nivel ? "true" : "false");
+      const status = progresso[i] !== undefined ? estrelasDe(progresso[i]) : (liberada(i) ? "a jogar" : "bloqueada");
+      b.innerHTML = (i + 1) + ". " + nv.titulo + "<small>" + status + "</small>";
+      b.addEventListener("click", () => carregarNivel(i));
+      box.appendChild(b);
+    });
+  }
+
+  document.getElementById("btn-verificar").addEventListener("click", verificar);
+  document.getElementById("btn-limpar").addEventListener("click", () => carregarNivel(nivel));
+  document.getElementById("btn-proxima").addEventListener("click", () => {
+    if (nivel < NIVEIS.length - 1) carregarNivel(nivel + 1);
+  });
+
+  let inicial = 0;
+  for (let i = 0; i < NIVEIS.length; i++) {
+    if (liberada(i) && progresso[i] === undefined) { inicial = i; break; }
+  }
+  carregarNivel(inicial);
+</script>
+</body>
+</html>
