@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duelo do estúdio — Portal Pixel</title>
+<meta name="description" content="Modo de 2 alunos na mesma tela: tela dividida, teclados separados e corrida até a saída.">
+<style>
+  :root { --bg:#f4f1ea; --card:#ffffff; --ink:#23211d; --muted:#6b665c; --acc:#2f7d6d; --acc-2:#e0a526; --erro:#b5382b; --ok:#2e7d4f; --borda:#d8d2c4; --destaque:#e6f2ec; --azul:#3d5a80; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:12px 18px; background:var(--card); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  header h1 { font-size:1.2rem; margin:0; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  main { max-width:1000px; margin:0 auto; padding:16px; display:grid; gap:14px; }
+  .card { background:var(--card); border:1px solid var(--borda); border-radius:12px; padding:16px; }
+  .card h2 { font-size:1rem; margin:0 0 8px; }
+  .card p { margin:0 0 6px; line-height:1.45; }
+  .aviso { color:var(--muted); font-size:.92rem; }
+  .nomes { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:640px) { .nomes { grid-template-columns:1fr; } }
+  .nomes label { font-weight:700; display:block; margin-bottom:4px; }
+  .nomes input { font:inherit; font-size:1rem; padding:10px 12px; border:2px solid var(--borda); border-radius:10px; width:100%; }
+  .placar { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center; text-align:center; }
+  .placar .jog { padding:8px; border-radius:10px; border:2px solid var(--borda); }
+  .placar .jog.p1 { border-color:var(--acc); }
+  .placar .jog.p2 { border-color:var(--azul); }
+  .placar strong { display:block; font-size:1.05rem; }
+  .placar .pts { font-size:1.6rem; font-weight:800; }
+  .placar small { color:var(--muted); }
+  .rodada { font-weight:700; color:var(--muted); }
+  .tabuleiros { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:760px) { .tabuleiros { grid-template-columns:1fr; } }
+  .tabuleiro h3 { margin:0 0 6px; font-size:.95rem; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .tabuleiro canvas { width:100%; height:auto; display:block; border-radius:8px; border:2px solid var(--borda); background:#efe9da; }
+  .tabuleiro.p1 canvas { border-color:var(--acc); }
+  .tabuleiro.p2 canvas { border-color:var(--azul); }
+  .controles { display:grid; grid-template-columns: repeat(3, 56px); gap:6px; justify-content:center; margin-top:10px; }
+  .controles button { height:48px; border-radius:10px; border:2px solid; background:var(--card); font-size:1.2rem; cursor:pointer; font-family:inherit; }
+  .controles.p1 button { border-color:var(--acc); color:var(--acc); }
+  .controles.p2 button { border-color:var(--azul); color:var(--azul); }
+  .controles .vazio { }
+  .teclas { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:640px) { .teclas { grid-template-columns:1fr; } }
+  .teclas p { font-size:.9rem; color:var(--muted); text-align:center; margin:4px 0 0; }
+  #msg { min-height:1.4em; font-weight:700; margin:0; text-align:center; }
+  #msg.ok { color:var(--ok); }
+  #msg.erro { color:var(--erro); }
+  .botoes { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  button.acao { border:0; border-radius:10px; padding:10px 16px; font:inherit; font-weight:700; cursor:pointer; background:var(--acc); color:#fff; }
+  button.acao.sec { background:var(--card); color:var(--acc); border:2px solid var(--acc); }
+  button.acao:disabled { opacity:.45; cursor:not-allowed; }
+  .fim { text-align:center; padding:12px; }
+  .fim h2 { font-size:1.4rem; margin:0 0 8px; }
+  .oculto { display:none !important; }
+  @media (max-width:480px) { main { padding:10px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Duelo do estúdio: 2 alunos</h1>
+  <a href="../estudio-de-jogos/index.html">← Estúdio de jogos</a>
+</header>
+
+<main>
+  <section class="card" id="cartaInicio">
+    <h2>Tela dividida: quem chega primeiro à saída vence a rodada</h2>
+    <p>Dois alunos jogam no mesmo computador, cada um no seu teclado. Melhor de três rodadas: quem vencer duas rodadas ganha a partida.</p>
+    <p class="aviso">Aluno 1: <strong>W A S D</strong> (ou os botões verdes). Aluno 2: <strong>setas</strong> (ou os botões azuis). Cada aluno tem 3 vidas. Encostar no 👾 tira uma vida e volta ao início. Pegue as 🪙 para somar pontos.</p>
+    <div class="nomes" style="margin-top:12px">
+      <div><label for="nome1">Aluno 1</label><input id="nome1" maxlength="20" value="Aluno 1" autocomplete="off"></div>
+      <div><label for="nome2">Aluno 2</label><input id="nome2" maxlength="20" value="Aluno 2" autocomplete="off"></div>
+    </div>
+    <div class="botoes" style="margin-top:12px">
+      <button class="acao" id="btn-comecar" type="button">▶ Começar partida</button>
+    </div>
+  </section>
+
+  <section class="card oculto" id="cartaJogo">
+    <div class="placar">
+      <div class="jog p1"><strong id="n1">Aluno 1</strong><span class="pts" id="p1">0</span><small>rodadas vencidas</small></div>
+      <div class="rodada" id="rodada-txt">Rodada 1 de 3</div>
+      <div class="jog p2"><strong id="n2">Aluno 2</strong><span class="pts" id="p2">0</span><small>rodadas vencidas</small></div>
+    </div>
+
+    <div class="tabuleiros" style="margin-top:14px">
+      <div class="tabuleiro p1">
+        <h3><span id="t1-nome">Aluno 1</span><span id="t1-info">vidas 3 · pontos 0</span></h3>
+        <canvas id="tela0" width="400" height="280"></canvas>
+      </div>
+      <div class="tabuleiro p2">
+        <h3><span id="t2-nome">Aluno 2</span><span id="t2-info">vidas 3 · pontos 0</span></h3>
+        <canvas id="tela1" width="400" height="280"></canvas>
+      </div>
+    </div>
+
+    <div class="teclas" style="margin-top:12px">
+      <div>
+        <div class="controles p1" aria-label="Controles do aluno 1">
+          <span></span><button type="button" data-jog="0" data-dir="0,-1" aria-label="Aluno 1: cima">▲</button><span></span>
+          <button type="button" data-jog="0" data-dir="-1,0" aria-label="Aluno 1: esquerda">◀</button>
+          <button type="button" data-jog="0" data-dir="0,1" aria-label="Aluno 1: baixo">▼</button>
+          <button type="button" data-jog="0" data-dir="1,0" aria-label="Aluno 1: direita">▶</button>
+        </div>
+        <p>Aluno 1: W A S D</p>
+      </div>
+      <div>
+        <div class="controles p2" aria-label="Controles do aluno 2">
+          <span></span><button type="button" data-jog="1" data-dir="0,-1" aria-label="Aluno 2: cima">▲</button><span></span>
+          <button type="button" data-jog="1" data-dir="-1,0" aria-label="Aluno 2: esquerda">◀</button>
+          <button type="button" data-jog="1" data-dir="0,1" aria-label="Aluno 2: baixo">▼</button>
+          <button type="button" data-jog="1" data-dir="1,0" aria-label="Aluno 2: direita">▶</button>
+        </div>
+        <p>Aluno 2: setas do teclado</p>
+      </div>
+    </div>
+
+    <p id="msg" aria-live="polite" style="margin-top:12px"></p>
+    <div class="botoes" style="margin-top:10px">
+      <button class="acao" id="btn-proxima" type="button" disabled>Próxima rodada</button>
+      <button class="acao sec" id="btn-nova" type="button">Nova partida</button>
+    </div>
+  </section>
+
+  <section class="card fim oculto" id="cartaFim">
+    <h2 id="fim-titulo">Partida decidida</h2>
+    <p id="fim-texto"></p>
+    <div class="botoes" style="margin-top:12px">
+      <button class="acao" id="btn-nova2" type="button">Nova partida</button>
+    </div>
+  </section>
+</main>
+
+<script>
+  const TAM = 40;
+  const PASSO_MS = 600;
+  const VIDAS = 3;
+
+  // Mapa: # parede · . chão · P início · E inimigo de patrulha · M moeda · X saída
+  const RODADAS = [
+    ["###########",
+     "#P..M.E..X#",
+     "#.#####.#.#",
+     "#.........#",
+     "###########"],
+    ["#############",
+     "#P..#.......#",
+     "#.#.#.#####.#",
+     "#.#...#M....#",
+     "#.#####.###.#",
+     "#.....E...#X#",
+     "#############"],
+    ["###############",
+     "#P....M.......#",
+     "#####.#######.#",
+     "#.............#",
+     "#.###.#######.#",
+     "#............X#"]
+  ];
+
+  let nomes = ["Aluno 1", "Aluno 2"];
+  let placar = [0, 0];
+  let rodada = 0;
+  let ativo = false;
+  let tabuleiros = [];
+  let timer = null;
+
+  function criarTabuleiro(idx, mapa) {
+    const grade = mapa.map(l => l.split(""));
+    const inimigos = [];
+    let inicio = { x: 1, y: 1 };
+    for (let y = 0; y < grade.length; y++) {
+      for (let x = 0; x < grade[y].length; x++) {
+        const c = grade[y][x];
+        if (c === "P") { inicio = { x, y }; grade[y][x] = "."; }
+        else if (c === "E") { inimigos.push({ x, y, dx: -1, dy: 0 }); grade[y][x] = "."; }
+      }
+    }
+    const cv = document.getElementById("tela" + idx);
+    cv.width = grade[0].length * TAM;
+    cv.height = grade.length * TAM;
+    return { idx, grade, inimigos, inicio, jog: { ...inicio }, vidas: VIDAS, pontos: 0, fim: false, venceu: false, canvas: cv };
+  }
+
+  function passavel(b, x, y) {
+    if (y < 0 || y >= b.grade.length || x < 0 || x >= b.grade[y].length) return false;
+    return b.grade[y][x] !== "#";
+  }
+
+  function mover(idx, dx, dy) {
+    const b = tabuleiros[idx];
+    if (!ativo || !b || b.fim) return;
+    const nx = b.jog.x + dx, ny = b.jog.y + dy;
+    if (!passavel(b, nx, ny)) return;
+    b.jog = { x: nx, y: ny };
+    const c = b.grade[ny][nx];
+    if (c === "M") {
+      b.grade[ny][nx] = ".";
+      b.pontos += 10;
+      mostrar(nomes[idx] + " pegou uma moeda! +10 pontos.", "ok");
+    } else if (c === "X") {
+      b.venceu = true;
+      encerrarRodada(idx);
+      return;
+    }
+    verificarColisao(b);
+    desenhar();
+  }
+
+  function verificarColisao(b) {
+    if (!b.inimigos.some(e => e.x === b.jog.x && e.y === b.jog.y)) return;
+    b.vidas--;
+    if (b.vidas <= 0) {
+      b.fim = true;
+      mostrar(nomes[b.idx] + " ficou sem vidas nesta rodada.", "erro");
+      checarRodada();
+      return;
+    }
+    b.jog = { ...b.inicio };
+    mostrar(nomes[b.idx] + " encostou no inimigo: perdeu uma vida.", "erro");
+  }
+
+  function passoPatrulha(b, e) {
+    let nx = e.x + e.dx, ny = e.y;
+    if (b.grade[ny][nx] !== ".") {
+      e.dx = -e.dx;
+      nx = e.x + e.dx;
+    }
+    if (b.grade[ny][nx] === ".") { e.x = nx; }
+  }
+
+  function tique() {
+    if (!ativo) return;
+    tabuleiros.forEach(b => {
+      if (b.fim) return;
+      b.inimigos.forEach(e => passoPatrulha(b, e));
+      verificarColisao(b);
+    });
+    desenhar();
+  }
+
+  function encerrarRodada(vencedor) {
+    tabuleiros.forEach((b, i) => { if (i !== vencedor) b.fim = true; });
+    tabuleiros[vencedor].fim = true;
+    placar[vencedor]++;
+    finalizar(vencedor);
+  }
+
+  // Empate: os dois perderam todas as vidas sem chegar à saída.
+  function checarRodada() {
+    if (tabuleiros.some(b => b.venceu)) return;
+    if (tabuleiros.every(b => b.fim)) finalizar(null);
+  }
+
+  function finalizar(vencedor) {
+    ativo = false;
+    clearInterval(timer);
+    timer = null;
+    desenharPlacar();
+    desenhar();
+    const quem = vencedor === null ? "Empate na rodada" : nomes[vencedor] + " chegou primeiro!";
+    mostrar(quem, vencedor === null ? "" : "ok");
+    const partidaAcabou = placar[0] >= 2 || placar[1] >= 2 || rodada >= RODADAS.length - 1;
+    if (partidaAcabou) {
+      mostrarFim();
+    } else {
+      document.getElementById("btn-proxima").disabled = false;
+    }
+  }
+
+  function mostrarFim() {
+    let titulo, texto;
+    if (placar[0] === placar[1]) {
+      titulo = "Empate na partida!";
+      texto = "Os dois alunos venceram o mesmo número de rodadas: " + placar[0] + " a " + placar[1] + ".";
+    } else {
+      const v = placar[0] > placar[1] ? 0 : 1;
+      titulo = "🏆 " + nomes[v] + " venceu a partida!";
+      texto = "Placar final: " + nomes[0] + " " + placar[0] + " × " + placar[1] + " " + nomes[1] + ".";
+    }
+    document.getElementById("fim-titulo").textContent = titulo;
+    document.getElementById("fim-texto").textContent = texto;
+    document.getElementById("cartaFim").classList.remove("oculto");
+  }
+
+  function iniciarRodada() {
+    tabuleiros = RODADAS[rodada] ? [criarTabuleiro(0, RODADAS[rodada]), criarTabuleiro(1, RODADAS[rodada])] : [];
+    ativo = true;
+    document.getElementById("btn-proxima").disabled = true;
+    document.getElementById("rodada-txt").textContent = "Rodada " + (rodada + 1) + " de " + RODADAS.length;
+    mostrar("Valendo! Cheguem à 🏁 primeiro.", "");
+    desenharPlacar();
+    desenhar();
+    clearInterval(timer);
+    timer = setInterval(tique, PASSO_MS);
+  }
+
+  function iniciarPartida() {
+    const n1 = document.getElementById("nome1").value.trim() || "Aluno 1";
+    const n2 = document.getElementById("nome2").value.trim() || "Aluno 2";
+    nomes = [n1, n2];
+    placar = [0, 0];
+    rodada = 0;
+    document.getElementById("n1").textContent = n1;
+    document.getElementById("n2").textContent = n2;
+    document.getElementById("t1-nome").textContent = n1;
+    document.getElementById("t2-nome").textContent = n2;
+    document.getElementById("cartaInicio").classList.add("oculto");
+    document.getElementById("cartaFim").classList.add("oculto");
+    document.getElementById("cartaJogo").classList.remove("oculto");
+    iniciarRodada();
+  }
+
+  function proximaRodada() {
+    if (rodada < RODADAS.length - 1) {
+      rodada++;
+      iniciarRodada();
+    }
+  }
+
+  function mostrar(texto, tipo) {
+    const m = document.getElementById("msg");
+    m.textContent = texto;
+    m.className = tipo || "";
+  }
+
+  function desenharPlacar() {
+    document.getElementById("p1").textContent = placar[0];
+    document.getElementById("p2").textContent = placar[1];
+  }
+
+  const EMOJI_JOGADOR = ["🧑", "🧒"];
+
+  function desenhar() {
+    tabuleiros.forEach((b, i) => {
+      const g = b.canvas.getContext("2d");
+      g.clearRect(0, 0, b.canvas.width, b.canvas.height);
+      for (let y = 0; y < b.grade.length; y++) {
+        for (let x = 0; x < b.grade[y].length; x++) {
+          const c = b.grade[y][x];
+          const px = x * TAM, py = y * TAM;
+          g.fillStyle = c === "#" ? "#6d6656" : "#efe9da";
+          g.fillRect(px, py, TAM, TAM);
+          g.strokeStyle = "#d6cfbd";
+          g.strokeRect(px + 0.5, py + 0.5, TAM - 1, TAM - 1);
+          const emo = { M: "🪙", X: "🏁" }[c];
+          if (emo) desenharEmoji(g, emo, px, py);
+        }
+      }
+      b.inimigos.forEach(e => desenharEmoji(g, "👾", e.x * TAM, e.y * TAM));
+      desenharEmoji(g, EMOJI_JOGADOR[i], b.jog.x * TAM, b.jog.y * TAM);
+      document.getElementById("t" + (i + 1) + "-info").textContent = "vidas " + b.vidas + " · pontos " + b.pontos;
+    });
+  }
+
+  function desenharEmoji(g, t, px, py) {
+    g.font = Math.floor(TAM * 0.62) + 'px "Segoe UI Emoji", system-ui, sans-serif';
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText(t, px + TAM / 2, py + TAM / 2 + 2);
+  }
+
+  // Teclado: W A S D para o aluno 1 e setas para o aluno 2
+  const TECLAS = {
+    w: [0, 0, -1], W: [0, 0, -1], s: [0, 0, 1], S: [0, 0, 1], a: [0, -1, 0], A: [0, -1, 0], d: [0, 1, 0], D: [0, 1, 0],
+    ArrowUp: [1, 0, -1], ArrowDown: [1, 0, 1], ArrowLeft: [1, -1, 0], ArrowRight: [1, 1, 0]
+  };
+  document.addEventListener("keydown", e => {
+    const t = TECLAS[e.key];
+    if (!t) return;
+    if (e.key.startsWith("Arrow")) e.preventDefault();
+    mover(t[0], t[1], t[2]);
+  });
+
+  document.querySelectorAll(".controles button").forEach(b => {
+    b.addEventListener("click", () => {
+      const [dx, dy] = b.dataset.dir.split(",").map(Number);
+      mover(Number(b.dataset.jog), dx, dy);
+    });
+  });
+
+  document.getElementById("btn-comecar").addEventListener("click", iniciarPartida);
+  document.getElementById("btn-proxima").addEventListener("click", proximaRodada);
+  document.getElementById("btn-nova").addEventListener("click", () => {
+    clearInterval(timer);
+    ativo = false;
+    document.getElementById("cartaJogo").classList.add("oculto");
+    document.getElementById("cartaInicio").classList.remove("oculto");
+    document.getElementById("cartaFim").classList.add("oculto");
+  });
+  document.getElementById("btn-nova2").addEventListener("click", () => {
+    document.getElementById("cartaFim").classList.add("oculto");
+    document.getElementById("cartaJogo").classList.add("oculto");
+    document.getElementById("cartaInicio").classList.remove("oculto");
+  });
+</script>
+</body>
+</html>
