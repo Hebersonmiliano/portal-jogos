@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Estúdio de jogos — Portal Pixel</title>
-<meta name="description" content="Aprenda conceitos de desenvolvimento de jogos: engines, cenas, sprites, objetos, colisão, variáveis, eventos e loop do jogo.">
+<meta name="description" content="Aprenda conceitos de desenvolvimento de jogos: engines, cenas, sprites, objetos, colisão, variáveis, eventos, estados, checkpoints e loop do jogo.">
 <style>
   :root { --bg:#f4f1ea; --card:#ffffff; --ink:#23211d; --muted:#6b665c; --acc:#2f7d6d; --acc-2:#e0a526; --erro:#b5382b; --ok:#2e7d4f; --borda:#d8d2c4; --destaque:#e6f2ec; }
   * { box-sizing: border-box; }
@@ -25,7 +25,7 @@
   .dica { color:var(--muted); font-size:.92rem; margin-top:6px; }
   .jogo { display:grid; grid-template-columns: minmax(0,1fr) 210px; gap:14px; align-items:start; }
   @media (max-width:760px) { .jogo { grid-template-columns:1fr; } }
-  #tela { width:100%; max-width:484px; height:auto; display:block; margin:0 auto; border-radius:8px; border:1px solid var(--borda); background:#efe9da; }
+  #tela { width:100%; max-width:540px; height:auto; display:block; margin:0 auto; border-radius:8px; border:1px solid var(--borda); background:#efe9da; }
   .painel dl { display:grid; grid-template-columns:auto 1fr; gap:6px 10px; margin:0; }
   .painel dt { color:var(--muted); font-size:.9rem; }
   .painel dd { margin:0; font-weight:700; font-family: ui-monospace, Consolas, monospace; }
@@ -39,7 +39,7 @@
   #msg { min-height:1.4em; font-weight:600; margin:10px 0 0; }
   #msg.ok { color:var(--ok); }
   #msg.erro { color:var(--erro); }
-  .legenda { display:flex; flex-wrap:wrap; gap:8px 14px; font-size:.9rem; color:var(--muted); margin-top:10px; }
+  .legenda { display:grid; gap:4px; font-size:.9rem; color:var(--muted); margin-top:12px; }
   dl.glossario { display:grid; grid-template-columns: minmax(120px, max-content) 1fr; gap:8px 14px; margin:0; }
   dl.glossario dt { font-weight:700; }
   dl.glossario dd { margin:0; line-height:1.4; }
@@ -88,14 +88,19 @@
           <dt>moedas</dt><dd id="v-moedas">0</dd>
           <dt>vidas</dt><dd id="v-vidas">3</dd>
           <dt>chave</dt><dd id="v-chave">não</dd>
+          <dt>escudo</dt><dd id="v-escudo">0</dd>
+          <dt>tempo</dt><dd id="v-tempo">—</dd>
           <dt>quadro</dt><dd id="v-quadro">0</dd>
         </dl>
         <div class="legenda">
           <span>🧑 sprite do jogador</span>
           <span>👾 inimigo (colisão)</span>
+          <span>🤖 inimigo que persegue</span>
           <span>🪙 moeda (pontuação)</span>
           <span>🔑 chave (evento)</span>
           <span>🔒 porta trancada</span>
+          <span>⭐ power-up (estado)</span>
+          <span>🚩 checkpoint</span>
           <span>🏁 saída</span>
           <span>cinza: parede (tile)</span>
         </div>
@@ -108,7 +113,7 @@
   </section>
 
   <section class="card" id="cartaQuiz" hidden>
-    <h2>Desafio: qual engine?</h2>
+    <h2 id="quiz-titulo">Desafio</h2>
     <p id="quiz-pergunta"></p>
     <div class="quiz-opcoes" id="quiz-opcoes"></div>
     <p id="quiz-resultado" class="dica"></p>
@@ -124,9 +129,13 @@
       <dt>Objeto</dt><dd>Qualquer coisa do jogo que tem posição, tamanho e comportamento.</dd>
       <dt>Asset</dt><dd>Recurso usado no jogo, como imagem, som ou fonte.</dd>
       <dt>Loop do jogo</dt><dd>Ciclo que se repete: ler a entrada, atualizar o jogo e desenhar a tela.</dd>
-      <dt>Variável</dt><dd>Guarda um valor que muda durante o jogo, como pontos ou vidas.</dd>
+      <dt>Variável</dt><dd>Guarda um valor que muda durante o jogo, como pontos, vidas ou tempo.</dd>
       <dt>Colisão</dt><dd>Acontece quando dois objetos se encostam.</dd>
       <dt>Evento</dt><dd>Algo que acontece e dispara uma ação, como pegar a chave e abrir a porta.</dd>
+      <dt>Estado</dt><dd>A situação atual do jogo, como estar protegido pelo escudo ou ter a chave.</dd>
+      <dt>Power-up</dt><dd>Item que dá um efeito temporário ao jogador, como o escudo da ⭐.</dd>
+      <dt>Checkpoint</dt><dd>Ponto que salva o progresso. Se o jogador perde uma vida, volta até ele.</dd>
+      <dt>IA (comportamento)</dt><dd>Regra que faz um inimigo agir sozinho, como perseguir o jogador.</dd>
     </dl>
   </section>
 </main>
@@ -134,86 +143,82 @@
 <script>
   const CHAVE = "portal-pixel:estudio-de-jogos";
   const TAM = 44;
+  // Progresso das fases antigas (ids f0 a f5) para os ids atuais.
+  const LEGADO = { f0: "sprite", f1: "cenario", f2: "colisao", f3: "variaveis", f4: "eventos", f5: "engines" };
 
-  // Legenda do mapa: # parede (tile) · . chão · P jogador · E inimigo · M moeda · K chave · D porta · X saída
-  const FASES = [
-    { titulo: "Sprite e objeto",
-      conceito: "Sprite é a imagem que representa um personagem. Objeto é tudo o que existe no jogo e tem posição. O 🧑 é um sprite e o 🏁 é um objeto. Leve o personagem até a saída.",
-      dica: "Engines como Godot e GDevelop já trazem sprites prontos para arrastar e posicionar.",
-      minMoedas: 0,
-      mapa: [
-        "#########",
-        "#P......#",
-        "#.#####.#",
-        "#.#...#.#",
-        "#.#.#.#X#",
-        "#...#...#",
-        "#########"
-      ] },
-    { titulo: "Cenário e tiles",
-      conceito: "Cenário é o que monta a fase. Ele é feito de tiles, pequenos blocos repetidos, como as paredes cinzas e o chão. Cada fase é uma cena do jogo.",
-      dica: "Em engines, o cenário costuma ser montado com um editor de tilemap, desenhando os blocos com o mouse.",
-      minMoedas: 0,
-      mapa: [
-        "###########",
-        "#P..#.....#",
-        "#.#.#.###.#",
-        "#.#...#...#",
-        "#.#####.#.#",
-        "#...#...#.#",
-        "###.#.###.#",
-        "#.....#..X#",
-        "###########"
-      ] },
-    { titulo: "Colisão e loop do jogo",
-      conceito: "Colisão acontece quando dois objetos se tocam. O 👾 é um inimigo: se ele encostar em você, você perde uma vida e volta ao início. O loop do jogo move o inimigo a cada tique do relógio, mesmo quando você não aperta nada.",
-      dica: "Engines calculam colisões sozinhas. Você só diz quais objetos podem se tocar.",
-      minMoedas: 0,
-      mapa: [
-        "###########",
-        "#P........#",
-        "#.#######.#",
-        "#.........#",
-        "#######.#.#",
-        "#X.....E..#",
-        "###########"
-      ] },
-    { titulo: "Variáveis e pontuação",
-      conceito: "Variável guarda um valor que muda, como pontos e moedas. Cada 🪙 soma 10 pontos. Para passar pela 🏁, pegue pelo menos 3 moedas.",
-      dica: "Em qualquer engine, variáveis aparecem no painel de depuração enquanto o jogo roda.",
-      minMoedas: 3,
-      mapa: [
-        "###########",
-        "#P..M.....#",
-        "#.#####.#.#",
-        "#.#...M.#M#",
-        "#.#.#.#.#.#",
-        "#M..#...#X#",
-        "###########"
-      ] },
-    { titulo: "Eventos e a porta",
-      conceito: "Evento é algo que acontece e dispara uma ação. Pegar a 🔑 é um evento: ele destranca a 🔒 porta. Sem a chave, a porta bloqueia a passagem.",
-      dica: "No GDevelop, eventos são escritos como 'Se... então...', sem precisar digitar código.",
-      minMoedas: 0,
-      mapa: [
-        "#########",
-        "#P..K...#",
-        "#.#####.#",
-        "#.......#",
-        "#.#####D#",
-        "#.....#X#",
-        "#########"
-      ] },
-    { titulo: "Desafio: engines", tipo: "quiz",
-      conceito: "Agora um desafio sobre as engines. Engine é o motor que faz o jogo funcionar. Responda as perguntas para concluir o estúdio.",
-      dica: "Procure as respostas no glossário abaixo, se precisar." }
-  ];
+  // Legenda do mapa: # parede · . chão · P jogador · E inimigo de patrulha · C inimigo que persegue
+  // M moeda · K chave · D porta · S power-up · B checkpoint · X saída
 
-  const PERGUNTAS = [
+  const ENGINES = [
     { p: "Qual engine é gratuita, de código aberto e usa a linguagem GDScript?", o: ["Godot", "Unity", "GDevelop", "Construct"], c: 0 },
     { p: "Qual engine permite criar jogos sem programar, montando eventos do tipo 'Se... então...'?", o: ["Unity", "Godot", "GDevelop", "Blender"], c: 2 },
     { p: "Qual engine é muito usada com a linguagem C#?", o: ["Unity", "Godot", "GDevelop", "Scratch"], c: 0 },
     { p: "O que uma engine faz por você?", o: ["Desenha, calcula física e toca som prontos", "Substitui o computador", "Cria o roteiro do jogo sozinha", "Só guarda fotos"], c: 0 }
+  ];
+
+  const CONCEITOS = [
+    { p: "O que é um sprite?", o: ["Uma imagem que representa um personagem ou item", "Um tipo de moeda do jogo", "Um botão de salvar", "Uma linha de código"], c: 0 },
+    { p: "O que é um tile?", o: ["Um bloco pequeno que se repete para montar o cenário", "Um inimigo", "Um tipo de evento", "Uma tela do menu"], c: 0 },
+    { p: "Quando dois objetos se encostam no jogo, isso se chama:", o: ["Pontuação", "Colisão", "Loop", "Asset"], c: 1 },
+    { p: "O loop do jogo é:", o: ["O ciclo que se repete: ler a entrada, atualizar e desenhar", "Um inimigo que anda em círculos", "Uma fase repetida", "O som do jogo"], c: 0 },
+    { p: "Uma variável serve para:", o: ["Guardar um valor que muda, como pontos ou vidas", "Desenhar a tela", "Tocar música", "Criar um cenário"], c: 0 },
+    { p: "Um checkpoint é:", o: ["Um ponto que salva onde o jogador chegou", "Uma moeda especial", "Um tipo de inimigo", "Um botão de sair do jogo"], c: 0 }
+  ];
+
+  const FASES = [
+    { id: "sprite", titulo: "Sprite e objeto",
+      conceito: "Sprite é a imagem que representa um personagem. Objeto é tudo o que existe no jogo e tem posição. O 🧑 é um sprite e o 🏁 é um objeto. Leve o personagem até a saída.",
+      dica: "Engines como Godot e GDevelop já trazem sprites prontos para arrastar e posicionar.",
+      minMoedas: 0,
+      mapa: ["#########", "#P......#", "#.#####.#", "#.#...#.#", "#.#.#.#X#", "#...#...#", "#########"] },
+    { id: "cenario", titulo: "Cenário e tiles",
+      conceito: "Cenário é o que monta a fase. Ele é feito de tiles, pequenos blocos repetidos, como as paredes cinzas e o chão. Cada fase é uma cena do jogo.",
+      dica: "Em engines, o cenário costuma ser montado com um editor de tilemap, desenhando os blocos com o mouse.",
+      minMoedas: 0,
+      mapa: ["###########", "#P..#.....#", "#.#.#.###.#", "#.#...#...#", "#.#####.#.#", "#...#...#.#", "###.#.###.#", "#.....#..X#", "###########"] },
+    { id: "colisao", titulo: "Colisão e loop do jogo",
+      conceito: "Colisão acontece quando dois objetos se tocam. O 👾 é um inimigo: se ele encostar em você, você perde uma vida e volta ao início. O loop do jogo move o inimigo a cada tique do relógio, mesmo quando você não aperta nada.",
+      dica: "Engines calculam colisões sozinhas. Você só diz quais objetos podem se tocar.",
+      minMoedas: 0,
+      mapa: ["###########", "#P........#", "#.#######.#", "#.........#", "#######.#.#", "#X.....E..#", "###########"] },
+    { id: "variaveis", titulo: "Variáveis e pontuação",
+      conceito: "Variável guarda um valor que muda, como pontos e moedas. Cada 🪙 soma 10 pontos. Para passar pela 🏁, pegue pelo menos 3 moedas.",
+      dica: "Em qualquer engine, variáveis aparecem no painel de depuração enquanto o jogo roda.",
+      minMoedas: 3,
+      mapa: ["###########", "#P..M.....#", "#.#####.#.#", "#.#...M.#M#", "#.#.#.#.#.#", "#M..#...#X#", "###########"] },
+    { id: "eventos", titulo: "Eventos e a porta",
+      conceito: "Evento é algo que acontece e dispara uma ação. Pegar a 🔑 é um evento: ele destranca a 🔒 porta. Sem a chave, a porta bloqueia a passagem.",
+      dica: "No GDevelop, eventos são escritos como 'Se... então...', sem precisar digitar código.",
+      minMoedas: 0,
+      mapa: ["#########", "#P..K...#", "#.#####.#", "#.......#", "#.#####D#", "#.....#X#", "#########"] },
+    { id: "perseguicao", titulo: "Inimigo que persegue",
+      conceito: "Este 🤖 não patrulha: ele calcula o caminho até você e dá um passo a cada tique do loop. Esse tipo de regra se chama IA (comportamento). Chegue à 🏁 sem deixar o robô te alcançar.",
+      dica: "Em engines, perseguir costuma ser uma regra pronta, como o 'comportamento de perseguição'. Você só escolhe o alvo.",
+      minMoedas: 0,
+      mapa: ["###########", "#P..C....X#", "#.#######.#", "#.........#", "###########"] },
+    { id: "cronometro", titulo: "Tempo e cronômetro",
+      conceito: "O tempo também é uma variável. Aqui o cronômetro diminui a cada tique do loop. Quando chega a zero, a fase acaba. Chegue à 🏁 antes que o tempo termine.",
+      dica: "Em engines, temporizadores (timers) são usados para contagens, cooldowns e ondas de inimigos.",
+      minMoedas: 0, tempo: 20,
+      mapa: ["###########", "#P........#", "#########.#", "#.........#", "#.#########", "#X#########", "###########"] },
+    { id: "estrela", titulo: "Estados e power-up",
+      conceito: "Estado é a situação atual do jogo, como estar protegido. Pegar a ⭐ liga o escudo por alguns tiques. Com o escudo ativo, encostar no 👾 derrota o inimigo em vez de tirar uma vida.",
+      dica: "Engines guardam estados em variáveis, como 'invencível' ou 'com power-up'.",
+      minMoedas: 0,
+      mapa: ["############", "#P..S...E.X#", "############"] },
+    { id: "checkpoint", titulo: "Checkpoints",
+      conceito: "Checkpoint é um ponto que salva onde o jogador chegou. Se você perder uma vida depois dele, volta até a 🚩 e não ao começo. Passe pelo corredor e salve o progresso sempre que puder.",
+      dica: "Engines guardam checkpoints em variáveis ou em arquivos de save, para o jogador continuar de onde parou.",
+      minMoedas: 0,
+      mapa: ["###############", "#P...B...E...X#", "#.............#", "###############"] },
+    { id: "engines", titulo: "Desafio: engines", tipo: "quiz",
+      conceito: "Engine é o motor que faz o jogo funcionar. Responda as perguntas sobre Godot, GDevelop, Unity e o que uma engine faz.",
+      dica: "Procure as respostas no glossário, se precisar.",
+      perguntas: ENGINES },
+    { id: "conceitos", titulo: "Desafio: conceitos", tipo: "quiz",
+      conceito: "Agora um desafio com os conceitos das fases: sprite, tile, colisão, loop, variável e checkpoint.",
+      dica: "Se errar, a resposta certa aparece e você pode revisar o glossário.",
+      perguntas: CONCEITOS }
   ];
 
   let progresso = carregarProgresso();
@@ -229,13 +234,21 @@
   let acertos = 0;
 
   function carregarProgresso() {
-    try { return JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { return {}; }
+    let p = {};
+    try { p = JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { p = {}; }
+    Object.keys(LEGADO).forEach(k => {
+      if (p[k] !== undefined) {
+        if (p[LEGADO[k]] === undefined) p[LEGADO[k]] = p[k];
+        delete p[k];
+      }
+    });
+    return p;
   }
   function salvarProgresso() {
     try { localStorage.setItem(CHAVE, JSON.stringify(progresso)); } catch (e) { /* sem armazenamento */ }
   }
   function faseLiberada(i) {
-    return i === 0 || progresso["f" + (i - 1)] !== undefined;
+    return i === 0 || progresso[FASES[i - 1].id] !== undefined;
   }
   function mostrar(texto, tipo) {
     const m = document.getElementById("msg");
@@ -265,7 +278,7 @@
     document.getElementById("cartaJogo").hidden = false;
     document.getElementById("cartaQuiz").hidden = true;
 
-    vars = { pontos: 0, moedas: 0, vidas: 3, chave: false, quadro: 0 };
+    vars = { pontos: 0, moedas: 0, vidas: 3, chave: false, quadro: 0, escudo: 0, tempo: f.tempo !== undefined ? f.tempo : null };
     fim = false;
     grade = f.mapa.map(l => l.split(""));
     inimigos = [];
@@ -273,7 +286,8 @@
       for (let x = 0; x < grade[y].length; x++) {
         const c = grade[y][x];
         if (c === "P") { jog = { x, y }; inicio = { x, y }; grade[y][x] = "."; }
-        else if (c === "E") { inimigos.push({ x, y, dx: -1, dy: 0 }); grade[y][x] = "."; }
+        else if (c === "E") { inimigos.push({ x, y, dx: -1, dy: 0, tipo: "patrulha" }); grade[y][x] = "."; }
+        else if (c === "C") { inimigos.push({ x, y, dx: 0, dy: 0, tipo: "perseguir" }); grade[y][x] = "."; }
       }
     }
     const cv = document.getElementById("tela");
@@ -308,11 +322,20 @@
       grade[jog.y][jog.x] = ".";
       vars.moedas++;
       vars.pontos += 10;
-      mostrar("Moeda! Variável pontos somou 10.", "ok");
+      mostrar("Moeda! A variável pontos somou 10.", "ok");
     } else if (c === "K") {
       grade[jog.y][jog.x] = ".";
       vars.chave = true;
       mostrar("Evento disparado: a chave destrancou a porta!", "ok");
+    } else if (c === "S") {
+      grade[jog.y][jog.x] = ".";
+      vars.escudo = 6;
+      mostrar("Power-up! Escudo ativo por 6 tiques. O estado mudou.", "ok");
+    } else if (c === "B") {
+      if (inicio.x !== jog.x || inicio.y !== jog.y) {
+        inicio = { x: jog.x, y: jog.y };
+        mostrar("Checkpoint salvo! Se perder uma vida, você volta aqui.", "ok");
+      }
     } else if (c === "X") {
       const min = FASES[fase].minMoedas;
       if (vars.moedas >= min) vencer();
@@ -321,24 +344,76 @@
   }
 
   function verificarColisao() {
-    if (inimigos.some(e => e.x === jog.x && e.y === jog.y)) {
-      vars.vidas--;
-      if (vars.vidas <= 0) { perder(); return; }
-      jog = { x: inicio.x, y: inicio.y };
-      mostrar("Colisão! Você perdeu uma vida e voltou ao início.", "erro");
+    const idx = inimigos.findIndex(e => e.x === jog.x && e.y === jog.y);
+    if (idx < 0) return;
+    if (vars.escudo > 0) {
+      inimigos.splice(idx, 1);
+      mostrar("Escudo ativo: o inimigo foi derrotado!", "ok");
+      return;
     }
+    vars.vidas--;
+    if (vars.vidas <= 0) { perder("Fim de jogo! Clique em Recomeçar fase."); return; }
+    jog = { x: inicio.x, y: inicio.y };
+    mostrar("Colisão! Você perdeu uma vida e voltou ao ponto seguro.", "erro");
+  }
+
+  // Distância de cada célula até o jogador (busca em largura). Usada pelo inimigo que persegue.
+  function distancias() {
+    const H = grade.length, W = grade[0].length;
+    const d = Array.from({ length: H }, () => Array(W).fill(-1));
+    const q = [[jog.x, jog.y]];
+    d[jog.y][jog.x] = 0;
+    while (q.length) {
+      const [x, y] = q.shift();
+      for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+        const nx = x + dx, ny = y + dy;
+        if (!passavel(nx, ny) || d[ny][nx] >= 0) continue;
+        d[ny][nx] = d[y][x] + 1;
+        q.push([nx, ny]);
+      }
+    }
+    return d;
+  }
+
+  function passoPerseguir(e, d) {
+    const atual = d[e.y][e.x];
+    if (atual <= 0) return;
+    let melhor = null;
+    for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const nx = e.x + dx, ny = e.y + dy;
+      if (ny < 0 || ny >= d.length || nx < 0 || nx >= d[ny].length) continue;
+      const v = d[ny][nx];
+      if (v >= 0 && v < atual && (melhor === null || v < melhor.v)) melhor = { x: nx, y: ny, v };
+    }
+    if (melhor) { e.x = melhor.x; e.y = melhor.y; }
+  }
+
+  function passoPatrulha(e) {
+    let nx = e.x + e.dx, ny = e.y + e.dy;
+    if (grade[ny] === undefined || grade[ny][nx] !== ".") {
+      e.dx = -e.dx; e.dy = -e.dy;
+      nx = e.x + e.dx; ny = e.y + e.dy;
+    }
+    if (grade[ny] !== undefined && grade[ny][nx] === ".") { e.x = nx; e.y = ny; }
   }
 
   function tique() {
     if (fim) return;
     vars.quadro++;
-    inimigos.forEach(e => {
-      let nx = e.x + e.dx, ny = e.y + e.dy;
-      if (grade[ny] === undefined || grade[ny][nx] !== ".") {
-        e.dx = -e.dx; e.dy = -e.dy;
-        nx = e.x + e.dx; ny = e.y + e.dy;
+    if (vars.escudo > 0) vars.escudo--;
+    if (vars.tempo !== null) {
+      vars.tempo--;
+      if (vars.tempo <= 0) {
+        vars.tempo = 0;
+        perder("Tempo esgotado! Clique em Recomeçar fase.");
+        desenhar();
+        return;
       }
-      if (grade[ny] !== undefined && grade[ny][nx] === ".") { e.x = nx; e.y = ny; }
+    }
+    const d = distancias();
+    inimigos.forEach(e => {
+      if (e.tipo === "perseguir") passoPerseguir(e, d);
+      else passoPatrulha(e);
     });
     verificarColisao();
     desenhar();
@@ -347,7 +422,7 @@
   function vencer() {
     fim = true;
     parar();
-    progresso["f" + fase] = true;
+    progresso[FASES[fase].id] = true;
     salvarProgresso();
     mostrar("Fase concluída! Sua pontuação foi " + vars.pontos + ".", "ok");
     document.getElementById("btn-proxima").disabled = fase >= FASES.length - 1;
@@ -355,10 +430,10 @@
     desenhar();
   }
 
-  function perder() {
+  function perder(texto) {
     fim = true;
     parar();
-    mostrar("Fim de jogo! Clique em Recomeçar fase.", "erro");
+    mostrar(texto, "erro");
     desenhar();
   }
 
@@ -381,17 +456,19 @@
         g.fillRect(px, py, TAM, TAM);
         g.strokeStyle = "#d6cfbd";
         g.strokeRect(px + 0.5, py + 0.5, TAM - 1, TAM - 1);
-        const emo = { M: "🪙", K: "🔑", X: "🏁", D: vars.chave ? "🚪" : "🔒" }[c];
+        const emo = { M: "🪙", K: "🔑", X: "🏁", S: "⭐", B: "🚩", D: vars.chave ? "🚪" : "🔒" }[c];
         if (emo) desenharEmoji(g, emo, px, py);
       }
     }
-    inimigos.forEach(e => desenharEmoji(g, "👾", e.x * TAM, e.y * TAM));
+    inimigos.forEach(e => desenharEmoji(g, e.tipo === "perseguir" ? "🤖" : "👾", e.x * TAM, e.y * TAM));
     desenharEmoji(g, "🧑", jog.x * TAM, jog.y * TAM);
 
     document.getElementById("v-pontos").textContent = vars.pontos;
     document.getElementById("v-moedas").textContent = vars.moedas + "/" + FASES[fase].minMoedas;
     document.getElementById("v-vidas").textContent = vars.vidas;
     document.getElementById("v-chave").textContent = vars.chave ? "sim" : "não";
+    document.getElementById("v-escudo").textContent = vars.escudo;
+    document.getElementById("v-tempo").textContent = vars.tempo === null ? "—" : vars.tempo;
     document.getElementById("v-quadro").textContent = vars.quadro;
   }
 
@@ -404,7 +481,7 @@
       b.className = "fase-btn";
       b.disabled = !faseLiberada(i);
       b.setAttribute("aria-current", i === fase ? "true" : "false");
-      const status = progresso["f" + i] ? "concluída" : (faseLiberada(i) ? "a jogar" : "bloqueada");
+      const status = progresso[f.id] ? "concluída" : (faseLiberada(i) ? "a jogar" : "bloqueada");
       b.innerHTML = (i + 1) + ". " + f.titulo + "<small>" + status + "</small>";
       b.addEventListener("click", () => carregar(i));
       box.appendChild(b);
@@ -414,24 +491,25 @@
   function iniciarQuiz() {
     qi = 0;
     acertos = 0;
+    document.getElementById("quiz-titulo").textContent = FASES[fase].titulo;
     mostrarPergunta();
   }
 
   function mostrarPergunta() {
-    const res = document.getElementById("quiz-resultado");
-    res.textContent = "";
+    const perguntas = FASES[fase].perguntas;
+    document.getElementById("quiz-resultado").textContent = "";
     const opcoes = document.getElementById("quiz-opcoes");
     opcoes.innerHTML = "";
-    if (qi >= PERGUNTAS.length) {
-      document.getElementById("quiz-pergunta").textContent = "Você concluiu o desafio: " + acertos + " de " + PERGUNTAS.length + " certas.";
-      progresso["f" + fase] = true;
+    if (qi >= perguntas.length) {
+      document.getElementById("quiz-pergunta").textContent = "Você concluiu o desafio: " + acertos + " de " + perguntas.length + " certas.";
+      progresso[FASES[fase].id] = true;
       salvarProgresso();
       document.getElementById("btn-proxima").disabled = fase >= FASES.length - 1;
       mostrarAtualizarFases();
       return;
     }
-    const q = PERGUNTAS[qi];
-    document.getElementById("quiz-pergunta").textContent = (qi + 1) + ". " + q.p;
+    const q = perguntas[qi];
+    document.getElementById("quiz-pergunta").textContent = (qi + 1) + "/" + perguntas.length + ". " + q.p;
     q.o.forEach((texto, k) => {
       const b = document.createElement("button");
       b.type = "button";
@@ -442,7 +520,7 @@
   }
 
   function responder(k) {
-    const q = PERGUNTAS[qi];
+    const q = FASES[fase].perguntas[qi];
     const botoes = document.querySelectorAll("#quiz-opcoes button");
     botoes.forEach(b => b.disabled = true);
     botoes[q.c].classList.add("certa");
@@ -472,7 +550,7 @@
 
   let inicial = 0;
   for (let i = 0; i < FASES.length; i++) {
-    if (faseLiberada(i) && progresso["f" + i] === undefined) { inicial = i; break; }
+    if (faseLiberada(i) && progresso[FASES[i].id] === undefined) { inicial = i; break; }
   }
   carregar(inicial);
 </script>
