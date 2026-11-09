@@ -190,7 +190,28 @@ document.getElementById("busca").addEventListener("input", (e) => {
   desenhar();
   if (e.target.value.trim()) document.getElementById("jogos").scrollIntoView && document.getElementById("jogos").scrollIntoView({ block: "start" });
 });
+// Menu "Educacionais": abre a grade já filtrada pelo gênero Educativo.
+function aplicarHashGenero() {
+  const alvo = document.querySelector('.menu a[data-genero]');
+  if (!alvo) return;
+  const genero = alvo.dataset.genero;
+  const pedido = location.hash === "#" + alvo.getAttribute("href").slice(1);
+  if (!pedido) return;
+  estado.genero = genero;
+  desenharFiltros();
+  desenhar();
+  document.getElementById("jogos").scrollIntoView && document.getElementById("jogos").scrollIntoView({ block: "start" });
+}
+document.querySelectorAll(".menu a[data-genero]").forEach((a) => {
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    history.replaceState(null, "", a.getAttribute("href"));
+    aplicarHashGenero();
+  });
+});
+window.addEventListener("hashchange", aplicarHashGenero);
 desenharVitrines();
 desenharDestaque();
 desenharFiltros();
 desenhar();
+aplicarHashGenero();

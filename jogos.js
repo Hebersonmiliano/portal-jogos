@@ -34,6 +34,24 @@ window.GENEROS = [
 
 window.JOGOS = [
   {
+    id: "logica-blocos",
+    titulo: "Lógica de Blocos",
+    chamada: "Monte programas com blocos, guie o robô e aprenda lógica de programação: sequência, repetição e decisão.",
+    genero: ["Educativo", "Puzzle"],
+    tags: ["lógica de programação", "educacional", "ensino médio", "blocos", "repetição", "condicional", "se e senão", "lógica booleana", "depuração"],
+    descricao: "Um robô precisa chegar à bandeira e pegar as moedas. Você monta o programa com blocos: andar, virar, pegar moeda, repetir e se/senão. Cada fase ensina um conceito novo, do caminho reto à decisão com Se, passando por repetição, lógica E, OU e NÃO e depuração de programas com erro. Tem fases de quiz para prever resultados. Você pode usar dicas e ver a solução. O progresso fica salvo no navegador.",
+    controles: "Mouse ou toque: monte o programa com os botões Adicionar, use ↑ ↓ para reordenar e ✕ para remover. Executar roda o programa. Funciona no computador e no celular.",
+    url: "jogos/logica-blocos/index.html",
+    versao: "1.0.0",
+    cor: "#2f7d6d",
+    icone: "🤖",
+    engine: "HTML5 · Canvas 2D",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-11-09",
+    novidades: [{ versao: "1.0", data: "2026-11-09", itens: ["Primeira versão: 9 fases de programação e 4 quizzes de lógica", "Sequência, repetição, Se/Senão, NÃO, depuração e um desafio final"] }],
+  },
+  {
     id: "faisca-2",
     titulo: "FAÍSCA 2 — Castelo das Cinzas",
     tituloCompartilhar: "FAÍSCA 2",
