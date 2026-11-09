@@ -400,7 +400,8 @@
       const botoes = document.querySelectorAll("#op" + (jog + 1) + " button");
       botoes[k].classList.add("errada");
       botoes.forEach(b => b.disabled = true);
-      mostrar(nomes[jog] + " errou e fica travado nesta pergunta.", "erro");
+      pontos[jog] = Math.max(0, pontos[jog] - 5);
+      mostrar(nomes[jog] + " errou: perde 5 pontos e fica travado nesta pergunta.", "erro");
       atualizarPlacar();
       if (bloqueado[0] && bloqueado[1]) terminarPergunta(null);
     }
@@ -473,9 +474,11 @@
   // ---------- Fogos na vitória ----------
   let fogosId = null;
   function festa(titulo, texto) {
+    const destaque = true; // vitória de partida: fogos mais fortes e título maior
     const ov = document.getElementById("festa");
     const cv = document.getElementById("fogos");
     document.getElementById("festa-titulo").textContent = titulo;
+    document.getElementById("festa-titulo").style.fontSize = destaque ? "2rem" : "";
     document.getElementById("festa-texto").textContent = texto;
     ov.classList.remove("oculto");
     cv.width = window.innerWidth;
@@ -485,14 +488,14 @@
     const parts = [];
     const explodir = (x, y) => {
       const cor = cores[Math.floor(Math.random() * cores.length)];
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < (destaque ? 110 : 60); i++) {
         const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 4;
         parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vida: 60 + Math.random() * 40, max: 100, cor });
       }
     };
     let ultimo = 0;
     const quadro = t => {
-      if (t - ultimo > 450) { explodir(Math.random() * cv.width, Math.random() * cv.height * 0.6 + 40); ultimo = t; }
+      if (t - ultimo > (destaque ? 250 : 450)) { explodir(Math.random() * cv.width, Math.random() * cv.height * 0.6 + 40); ultimo = t; }
       g.clearRect(0, 0, cv.width, cv.height);
       for (let i = parts.length - 1; i >= 0; i--) {
         const p = parts[i];
