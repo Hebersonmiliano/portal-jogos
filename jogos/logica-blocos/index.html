@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lógica de Blocos — Portal Pixel</title>
+<meta name="description" content="Jogo educacional para praticar lógica de programação com blocos: sequência, repetição, decisão, depuração e lógica booleana.">
+<style>
+  :root { --bg:#f4f1ea; --card:#ffffff; --ink:#23211d; --muted:#6b665c; --acc:#2f7d6d; --acc-2:#e0a526; --erro:#b5382b; --ok:#2e7d4f; --borda:#d8d2c4; --chao:#ece6d6; --parede:#5b5346; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:12px 18px; background:var(--card); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  header h1 { font-size:1.2rem; margin:0; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  .layout { display:grid; grid-template-columns: 230px 1fr; gap:16px; padding:16px; max-width:1200px; margin:0 auto; }
+  @media (max-width:820px) { .layout { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--borda); border-radius:12px; padding:14px; }
+  aside.fases { display:flex; flex-direction:column; gap:4px; max-height:85vh; overflow:auto; }
+  .grupo { font-size:.75rem; color:var(--muted); font-weight:700; text-transform:uppercase; margin:10px 0 2px; }
+  .fase-btn { text-align:left; background:#fff; border:1px solid var(--borda); border-radius:8px; padding:7px 9px; cursor:pointer; font:inherit; color:var(--ink); }
+  .fase-btn.atual { border-color:var(--acc); background:#eef6f3; }
+  .fase-btn .estrelas { float:right; color:var(--acc-2); letter-spacing:1px; }
+  .progresso { font-size:.85rem; color:var(--muted); margin-top:8px; }
+  h2 { margin:0 0 4px; font-size:1.2rem; }
+  .objetivo { margin:0 0 10px; color:var(--muted); }
+  .jogo-area { display:grid; grid-template-columns: auto 1fr; gap:16px; align-items:start; }
+  @media (max-width:900px) { .jogo-area { grid-template-columns:1fr; } }
+  canvas { display:block; max-width:100%; height:auto; border-radius:10px; border:1px solid var(--borda); background:var(--chao); }
+  .toolbar { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  button { font:inherit; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .primario { background:var(--acc); color:#fff; border:0; border-radius:8px; padding:9px 16px; font-weight:700; }
+  .sec { background:#fff; color:var(--ink); border:1px solid var(--borda); border-radius:8px; padding:8px 12px; }
+  .msg { padding:10px; border-radius:8px; min-height:44px; font-size:.95rem; }
+  .msg.ok { background:#e4f5ea; color:var(--ok); }
+  .msg.erro { background:#fbe7e4; color:var(--erro); }
+  .msg.info { background:#fdf3d8; color:#6a4b00; }
+  .editor { min-width:0; }
+  .rodando .editor { pointer-events:none; opacity:.7; }
+  ol.lista { list-style:none; margin:0; padding:0; }
+  li.no { background:#fbfaf6; border:1px solid var(--borda); border-radius:8px; padding:6px 8px; margin:6px 0; }
+  li.no.ativo { outline:3px solid var(--acc-2); }
+  li.no.falhou { outline:3px solid var(--erro); }
+  li.vazio { color:var(--muted); font-style:italic; padding:6px; }
+  .cab { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .cab input[type=number] { width:58px; padding:3px; }
+  .cab select { padding:3px; max-width:100%; }
+  .mini { background:#fff; border:1px solid var(--borda); border-radius:6px; padding:2px 7px; font-size:.85rem; }
+  .bloco { margin:6px 0 0 14px; padding-left:10px; border-left:3px dashed var(--borda); }
+  .rotulo-bloco { font-size:.75rem; color:var(--muted); font-weight:700; text-transform:uppercase; }
+  .adicionar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:8px; }
+  .rotulo-peq { font-size:.8rem; color:var(--muted); }
+  .btn-add { background:#eef6f3; border:1px solid var(--acc); color:var(--acc); border-radius:6px; padding:4px 8px; font-size:.85rem; }
+  .bloco-principal { border:0; margin:0; padding:0; }
+  .quiz-alt { display:block; width:100%; text-align:left; margin:6px 0; padding:10px; border:1px solid var(--borda); border-radius:8px; background:#fff; }
+  .quiz-alt.certa { border-color:var(--ok); background:#e4f5ea; }
+  .quiz-alt.errada { border-color:var(--erro); background:#fbe7e4; }
+  pre { background:#faf8f2; border:1px solid var(--borda); border-radius:8px; padding:10px; white-space:pre-wrap; }
+  .explicacao { margin-top:10px; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lógica de Blocos</h1>
+  <a href="../../index.html">← Portal Pixel</a>
+</header>
+
+<div class="layout">
+  <aside class="card fases" id="fases" aria-label="Fases"></aside>
+
+  <main>
+    <section id="secao-jogo" class="card">
+      <h2 id="titulo-fase"></h2>
+      <p class="objetivo" id="objetivo"></p>
+      <div class="jogo-area">
+        <div>
+          <canvas id="cena" width="300" height="300" aria-label="Mapa do robô"></canvas>
+          <div class="toolbar">
+            <button class="primario" id="btn-executar">▶ Executar</button>
+            <button class="sec" id="btn-limpar">Limpar programa</button>
+            <button class="sec" id="btn-reiniciar">Voltar ao início</button>
+            <button class="sec" id="btn-dica">Dica</button>
+            <button class="sec" id="btn-solucao">Ver solução</button>
+            <button class="sec" id="btn-proxima" disabled>Próxima fase →</button>
+          </div>
+          <div class="msg info" id="msg" role="status"></div>
+          <p class="progresso" id="contador"></p>
+        </div>
+        <div class="editor" id="editor" aria-label="Programa do robô"></div>
+      </div>
+    </section>
+
+    <section id="secao-quiz" class="card hidden">
+      <h2 id="quiz-titulo"></h2>
+      <p id="quiz-pergunta"></p>
+      <pre id="quiz-codigo" class="hidden"></pre>
+      <div id="quiz-alternativas"></div>
+      <div class="explicacao msg info hidden" id="quiz-explicacao"></div>
+      <div class="toolbar">
+        <button class="primario" id="btn-quiz-proxima" disabled>Próxima fase →</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Constantes ----------
+  // Direções: 0 = norte, 1 = leste, 2 = sul, 3 = oeste. x cresce para a direita, y para baixo.
+  const DX = [0, 1, 0, -1];
+  const DY = [-1, 0, 1, 0];
+  const ACOES = { frente: "andar para frente", esq: "virar à esquerda", dir: "virar à direita", pegar: "pegar moeda" };
+  const CONDS = { livre: "caminho à frente está livre", nlivre: "caminho à frente NÃO está livre", moeda: "há moeda aqui", nmoeda: "NÃO há moeda aqui" };
+  const TIPOS = [["frente", "Andar"], ["esq", "Virar à esquerda"], ["dir", "Virar à direita"], ["pegar", "Pegar moeda"], ["rep", "Repetir"], ["se", "Se…"]];
+  const CHAVE = "logica-blocos-progresso-v1";
+
+  // ---------- Construtores de blocos (usados nas fases) ----------
+  const A = (c) => ({ t: "a", c });
+  const R = (n, ...corpo) => ({ t: "rep", n, corpo });
+  const SE = (c, faz, senao = null) => ({ t: "se", c, faz, senao });
+
+  // ---------- Fases ----------
+  // mapa: '.' chão, '#' parede, '*' moeda, 'S' bandeira (saída).
+  const NIVEIS = [
+    { id: "n1", grupo: "Sequências", tipo: "programa", titulo: "Caminho reto",
+      objetivo: "Leve o robô até a bandeira 🏁 montando a sequência de blocos na ordem certa.",
+      dica: "Andar move uma casa na direção em que o robô está virado. Virar só muda a direção.",
+      mapa: [".....", ".....", "....S"], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["frente", "esq", "dir"], ideal: 7, inicial: [],
+      solucao: [A("frente"), A("frente"), A("frente"), A("frente"), A("dir"), A("frente"), A("frente")] },
+
+    { id: "n2", grupo: "Sequências", tipo: "programa", titulo: "Pegue a moeda",
+      objetivo: "Passe pela moeda ●, pegue-a e siga até a bandeira.",
+      dica: "Pegar moeda só funciona quando o robô está em cima da moeda.",
+      mapa: ["....", ".*..", "....", "...S"], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["frente", "esq", "dir", "pegar"], ideal: 11, inicial: [],
+      solucao: [A("dir"), A("frente"), A("esq"), A("frente"), A("pegar"), A("dir"), A("frente"), A("frente"), A("esq"), A("frente"), A("frente")] },
+
+    { id: "n3", grupo: "Repetição", tipo: "programa", titulo: "Repetir é mais rápido",
+      objetivo: "Use o bloco Repetir para andar várias casas sem repetir blocos.",
+      dica: "Repetir 5 vezes \"andar\" faz o mesmo que cinco blocos \"andar\".",
+      mapa: ["......", "......", ".....S"], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["frente", "esq", "dir", "rep"], ideal: 5, inicial: [],
+      solucao: [R(5, A("frente")), A("dir"), R(2, A("frente"))] },
+
+    { id: "n4", grupo: "Repetição", tipo: "programa", titulo: "Escada",
+      objetivo: "Desça a escada até a bandeira. O mesmo padrão se repete em cada degrau.",
+      dica: "Observe um degrau: andar, virar para baixo, andar, virar de volta. Repita esse padrão.",
+      mapa: [".....", ".....", ".....", ".....", "....S"], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["frente", "esq", "dir", "rep"], ideal: 5, inicial: [],
+      solucao: [R(4, A("frente"), A("dir"), A("frente"), A("esq"))] },
+
+    { id: "n5", grupo: "Decisão", tipo: "programa", titulo: "Parede no caminho",
+      objetivo: "Siga o corredor. Quando a frente estiver bloqueada, o robô precisa virar.",
+      dica: "Combine Repetir com Se: se o caminho estiver livre, ande; senão, vire à direita.",
+      mapa: ["...", "##.", "S.."], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["rep", "se", "senao", "frente", "dir", "esq"], ideal: 4, inicial: [],
+      solucao: [R(8, SE("livre", [A("frente")], [A("dir")]))] },
+
+    { id: "n6", grupo: "Decisão", tipo: "programa", titulo: "Colete as moedas",
+      objetivo: "Ande até a bandeira e pegue cada moeda que encontrar pelo caminho.",
+      dica: "Depois de andar, pergunte: há moeda aqui? Se sim, pegue.",
+      mapa: ["..*.*.S"], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["rep", "se", "frente", "pegar"], ideal: 4, inicial: [],
+      solucao: [R(6, A("frente"), SE("moeda", [A("pegar")]))] },
+
+    { id: "n7", grupo: "Decisão", tipo: "programa", titulo: "Ao contrário",
+      objetivo: "Pegue todas as moedas. Quando NÃO houver moeda, ande; quando houver, pegue.",
+      dica: "\"Se NÃO há moeda aqui\" é verdadeiro quando a casa está vazia.",
+      mapa: ["*.*.*.S"], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["rep", "se", "senao", "frente", "pegar"], ideal: 4, inicial: [],
+      solucao: [R(9, SE("nmoeda", [A("frente")], [A("pegar")]))] },
+
+    { id: "n8", grupo: "Depuração", tipo: "programa", titulo: "Ache o erro",
+      objetivo: "Este programa tem um erro e o robô bate na parede. Corrija o número de repetições para chegar à bandeira.",
+      dica: "Conte quantas casas faltam depois de virar para baixo.",
+      mapa: ["......", "......", ".....S"], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["frente", "esq", "dir", "rep"], ideal: 5,
+      inicial: [R(5, A("frente")), A("dir"), R(3, A("frente"))],
+      solucao: [R(5, A("frente")), A("dir"), R(2, A("frente"))] },
+
+    { id: "n9", grupo: "Desafio", tipo: "programa", titulo: "Trilha de moedas",
+      objetivo: "Pegue as duas moedas e chegue à bandeira com um único programa.",
+      dica: "Dentro do Repetir, use um Se para pegar a moeda e outro Se para decidir: andar ou virar.",
+      mapa: [".*.", "##.", "S*."], inicio: { x: 0, y: 0, d: 1 },
+      permitidos: ["rep", "se", "senao", "frente", "dir", "esq", "pegar"], ideal: 6, inicial: [],
+      solucao: [R(8, SE("moeda", [A("pegar")]), SE("livre", [A("frente")], [A("dir")]))] },
+
+    { id: "q1", grupo: "Lógica", tipo: "quiz", titulo: "Lógica: E",
+      pergunta: "Considere A = verdadeiro e B = falso. Qual é o resultado de \"A E B\"?",
+      alternativas: ["Verdadeiro", "Falso", "Depende da ordem"], correta: 1,
+      explicacao: "E só é verdadeiro quando TODAS as partes são verdadeiras. Como B é falso, o resultado é falso." },
+
+    { id: "q2", grupo: "Lógica", tipo: "quiz", titulo: "Lógica: OU",
+      pergunta: "Considere A = falso e B = verdadeiro. Qual é o resultado de \"A OU B\"?",
+      alternativas: ["Verdadeiro", "Falso", "Não dá para saber"], correta: 0,
+      explicacao: "OU é verdadeiro quando PELO MENOS UMA parte é verdadeira. Como B é verdadeiro, o resultado é verdadeiro." },
+
+    { id: "q3", grupo: "Lógica", tipo: "quiz", titulo: "Lógica: NÃO",
+      pergunta: "Se \"o caminho à frente está livre\" é verdadeiro, então \"NÃO o caminho à frente está livre\" é:",
+      alternativas: ["Verdadeiro", "Falso"], correta: 1,
+      explicacao: "NÃO inverte o valor lógico: verdadeiro vira falso, e falso vira verdadeiro." },
+
+    { id: "q4", grupo: "Lógica", tipo: "quiz", titulo: "Prever o resultado",
+      pergunta: "O robô começa na casa (0, 0), virado para a direita (leste). Depois de executar o programa abaixo, em qual casa ele para? Lembre que x cresce para a direita e y cresce para baixo.",
+      codigo: [R(3, A("frente"), A("dir"))],
+      alternativas: ["(0, 1)", "(1, 1)", "(0, 0)", "(3, 0)"], correta: 0,
+      explicacao: "Cada volta do Repetir anda uma casa e vira à direita. Depois de 3 voltas, o robô está em (0, 1), virado para o norte." }
+  ];
+
+  // ---------- Estado ----------
+  let uidc = 0;
+  let atual = 0;
+  let prog = [];
+  let animando = false;
+  let progresso = carregarProgresso();
+
+  // ---------- Utilidades ----------
+  function $(s) { return document.querySelector(s); }
+  function el(tag, cls, texto) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (texto != null) e.textContent = texto;
+    return e;
+  }
+  function botao(texto, fn, cls) {
+    const b = el("button", cls || "mini", texto);
+    b.type = "button";
+    b.onclick = fn;
+    return b;
+  }
+  function clonar(lista) {
+    return lista.map((n) => {
+      const c = Object.assign({}, n, { uid: ++uidc });
+      if (n.corpo) c.corpo = clonar(n.corpo);
+      if (n.faz) c.faz = clonar(n.faz);
+      if (n.senao) c.senao = clonar(n.senao);
+      return c;
+    });
+  }
+  function novoNo(tipo) {
+    if (tipo === "rep") return { uid: ++uidc, t: "rep", n: 2, corpo: [] };
+    if (tipo === "se") return { uid: ++uidc, t: "se", c: "livre", faz: [], senao: nivelAtual().permitidos.includes("senao") ? [] : null };
+    return { uid: ++uidc, t: "a", c: tipo };
+  }
+  function contar(lista) {
+    return lista.reduce((s, n) => s + 1 + (n.corpo ? contar(n.corpo) : 0) + (n.faz ? contar(n.faz) : 0) + (n.senao ? contar(n.senao) : 0), 0);
+  }
+  function textoPrograma(lista, pad) {
+    pad = pad || "";
+    if (!lista.length) return pad + "(vazio)";
+    return lista.map((n) => {
+      if (n.t === "a") return pad + ACOES[n.c];
+      if (n.t === "rep") return pad + "repita " + n.n + " vezes:\n" + textoPrograma(n.corpo, pad + "   ");
+      let s = pad + "se " + CONDS[n.c] + ":\n" + textoPrograma(n.faz, pad + "   ");
+      if (n.senao) s += "\n" + pad + "senão:\n" + textoPrograma(n.senao, pad + "   ");
+      return s;
+    }).join("\n");
+  }
+  function estrelasPara(n, ideal) { return n <= ideal ? 3 : n <= ideal + 3 ? 2 : 1; }
+  function nivelAtual() { return NIVEIS[atual]; }
+
+  function carregarProgresso() {
+    try { return JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { return {}; }
+  }
+  function salvarProgresso() {
+    try { localStorage.setItem(CHAVE, JSON.stringify(progresso)); } catch (e) { /* armazenamento indisponível: segue sem salvar */ }
+  }
+
+  // ---------- Simulação ----------
+  function ErroJogo(msg, uid) { this.message = msg; this.uid = uid; }
+
+  function simular(programa, nv) {
+    const mapa = nv.mapa.map((r) => r.split(""));
+    let x = nv.inicio.x, y = nv.inicio.y, d = nv.inicio.d;
+    let saida = null;
+    mapa.forEach((linha, yy) => linha.forEach((c, xx) => { if (c === "S") saida = { x: xx, y: yy }; }));
+    const trace = [];
+    let passos = 0;
+    const foto = (uid, erro) => ({ x, y, d, uid, erro, mapa: mapa.map((r) => r.join("")) });
+    const aFrente = () => {
+      const nx = x + DX[d], ny = y + DY[d];
+      if (ny < 0 || ny >= mapa.length || nx < 0 || nx >= mapa[0].length || mapa[ny][nx] === "#") return null;
+      return { nx, ny };
+    };
+    const condicao = (c) => {
+      if (c === "livre") return !!aFrente();
+      if (c === "nlivre") return !aFrente();
+      if (c === "moeda") return mapa[y][x] === "*";
+      return mapa[y][x] !== "*";
+    };
+    const executar = (lista) => {
+      for (const n of lista) {
+        if (++passos > 5000) throw new ErroJogo("Programa longo demais. Confira se há repetições exageradas.", n.uid);
+        if (n.t === "a") {
+          if (n.c === "frente") {
+            const f = aFrente();
+            if (!f) { trace.push(foto(n.uid, true)); throw new ErroJogo("O robô bateu na parede!", n.uid); }
+            x = f.nx; y = f.ny;
+          } else if (n.c === "esq") {
+            d = (d + 3) % 4;
+          } else if (n.c === "dir") {
+            d = (d + 1) % 4;
+          } else if (n.c === "pegar") {
+            if (mapa[y][x] !== "*") { trace.push(foto(n.uid, true)); throw new ErroJogo("Não há moeda nesta casa para pegar.", n.uid); }
+            mapa[y][x] = ".";
+          }
+          trace.push(foto(n.uid, false));
+        } else if (n.t === "rep") {
+          for (let i = 0; i < n.n; i++) executar(n.corpo);
+        } else if (n.t === "se") {
+          if (condicao(n.c)) executar(n.faz);
+          else if (n.senao) executar(n.senao);
+        }
+      }
+    };
+    trace.push(foto(null, false));
+    let erro = null;
+    try { executar(programa); } catch (e) { if (e instanceof ErroJogo) erro = e; else throw e; }
+    const restantes = mapa.reduce((s, r) => s + r.join("").split("*").length - 1, 0);
+    const noSaida = saida && x === saida.x && y === saida.y;
+    let msg, ok = false;
+    if (erro) msg = erro.message;
+    else if (!noSaida) msg = "O programa terminou, mas o robô não chegou à bandeira (S).";
+    else if (restantes > 0) msg = "Chegou à bandeira, mas ainda faltam moedas (" + restantes + ").";
+    else { ok = true; msg = "Fase concluída!"; }
+    return { trace, ok, msg };
+  }
+
+  // ---------- Desenho ----------
+  const cv = $("#cena");
+  const ctx = cv.getContext("2d");
+
+  function desenharCena(mapaStrs, x, y, d, erro) {
+    const cols = mapaStrs[0].length, rows = mapaStrs.length;
+    const T = Math.min(64, Math.floor(560 / cols));
+    cv.width = cols * T; cv.height = rows * T;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const ch = mapaStrs[r][c];
+        ctx.fillStyle = ch === "#" ? "#5b5346" : "#ece6d6";
+        ctx.fillRect(c * T, r * T, T, T);
+        ctx.strokeStyle = "rgba(0,0,0,0.08)";
+        ctx.strokeRect(c * T + 0.5, r * T + 0.5, T - 1, T - 1);
+        if (ch === "S") {
+          ctx.fillStyle = "#bfe8d6";
+          ctx.fillRect(c * T + 4, r * T + 4, T - 8, T - 8);
+          ctx.font = Math.floor(T * 0.55) + "px system-ui, sans-serif";
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText("🏁", c * T + T / 2, r * T + T / 2);
+        }
+        if (ch === "*") {
+          ctx.beginPath();
+          ctx.arc(c * T + T / 2, r * T + T / 2, T * 0.18, 0, Math.PI * 2);
+          ctx.fillStyle = "#e0a526"; ctx.fill();
+          ctx.strokeStyle = "#8a6512"; ctx.lineWidth = 2; ctx.stroke();
+        }
+      }
+    }
+    if (x == null) return;
+    const cx = (x + 0.5) * T, cy = (y + 0.5) * T, raio = T * 0.3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, raio, 0, Math.PI * 2);
+    ctx.fillStyle = erro ? "#b5382b" : "#2f7d6d";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx + DX[d] * raio * 0.75, cy + DY[d] * raio * 0.75, T * 0.11, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff"; ctx.fill();
+  }
+
+  function desenharCenaInicial() {
+    const nv = nivelAtual();
+    desenharCena(nv.mapa, nv.inicio.x, nv.inicio.y, nv.inicio.d, false);
+  }
+
+  // ---------- Editor ----------
+  function podeAdicionar(tipo) { return nivelAtual().permitidos.includes(tipo); }
+
+  function barraAdicionar(lista) {
+    const bar = el("div", "adicionar");
+    bar.append(el("span", "rotulo-peq", "Adicionar:"));
+    TIPOS.forEach(([tipo, rotulo]) => {
+      if (!podeAdicionar(tipo)) return;
+      bar.append(botao(rotulo, () => { lista.push(novoNo(tipo)); atualizar(); }, "btn-add"));
+    });
+    return bar;
+  }
+
+  function montarLista(lista) {
+    const ol = el("ol", "lista");
+    if (!lista.length) ol.append(el("li", "vazio", "(vazio)"));
+    lista.forEach((no, i) => ol.append(montarNo(no, lista, i)));
+    return ol;
+  }
+
+  function montarBloco(titulo, lista) {
+    const div = el("div", "bloco");
+    div.append(el("div", "rotulo-bloco", titulo));
+    div.append(montarLista(lista));
+    div.append(barraAdicionar(lista));
+    return div;
+  }
+
+  function montarNo(no, lista, i) {
+    const li = el("li", "no");
+    li.dataset.uid = no.uid;
+    const cab = el("div", "cab");
+    if (no.t === "a") {
+      cab.append(el("strong", null, ACOES[no.c].charAt(0).toUpperCase() + ACOES[no.c].slice(1)));
+    } else if (no.t === "rep") {
+      cab.append(el("span", null, "Repetir"));
+      const inp = el("input");
+      inp.type = "number"; inp.min = 1; inp.max = 20; inp.value = no.n;
+      inp.onchange = () => { no.n = Math.min(20, Math.max(1, parseInt(inp.value, 10) || 1)); atualizar(); };
+      cab.append(inp, el("span", null, "vezes"));
+    } else {
+      cab.append(el("span", null, "Se"));
+      const sel = el("select");
+      Object.keys(CONDS).forEach((k) => {
+        const o = el("option", null, CONDS[k]);
+        o.value = k;
+        if (k === no.c) o.selected = true;
+        sel.append(o);
+      });
+      sel.onchange = () => { no.c = sel.value; atualizar(); };
+      cab.append(sel);
+    }
+    const acoes = el("span", "acoes");
+    acoes.style.marginLeft = "auto";
+    acoes.append(
+      botao("↑", () => { if (i > 0) { [lista[i - 1], lista[i]] = [lista[i], lista[i - 1]]; atualizar(); } }),
+      botao("↓", () => { if (i < lista.length - 1) { [lista[i + 1], lista[i]] = [lista[i], lista[i + 1]]; atualizar(); } }),
+      botao("✕", () => { lista.splice(i, 1); atualizar(); })
+    );
+    cab.append(acoes);
+    li.append(cab);
+    if (no.t === "rep") li.append(montarBloco("faça", no.corpo));
+    if (no.t === "se") {
+      li.append(montarBloco("faça", no.faz));
+      if (no.senao) li.append(montarBloco("senão", no.senao));
+    }
+    return li;
+  }
+
+  function desenharEditor() {
+    const box = $("#editor");
+    box.replaceChildren();
+    box.append(el("div", "rotulo-bloco", "Programa do robô (executa de cima para baixo)"));
+    box.append(montarLista(prog));
+    box.append(barraAdicionar(prog));
+  }
+
+  // ---------- Fluxo ----------
+  function setMsg(texto, tipo) {
+    const m = $("#msg");
+    m.textContent = texto;
+    m.className = "msg " + (tipo || "info");
+  }
+
+  function atualizarContador() {
+    const n = contar(prog);
+    $("#contador").textContent = "Blocos usados: " + n + " (ideal: " + nivelAtual().ideal + ")";
+  }
+
+  function atualizarNav() {
+    const box = $("#fases");
+    box.replaceChildren();
+    let grupoAtual = null;
+    NIVEIS.forEach((nv, i) => {
+      if (nv.grupo !== grupoAtual) { grupoAtual = nv.grupo; box.append(el("div", "grupo", grupoAtual)); }
+      const b = el("button", "fase-btn" + (i === atual ? " atual" : ""));
+      b.type = "button";
+      b.append(el("span", "estrelas", progresso[nv.id] ? "★".repeat(progresso[nv.id]) : ""));
+      b.append(document.createTextNode((i + 1) + ". " + nv.titulo));
+      b.onclick = () => carregarFase(i);
+      box.append(b);
+    });
+    const feitas = NIVEIS.filter((nv) => progresso[nv.id]).length;
+    box.append(el("p", "progresso", "Concluídas: " + feitas + " de " + NIVEIS.length));
+  }
+
+  function setBotoes() {
+    const nv = nivelAtual();
+    const temProxima = atual < NIVEIS.length - 1;
+    const feito = !!progresso[nv.id];
+    $("#btn-executar").disabled = animando;
+    $("#btn-proxima").disabled = animando || !feito || !temProxima;
+    $("#btn-quiz-proxima").disabled = !feito || !temProxima;
+  }
+
+  function atualizar() {
+    if (animando) return;
+    desenharEditor();
+    desenharCenaInicial();
+    setMsg("", "info");
+    atualizarContador();
+  }
+
+  function carregarFase(i) {
+    atual = i;
+    animando = false;
+    document.body.classList.remove("rodando");
+    const nv = nivelAtual();
+    if (nv.tipo === "quiz") {
+      mostrarQuiz(nv);
+    } else {
+      $("#secao-quiz").classList.add("hidden");
+      $("#secao-jogo").classList.remove("hidden");
+      $("#titulo-fase").textContent = (i + 1) + ". " + nv.titulo;
+      $("#objetivo").textContent = nv.objetivo;
+      prog = clonar(nv.inicial || []);
+      setMsg("", "info");
+      desenharEditor();
+      desenharCenaInicial();
+      atualizarContador();
+    }
+    atualizarNav();
+    setBotoes();
+  }
+
+  function destacar(uid, falhou) {
+    document.querySelectorAll("li.no.ativo, li.no.falhou").forEach((li) => li.classList.remove("ativo", "falhou"));
+    if (uid == null) return;
+    const li = document.querySelector('li.no[data-uid="' + uid + '"]');
+    if (li) li.classList.add(falhou ? "falhou" : "ativo");
+  }
+
+  function executarPrograma() {
+    if (animando) return;
+    const nv = nivelAtual();
+    const r = simular(prog, nv);
+    animando = true;
+    document.body.classList.add("rodando");
+    setBotoes();
+    setMsg("Executando…", "info");
+    let i = 0;
+    const passo = () => {
+      const f = r.trace[i];
+      desenharCena(f.mapa, f.x, f.y, f.d, f.erro);
+      destacar(f.uid, f.erro);
+      i++;
+      if (i < r.trace.length) {
+        setTimeout(passo, 320);
+      } else {
+        animando = false;
+        document.body.classList.remove("rodando");
+        concluirFase(r, nv);
+      }
+    };
+    passo();
+  }
+
+  function concluirFase(r, nv) {
+    if (r.ok) {
+      const n = contar(prog);
+      const st = estrelasPara(n, nv.ideal);
+      if (st > (progresso[nv.id] || 0)) { progresso[nv.id] = st; salvarProgresso(); }
+      setMsg(r.msg + " " + "★".repeat(st) + "☆".repeat(3 - st) + " — " + n + " blocos (ideal: " + nv.ideal + ").", "ok");
+    } else {
+      setMsg(r.msg, "erro");
+    }
+    atualizarNav();
+    setBotoes();
+  }
+
+  // ---------- Quiz ----------
+  function mostrarQuiz(nv) {
+    $("#secao-jogo").classList.add("hidden");
+    $("#secao-quiz").classList.remove("hidden");
+    $("#quiz-titulo").textContent = (atual + 1) + ". " + nv.titulo;
+    $("#quiz-pergunta").textContent = nv.pergunta;
+    const pre = $("#quiz-codigo");
+    if (nv.codigo) { pre.textContent = textoPrograma(nv.codigo); pre.classList.remove("hidden"); }
+    else { pre.classList.add("hidden"); }
+    const box = $("#quiz-alternativas");
+    box.replaceChildren();
+    const exp = $("#quiz-explicacao");
+    exp.classList.add("hidden");
+    exp.textContent = "";
+    nv.alternativas.forEach((texto, i) => {
+      const b = el("button", "quiz-alt", texto);
+      b.type = "button";
+      b.onclick = () => responderQuiz(nv, i, box);
+      box.append(b);
+    });
+    if (progresso[nv.id]) { mostrarRespostaCerta(nv, box); }
+    setBotoes();
+  }
+
+  function responderQuiz(nv, i, box) {
+    if (progresso[nv.id]) return;
+    const certa = i === nv.correta;
+    progresso[nv.id] = certa ? 3 : 1;
+    salvarProgresso();
+    box.querySelectorAll("button").forEach((b, j) => {
+      b.disabled = true;
+      if (j === nv.correta) b.classList.add("certa");
+      else if (j === i) b.classList.add("errada");
+    });
+    mostrarExplicacao(nv, certa);
+    atualizarNav();
+    setBotoes();
+  }
+
+  function mostrarRespostaCerta(nv, box) {
+    box.querySelectorAll("button").forEach((b, j) => {
+      b.disabled = true;
+      if (j === nv.correta) b.classList.add("certa");
+    });
+    mostrarExplicacao(nv, null);
+  }
+
+  function mostrarExplicacao(nv, certa) {
+    const exp = $("#quiz-explicacao");
+    const prefixo = certa === null ? "" : (certa ? "Resposta certa! " : "Quase! ");
+    exp.textContent = prefixo + nv.explicacao;
+    exp.classList.remove("hidden");
+  }
+
+  // ---------- Eventos e início ----------
+  $("#btn-executar").onclick = executarPrograma;
+  $("#btn-limpar").onclick = () => { prog = []; atualizar(); };
+  $("#btn-reiniciar").onclick = () => { prog = clonar(nivelAtual().inicial || []); atualizar(); };
+  $("#btn-dica").onclick = () => setMsg("Dica: " + nivelAtual().dica, "info");
+  $("#btn-solucao").onclick = () => {
+    prog = clonar(nivelAtual().solucao || []);
+    atualizar();
+    setMsg("Solução carregada. Clique em Executar para ver o robô em ação.", "info");
+  };
+  $("#btn-proxima").onclick = () => { if (atual < NIVEIS.length - 1) carregarFase(atual + 1); };
+  $("#btn-quiz-proxima").onclick = () => { if (atual < NIVEIS.length - 1) carregarFase(atual + 1); };
+
+  carregarFase(0);
+})();
+</script>
+</body>
+</html>
