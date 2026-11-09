@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semáforo: rumo à escola — Portal Pixel</title>
+<meta name="description" content="Jogo para iniciantes em lógica de programação: ensine o carro a esperar o sinal e o pedestre usando se, senão e repetir.">
+<style>
+  :root { --bg:#f4f1ea; --card:#ffffff; --ink:#23211d; --muted:#6b665c; --acc:#2f7d6d; --acc-2:#e0a526; --erro:#b5382b; --ok:#2e7d4f; --borda:#d8d2c4; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:12px 18px; background:var(--card); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  header h1 { font-size:1.2rem; margin:0; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  .layout { display:grid; grid-template-columns: 230px 1fr; gap:16px; padding:16px; max-width:1200px; margin:0 auto; }
+  @media (max-width:820px) { .layout { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--borda); border-radius:12px; padding:14px; }
+  aside.fases { display:flex; flex-direction:column; gap:4px; max-height:85vh; overflow:auto; }
+  .grupo { font-size:.75rem; color:var(--muted); font-weight:700; text-transform:uppercase; margin:10px 0 2px; }
+  .fase-btn { text-align:left; background:#fff; border:1px solid var(--borda); border-radius:8px; padding:7px 9px; cursor:pointer; font:inherit; color:var(--ink); }
+  .fase-btn.atual { border-color:var(--acc); background:#eef6f3; }
+  .fase-btn .estrelas { float:right; color:var(--acc-2); letter-spacing:1px; }
+  .progresso { font-size:.85rem; color:var(--muted); margin-top:8px; }
+  h2 { margin:0 0 4px; font-size:1.2rem; }
+  .objetivo { margin:0 0 10px; color:var(--muted); }
+  .jogo-area { display:grid; grid-template-columns: auto 1fr; gap:16px; align-items:start; }
+  @media (max-width:900px) { .jogo-area { grid-template-columns:1fr; } }
+  canvas { display:block; max-width:100%; height:auto; border-radius:10px; border:1px solid var(--borda); }
+  .estado { font-size:.95rem; margin:8px 0; padding:8px 10px; background:#faf8f2; border:1px solid var(--borda); border-radius:8px; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  button { font:inherit; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .primario { background:var(--acc); color:#fff; border:0; border-radius:8px; padding:9px 16px; font-weight:700; }
+  .sec { background:#fff; color:var(--ink); border:1px solid var(--borda); border-radius:8px; padding:8px 12px; }
+  .msg { padding:10px; border-radius:8px; min-height:44px; font-size:.95rem; }
+  .msg.ok { background:#e4f5ea; color:var(--ok); }
+  .msg.erro { background:#fbe7e4; color:var(--erro); }
+  .msg.info { background:#fdf3d8; color:#6a4b00; }
+  .editor { min-width:0; }
+  .rodando .editor { pointer-events:none; opacity:.7; }
+  ol.lista { list-style:none; margin:0; padding:0; }
+  li.no { background:#fbfaf6; border:1px solid var(--borda); border-radius:8px; padding:6px 8px; margin:6px 0; }
+  li.no.ativo { outline:3px solid var(--acc-2); }
+  li.no.falhou { outline:3px solid var(--erro); }
+  li.vazio { color:var(--muted); font-style:italic; padding:6px; }
+  .cab { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .cab input[type=number] { width:58px; padding:3px; }
+  .cab select { padding:3px; max-width:100%; }
+  .mini { background:#fff; border:1px solid var(--borda); border-radius:6px; padding:2px 7px; font-size:.85rem; }
+  .bloco { margin:6px 0 0 14px; padding-left:10px; border-left:3px dashed var(--borda); }
+  .rotulo-bloco { font-size:.75rem; color:var(--muted); font-weight:700; text-transform:uppercase; }
+  .adicionar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:8px; }
+  .rotulo-peq { font-size:.8rem; color:var(--muted); }
+  .btn-add { background:#eef6f3; border:1px solid var(--acc); color:var(--acc); border-radius:6px; padding:4px 8px; font-size:.85rem; }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Semáforo: rumo à escola</h1>
+  <a href="../../index.html">← Portal Pixel</a>
+</header>
+
+<div class="layout">
+  <aside class="card fases" id="fases" aria-label="Fases"></aside>
+
+  <main>
+    <section class="card">
+      <h2 id="titulo-fase"></h2>
+      <p class="objetivo" id="objetivo"></p>
+      <div class="jogo-area">
+        <div>
+          <canvas id="cena" width="504" height="170" aria-label="Rua com semáforo e carro"></canvas>
+          <div class="estado" id="estado" aria-live="polite"></div>
+          <div class="toolbar">
+            <button class="primario" id="btn-executar">▶ Executar</button>
+            <button class="sec" id="btn-limpar">Limpar programa</button>
+            <button class="sec" id="btn-reiniciar">Voltar ao início</button>
+            <button class="sec" id="btn-dica">Dica</button>
+            <button class="sec" id="btn-solucao">Ver solução</button>
+            <button class="sec" id="btn-proxima" disabled>Próxima fase →</button>
+          </div>
+          <div class="msg info" id="msg" role="status"></div>
+          <p class="progresso" id="contador"></p>
+        </div>
+        <div class="editor" id="editor" aria-label="Programa do carro"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Constantes ----------
+  const COMPRIMENTO = 6;   // a rua tem casas de 0 (casa) a 6 (escola)
+  const CRUZAMENTO = 3;    // a faixa de pedestres fica na casa 3
+  const ACOES = { andar: "andar", parar: "parar e esperar" };
+  const CONDS = {
+    verde: "o semáforo está VERDE",
+    nverde: "o semáforo NÃO está verde",
+    pedestre: "há pedestre na faixa",
+    npedestre: "NÃO há pedestre na faixa"
+  };
+  const TIPOS = [["andar", "Andar"], ["parar", "Parar e esperar"], ["rep", "Repetir"], ["se", "Se…"]];
+  const CHAVE = "semaforo-progresso-v1";
+
+  // ---------- Construtores de blocos ----------
+  const A = (c) => ({ t: "a", c });
+  const R = (n, ...corpo) => ({ t: "rep", n, corpo });
+  const SE = (c, faz, senao = null) => ({ t: "se", c, faz, senao });
+
+  // ---------- Fases ----------
+  // sinal: 'V' verde / 'R' vermelho, repetido em ciclo a cada tempo (cada ação gasta um tempo).
+  // ped: 'P' pedestre na faixa / 'N' sem pedestre, também em ciclo.
+  const NIVEIS = [
+    { id: "s1", grupo: "Primeiros passos", titulo: "Rua livre",
+      objetivo: "O carro sai de casa e precisa chegar à escola. A rua está livre: monte os blocos para andar até lá.",
+      dica: "Cada bloco \"andar\" faz o carro avançar uma casa.",
+      sinal: "V", ped: "N", conds: [], permitidos: ["andar", "parar"], ideal: 6, inicial: [],
+      solucao: [A("andar"), A("andar"), A("andar"), A("andar"), A("andar"), A("andar")] },
+
+    { id: "s2", grupo: "Decisão", titulo: "Espere o verde",
+      objetivo: "O semáforo fica verde e vermelho. Ande quando estiver verde e pare quando estiver vermelho.",
+      dica: "Use \"se o semáforo está verde, andar; senão, parar\" dentro de Repetir.",
+      sinal: "VVRRVV", ped: "N", conds: ["verde"], permitidos: ["rep", "se", "andar", "parar"], ideal: 4, inicial: [],
+      solucao: [R(8, SE("verde", [A("andar")], [A("parar")]))] },
+
+    { id: "s3", grupo: "Decisão", titulo: "Pedestre na faixa",
+      objetivo: "O sinal está sempre verde, mas às vezes um pedestre atravessa. Não atropele ninguém!",
+      dica: "Se há pedestre na faixa, pare; senão, ande.",
+      sinal: "V", ped: "NNPPNN", conds: ["pedestre"], permitidos: ["rep", "se", "andar", "parar"], ideal: 4, inicial: [],
+      solucao: [R(10, SE("pedestre", [A("parar")], [A("andar")]))] },
+
+    { id: "s4", grupo: "Decisão", titulo: "Ao contrário",
+      objetivo: "Agora a regra é pensada pelo lado de NÃO: se o semáforo NÃO estiver verde, pare.",
+      dica: "Pense assim: \"se NÃO está verde, pare; senão, ande\".",
+      sinal: "VVRRVV", ped: "N", conds: ["nverde"], permitidos: ["rep", "se", "andar", "parar"], ideal: 4, inicial: [],
+      solucao: [R(8, SE("nverde", [A("parar")], [A("andar")]))] },
+
+    { id: "s5", grupo: "Desafio", titulo: "Pedestre e semáforo",
+      objetivo: "Um desafio com tudo junto: pedestres e semáforo. Pense na ordem das decisões.",
+      dica: "Primeiro pergunte: há pedestre? Se não, pergunte: o semáforo está verde?",
+      sinal: "VVRRVV", ped: "NNPPNN", conds: ["verde", "pedestre"],
+      permitidos: ["rep", "se", "senao", "andar", "parar"], ideal: 6, inicial: [],
+      solucao: [R(14, SE("pedestre", [A("parar")], [SE("verde", [A("andar")], [A("parar")])]))] }
+  ];
+
+  // ---------- Estado ----------
+  let uidc = 0;
+  let atual = 0;
+  let prog = [];
+  let animando = false;
+  let progresso = carregarProgresso();
+
+  // ---------- Utilidades ----------
+  function $(s) { return document.querySelector(s); }
+  function el(tag, cls, texto) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (texto != null) e.textContent = texto;
+    return e;
+  }
+  function botao(texto, fn, cls) {
+    const b = el("button", cls || "mini", texto);
+    b.type = "button";
+    b.onclick = fn;
+    return b;
+  }
+  function clonar(lista) {
+    return lista.map((n) => {
+      const c = Object.assign({}, n, { uid: ++uidc });
+      if (n.corpo) c.corpo = clonar(n.corpo);
+      if (n.faz) c.faz = clonar(n.faz);
+      if (n.senao) c.senao = clonar(n.senao);
+      return c;
+    });
+  }
+  function nivelAtual() { return NIVEIS[atual]; }
+  function novoNo(tipo) {
+    const nv = nivelAtual();
+    if (tipo === "rep") return { uid: ++uidc, t: "rep", n: 2, corpo: [] };
+    if (tipo === "se") return { uid: ++uidc, t: "se", c: nv.conds[0], faz: [], senao: nv.permitidos.includes("senao") ? [] : null };
+    return { uid: ++uidc, t: "a", c: tipo };
+  }
+  function contar(lista) {
+    return lista.reduce((s, n) => s + 1 + (n.corpo ? contar(n.corpo) : 0) + (n.faz ? contar(n.faz) : 0) + (n.senao ? contar(n.senao) : 0), 0);
+  }
+  function estrelasPara(n, ideal) { return n <= ideal ? 3 : n <= ideal + 3 ? 2 : 1; }
+
+  function carregarProgresso() {
+    try { return JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { return {}; }
+  }
+  function salvarProgresso() {
+    try { localStorage.setItem(CHAVE, JSON.stringify(progresso)); } catch (e) { /* sem armazenamento: segue sem salvar */ }
+  }
+
+  // ---------- Simulação ----------
+  function ErroJogo(msg, uid) { this.message = msg; this.uid = uid; }
+
+  function estadoEm(nv, t) {
+    return {
+      verde: nv.sinal[t % nv.sinal.length] === "V",
+      pedestre: nv.ped[t % nv.ped.length] === "P"
+    };
+  }
+
+  function simular(programa, nv) {
+    let x = 0, t = 0, passos = 0, chegou = false;
+    const trace = [];
+    const foto = (uid, erro) => {
+      const e = estadoEm(nv, t);
+      return { x, t, uid, erro, verde: e.verde, pedestre: e.pedestre };
+    };
+    const condicao = (c) => {
+      const e = estadoEm(nv, t);
+      if (c === "verde") return e.verde;
+      if (c === "nverde") return !e.verde;
+      if (c === "pedestre") return e.pedestre;
+      return !e.pedestre;
+    };
+    const executar = (lista) => {
+      for (const n of lista) {
+        if (chegou) return;
+        if (++passos > 5000) throw new ErroJogo("Programa longo demais. Confira se há repetições exageradas.", n.uid);
+        if (n.t === "a") {
+          if (n.c === "andar") {
+            const e = estadoEm(nv, t);
+            const novo = x + 1;
+            if (novo === CRUZAMENTO && !e.verde) {
+              trace.push(foto(n.uid, true));
+              throw new ErroJogo("O carro avançou o sinal VERMELHO!", n.uid);
+            }
+            if (novo === CRUZAMENTO && e.pedestre) {
+              trace.push(foto(n.uid, true));
+              throw new ErroJogo("O carro atropelou o pedestre na faixa!", n.uid);
+            }
+            x = novo;
+            t++;
+            trace.push(foto(n.uid, false));
+            if (x === COMPRIMENTO) { chegou = true; return; }
+          } else {
+            t++;
+            trace.push(foto(n.uid, false));
+          }
+        } else if (n.t === "rep") {
+          for (let i = 0; i < n.n; i++) executar(n.corpo);
+        } else if (n.t === "se") {
+          if (condicao(n.c)) executar(n.faz);
+          else if (n.senao) executar(n.senao);
+        }
+      }
+    };
+    trace.push(foto(null, false));
+    let erro = null;
+    try { executar(programa); } catch (e) { if (e instanceof ErroJogo) erro = e; else throw e; }
+    let msg, ok = false;
+    if (erro) msg = erro.message;
+    else if (!chegou) msg = "O programa acabou antes de o carro chegar à escola.";
+    else { ok = true; msg = "O carro chegou à escola!"; }
+    return { trace, ok, msg };
+  }
+
+  // ---------- Desenho ----------
+  const cv = $("#cena");
+  const ctx = cv.getContext("2d");
+  const T = 72;
+
+  function desenharCena(f, nv) {
+    const W = (COMPRIMENTO + 1) * T;
+    cv.width = W; cv.height = 170;
+    ctx.clearRect(0, 0, W, cv.height);
+    // calçada e pista
+    ctx.fillStyle = "#d9d2c1"; ctx.fillRect(0, 0, W, cv.height);
+    ctx.fillStyle = "#5b5346"; ctx.fillRect(0, 60, W, 70);
+    // faixa de pedestres
+    for (let k = 0; k < 6; k++) {
+      ctx.fillStyle = "#f5f1e6";
+      ctx.fillRect(CRUZAMENTO * T + 6, 62 + k * 11, T - 12, 6);
+    }
+    // casa e escola
+    ctx.font = "34px system-ui, sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("🏠", T * 0.5, 30);
+    ctx.fillText("🏫", COMPRIMENTO * T + T * 0.5, 30);
+    // semáforo sobre a faixa
+    const xs = CRUZAMENTO * T + T / 2;
+    ctx.fillStyle = "#23211d"; ctx.fillRect(xs - 9, 2, 18, 0.1);
+    ctx.fillStyle = "#3b382f"; ctx.fillRect(xs - 13, 4, 26, 40);
+    ctx.beginPath(); ctx.arc(xs, 14, 6, 0, Math.PI * 2);
+    ctx.fillStyle = f.verde ? "#2e7d4f" : "#b5382b"; ctx.fill();
+    ctx.beginPath(); ctx.arc(xs, 32, 6, 0, Math.PI * 2);
+    ctx.fillStyle = f.verde ? "#3a3a33" : "#f5c04a"; ctx.fill();
+    // pedestre
+    if (f.pedestre) {
+      ctx.font = "34px system-ui, sans-serif";
+      ctx.fillText("🚶", xs, 110);
+    }
+    // carro
+    ctx.font = "38px system-ui, sans-serif";
+    ctx.fillText("🚗", (f.x + 0.5) * T, 95);
+    if (f.erro) {
+      ctx.strokeStyle = "#b5382b"; ctx.lineWidth = 4;
+      ctx.strokeRect(f.x * T + 4, 62, T - 8, 66);
+    }
+  }
+
+  function desenharCenaInicial() {
+    const nv = nivelAtual();
+    const e = estadoEm(nv, 0);
+    desenharCena({ x: 0, verde: e.verde, pedestre: e.pedestre, erro: false }, nv);
+    mostrarEstado(0, nv);
+  }
+
+  function mostrarEstado(t, nv) {
+    const e = estadoEm(nv, t);
+    $("#estado").textContent = "Agora: semáforo " + (e.verde ? "VERDE" : "VERMELHO") + " · pedestre na faixa: " + (e.pedestre ? "sim" : "não") + " · tempo " + t;
+  }
+
+  // ---------- Editor ----------
+  function barraAdicionar(lista) {
+    const nv = nivelAtual();
+    const bar = el("div", "adicionar");
+    bar.append(el("span", "rotulo-peq", "Adicionar:"));
+    TIPOS.forEach(([tipo, rotulo]) => {
+      if (!nv.permitidos.includes(tipo)) return;
+      bar.append(botao(rotulo, () => { lista.push(novoNo(tipo)); atualizar(); }, "btn-add"));
+    });
+    return bar;
+  }
+
+  function montarLista(lista) {
+    const ol = el("ol", "lista");
+    if (!lista.length) ol.append(el("li", "vazio", "(vazio)"));
+    lista.forEach((no, i) => ol.append(montarNo(no, lista, i)));
+    return ol;
+  }
+
+  function montarBloco(titulo, lista) {
+    const div = el("div", "bloco");
+    div.append(el("div", "rotulo-bloco", titulo));
+    div.append(montarLista(lista));
+    div.append(barraAdicionar(lista));
+    return div;
+  }
+
+  function montarNo(no, lista, i) {
+    const nv = nivelAtual();
+    const li = el("li", "no");
+    li.dataset.uid = no.uid;
+    const cab = el("div", "cab");
+    if (no.t === "a") {
+      cab.append(el("strong", null, no.c === "andar" ? "Andar" : "Parar e esperar"));
+    } else if (no.t === "rep") {
+      cab.append(el("span", null, "Repetir"));
+      const inp = el("input");
+      inp.type = "number"; inp.min = 1; inp.max = 30; inp.value = no.n;
+      inp.onchange = () => { no.n = Math.min(30, Math.max(1, parseInt(inp.value, 10) || 1)); atualizar(); };
+      cab.append(inp, el("span", null, "vezes"));
+    } else {
+      cab.append(el("span", null, "Se"));
+      const sel = el("select");
+      nv.conds.forEach((k) => {
+        const o = el("option", null, CONDS[k]);
+        o.value = k;
+        if (k === no.c) o.selected = true;
+        sel.append(o);
+      });
+      sel.onchange = () => { no.c = sel.value; atualizar(); };
+      cab.append(sel);
+    }
+    const acoes = el("span", "acoes");
+    acoes.style.marginLeft = "auto";
+    acoes.append(
+      botao("↑", () => { if (i > 0) { [lista[i - 1], lista[i]] = [lista[i], lista[i - 1]]; atualizar(); } }),
+      botao("↓", () => { if (i < lista.length - 1) { [lista[i + 1], lista[i]] = [lista[i], lista[i + 1]]; atualizar(); } }),
+      botao("✕", () => { lista.splice(i, 1); atualizar(); })
+    );
+    cab.append(acoes);
+    li.append(cab);
+    if (no.t === "rep") li.append(montarBloco("faça", no.corpo));
+    if (no.t === "se") {
+      li.append(montarBloco("faça", no.faz));
+      if (no.senao) li.append(montarBloco("senão", no.senao));
+    }
+    return li;
+  }
+
+  function desenharEditor() {
+    const box = $("#editor");
+    box.replaceChildren();
+    box.append(el("div", "rotulo-bloco", "Programa do carro (executa de cima para baixo)"));
+    box.append(montarLista(prog));
+    box.append(barraAdicionar(prog));
+  }
+
+  // ---------- Fluxo ----------
+  function setMsg(texto, tipo) {
+    const m = $("#msg");
+    m.textContent = texto;
+    m.className = "msg " + (tipo || "info");
+  }
+
+  function atualizarContador() {
+    $("#contador").textContent = "Blocos usados: " + contar(prog) + " (ideal: " + nivelAtual().ideal + ")";
+  }
+
+  function atualizarNav() {
+    const box = $("#fases");
+    box.replaceChildren();
+    let grupoAtual = null;
+    NIVEIS.forEach((nv, i) => {
+      if (nv.grupo !== grupoAtual) { grupoAtual = nv.grupo; box.append(el("div", "grupo", grupoAtual)); }
+      const b = el("button", "fase-btn" + (i === atual ? " atual" : ""));
+      b.type = "button";
+      b.append(el("span", "estrelas", progresso[nv.id] ? "★".repeat(progresso[nv.id]) : ""));
+      b.append(document.createTextNode((i + 1) + ". " + nv.titulo));
+      b.onclick = () => carregarFase(i);
+      box.append(b);
+    });
+    const feitas = NIVEIS.filter((nv) => progresso[nv.id]).length;
+    box.append(el("p", "progresso", "Concluídas: " + feitas + " de " + NIVEIS.length));
+  }
+
+  function setBotoes() {
+    const nv = nivelAtual();
+    $("#btn-executar").disabled = animando;
+    $("#btn-proxima").disabled = animando || !progresso[nv.id] || atual >= NIVEIS.length - 1;
+  }
+
+  function atualizar() {
+    if (animando) return;
+    desenharEditor();
+    desenharCenaInicial();
+    setMsg("", "info");
+    atualizarContador();
+  }
+
+  function carregarFase(i) {
+    atual = i;
+    animando = false;
+    document.body.classList.remove("rodando");
+    const nv = nivelAtual();
+    $("#titulo-fase").textContent = (i + 1) + ". " + nv.titulo;
+    $("#objetivo").textContent = nv.objetivo;
+    prog = clonar(nv.inicial || []);
+    setMsg("", "info");
+    desenharEditor();
+    desenharCenaInicial();
+    atualizarContador();
+    atualizarNav();
+    setBotoes();
+  }
+
+  function destacar(uid, falhou) {
+    document.querySelectorAll("li.no.ativo, li.no.falhou").forEach((li) => li.classList.remove("ativo", "falhou"));
+    if (uid == null) return;
+    const li = document.querySelector('li.no[data-uid="' + uid + '"]');
+    if (li) li.classList.add(falhou ? "falhou" : "ativo");
+  }
+
+  function executarPrograma() {
+    if (animando) return;
+    const nv = nivelAtual();
+    const r = simular(prog, nv);
+    animando = true;
+    document.body.classList.add("rodando");
+    setBotoes();
+    setMsg("Executando…", "info");
+    let i = 0;
+    const passo = () => {
+      const f = r.trace[i];
+      desenharCena(f, nv);
+      mostrarEstado(f.t, nv);
+      destacar(f.uid, !!f.erro);
+      i++;
+      if (i < r.trace.length) {
+        setTimeout(passo, 500);
+      } else {
+        animando = false;
+        document.body.classList.remove("rodando");
+        concluirFase(r, nv);
+      }
+    };
+    passo();
+  }
+
+  function concluirFase(r, nv) {
+    if (r.ok) {
+      const n = contar(prog);
+      const st = estrelasPara(n, nv.ideal);
+      if (st > (progresso[nv.id] || 0)) { progresso[nv.id] = st; salvarProgresso(); }
+      setMsg(r.msg + " " + "★".repeat(st) + "☆".repeat(3 - st) + " — " + n + " blocos (ideal: " + nv.ideal + ").", "ok");
+    } else {
+      setMsg(r.msg, "erro");
+    }
+    atualizarNav();
+    setBotoes();
+  }
+
+  // ---------- Eventos e início ----------
+  $("#btn-executar").onclick = executarPrograma;
+  $("#btn-limpar").onclick = () => { prog = []; atualizar(); };
+  $("#btn-reiniciar").onclick = () => { prog = clonar(nivelAtual().inicial || []); atualizar(); };
+  $("#btn-dica").onclick = () => setMsg("Dica: " + nivelAtual().dica, "info");
+  $("#btn-solucao").onclick = () => {
+    prog = clonar(nivelAtual().solucao || []);
+    atualizar();
+    setMsg("Solução carregada. Clique em Executar para ver o carro em ação.", "info");
+  };
+  $("#btn-proxima").onclick = () => { if (atual < NIVEIS.length - 1) carregarFase(atual + 1); };
+
+  carregarFase(0);
+})();
+</script>
+</body>
+</html>
