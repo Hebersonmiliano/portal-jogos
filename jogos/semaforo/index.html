@@ -298,8 +298,13 @@
       ctx.fillText("🚶", xs, 110);
     }
     // carro
+    // O emoji 🚗 aponta para a esquerda: espelhamos para o carro andar para a direita.
+    ctx.save();
+    ctx.translate((f.x + 0.5) * T, 95);
+    ctx.scale(-1, 1);
     ctx.font = "38px system-ui, sans-serif";
-    ctx.fillText("🚗", (f.x + 0.5) * T, 95);
+    ctx.fillText("🚗", 0, 0);
+    ctx.restore();
     if (f.erro) {
       ctx.strokeStyle = "#b5382b"; ctx.lineWidth = 4;
       ctx.strokeRect(f.x * T + 4, 62, T - 8, 66);
