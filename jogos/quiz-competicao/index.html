@@ -268,6 +268,33 @@
     m.className = tipo || "";
   }
 
+  let valorAtual = 10;
+  let streak = [0, 0];
+  let contando = false;
+
+  // Contagem "3, 2, 1, valendo!" antes de cada partida.
+  function contagemRegressiva() {
+    contando = true;
+    document.getElementById("btn-proxima").disabled = true;
+    document.getElementById("pergunta").textContent = "Preparar...";
+    let n = 3;
+    const passo = () => {
+      if (n > 0) {
+        document.getElementById("pergunta").textContent = n + "...";
+        mostrar("Prontos para a disputa!", "");
+        somTique();
+        n--;
+        setTimeout(passo, 800);
+      } else {
+        document.getElementById("pergunta").textContent = "VALENDO!";
+        mostrar("Valendo!", "ok");
+        somAcerto();
+        setTimeout(() => { contando = false; perguntar(); }, 500);
+      }
+    };
+    passo();
+  }
+
   // Nova ordem a cada partida, sempre diferente da anterior.
   let ordem = [];
   let ultimaOrdem = null;
@@ -300,8 +327,9 @@
     document.getElementById("cartaInicio").classList.add("oculto");
     document.getElementById("cartaFim").classList.add("oculto");
     document.getElementById("cartaJogo").classList.remove("oculto");
+    streak = [0, 0];
     musicaLigar();
-    perguntar();
+    contagemRegressiva();
   }
 
   function perguntar() {
@@ -312,8 +340,9 @@
     urgente = false;
     document.getElementById("rodada-txt").textContent = "Pergunta " + (q + 1) + " de " + PERGUNTAS.length;
     document.getElementById("pergunta").textContent = p.p;
+    valorAtual = q % 4 === 3 ? 20 : 10;
     document.getElementById("btn-proxima").disabled = true;
-    mostrar("Valendo! Quem responde certo primeiro ganha 10 pontos.", "");
+    mostrar(valorAtual === 20 ? "⭐ PERGUNTA VALENDO DOBRADO! Quem acertar primeiro ganha 20 pontos." : "Valendo! Quem responde certo primeiro ganha 10 pontos.", valorAtual === 20 ? "ok" : "");
     atualizarPlacar();
     montarOpcoes(0, p);
     montarOpcoes(1, p);
@@ -359,10 +388,10 @@
   }
 
   function responder(jog, k) {
-    if (resolvida || bloqueado[jog]) return;
+    if (contando || resolvida || bloqueado[jog]) return;
     const p = perguntaAtual();
     if (k === p.c) {
-      pontos[jog] += 10;
+      pontos[jog] += valorAtual;
       somAcerto();
       terminarPergunta(jog);
     } else {
@@ -390,10 +419,18 @@
         if (k === p.c) b.classList.add("certa");
       });
     });
+    // Sequência de acertos: quem acerta seguido ganha bônus; errar ou perder a vez zera.
+    [0, 1].forEach(j => { streak[j] = j === vencedor ? streak[j] + 1 : 0; });
     if (vencedor === null) {
       mostrar("Ninguém acertou. A resposta era: " + p.o[p.c] + ".", "erro");
     } else {
-      mostrar(nomes[vencedor] + " acertou primeiro! +10 pontos.", "ok");
+      let texto = nomes[vencedor] + " acertou primeiro! +" + valorAtual + " pontos.";
+      if (streak[vencedor] >= 2) {
+        const bonus = 5 * (streak[vencedor] - 1);
+        pontos[vencedor] += bonus;
+        texto += " 🔥 Sequência de " + streak[vencedor] + "! +" + bonus + " de bônus.";
+      }
+      mostrar(texto, "ok");
     }
     atualizarPlacar();
     document.getElementById("btn-proxima").disabled = false;
