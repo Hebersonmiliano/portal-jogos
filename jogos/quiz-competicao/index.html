@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz de competição — Portal Pixel</title>
+<meta name="description" content="Quiz para 2 alunos sobre programação de jogos, com tempo, música emocionante e efeitos sonoros.">
+<style>
+  :root { --bg:#f4f1ea; --card:#ffffff; --ink:#23211d; --muted:#6b665c; --acc:#2f7d6d; --acc-2:#e0a526; --erro:#b5382b; --ok:#2e7d4f; --borda:#d8d2c4; --destaque:#e6f2ec; --azul:#3d5a80; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:12px 18px; background:var(--card); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  header h1 { font-size:1.2rem; margin:0; }
+  header .direita { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  header a, header .link { color:var(--acc); text-decoration:none; font-weight:600; background:none; border:0; font:inherit; cursor:pointer; padding:0; }
+  main { max-width:900px; margin:0 auto; padding:16px; display:grid; gap:14px; }
+  .card { background:var(--card); border:1px solid var(--borda); border-radius:12px; padding:16px; }
+  .card h2 { font-size:1rem; margin:0 0 8px; }
+  .card p { margin:0 0 6px; line-height:1.45; }
+  .aviso { color:var(--muted); font-size:.92rem; }
+  .nomes { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:640px) { .nomes { grid-template-columns:1fr; } }
+  .nomes label { font-weight:700; display:block; margin-bottom:4px; }
+  .nomes input { font:inherit; font-size:1rem; padding:10px 12px; border:2px solid var(--borda); border-radius:10px; width:100%; }
+  .placar { display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center; text-align:center; }
+  .placar .jog { padding:8px; border-radius:10px; border:2px solid var(--borda); }
+  .placar .p1 { border-color:var(--acc); }
+  .placar .p2 { border-color:var(--azul); }
+  .placar strong { display:block; font-size:1.05rem; }
+  .placar .pts { font-size:1.9rem; font-weight:800; }
+  .placar small { color:var(--muted); }
+  .rodada { font-weight:700; color:var(--muted); }
+  .tempo { height:14px; background:#ebe6da; border-radius:999px; overflow:hidden; }
+  #barra { height:100%; width:100%; background:var(--acc); transition:width .1s linear, background .3s; }
+  #barra.urgente { background:var(--erro); }
+  .segundos { text-align:center; font-weight:800; font-size:1.3rem; margin:4px 0 0; font-variant-numeric:tabular-nums; }
+  .pergunta { font-size:1.2rem; font-weight:700; line-height:1.35; text-align:center; margin:8px 0 12px; min-height:3.2em; }
+  .alunos { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:640px) { .alunos { grid-template-columns:1fr; } }
+  .alunos h3 { margin:0 0 6px; font-size:.95rem; }
+  .alunos .p1 h3 { color:var(--acc); }
+  .alunos .p2 h3 { color:var(--azul); }
+  .opcoes { display:grid; gap:6px; }
+  .opcoes button { text-align:left; padding:10px 12px; border-radius:10px; border:2px solid var(--borda); background:var(--card); font:inherit; cursor:pointer; color:var(--ink); }
+  .opcoes button:disabled { cursor:default; opacity:.8; }
+  .opcoes button.certa { border-color:var(--ok); background:var(--destaque); font-weight:700; }
+  .opcoes button.errada { border-color:var(--erro); }
+  .opcoes .tecla { display:inline-block; min-width:1.6em; font-weight:800; color:var(--muted); }
+  #msg { min-height:1.4em; font-weight:700; margin:10px 0 0; text-align:center; }
+  #msg.ok { color:var(--ok); }
+  #msg.erro { color:var(--erro); }
+  .botoes { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px; }
+  button.acao { border:0; border-radius:10px; padding:10px 16px; font:inherit; font-weight:700; cursor:pointer; background:var(--acc); color:#fff; }
+  button.acao.sec { background:var(--card); color:var(--acc); border:2px solid var(--acc); }
+  button.acao:disabled { opacity:.45; cursor:not-allowed; }
+  .oculto { display:none !important; }
+  .fim { text-align:center; }
+  .fim h2 { font-size:1.6rem; margin:0 0 8px; }
+  .sobreposicao { position:fixed; inset:0; background:rgba(20,18,15,.6); z-index:50; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .sobreposicao.oculto { display:none; }
+  #fogos { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; }
+  .caixa { position:relative; background:var(--card); border-radius:16px; padding:24px; max-width:420px; width:100%; text-align:center; }
+  .caixa h2 { margin:0 0 8px; font-size:1.5rem; }
+  @media (max-width:480px) { main { padding:10px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Quiz de competição</h1>
+  <div class="direita">
+    <button class="link" id="btn-som" type="button">🔊 Som ligado</button>
+    <a href="../../index.html">← Portal Pixel</a>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="cartaInicio">
+    <h2>Dois alunos, uma tela, 12 perguntas</h2>
+    <p>Quem responder certo primeiro ganha 10 pontos. Cada pergunta tem 15 segundos. Errou? Você fica travado nessa pergunta, e o outro aluno ainda pode responder.</p>
+    <p class="aviso">Aluno 1 responde com as teclas <strong>Q W E R</strong> (ou botões verdes). Aluno 2 com <strong>U I O P</strong> (ou botões azuis). A música fica mais intensa nos últimos 5 segundos.</p>
+    <div class="nomes" style="margin-top:12px">
+      <div><label for="nome1">Aluno 1</label><input id="nome1" maxlength="20" value="Aluno 1" autocomplete="off"></div>
+      <div><label for="nome2">Aluno 2</label><input id="nome2" maxlength="20" value="Aluno 2" autocomplete="off"></div>
+    </div>
+    <div class="botoes" style="margin-top:14px">
+      <button class="acao" id="btn-comecar" type="button">▶ Começar com música</button>
+    </div>
+  </section>
+
+  <section class="card oculto" id="cartaJogo">
+    <div class="placar">
+      <div class="jog p1"><strong id="n1">Aluno 1</strong><span class="pts" id="p1">0</span><small>pontos</small></div>
+      <div class="rodada" id="rodada-txt">Pergunta 1 de 12</div>
+      <div class="jog p2"><strong id="n2">Aluno 2</strong><span class="pts" id="p2">0</span><small>pontos</small></div>
+    </div>
+
+    <div class="tempo" style="margin-top:14px"><div id="barra"></div></div>
+    <p class="segundos" id="segundos">15</p>
+
+    <p class="pergunta" id="pergunta"></p>
+
+    <div class="alunos">
+      <div class="p1">
+        <h3 id="t1">Aluno 1 · Q W E R</h3>
+        <div class="opcoes" id="op1"></div>
+      </div>
+      <div class="p2">
+        <h3 id="t2">Aluno 2 · U I O P</h3>
+        <div class="opcoes" id="op2"></div>
+      </div>
+    </div>
+
+    <p id="msg" aria-live="polite"></p>
+    <div class="botoes">
+      <button class="acao" id="btn-proxima" type="button" disabled>Próxima pergunta</button>
+    </div>
+  </section>
+
+  <section class="card fim oculto" id="cartaFim">
+    <h2 id="fim-titulo">Fim de jogo</h2>
+    <p id="fim-texto"></p>
+    <div class="botoes" style="margin-top:12px">
+      <button class="acao" id="btn-nova" type="button">Nova competição</button>
+    </div>
+  </section>
+</main>
+
+<div class="sobreposicao oculto" id="festa">
+  <canvas id="fogos"></canvas>
+  <section class="caixa">
+    <h2 id="festa-titulo">🏆 Campeão!</h2>
+    <p id="festa-texto"></p>
+    <div class="botoes"><button class="acao" id="btn-festa" type="button">Continuar</button></div>
+  </section>
+</div>
+
+<script>
+  const TEMPO = 15;
+  const PERGUNTAS = [
+    { p: "Qual é a linguagem própria da engine Godot?", o: ["GDScript", "C#", "Java", "Python"], c: 0 },
+    { p: "Qual engine permite criar jogos montando eventos do tipo 'Se... então...', sem programar?", o: ["Unity", "GDevelop", "Blender", "Construct Wiki"], c: 1 },
+    { p: "O que é um sprite?", o: ["Um tipo de moeda do jogo", "Uma imagem que representa um personagem ou item", "Um botão de salvar", "Uma linha de código"], c: 1 },
+    { p: "O que significa FPS em jogos?", o: ["Fases por segundo", "Quadros por segundo", "Fontes por sprite", "Faixas de som"], c: 1 },
+    { p: "O que é o loop do jogo?", o: ["Um inimigo que anda em círculos", "O ciclo que se repete: ler, atualizar e desenhar", "Uma fase repetida", "O som de fundo"], c: 1 },
+    { p: "Quando dois objetos se encostam no jogo, isso se chama:", o: ["Pontuação", "Checkpoint", "Colisão", "Asset"], c: 2 },
+    { p: "Para que serve um tilemap?", o: ["Tocar música", "Montar o cenário com blocos repetidos", "Guardar a pontuação", "Criar o menu inicial"], c: 1 },
+    { p: "Qual é a linguagem mais usada com a engine Unity?", o: ["C#", "GDScript", "Assembly", "HTML"], c: 0 },
+    { p: "Um checkpoint serve para:", o: ["Salvar o progresso do jogador", "Desenhar o cenário", "Aumentar a velocidade", "Tocar o som de vitória"], c: 0 },
+    { p: "A gravidade em um jogo normalmente faz o quê?", o: ["Empurra os objetos para cima", "Puxa os objetos para baixo a cada quadro", "Deixa os objetos parados", "Troca as cores"], c: 1 },
+    { p: "Em engines visuais, o que é um evento?", o: ["Um tipo de imagem", "Algo que acontece e dispara uma ação", "Um erro do programa", "Uma pasta de arquivos"], c: 1 },
+    { p: "Uma variável serve para:", o: ["Guardar um valor que pode mudar, como pontos", "Desenhar a tela", "Tocar música", "Criar um inimigo"], c: 0 }
+  ];
+
+  let nomes = ["Aluno 1", "Aluno 2"];
+  let pontos = [0, 0];
+  let q = 0;
+  let bloqueado = [false, false];
+  let resolvida = false;
+  let restante = TEMPO;
+  let relogio = null;
+
+  // ---------- Áudio: música tensa e efeitos com Web Audio (sem arquivos externos) ----------
+  let ctx = null, master = null, ruido = null, somLigado = true;
+  let musicaId = null, passo = 0, proximoT = 0, urgente = false;
+  const BAIXO = [110, 110, 146.8, 110, 98, 98, 130.8, 98];
+  const MELODIA = [440, 523.25, 659.25, 523.25, 392, 493.88, 587.33, 493.88];
+
+  function audioIniciar() {
+    if (!ctx) {
+      try {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) { return false; }
+      master = ctx.createGain();
+      master.gain.value = somLigado ? 0.22 : 0;
+      master.connect(ctx.destination);
+      const tam = ctx.sampleRate * 0.05;
+      ruido = ctx.createBuffer(1, tam, ctx.sampleRate);
+      const d = ruido.getChannelData(0);
+      for (let i = 0; i < tam; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    return true;
+  }
+
+  function nota(freq, t, dur, tipo, vol) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = tipo;
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+
+  function bumbo(t, vol) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(130, t);
+    o.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + 0.16);
+  }
+
+  function chimbal(t, vol) {
+    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = ruido;
+    f.type = "highpass"; f.frequency.value = 7000;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    s.connect(f); f.connect(g); g.connect(master);
+    s.start(t); s.stop(t + 0.06);
+  }
+
+  function agendarMusica() {
+    if (!ctx) return;
+    const bpm = urgente ? 172 : 132;
+    const dur = 60 / bpm / 2;
+    while (proximoT < ctx.currentTime + 0.2) {
+      const i = passo % 8;
+      nota(BAIXO[i], proximoT, dur * 1.8, "sawtooth", 0.05);
+      nota(MELODIA[i], proximoT, dur * 0.9, "square", 0.025);
+      if (passo % 4 === 0) bumbo(proximoT, 0.5);
+      if (passo % 2 === 1) chimbal(proximoT, urgente ? 0.12 : 0.06);
+      passo++;
+      proximoT += dur;
+    }
+  }
+
+  function musicaLigar() {
+    if (!audioIniciar() || musicaId) return;
+    proximoT = ctx.currentTime + 0.05;
+    musicaId = setInterval(agendarMusica, 50);
+  }
+
+  function musicaParar() {
+    if (musicaId) { clearInterval(musicaId); musicaId = null; }
+  }
+
+  function somAcerto() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => nota(f, t + i * 0.09, 0.25, "triangle", 0.18));
+  }
+
+  function somErro() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    nota(220, t, 0.35, "square", 0.12);
+    nota(165, t + 0.15, 0.4, "square", 0.12);
+  }
+
+  function somTique() {
+    if (!ctx) return;
+    nota(1200, ctx.currentTime, 0.04, "square", 0.05);
+  }
+
+  document.getElementById("btn-som").addEventListener("click", () => {
+    somLigado = !somLigado;
+    if (master) master.gain.value = somLigado ? 0.22 : 0;
+    document.getElementById("btn-som").textContent = somLigado ? "🔊 Som ligado" : "🔇 Som desligado";
+  });
+
+  // ---------- Jogo ----------
+  function mostrar(texto, tipo) {
+    const m = document.getElementById("msg");
+    m.textContent = texto;
+    m.className = tipo || "";
+  }
+
+  function iniciarPartida() {
+    nomes = [document.getElementById("nome1").value.trim() || "Aluno 1", document.getElementById("nome2").value.trim() || "Aluno 2"];
+    pontos = [0, 0];
+    q = 0;
+    document.getElementById("n1").textContent = nomes[0];
+    document.getElementById("n2").textContent = nomes[1];
+    document.getElementById("t1").textContent = nomes[0] + " · Q W E R";
+    document.getElementById("t2").textContent = nomes[1] + " · U I O P";
+    document.getElementById("cartaInicio").classList.add("oculto");
+    document.getElementById("cartaFim").classList.add("oculto");
+    document.getElementById("cartaJogo").classList.remove("oculto");
+    musicaLigar();
+    perguntar();
+  }
+
+  function perguntar() {
+    const p = PERGUNTAS[q];
+    resolvida = false;
+    bloqueado = [false, false];
+    restante = TEMPO;
+    urgente = false;
+    document.getElementById("rodada-txt").textContent = "Pergunta " + (q + 1) + " de " + PERGUNTAS.length;
+    document.getElementById("pergunta").textContent = p.p;
+    document.getElementById("btn-proxima").disabled = true;
+    mostrar("Valendo! Quem responde certo primeiro ganha 10 pontos.", "");
+    atualizarPlacar();
+    montarOpcoes(0, p);
+    montarOpcoes(1, p);
+    atualizarTempo();
+    clearInterval(relogio);
+    relogio = setInterval(tiqueTempo, 100);
+  }
+
+  function montarOpcoes(jog, p) {
+    const box = document.getElementById("op" + (jog + 1));
+    box.innerHTML = "";
+    const teclas = jog === 0 ? ["Q", "W", "E", "R"] : ["U", "I", "O", "P"];
+    p.o.forEach((texto, k) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = '<span class="tecla">' + teclas[k] + "</span> ";
+      b.appendChild(document.createTextNode(texto));
+      b.addEventListener("click", () => responder(jog, k));
+      box.appendChild(b);
+    });
+  }
+
+  function tiqueTempo() {
+    restante = Math.max(0, restante - 0.1);
+    atualizarTempo();
+    if (!urgente && restante <= 5) {
+      urgente = true;
+      mostrar("Últimos 5 segundos!", "erro");
+    }
+    if (restante <= 0) {
+      clearInterval(relogio);
+      relogio = null;
+      terminarPergunta(null);
+    }
+  }
+
+  function atualizarTempo() {
+    const pct = (restante / TEMPO) * 100;
+    const barra = document.getElementById("barra");
+    barra.style.width = pct + "%";
+    barra.classList.toggle("urgente", restante <= 5);
+    document.getElementById("segundos").textContent = Math.ceil(restante);
+  }
+
+  function responder(jog, k) {
+    if (resolvida || bloqueado[jog]) return;
+    const p = PERGUNTAS[q];
+    if (k === p.c) {
+      pontos[jog] += 10;
+      somAcerto();
+      terminarPergunta(jog);
+    } else {
+      bloqueado[jog] = true;
+      somErro();
+      const botoes = document.querySelectorAll("#op" + (jog + 1) + " button");
+      botoes[k].classList.add("errada");
+      botoes.forEach(b => b.disabled = true);
+      mostrar(nomes[jog] + " errou e fica travado nesta pergunta.", "erro");
+      atualizarPlacar();
+      if (bloqueado[0] && bloqueado[1]) terminarPergunta(null);
+    }
+  }
+
+  function terminarPergunta(vencedor) {
+    if (resolvida) return;
+    resolvida = true;
+    clearInterval(relogio);
+    relogio = null;
+    const p = PERGUNTAS[q];
+    [0, 1].forEach(j => {
+      const botoes = document.querySelectorAll("#op" + (j + 1) + " button");
+      botoes.forEach((b, k) => {
+        b.disabled = true;
+        if (k === p.c) b.classList.add("certa");
+      });
+    });
+    if (vencedor === null) {
+      mostrar("Ninguém acertou. A resposta era: " + p.o[p.c] + ".", "erro");
+    } else {
+      mostrar(nomes[vencedor] + " acertou primeiro! +10 pontos.", "ok");
+    }
+    atualizarPlacar();
+    document.getElementById("btn-proxima").disabled = false;
+  }
+
+  function atualizarPlacar() {
+    document.getElementById("p1").textContent = pontos[0];
+    document.getElementById("p2").textContent = pontos[1];
+  }
+
+  function proxima() {
+    if (q < PERGUNTAS.length - 1) {
+      q++;
+      perguntar();
+    } else {
+      fimDeJogo();
+    }
+  }
+
+  function fimDeJogo() {
+    clearInterval(relogio);
+    relogio = null;
+    musicaParar();
+    document.getElementById("cartaJogo").classList.add("oculto");
+    let titulo, texto;
+    if (pontos[0] === pontos[1]) {
+      titulo = "Empate!";
+      texto = "Os dois alunos fizeram " + pontos[0] + " pontos.";
+    } else {
+      const v = pontos[0] > pontos[1] ? 0 : 1;
+      titulo = "🏆 " + nomes[v] + " venceu!";
+      texto = "Placar final: " + nomes[0] + " " + pontos[0] + " × " + pontos[1] + " " + nomes[1] + ".";
+      festa(titulo, texto);
+    }
+    document.getElementById("fim-titulo").textContent = titulo;
+    document.getElementById("fim-texto").textContent = texto;
+    document.getElementById("cartaFim").classList.remove("oculto");
+  }
+
+  // ---------- Fogos na vitória ----------
+  let fogosId = null;
+  function festa(titulo, texto) {
+    const ov = document.getElementById("festa");
+    const cv = document.getElementById("fogos");
+    document.getElementById("festa-titulo").textContent = titulo;
+    document.getElementById("festa-texto").textContent = texto;
+    ov.classList.remove("oculto");
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+    const g = cv.getContext("2d");
+    const cores = ["#e0a526", "#2f7d6d", "#b5382b", "#3d5a80", "#ffffff", "#e85d9a"];
+    const parts = [];
+    const explodir = (x, y) => {
+      const cor = cores[Math.floor(Math.random() * cores.length)];
+      for (let i = 0; i < 60; i++) {
+        const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 4;
+        parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vida: 60 + Math.random() * 40, max: 100, cor });
+      }
+    };
+    let ultimo = 0;
+    const quadro = t => {
+      if (t - ultimo > 450) { explodir(Math.random() * cv.width, Math.random() * cv.height * 0.6 + 40); ultimo = t; }
+      g.clearRect(0, 0, cv.width, cv.height);
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.vx *= 0.985; p.vida--;
+        if (p.vida <= 0) { parts.splice(i, 1); continue; }
+        g.globalAlpha = Math.max(0, p.vida / p.max);
+        g.fillStyle = p.cor;
+        g.beginPath(); g.arc(p.x, p.y, 2.5, 0, Math.PI * 2); g.fill();
+      }
+      g.globalAlpha = 1;
+      fogosId = requestAnimationFrame(quadro);
+    };
+    fogosId = requestAnimationFrame(quadro);
+  }
+
+  function fecharFesta() {
+    if (fogosId !== null) cancelAnimationFrame(fogosId);
+    fogosId = null;
+    document.getElementById("festa").classList.add("oculto");
+  }
+
+  // ---------- Teclado e botões ----------
+  const TECLAS = { q: [0, 0], w: [0, 1], e: [0, 2], r: [0, 3], u: [1, 0], i: [1, 1], o: [1, 2], p: [1, 3] };
+  document.addEventListener("keydown", e => {
+    const t = TECLAS[e.key.toLowerCase()];
+    if (!t || document.getElementById("cartaJogo").classList.contains("oculto")) return;
+    responder(t[0], t[1]);
+  });
+
+  document.getElementById("btn-comecar").addEventListener("click", iniciarPartida);
+  document.getElementById("btn-proxima").addEventListener("click", proxima);
+  document.getElementById("btn-festa").addEventListener("click", fecharFesta);
+  document.getElementById("btn-nova").addEventListener("click", () => {
+    fecharFesta();
+    document.getElementById("cartaFim").classList.add("oculto");
+    document.getElementById("cartaInicio").classList.remove("oculto");
+  });
+</script>
+</body>
+</html>
