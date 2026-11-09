@@ -268,10 +268,31 @@
     m.className = tipo || "";
   }
 
+  // Nova ordem a cada partida, sempre diferente da anterior.
+  let ordem = [];
+  let ultimaOrdem = null;
+  function embaralharPerguntas() {
+    const base = PERGUNTAS.map((_, i) => i);
+    let nova;
+    do {
+      nova = base.slice();
+      for (let i = nova.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nova[i], nova[j]] = [nova[j], nova[i]];
+      }
+    } while (ultimaOrdem && nova.every((v, i) => v === ultimaOrdem[i]));
+    ultimaOrdem = nova;
+    ordem = nova;
+  }
+  function perguntaAtual() {
+    return PERGUNTAS[ordem[q]];
+  }
+
   function iniciarPartida() {
     nomes = [document.getElementById("nome1").value.trim() || "Aluno 1", document.getElementById("nome2").value.trim() || "Aluno 2"];
     pontos = [0, 0];
     q = 0;
+    embaralharPerguntas();
     document.getElementById("n1").textContent = nomes[0];
     document.getElementById("n2").textContent = nomes[1];
     document.getElementById("t1").textContent = nomes[0] + " · Q W E R";
@@ -284,7 +305,7 @@
   }
 
   function perguntar() {
-    const p = PERGUNTAS[q];
+    const p = perguntaAtual();
     resolvida = false;
     bloqueado = [false, false];
     restante = TEMPO;
@@ -339,7 +360,7 @@
 
   function responder(jog, k) {
     if (resolvida || bloqueado[jog]) return;
-    const p = PERGUNTAS[q];
+    const p = perguntaAtual();
     if (k === p.c) {
       pontos[jog] += 10;
       somAcerto();
@@ -361,7 +382,7 @@
     resolvida = true;
     clearInterval(relogio);
     relogio = null;
-    const p = PERGUNTAS[q];
+    const p = perguntaAtual();
     [0, 1].forEach(j => {
       const botoes = document.querySelectorAll("#op" + (j + 1) + " button");
       botoes.forEach((b, k) => {
