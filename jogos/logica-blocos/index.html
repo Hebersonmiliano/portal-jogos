@@ -112,9 +112,13 @@
   // Direções: 0 = norte, 1 = leste, 2 = sul, 3 = oeste. x cresce para a direita, y para baixo.
   const DX = [0, 1, 0, -1];
   const DY = [-1, 0, 1, 0];
-  const ACOES = { frente: "andar para frente", esq: "virar à esquerda", dir: "virar à direita", pegar: "pegar moeda" };
+  const ACOES = { frente: "andar para frente", esq: "virar à esquerda", dir: "virar à direita", pegar: "pegar moeda",
+    cima: "ir para cima", baixo: "ir para baixo", esquerda: "ir para a esquerda", direita: "ir para a direita" };
+  // Blocos absolutos: viram o robô para a direção indicada e andam uma casa.
+  const ABS = { cima: 0, direita: 1, baixo: 2, esquerda: 3 };
   const CONDS = { livre: "caminho à frente está livre", nlivre: "caminho à frente NÃO está livre", moeda: "há moeda aqui", nmoeda: "NÃO há moeda aqui" };
-  const TIPOS = [["frente", "Andar"], ["esq", "Virar à esquerda"], ["dir", "Virar à direita"], ["pegar", "Pegar moeda"], ["rep", "Repetir"], ["se", "Se…"]];
+  const TIPOS = [["cima", "Ir para cima"], ["baixo", "Ir para baixo"], ["esquerda", "Ir para a esquerda"], ["direita", "Ir para a direita"],
+    ["frente", "Andar"], ["esq", "Virar à esquerda"], ["dir", "Virar à direita"], ["pegar", "Pegar moeda"], ["rep", "Repetir"], ["se", "Se…"]];
   const CHAVE = "logica-blocos-progresso-v1";
 
   // ---------- Construtores de blocos (usados nas fases) ----------
@@ -129,15 +133,15 @@
       objetivo: "Leve o robô até a bandeira 🏁 montando a sequência de blocos na ordem certa.",
       dica: "Andar move uma casa na direção em que o robô está virado. Virar só muda a direção.",
       mapa: [".....", ".....", "....S"], inicio: { x: 0, y: 0, d: 1 },
-      permitidos: ["frente", "esq", "dir"], ideal: 7, inicial: [],
-      solucao: [A("frente"), A("frente"), A("frente"), A("frente"), A("dir"), A("frente"), A("frente")] },
+      permitidos: ["cima", "baixo", "esquerda", "direita"], ideal: 6, inicial: [],
+      solucao: [A("direita"), A("direita"), A("direita"), A("direita"), A("baixo"), A("baixo")] },
 
     { id: "n2", grupo: "Sequências", tipo: "programa", titulo: "Pegue a moeda",
       objetivo: "Passe pela moeda ●, pegue-a e siga até a bandeira.",
       dica: "Pegar moeda só funciona quando o robô está em cima da moeda.",
       mapa: ["....", ".*..", "....", "...S"], inicio: { x: 0, y: 0, d: 1 },
-      permitidos: ["frente", "esq", "dir", "pegar"], ideal: 11, inicial: [],
-      solucao: [A("dir"), A("frente"), A("esq"), A("frente"), A("pegar"), A("dir"), A("frente"), A("frente"), A("esq"), A("frente"), A("frente")] },
+      permitidos: ["direita", "baixo", "esquerda", "cima", "pegar"], ideal: 7, inicial: [],
+      solucao: [A("baixo"), A("direita"), A("pegar"), A("baixo"), A("baixo"), A("direita"), A("direita")] },
 
     { id: "n3", grupo: "Repetição", tipo: "programa", titulo: "Repetir é mais rápido",
       objetivo: "Use o bloco Repetir para andar várias casas sem repetir blocos.",
@@ -296,7 +300,8 @@
       for (const n of lista) {
         if (++passos > 5000) throw new ErroJogo("Programa longo demais. Confira se há repetições exageradas.", n.uid);
         if (n.t === "a") {
-          if (n.c === "frente") {
+          if (n.c === "frente" || ABS[n.c] !== undefined) {
+            if (ABS[n.c] !== undefined) d = ABS[n.c];
             const f = aFrente();
             if (!f) { trace.push(foto(n.uid, true)); throw new ErroJogo("O robô bateu na parede!", n.uid); }
             x = f.nx; y = f.ny;
