@@ -1,6 +1,6 @@
 # Trilha Dev — Documento de Design do Jogo (GDD)
 
-Versão do jogo: **1.6.0** · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano
+Versão do jogo: **1.7.0** · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano
 
 Este documento descreve o jogo Trilha Dev, que até a versão 1.5 se chamava Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.
 
@@ -102,7 +102,19 @@ Concluir bem a trilha de HTML5 leva perto de Dev Pleno. Para chegar a Arquiteto 
 
 Ao concluir uma fase, o aluno entra no ranking, que mostra os 10 melhores por XP, com patente, fases concluídas e estrelas. O botão Trocar de aluno apaga o progresso do aluno atual e mantém a pontuação dele no ranking. O botão Limpar ranking zera a tabela.
 
-O ranking fica salvo no navegador. Ele reúne os alunos que jogaram no mesmo computador, não a turma inteira em computadores diferentes.
+Sem turma escolhida, o ranking fica salvo no navegador e reúne só os alunos que jogaram no mesmo computador.
+
+Com uma turma escolhida na tela inicial, o ranking passa a ser online: mostra os 20 melhores da turma, somando o melhor resultado de cada fase. Os nomes aparecem abreviados (primeiro nome e inicial do último), porque a lista pode ser vista sem senha.
+
+### Turma e envio ao professor
+
+A lista de turmas vem do Portal de Avaliações (`hebersonmiliano.github.io/portal-de-avaliacoes`), onde o professor cadastra as turmas no painel. Depois de escolher a turma, cada fase concluída envia ao banco de dados do portal o nome do aluno, a turma, a trilha, a fase, o XP, as estrelas e os acertos de primeira. O banco guarda o melhor resultado de cada fase e conta as partidas.
+
+O professor vê os resultados no painel do Portal de Avaliações, na seção Trilha Dev: posição, fases concluídas, estrelas, XP, avanço em cada trilha e última atividade, com filtro por turma, exportação em CSV e botão para remover um aluno.
+
+Se o envio falhar (sem internet ou servidor fora do ar), o resultado fica guardado no aparelho e o jogo tenta de novo na próxima vez que for aberto.
+
+**Não vale como nota.** O jogo corrige as respostas no navegador do aluno, então um aluno com conhecimento técnico consegue forjar a pontuação. Use para acompanhar o estudo; a nota oficial vem da prova com código do Portal de Avaliações.
 
 ![Ranking da turma](../assets/missao-html5/ranking.jpg)
 
@@ -235,7 +247,7 @@ Os textos entram na página como texto puro, então tags como `<p>` aparecem esc
 
 ### Dados salvos
 
-Tudo fica no `localStorage` do navegador. Nada é enviado para a internet.
+O progresso fica no `localStorage` do navegador. Sem turma escolhida, nada é enviado para a internet. Com turma, o melhor resultado de cada fase vai para o banco do Portal de Avaliações (`POST /api/game/result` em `provabd.hebersonmiliano.chatgpt.site`). O campo `turma` guarda a turma escolhida e `enviadas` marca o que já foi enviado.
 
 | Chave | Conteúdo |
 |---|---|
@@ -256,7 +268,7 @@ O progresso da versão 1.0, que só tinha HTML5, é convertido ao abrir o jogo.
 
 Para publicar uma versão nova: altere o jogo, aumente `VERSAO` no jogo e `versao` no catálogo, acrescente a versão no início de `novidades`, atualize este documento e gere a página do guia de novo.
 
-## Testes realizados na versão 1.6.0
+## Testes realizados na versão 1.7.0
 
 - Conferência automática das 210 questões: 10 por fase, 4 alternativas diferentes, 1 certa e explicação preenchida.
 - Quatro partidas automáticas completas em cada uma das 21 fases, que passaram por 199 das 210 questões.
@@ -268,12 +280,22 @@ Para publicar uma versão nova: altere o jogo, aumente `VERSAO` no jogo e `versa
 - Certificado das seis trilhas.
 - Página do jogo e vitrine da página inicial no portal.
 
+Os itens acima foram executados até a versão 1.6 e não foram repetidos na 1.7. Na versão 1.7 foram testados, na prévia local do Portal de Avaliações com banco temporário:
+
+- Testes automáticos do servidor: gravação do melhor resultado, recusa de dados inválidos e de turma desconhecida, ranking com nomes abreviados e separação das turmas por professor.
+- Escolha de turma com progresso já salvo: as fases antigas foram enviadas ao banco.
+- Uma fase jogada até o fim: resultado enviado e ranking online atualizado.
+- Painel do professor: tabela, filtro por turma e seção Trilha Dev.
+
+Não testado na 1.7: envio pelo servidor de produção, que ainda precisa ser publicado com as rotas novas.
+
 Ainda não testado: uso em um celular físico e impressão do certificado em papel.
 
 ## Histórico de versões
 
 | Versão | Data | Mudanças |
 |---|---|---|
+| 1.7 | 10/11/2026 | Escolha de turma, envio dos resultados ao banco do Portal de Avaliações, ranking online e seção Trilha Dev no painel do professor |
 | 1.6 | 10/11/2026 | Novo nome: Trilha Dev. Endereço, pastas e progresso salvo continuam os mesmos |
 | 1.5 | 10/11/2026 | Trilhas de Lógica, Banco de dados e Git; bancos de CSS e JavaScript com 10 questões; patentes recalculadas |
 | 1.4 | 10/11/2026 | Trilhas de CSS e JavaScript, abas, um certificado por trilha, patentes recalculadas |
