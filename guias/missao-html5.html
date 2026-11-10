@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Missão HTML5 — Documento de Design do Jogo (GDD) · Portal Pixel</title>
-  <meta name="description" content="Documento de design (GDD) de Missão HTML5: objetivos, mecânicas, conteúdo das 12 fases, telas, arquitetura, testes e histórico de versões.">
+  <meta name="description" content="Documento de design (GDD) de Missão HTML5: objetivos, mecânicas, conteúdo das 21 fases, telas, arquitetura, testes e histórico de versões.">
   <link rel="icon" type="image/svg+xml" href="../assets/marca/icone.svg">
   <meta name="theme-color" content="#0f1020">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,9 +24,9 @@
       <a class="botao guia-jogar" href="../jogo.html?id=missao-html5">▶ Jogar agora</a>
     </div>
     <div class="guia-grade">
-      <nav class="guia-indice" aria-label="Índice do guia"><strong>Índice</strong><ol><li><a href="#visão-geral">Visão geral</a></li><li><a href="#objetivos-pedagógicos">Objetivos pedagógicos</a></li><li><a href="#público-e-uso-em-sala">Público e uso em sala</a></li><li><a href="#ciclo-de-jogo">Ciclo de jogo</a></li><li><a href="#mecânicas">Mecânicas</a></li><li><a href="#conteúdo">Conteúdo</a></li><li><a href="#telas">Telas</a></li><li><a href="#controles">Controles</a></li><li><a href="#áudio">Áudio</a></li><li><a href="#acessibilidade">Acessibilidade</a></li><li><a href="#arquitetura-técnica">Arquitetura técnica</a></li><li><a href="#integração-com-o-portal-pixel">Integração com o Portal Pixel</a></li><li><a href="#testes-realizados-na-versão-140">Testes realizados na versão 1.4.0</a></li><li><a href="#histórico-de-versões">Histórico de versões</a></li><li><a href="#limitações-e-próximos-passos">Limitações e próximos passos</a></li></ol></nav>
+      <nav class="guia-indice" aria-label="Índice do guia"><strong>Índice</strong><ol><li><a href="#visão-geral">Visão geral</a></li><li><a href="#objetivos-pedagógicos">Objetivos pedagógicos</a></li><li><a href="#público-e-uso-em-sala">Público e uso em sala</a></li><li><a href="#ciclo-de-jogo">Ciclo de jogo</a></li><li><a href="#mecânicas">Mecânicas</a></li><li><a href="#conteúdo">Conteúdo</a></li><li><a href="#telas">Telas</a></li><li><a href="#controles">Controles</a></li><li><a href="#áudio">Áudio</a></li><li><a href="#acessibilidade">Acessibilidade</a></li><li><a href="#arquitetura-técnica">Arquitetura técnica</a></li><li><a href="#integração-com-o-portal-pixel">Integração com o Portal Pixel</a></li><li><a href="#testes-realizados-na-versão-150">Testes realizados na versão 1.5.0</a></li><li><a href="#histórico-de-versões">Histórico de versões</a></li><li><a href="#limitações-e-próximos-passos">Limitações e próximos passos</a></li></ol></nav>
       <article class="guia-texto">
-<p>Versão do jogo: <strong>1.4.0</strong> · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano</p>
+<p>Versão do jogo: <strong>1.5.0</strong> · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano</p>
 <p>Este documento descreve o jogo Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.</p>
 <p><img loading="lazy" decoding="async" alt="Capa de Missão HTML5" src="../assets/missao-html5/capa.jpg" /></p>
 <h2 id="visão-geral">Visão geral</h2>
@@ -76,10 +76,10 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Resumo em uma frase:</strong> o aluno avança por 12 fases de HTML5, CSS e JavaScript respondendo questões sorteadas, com vidas, cronômetro, XP, patentes, ranking e certificado.</p>
+<p><strong>Resumo em uma frase:</strong> o aluno avança por 21 fases, em seis trilhas que vão de HTML5 a Git, respondendo questões sorteadas, com vidas, cronômetro, XP, patentes, ranking e certificado.</p>
 <h2 id="objetivos-pedagógicos">Objetivos pedagógicos</h2>
 <ol>
-<li>Revisar o conteúdo de front-end do curso: marcação com HTML5, estilo com CSS e lógica com JavaScript.</li>
+<li>Revisar o conteúdo do curso: lógica de programação, HTML5, CSS, JavaScript, banco de dados e Git.</li>
 <li>Treinar a leitura de código, com questões de completar o código, achar o erro e prever o resultado.</li>
 <li>Corrigir o erro no momento em que ele acontece: toda resposta, certa ou errada, mostra uma explicação curta.</li>
 <li>Garantir que o aluno veja todo o conteúdo da fase: a questão errada volta para o fim da fila e a fase só termina quando todas forem acertadas.</li>
@@ -95,7 +95,7 @@
 <h2 id="ciclo-de-jogo">Ciclo de jogo</h2>
 <ol>
 <li>O aluno digita o nome. Sem nome, as fases ficam bloqueadas.</li>
-<li>No mapa, escolhe a trilha (HTML5, CSS ou JavaScript) e a fase liberada.</li>
+<li>No mapa, escolhe uma das seis trilhas e a fase liberada.</li>
 <li>A fase sorteia 5 questões do banco e embaralha as alternativas.</li>
 <li>O aluno responde. A tela mostra a alternativa certa e a explicação.</li>
 <li>Acerto: ganha XP e a questão sai da fila. Erro ou tempo esgotado: perde uma vida e a questão volta para o fim da fila.</li>
@@ -107,7 +107,7 @@
 <h3 id="vidas-e-fila-de-questões">Vidas e fila de questões</h3>
 <p>Cada fase começa com 3 vidas. Um erro, ou o fim do tempo, tira uma vida e manda a questão para o fim da fila. Com isso o aluno pode errar até 2 vezes por fase; no terceiro erro a fase termina e pode ser repetida.</p>
 <h3 id="sorteio">Sorteio</h3>
-<p>Cada fase tem um banco de 8 a 10 questões e sorteia 5 por partida. A ordem das questões e das alternativas muda a cada vez. Isso dificulta decorar a posição das respostas e copiar do colega ao lado.</p>
+<p>Cada fase tem um banco de 10 questões e sorteia 5 por partida. A ordem das questões e das alternativas muda a cada vez. Isso dificulta decorar a posição das respostas e copiar do colega ao lado.</p>
 <h3 id="cronômetro">Cronômetro</h3>
 <p>Cada questão tem 40 segundos. Uma barra mostra o tempo, fica vermelha nos últimos 10 segundos e emite um som nos últimos 5. O cronômetro é ligado por padrão e pode ser desligado no mapa de fases.</p>
 <p><img loading="lazy" decoding="async" alt="Questão com cronômetro" src="../assets/missao-html5/questao.jpg" /></p>
@@ -163,7 +163,7 @@
 </tbody>
 </table>
 <h3 id="patentes">Patentes</h3>
-<p>O XP somado das três trilhas define a patente do aluno.</p>
+<p>O XP somado das seis trilhas define a patente do aluno. O máximo possível é 23.100 XP com cronômetro e 17.850 XP sem.</p>
 <table>
 <thead>
 <tr>
@@ -178,23 +178,23 @@
 </tr>
 <tr>
 <td>Dev Júnior</td>
-<td>1.500</td>
+<td>2.500</td>
 </tr>
 <tr>
 <td>Dev Pleno</td>
-<td>4.000</td>
+<td>6.500</td>
 </tr>
 <tr>
 <td>Dev Sênior</td>
-<td>7.000</td>
+<td>11.000</td>
 </tr>
 <tr>
 <td>Arquiteto Web</td>
-<td>10.000</td>
+<td>16.000</td>
 </tr>
 </tbody>
 </table>
-<p>Concluir só a trilha de HTML5 leva até Dev Pleno. Para chegar a Arquiteto Web é preciso jogar bem as três trilhas.</p>
+<p>Concluir bem a trilha de HTML5 leva perto de Dev Pleno. Para chegar a Arquiteto Web é preciso jogar bem quase todas as trilhas. Na versão 1.5 os níveis passaram a pedir mais XP, então um aluno que já tinha jogado pode aparecer com uma patente menor até avançar nas trilhas novas.</p>
 <h3 id="ranking-da-turma">Ranking da turma</h3>
 <p>Ao concluir uma fase, o aluno entra no ranking, que mostra os 10 melhores por XP, com patente, fases concluídas e estrelas. O botão Trocar de aluno apaga o progresso do aluno atual e mantém a pontuação dele no ranking. O botão Limpar ranking zera a tabela.</p>
 <p>O ranking fica salvo no navegador. Ele reúne os alunos que jogaram no mesmo computador, não a turma inteira em computadores diferentes.</p>
@@ -253,48 +253,105 @@
 <tr>
 <td>CSS</td>
 <td>1. Seletores e sintaxe</td>
-<td>Regra, seletor de tag, classe e id, color, background-color</td>
-<td>8</td>
+<td>Regra, seletor de tag, classe e id, descendência, color, background-color</td>
+<td>10</td>
 </tr>
 <tr>
 <td>CSS</td>
 <td>2. Texto e modelo de caixa</td>
-<td>font-size, font-weight, text-align, padding, border, margin</td>
-<td>8</td>
+<td>font-family, font-size, font-weight, text-align, padding, border, margin</td>
+<td>10</td>
 </tr>
 <tr>
 <td>CSS</td>
 <td>3. Layout e responsivo</td>
-<td>Flexbox, grid, media query, rem, :hover, especificidade</td>
-<td>8</td>
+<td>Flexbox, grid, gap, media query, rem, :hover, especificidade</td>
+<td>10</td>
 </tr>
 <tr>
 <td>JavaScript</td>
 <td>1. Variáveis e tipos</td>
-<td>let, const, string, number, boolean, console.log</td>
-<td>8</td>
+<td>let, const, string, number, boolean, typeof, console.log</td>
+<td>10</td>
 </tr>
 <tr>
 <td>JavaScript</td>
 <td>2. Decisão e repetição</td>
 <td>if e else, operadores de comparação e lógicos, for, while</td>
-<td>8</td>
+<td>10</td>
 </tr>
 <tr>
 <td>JavaScript</td>
 <td>3. Funções, listas e página</td>
-<td>function, return, arrays, getElementById, eventos</td>
-<td>8</td>
+<td>function, return, arrays, for...of, getElementById, eventos</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Lógica</td>
+<td>1. Algoritmos e variáveis</td>
+<td>Algoritmo, variável, tipos, atribuição, leia e escreva</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Lógica</td>
+<td>2. Decisão</td>
+<td>se e senão, operadores relacionais e lógicos, escolha</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Lógica</td>
+<td>3. Repetição e vetores</td>
+<td>para, enquanto, repita, contador, acumulador, vetor</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Banco de dados</td>
+<td>1. Conceitos</td>
+<td>Tabela, registro, campo, chave primária e estrangeira, tipos</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Banco de dados</td>
+<td>2. Consultas</td>
+<td>SELECT, FROM, WHERE, ORDER BY, COUNT, LIKE, DISTINCT</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Banco de dados</td>
+<td>3. Alterar e relacionar</td>
+<td>INSERT, UPDATE, DELETE, CREATE e DROP TABLE, JOIN, 1:N</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Git</td>
+<td>1. Primeiros passos</td>
+<td>init, status, add, commit, log</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Git</td>
+<td>2. Repositório remoto</td>
+<td>clone, push, pull, origin, .gitignore, README</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Git</td>
+<td>3. Ramos e equipe</td>
+<td>branch, switch, merge, conflito, pull request, fork</td>
+<td>10</td>
 </tr>
 </tbody>
 </table>
-<p>Total: 3 trilhas, 12 fases e 108 questões.</p>
+<p>Total: 6 trilhas, 21 fases e 210 questões.</p>
+<p>A trilha de Lógica usa pseudocódigo em português, para não depender de uma linguagem. A de Banco de dados usa SQL.</p>
+<p><img loading="lazy" decoding="async" alt="Trilha de Lógica" src="../assets/missao-html5/logica.jpg" /></p>
+<p><img loading="lazy" decoding="async" alt="Trilha de Banco de dados" src="../assets/missao-html5/sql.jpg" /></p>
 <h3 id="tipos-de-questão">Tipos de questão</h3>
 <ul>
 <li><strong>Pergunta:</strong> conceito direto, com quatro alternativas.</li>
 <li><strong>Complete o código:</strong> um trecho com uma lacuna.</li>
 <li><strong>Ache o erro:</strong> um trecho com um erro para identificar.</li>
-<li><strong>O que este código mostra?:</strong> leitura de código, na trilha de JavaScript.</li>
+<li><strong>O que este código mostra?:</strong> leitura de código, nas trilhas de JavaScript, Lógica e Banco de dados.</li>
 </ul>
 <p><img loading="lazy" decoding="async" alt="Trilha de JavaScript" src="../assets/missao-html5/javascript.jpg" /></p>
 <h3 id="regras-de-escrita-das-questões">Regras de escrita das questões</h3>
@@ -489,15 +546,16 @@
 </tbody>
 </table>
 <p>Para publicar uma versão nova: altere o jogo, aumente <code>VERSAO</code> no jogo e <code>versao</code> no catálogo, acrescente a versão no início de <code>novidades</code>, atualize este documento e gere a página do guia de novo.</p>
-<h2 id="testes-realizados-na-versão-140">Testes realizados na versão 1.4.0</h2>
+<h2 id="testes-realizados-na-versão-150">Testes realizados na versão 1.5.0</h2>
 <ul>
-<li>Partida automática completa nas 12 fases, conferindo que cada questão sorteada tem 4 alternativas e exatamente 1 certa.</li>
+<li>Conferência automática das 210 questões: 10 por fase, 4 alternativas diferentes, 1 certa e explicação preenchida.</li>
+<li>Quatro partidas automáticas completas em cada uma das 21 fases, que passaram por 199 das 210 questões.</li>
 <li>Derrota por falta de vidas e nova tentativa.</li>
 <li>Fim do tempo contando como erro.</li>
 <li>Cronômetro desligado: sem barra e sem bônus de rapidez.</li>
 <li>Conversão do progresso salvo pela versão 1.0.</li>
 <li>Ranking com dois alunos e Trocar de aluno.</li>
-<li>Certificado das três trilhas.</li>
+<li>Certificado das seis trilhas.</li>
 <li>Página do jogo e vitrine da página inicial no portal.</li>
 </ul>
 <p>Ainda não testado: uso em um celular físico e impressão do certificado em papel.</p>
@@ -511,6 +569,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>1.5</td>
+<td>10/11/2026</td>
+<td>Trilhas de Lógica, Banco de dados e Git; bancos de CSS e JavaScript com 10 questões; patentes recalculadas</td>
+</tr>
 <tr>
 <td>1.4</td>
 <td>10/11/2026</td>
@@ -541,9 +604,9 @@
 <h2 id="limitações-e-próximos-passos">Limitações e próximos passos</h2>
 <ul>
 <li><strong>Ranking entre computadores:</strong> o ranking é local. Um ranking da turma inteira exige um serviço externo para guardar as pontuações, com conta e regras de privacidade para dados de alunos.</li>
-<li><strong>Banco de CSS e JavaScript:</strong> as fases têm 8 questões; a meta é chegar a 10, como em HTML5.</li>
 <li><strong>Relatório para o professor:</strong> exportar os resultados do ranking em uma planilha.</li>
-<li><strong>Novas trilhas:</strong> lógica de programação, banco de dados e Git seguem o mesmo formato.</li>
+<li><strong>Novas trilhas:</strong> back-end, testes de software e acessibilidade seguem o mesmo formato.</li>
+<li><strong>Bancos maiores:</strong> com mais de 10 questões por fase, o sorteio repete menos.</li>
 </ul></article>
     </div>
   </main>

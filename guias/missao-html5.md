@@ -1,6 +1,6 @@
 # Missão HTML5 — Documento de Design do Jogo (GDD)
 
-Versão do jogo: **1.4.0** · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano
+Versão do jogo: **1.5.0** · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano
 
 Este documento descreve o jogo Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.
 
@@ -20,11 +20,11 @@ Este documento descreve o jogo Missão HTML5: para quem ele é, como funciona, o
 | Endereço | `jogo.html?id=missao-html5` no Portal Pixel |
 | Código | `jogos/missao-html5/index.html` no repositório `portal-jogos` |
 
-**Resumo em uma frase:** o aluno avança por 12 fases de HTML5, CSS e JavaScript respondendo questões sorteadas, com vidas, cronômetro, XP, patentes, ranking e certificado.
+**Resumo em uma frase:** o aluno avança por 21 fases, em seis trilhas que vão de HTML5 a Git, respondendo questões sorteadas, com vidas, cronômetro, XP, patentes, ranking e certificado.
 
 ## Objetivos pedagógicos
 
-1. Revisar o conteúdo de front-end do curso: marcação com HTML5, estilo com CSS e lógica com JavaScript.
+1. Revisar o conteúdo do curso: lógica de programação, HTML5, CSS, JavaScript, banco de dados e Git.
 2. Treinar a leitura de código, com questões de completar o código, achar o erro e prever o resultado.
 3. Corrigir o erro no momento em que ele acontece: toda resposta, certa ou errada, mostra uma explicação curta.
 4. Garantir que o aluno veja todo o conteúdo da fase: a questão errada volta para o fim da fila e a fase só termina quando todas forem acertadas.
@@ -40,7 +40,7 @@ Este documento descreve o jogo Missão HTML5: para quem ele é, como funciona, o
 ## Ciclo de jogo
 
 1. O aluno digita o nome. Sem nome, as fases ficam bloqueadas.
-2. No mapa, escolhe a trilha (HTML5, CSS ou JavaScript) e a fase liberada.
+2. No mapa, escolhe uma das seis trilhas e a fase liberada.
 3. A fase sorteia 5 questões do banco e embaralha as alternativas.
 4. O aluno responde. A tela mostra a alternativa certa e a explicação.
 5. Acerto: ganha XP e a questão sai da fila. Erro ou tempo esgotado: perde uma vida e a questão volta para o fim da fila.
@@ -57,7 +57,7 @@ Cada fase começa com 3 vidas. Um erro, ou o fim do tempo, tira uma vida e manda
 
 ### Sorteio
 
-Cada fase tem um banco de 8 a 10 questões e sorteia 5 por partida. A ordem das questões e das alternativas muda a cada vez. Isso dificulta decorar a posição das respostas e copiar do colega ao lado.
+Cada fase tem um banco de 10 questões e sorteia 5 por partida. A ordem das questões e das alternativas muda a cada vez. Isso dificulta decorar a posição das respostas e copiar do colega ao lado.
 
 ### Cronômetro
 
@@ -86,17 +86,17 @@ O máximo por fase é 1.100 XP com cronômetro e 850 XP sem. O jogo guarda o mel
 
 ### Patentes
 
-O XP somado das três trilhas define a patente do aluno.
+O XP somado das seis trilhas define a patente do aluno. O máximo possível é 23.100 XP com cronômetro e 17.850 XP sem.
 
 | Patente | XP necessário |
 |---|---|
 | Estagiário | 0 |
-| Dev Júnior | 1.500 |
-| Dev Pleno | 4.000 |
-| Dev Sênior | 7.000 |
-| Arquiteto Web | 10.000 |
+| Dev Júnior | 2.500 |
+| Dev Pleno | 6.500 |
+| Dev Sênior | 11.000 |
+| Arquiteto Web | 16.000 |
 
-Concluir só a trilha de HTML5 leva até Dev Pleno. Para chegar a Arquiteto Web é preciso jogar bem as três trilhas.
+Concluir bem a trilha de HTML5 leva perto de Dev Pleno. Para chegar a Arquiteto Web é preciso jogar bem quase todas as trilhas. Na versão 1.5 os níveis passaram a pedir mais XP, então um aluno que já tinha jogado pode aparecer com uma patente menor até avançar nas trilhas novas.
 
 ### Ranking da turma
 
@@ -124,21 +124,36 @@ Cada trilha concluída libera um certificado com o nome do aluno, a patente, os 
 | HTML5 | 4. Tags semânticas | header, nav, main, section, article, aside, footer, figure | 10 |
 | HTML5 | 5. Formulários | form, input e seus tipos, label, required, placeholder, select, textarea | 10 |
 | HTML5 | 6. Desafio final | Tabelas, link de CSS, script, comentário, aninhamento, caça ao erro | 10 |
-| CSS | 1. Seletores e sintaxe | Regra, seletor de tag, classe e id, color, background-color | 8 |
-| CSS | 2. Texto e modelo de caixa | font-size, font-weight, text-align, padding, border, margin | 8 |
-| CSS | 3. Layout e responsivo | Flexbox, grid, media query, rem, :hover, especificidade | 8 |
-| JavaScript | 1. Variáveis e tipos | let, const, string, number, boolean, console.log | 8 |
-| JavaScript | 2. Decisão e repetição | if e else, operadores de comparação e lógicos, for, while | 8 |
-| JavaScript | 3. Funções, listas e página | function, return, arrays, getElementById, eventos | 8 |
+| CSS | 1. Seletores e sintaxe | Regra, seletor de tag, classe e id, descendência, color, background-color | 10 |
+| CSS | 2. Texto e modelo de caixa | font-family, font-size, font-weight, text-align, padding, border, margin | 10 |
+| CSS | 3. Layout e responsivo | Flexbox, grid, gap, media query, rem, :hover, especificidade | 10 |
+| JavaScript | 1. Variáveis e tipos | let, const, string, number, boolean, typeof, console.log | 10 |
+| JavaScript | 2. Decisão e repetição | if e else, operadores de comparação e lógicos, for, while | 10 |
+| JavaScript | 3. Funções, listas e página | function, return, arrays, for...of, getElementById, eventos | 10 |
+| Lógica | 1. Algoritmos e variáveis | Algoritmo, variável, tipos, atribuição, leia e escreva | 10 |
+| Lógica | 2. Decisão | se e senão, operadores relacionais e lógicos, escolha | 10 |
+| Lógica | 3. Repetição e vetores | para, enquanto, repita, contador, acumulador, vetor | 10 |
+| Banco de dados | 1. Conceitos | Tabela, registro, campo, chave primária e estrangeira, tipos | 10 |
+| Banco de dados | 2. Consultas | SELECT, FROM, WHERE, ORDER BY, COUNT, LIKE, DISTINCT | 10 |
+| Banco de dados | 3. Alterar e relacionar | INSERT, UPDATE, DELETE, CREATE e DROP TABLE, JOIN, 1:N | 10 |
+| Git | 1. Primeiros passos | init, status, add, commit, log | 10 |
+| Git | 2. Repositório remoto | clone, push, pull, origin, .gitignore, README | 10 |
+| Git | 3. Ramos e equipe | branch, switch, merge, conflito, pull request, fork | 10 |
 
-Total: 3 trilhas, 12 fases e 108 questões.
+Total: 6 trilhas, 21 fases e 210 questões.
+
+A trilha de Lógica usa pseudocódigo em português, para não depender de uma linguagem. A de Banco de dados usa SQL.
+
+![Trilha de Lógica](../assets/missao-html5/logica.jpg)
+
+![Trilha de Banco de dados](../assets/missao-html5/sql.jpg)
 
 ### Tipos de questão
 
 - **Pergunta:** conceito direto, com quatro alternativas.
 - **Complete o código:** um trecho com uma lacuna.
 - **Ache o erro:** um trecho com um erro para identificar.
-- **O que este código mostra?:** leitura de código, na trilha de JavaScript.
+- **O que este código mostra?:** leitura de código, nas trilhas de JavaScript, Lógica e Banco de dados.
 
 ![Trilha de JavaScript](../assets/missao-html5/javascript.jpg)
 
@@ -241,15 +256,16 @@ O progresso da versão 1.0, que só tinha HTML5, é convertido ao abrir o jogo.
 
 Para publicar uma versão nova: altere o jogo, aumente `VERSAO` no jogo e `versao` no catálogo, acrescente a versão no início de `novidades`, atualize este documento e gere a página do guia de novo.
 
-## Testes realizados na versão 1.4.0
+## Testes realizados na versão 1.5.0
 
-- Partida automática completa nas 12 fases, conferindo que cada questão sorteada tem 4 alternativas e exatamente 1 certa.
+- Conferência automática das 210 questões: 10 por fase, 4 alternativas diferentes, 1 certa e explicação preenchida.
+- Quatro partidas automáticas completas em cada uma das 21 fases, que passaram por 199 das 210 questões.
 - Derrota por falta de vidas e nova tentativa.
 - Fim do tempo contando como erro.
 - Cronômetro desligado: sem barra e sem bônus de rapidez.
 - Conversão do progresso salvo pela versão 1.0.
 - Ranking com dois alunos e Trocar de aluno.
-- Certificado das três trilhas.
+- Certificado das seis trilhas.
 - Página do jogo e vitrine da página inicial no portal.
 
 Ainda não testado: uso em um celular físico e impressão do certificado em papel.
@@ -258,6 +274,7 @@ Ainda não testado: uso em um celular físico e impressão do certificado em pap
 
 | Versão | Data | Mudanças |
 |---|---|---|
+| 1.5 | 10/11/2026 | Trilhas de Lógica, Banco de dados e Git; bancos de CSS e JavaScript com 10 questões; patentes recalculadas |
 | 1.4 | 10/11/2026 | Trilhas de CSS e JavaScript, abas, um certificado por trilha, patentes recalculadas |
 | 1.3 | 10/11/2026 | Ranking da turma e botão Trocar de aluno |
 | 1.2 | 10/11/2026 | Banco de HTML5 com 10 questões por fase e sorteio de 5 |
@@ -267,6 +284,6 @@ Ainda não testado: uso em um celular físico e impressão do certificado em pap
 ## Limitações e próximos passos
 
 - **Ranking entre computadores:** o ranking é local. Um ranking da turma inteira exige um serviço externo para guardar as pontuações, com conta e regras de privacidade para dados de alunos.
-- **Banco de CSS e JavaScript:** as fases têm 8 questões; a meta é chegar a 10, como em HTML5.
 - **Relatório para o professor:** exportar os resultados do ranking em uma planilha.
-- **Novas trilhas:** lógica de programação, banco de dados e Git seguem o mesmo formato.
+- **Novas trilhas:** back-end, testes de software e acessibilidade seguem o mesmo formato.
+- **Bancos maiores:** com mais de 10 questões por fase, o sorteio repete menos.
