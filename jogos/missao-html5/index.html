@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missão HTML5 — Portal Pixel</title>
+<meta name="description" content="Jogo de 6 fases e 30 questões sobre HTML5 para alunos de Desenvolvimento de Sistemas: estrutura, texto, links, semântica, formulários e tabelas.">
+<style>
+  :root { --bg:#141a26; --painel:#1e2636; --painel-2:#273247; --ink:#eef2f8; --muted:#9aa7bd; --acc:#f16529; --acc-2:#ffc145; --ok:#3ecf8e; --erro:#ff6b6b; --borda:#34415a; --codigo:#0e131d; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; font-family:system-ui,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:10px 16px; background:var(--painel); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  header h1 { font-size:1.15rem; margin:0; }
+  header h1 span { color:var(--acc); }
+  header .lado { display:flex; gap:10px; align-items:center; }
+  header a { color:var(--acc-2); text-decoration:none; font-weight:600; font-size:.9rem; }
+  main { max-width:860px; margin:0 auto; padding:16px; display:grid; gap:14px; }
+  .card { background:var(--painel); border:1px solid var(--borda); border-radius:14px; padding:16px; }
+  .oculto { display:none !important; }
+  button { font:inherit; cursor:pointer; }
+  .acao { border:0; border-radius:10px; padding:11px 18px; font-weight:700; background:var(--acc); color:#fff; }
+  .acao.sec { background:transparent; color:var(--ink); border:2px solid var(--borda); }
+  .acao:disabled { opacity:.45; cursor:not-allowed; }
+  .mini { border:1px solid var(--borda); background:var(--painel-2); color:var(--ink); border-radius:8px; padding:6px 10px; }
+  button:focus-visible, input:focus-visible { outline:3px solid var(--acc-2); outline-offset:2px; }
+
+  /* perfil */
+  .perfil { display:flex; gap:14px; align-items:center; flex-wrap:wrap; justify-content:space-between; }
+  .perfil .quem { display:flex; gap:12px; align-items:center; }
+  .avatar { width:52px; height:52px; border-radius:50%; background:var(--acc); display:grid; place-items:center; font-size:1.6rem; }
+  .perfil strong { font-size:1.05rem; }
+  .perfil small { color:var(--muted); display:block; }
+  .xpbox { flex:1; min-width:220px; }
+  .barra { height:12px; border-radius:99px; background:var(--codigo); overflow:hidden; border:1px solid var(--borda); }
+  .barra i { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--acc),var(--acc-2)); transition:width .5s; }
+  .xpbox .linha { display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-bottom:5px; }
+  .nome-form { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .nome-form input { flex:1; min-width:180px; padding:11px 12px; border-radius:10px; border:2px solid var(--borda); background:var(--codigo); color:var(--ink); font:inherit; }
+
+  /* mapa */
+  .mapa { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .fase { text-align:left; border:2px solid var(--borda); background:var(--painel-2); color:var(--ink); border-radius:14px; padding:14px; display:grid; gap:4px; position:relative; }
+  .fase:not(:disabled):hover { border-color:var(--acc); transform:translateY(-2px); }
+  .fase:disabled { opacity:.5; cursor:not-allowed; }
+  .fase .icone { font-size:1.8rem; }
+  .fase .num { font-size:.75rem; color:var(--acc-2); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .fase .titulo { font-weight:700; }
+  .fase .desc { font-size:.82rem; color:var(--muted); line-height:1.3; }
+  .fase .estrelas { letter-spacing:2px; color:var(--acc-2); }
+  .fase.feita { border-color:var(--ok); }
+  .fase.atual { border-color:var(--acc); box-shadow:0 0 0 3px rgba(241,101,41,.25); }
+
+  /* partida */
+  .hud { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .hud .vidas { font-size:1.2rem; letter-spacing:3px; }
+  .hud .combo { font-weight:700; color:var(--acc-2); min-width:110px; text-align:right; }
+  .progresso { display:flex; gap:6px; margin-top:10px; }
+  .progresso i { flex:1; height:8px; border-radius:99px; background:var(--codigo); border:1px solid var(--borda); }
+  .progresso i.ok { background:var(--ok); border-color:var(--ok); }
+  .pergunta { font-size:1.15rem; font-weight:600; line-height:1.4; margin:0 0 10px; }
+  .tipo { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--acc-2); margin-bottom:6px; }
+  pre { margin:0 0 12px; background:var(--codigo); border:1px solid var(--borda); border-radius:10px; padding:12px; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:.95rem; line-height:1.5; color:#cfe3ff; white-space:pre-wrap; word-break:break-word; }
+  .opcoes { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .op { display:flex; gap:10px; align-items:center; text-align:left; border:2px solid var(--borda); background:var(--painel-2); color:var(--ink); border-radius:12px; padding:12px; min-height:58px; line-height:1.3; }
+  .op b { flex:none; width:28px; height:28px; border-radius:8px; background:var(--codigo); display:grid; place-items:center; font-size:.85rem; color:var(--acc-2); }
+  .op span { word-break:break-word; }
+  .op.mono span { font-family:ui-monospace,Consolas,monospace; font-size:.95rem; }
+  .op:not(:disabled):hover { border-color:var(--acc); }
+  .op.certa { border-color:var(--ok); background:rgba(62,207,142,.15); }
+  .op.errada { border-color:var(--erro); background:rgba(255,107,107,.15); animation:treme .3s; }
+  .op:disabled { cursor:default; }
+  @keyframes treme { 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .retorno { margin-top:12px; border-radius:12px; padding:12px 14px; border:2px solid var(--borda); display:grid; gap:10px; }
+  .retorno.ok { border-color:var(--ok); }
+  .retorno.erro { border-color:var(--erro); }
+  .retorno p { margin:0; line-height:1.45; }
+  .retorno .titulo { font-weight:700; }
+  .retorno.ok .titulo { color:var(--ok); }
+  .retorno.erro .titulo { color:var(--erro); }
+  .retorno .linha { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .ganho { color:var(--acc-2); font-weight:700; }
+
+  /* resultado */
+  .resultado { text-align:center; display:grid; gap:10px; justify-items:center; }
+  .resultado h2 { margin:0; font-size:1.5rem; }
+  .resultado .estrelonas { font-size:2.6rem; letter-spacing:6px; color:var(--acc-2); }
+  .resultado .numeros { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .resultado .numeros div { background:var(--painel-2); border:1px solid var(--borda); border-radius:10px; padding:10px 14px; min-width:110px; }
+  .resultado .numeros strong { display:block; font-size:1.3rem; }
+  .resultado .numeros small { color:var(--muted); }
+  .botoes { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+
+  /* certificado */
+  .certificado { background:#fffaf0; color:#23211d; border:6px double #c8963e; border-radius:10px; padding:26px 20px; text-align:center; display:grid; gap:8px; }
+  .certificado h2 { margin:0; font-size:1.6rem; color:#b5451b; }
+  .certificado .aluno { font-size:1.7rem; font-weight:800; border-bottom:2px solid #c8963e; padding:0 20px 4px; justify-self:center; }
+  .certificado p { margin:0; line-height:1.5; }
+  .certificado .quadro { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
+  .certificado .quadro div { border:1px solid #d9c9a3; border-radius:8px; padding:8px 14px; min-width:120px; background:#fff; }
+  .certificado .quadro strong { display:block; font-size:1.25rem; }
+  .certificado small { color:#6b665c; }
+  .tabela { width:100%; border-collapse:collapse; font-size:.9rem; margin-top:6px; }
+  .tabela th, .tabela td { border:1px solid #d9c9a3; padding:5px 8px; text-align:left; }
+  .tabela td:last-child, .tabela th:last-child { text-align:center; }
+
+  #confete { position:fixed; inset:0; pointer-events:none; z-index:5; }
+
+  @media (max-width:640px) {
+    main { padding:10px; }
+    .mapa { grid-template-columns:1fr 1fr; }
+    .opcoes { grid-template-columns:1fr; }
+    .pergunta { font-size:1.05rem; }
+  }
+  @media (max-width:380px) { .mapa { grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+  @media print {
+    body { background:#fff; }
+    header, .nao-imprime, #confete { display:none !important; }
+    .card { border:0; padding:0; background:#fff; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Missão <span>HTML5</span></h1>
+  <div class="lado">
+    <button class="mini" id="btnSom" type="button" aria-pressed="true">🔊 Som</button>
+    <a href="../../index.html">← Portal Pixel</a>
+  </div>
+</header>
+
+<main>
+  <!-- TELA: MAPA -->
+  <div id="telaMapa" style="display:grid; gap:14px;">
+    <section class="card">
+      <div class="perfil">
+        <div class="quem">
+          <div class="avatar" id="avatar">🧑‍💻</div>
+          <div>
+            <strong id="nomeAluno">Aluno</strong>
+            <small id="patente">Estagiário</small>
+          </div>
+        </div>
+        <div class="xpbox">
+          <div class="linha"><span id="xpTexto">0 XP</span><span id="xpProx"></span></div>
+          <div class="barra"><i id="xpBarra"></i></div>
+        </div>
+      </div>
+      <form class="nome-form" id="formNome">
+        <input id="campoNome" type="text" maxlength="40" placeholder="Digite seu nome para começar" aria-label="Seu nome" autocomplete="off" required>
+        <button class="acao" type="submit">Salvar nome</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <p style="margin:0 0 12px; line-height:1.45;"><strong>Como jogar:</strong> são 6 fases com 5 questões cada. Você tem 3 vidas por fase. Questão errada volta para o fim da fila, então só passa quem acerta todas. Acertos seguidos rendem bônus de XP. Complete as 6 fases para receber o certificado.</p>
+      <div class="mapa" id="mapa"></div>
+    </section>
+
+    <section class="card nao-imprime" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:space-between; align-items:center;">
+      <span id="resumo" style="color:var(--muted)"></span>
+      <div class="botoes">
+        <button class="acao oculto" id="btnVerCert" type="button">🎓 Ver certificado</button>
+        <button class="acao sec" id="btnZerar" type="button">Recomeçar do zero</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- TELA: PARTIDA -->
+  <div id="telaJogo" class="oculto" style="display:grid; gap:14px;">
+    <section class="card">
+      <div class="hud">
+        <div><strong id="hudFase"></strong></div>
+        <div class="vidas" id="hudVidas" aria-live="polite"></div>
+        <div class="combo" id="hudCombo"></div>
+      </div>
+      <div class="progresso" id="hudProgresso"></div>
+    </section>
+    <section class="card">
+      <span class="tipo" id="qTipo"></span>
+      <p class="pergunta" id="qTexto"></p>
+      <pre id="qCodigo" class="oculto"></pre>
+      <div class="opcoes" id="qOpcoes"></div>
+      <div class="retorno oculto" id="retorno" aria-live="polite">
+        <p class="titulo" id="retTitulo"></p>
+        <p id="retTexto"></p>
+        <div class="linha">
+          <span class="ganho" id="retGanho"></span>
+          <button class="acao" id="btnProx" type="button">Continuar →</button>
+        </div>
+      </div>
+    </section>
+    <div class="nao-imprime"><button class="acao sec" id="btnSair" type="button">← Voltar ao mapa</button></div>
+  </div>
+
+  <!-- TELA: RESULTADO DA FASE -->
+  <div id="telaFim" class="oculto">
+    <section class="card resultado">
+      <h2 id="fimTitulo"></h2>
+      <div class="estrelonas" id="fimEstrelas"></div>
+      <p id="fimTexto" style="margin:0; color:var(--muted)"></p>
+      <div class="numeros" id="fimNumeros"></div>
+      <div class="botoes">
+        <button class="acao" id="btnFimPrincipal" type="button"></button>
+        <button class="acao sec" id="btnFimMapa" type="button">Mapa de fases</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- TELA: CERTIFICADO -->
+  <div id="telaCert" class="oculto" style="display:grid; gap:14px;">
+    <section class="certificado">
+      <small>PORTAL PIXEL · MISSÃO HTML5</small>
+      <h2>🎓 Certificado de conclusão</h2>
+      <p>Certificamos que</p>
+      <div class="aluno" id="certNome"></div>
+      <p>concluiu as 6 fases e respondeu as 30 questões de HTML5,<br>alcançando a patente <strong id="certPatente"></strong>.</p>
+      <div class="quadro" id="certQuadro"></div>
+      <table class="tabela" id="certTabela"></table>
+      <small id="certData"></small>
+    </section>
+    <div class="botoes nao-imprime">
+      <button class="acao" id="btnImprimir" type="button">🖨️ Imprimir / salvar PDF</button>
+      <button class="acao sec" id="btnCertMapa" type="button">Mapa de fases</button>
+    </div>
+  </div>
+</main>
+
+<canvas id="confete"></canvas>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- CONTEÚDO: 6 fases x 5 questões = 30 ----------
+  // c = índice da resposta certa em "op". "cod" (opcional) mostra um trecho de código.
+  var FASES = [
+    { icone: "🧱", titulo: "Estrutura da página", desc: "DOCTYPE, head, body, title e meta.", q: [
+      { t: "O que significa a sigla HTML?", op: ["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "HyperLinks and Text Management Language"], c: 0,
+        e: "HTML é HyperText Markup Language: uma linguagem de marcação de hipertexto. Ela marca o conteúdo com tags; não é uma linguagem de programação." },
+      { t: "Qual é a primeira linha de um documento HTML5?", mono: true, op: ["<!DOCTYPE html>", "<html5>", "<head>", "<?html version=\"5\"?>"], c: 0,
+        e: "<!DOCTYPE html> avisa ao navegador que o documento segue o padrão HTML5. Ele vem antes da tag <html>." },
+      { t: "Em qual tag fica tudo o que o visitante vê na página?", mono: true, op: ["<head>", "<body>", "<title>", "<meta>"], c: 1,
+        e: "O <body> guarda o conteúdo visível: textos, imagens, links, formulários. O <head> guarda informações sobre a página." },
+      { t: "Qual tag define o texto que aparece na aba do navegador?", mono: true, op: ["<h1>", "<header>", "<title>", "<name>"], c: 2,
+        e: "O <title> fica dentro do <head> e aparece na aba do navegador, nos favoritos e nos resultados de busca." },
+      { tipo: "Complete o código", t: "Qual linha faz os acentos (ç, ã, é) aparecerem corretamente?", cod: "<head>\n  ______\n  <title>Minha página</title>\n</head>", mono: true,
+        op: ["<meta charset=\"utf-8\">", "<meta lang=\"pt-BR\">", "<acentos on>", "<font type=\"utf-8\">"], c: 0,
+        e: "<meta charset=\"utf-8\"> define a codificação de caracteres. Sem ela, acentos podem virar símbolos estranhos." }
+    ] },
+    { icone: "✍️", titulo: "Texto e listas", desc: "Títulos, parágrafos, listas e destaque.", q: [
+      { t: "Qual tag marca o título mais importante da página?", mono: true, op: ["<h6>", "<title>", "<h1>", "<head>"], c: 2,
+        e: "Os títulos vão de <h1> (mais importante) até <h6> (menos importante). O recomendado é um <h1> principal por página." },
+      { t: "Qual tag cria um parágrafo?", mono: true, op: ["<p>", "<br>", "<text>", "<paragraph>"], c: 0,
+        e: "<p> marca um parágrafo. O <br> só quebra a linha; ele não cria um parágrafo novo." },
+      { t: "Você precisa de uma lista numerada (1, 2, 3...). Qual tag usar?", mono: true, op: ["<ul>", "<ol>", "<list>", "<dl>"], c: 1,
+        e: "<ol> é a lista ordenada (ordered list), com números. <ul> é a lista não ordenada, com marcadores." },
+      { tipo: "Complete o código", t: "Qual tag falta para criar cada item da lista?", cod: "<ul>\n  <___>Arroz</___>\n  <___>Feijão</___>\n</ul>", mono: true,
+        op: ["item", "li", "p", "ul"], c: 1,
+        e: "Cada item de lista usa <li> (list item), tanto dentro de <ul> quanto de <ol>." },
+      { t: "Qual tag indica que um trecho do texto é muito importante?", mono: true, op: ["<strong>", "<big>", "<font>", "<h1>"], c: 0,
+        e: "<strong> indica importância forte e costuma aparecer em negrito. Tem significado: leitores de tela também percebem a ênfase." }
+    ] },
+    { icone: "🔗", titulo: "Links e mídia", desc: "Links, imagens, áudio e vídeo.", q: [
+      { tipo: "Complete o código", t: "Qual atributo informa o destino do link?", cod: "<a ____=\"https://www.exemplo.com\">Visitar</a>", mono: true,
+        op: ["src", "link", "href", "url"], c: 2,
+        e: "No <a>, o atributo href (hypertext reference) guarda o endereço de destino." },
+      { tipo: "Complete o código", t: "Qual atributo informa o arquivo da imagem?", cod: "<img ____=\"foto.jpg\" alt=\"Foto da turma\">", mono: true,
+        op: ["href", "src", "file", "img"], c: 1,
+        e: "No <img>, o atributo src (source) aponta para o arquivo da imagem. href é usado em links." },
+      { t: "Para que serve o atributo alt da imagem?", op: ["Define a altura da imagem", "Descreve a imagem para leitores de tela e quando ela não carrega", "Troca a imagem ao passar o mouse", "Deixa a imagem mais leve"], c: 1,
+        e: "alt é o texto alternativo. Ele descreve a imagem para quem usa leitor de tela e aparece quando a imagem não carrega." },
+      { t: "Como fazer um link abrir em uma nova aba?", mono: true, op: ["target=\"_blank\"", "open=\"new\"", "href=\"_blank\"", "tab=\"new\""], c: 0,
+        e: "target=\"_blank\" no <a> abre o destino em uma nova aba." },
+      { t: "Qual tag do HTML5 exibe um vídeo sem precisar de plugin?", mono: true, op: ["<media>", "<movie>", "<video>", "<flash>"], c: 2,
+        e: "O HTML5 trouxe <video> e <audio>. Com o atributo controls, o navegador mostra os botões de reproduzir e pausar." }
+    ] },
+    { icone: "🏛️", titulo: "Tags semânticas", desc: "header, nav, main, section, article, footer.", q: [
+      { t: "Qual tag semântica agrupa o menu de navegação do site?", mono: true, op: ["<menu-bar>", "<nav>", "<links>", "<div>"], c: 1,
+        e: "<nav> marca um bloco de links de navegação, como o menu principal." },
+      { t: "Qual tag marca o conteúdo principal, que só aparece uma vez na página?", mono: true, op: ["<main>", "<body>", "<section>", "<center>"], c: 0,
+        e: "<main> marca o conteúdo principal e deve aparecer uma única vez. Cabeçalho, menu e rodapé ficam fora dele." },
+      { t: "Onde costumam ficar os direitos autorais e o contato, no fim da página?", mono: true, op: ["<bottom>", "<end>", "<header>", "<footer>"], c: 3,
+        e: "<footer> é o rodapé da página ou de uma seção." },
+      { t: "Qual é a diferença entre <div> e <section>?", op: ["Nenhuma, são iguais", "<div> não tem significado; <section> indica uma seção temática do conteúdo", "<section> só funciona em celular", "<div> é do HTML5 e <section> é antiga"], c: 1,
+        e: "<div> é um bloco genérico, sem significado. <section> diz ao navegador e aos buscadores que ali existe uma seção com um tema." },
+      { t: "Uma notícia de blog, que faz sentido sozinha fora da página, deve ficar em qual tag?", mono: true, op: ["<article>", "<aside>", "<span>", "<nav>"], c: 0,
+        e: "<article> marca um conteúdo independente: uma notícia, um post, um comentário. <aside> é para conteúdo lateral, relacionado." }
+    ] },
+    { icone: "📝", titulo: "Formulários", desc: "form, input, label e validação.", q: [
+      { t: "Qual tag agrupa os campos e envia os dados ao servidor?", mono: true, op: ["<input>", "<form>", "<fieldset>", "<send>"], c: 1,
+        e: "<form> é o formulário. Os campos dentro dele são enviados para o endereço indicado no atributo action." },
+      { tipo: "Complete o código", t: "Qual tipo faz o navegador validar o formato do e-mail?", cod: "<input type=\"____\" name=\"contato\">", mono: true,
+        op: ["text", "mail", "email", "@"], c: 2,
+        e: "type=\"email\" é um dos tipos novos do HTML5. O navegador confere o formato e, no celular, mostra o teclado com @." },
+      { t: "Qual atributo impede o envio do formulário com o campo vazio?", mono: true, op: ["required", "validate", "notnull", "must"], c: 0,
+        e: "required torna o campo obrigatório. O navegador avisa o usuário antes de enviar, sem precisar de JavaScript." },
+      { t: "Qual tag dá um nome visível ao campo e se liga a ele pelo atributo for?", mono: true, op: ["<name>", "<caption>", "<label>", "<title>"], c: 2,
+        e: "<label for=\"id-do-campo\"> liga o texto ao campo. Clicar no texto foca o campo, e leitores de tela anunciam o nome." },
+      { t: "Qual atributo mostra uma dica dentro do campo enquanto ele está vazio?", mono: true, op: ["value", "hint", "title", "placeholder"], c: 3,
+        e: "placeholder mostra um texto de exemplo que some ao digitar. Ele não substitui o <label>." }
+    ] },
+    { icone: "🏆", titulo: "Desafio final", desc: "Tabelas, boas práticas e caça ao erro.", q: [
+      { t: "Em uma tabela, qual tag cria uma linha?", mono: true, op: ["<td>", "<tr>", "<th>", "<row>"], c: 1,
+        e: "<tr> (table row) cria uma linha. Dentro dela ficam as células <td> e os cabeçalhos <th>." },
+      { t: "Qual tag marca uma célula de cabeçalho da tabela?", mono: true, op: ["<thead>", "<td>", "<th>", "<header>"], c: 2,
+        e: "<th> (table header) é a célula de cabeçalho. <thead> agrupa as linhas de cabeçalho, mas a célula em si é <th>." },
+      { tipo: "Ache o erro", t: "O que está errado neste código?", cod: "<p>Olá, <strong>mundo</p></strong>", op: ["Falta o atributo class", "<strong> não pode ficar dentro de <p>", "As tags foram fechadas na ordem errada", "Não há erro"], c: 2,
+        e: "A última tag aberta é a primeira a fechar. O certo é <p>Olá, <strong>mundo</strong></p>." },
+      { tipo: "Complete o código", t: "Qual linha liga a página a um arquivo CSS externo?", cod: "<head>\n  ______\n</head>", mono: true,
+        op: ["<link rel=\"stylesheet\" href=\"estilo.css\">", "<css src=\"estilo.css\">", "<style href=\"estilo.css\">", "<a href=\"estilo.css\">"], c: 0,
+        e: "<link rel=\"stylesheet\" href=\"...\"> fica dentro do <head> e carrega o arquivo CSS." },
+      { t: "Como escrever um comentário em HTML?", mono: true, op: ["// comentário", "/* comentário */", "<!-- comentário -->", "# comentário"], c: 2,
+        e: "Comentários em HTML ficam entre <!-- e -->. O navegador não mostra, mas quem abrir o código-fonte consegue ler." }
+    ] }
+  ];
+
+  var PATENTES = [
+    { xp: 0, nome: "Estagiário", avatar: "🧑‍🎓" },
+    { xp: 1000, nome: "Dev Júnior", avatar: "🧑‍💻" },
+    { xp: 2200, nome: "Dev Pleno", avatar: "🦾" },
+    { xp: 3400, nome: "Dev Sênior", avatar: "🚀" },
+    { xp: 4600, nome: "Arquiteto Web", avatar: "👑" }
+  ];
+  var VIDAS = 3, XP_ACERTO = 100, XP_COMBO = 20, XP_VIDA = 50;
+  var CHAVE = "portalpixel.missao-html5.v1";
+
+  // ---------- ESTADO SALVO ----------
+  var save = { nome: "", fases: {}, som: true };
+  try {
+    var bruto = JSON.parse(localStorage.getItem(CHAVE));
+    if (bruto && typeof bruto === "object") {
+      save.nome = String(bruto.nome || "").slice(0, 40);
+      save.fases = bruto.fases && typeof bruto.fases === "object" ? bruto.fases : {};
+      save.som = bruto.som !== false;
+    }
+  } catch (e) {}
+  function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(save)); } catch (e) {} }
+
+  function $(id) { return document.getElementById(id); }
+  function xpTotal() { var s = 0; for (var k in save.fases) s += save.fases[k].xp || 0; return s; }
+  function fasesFeitas() { var n = 0; for (var i = 0; i < FASES.length; i++) if (save.fases[i]) n++; return n; }
+  function patenteDe(xp) { var p = PATENTES[0]; PATENTES.forEach(function (x) { if (xp >= x.xp) p = x; }); return p; }
+  function estrelas(n) { return "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n); }
+  function embaralhar(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+  // ---------- SOM (Web Audio, sem arquivos) ----------
+  var ctx = null;
+  function nota(freq, ini, dur, tipo, vol) {
+    if (!save.som) return;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === "suspended") ctx.resume();
+      var o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + ini;
+      o.type = tipo || "square"; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.08, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + dur);
+    } catch (e) {}
+  }
+  var som = {
+    certo: function (combo) { var b = 520 + Math.min(combo, 5) * 40; nota(b, 0, .12); nota(b * 1.5, .09, .18); },
+    errado: function () { nota(180, 0, .25, "sawtooth"); nota(130, .12, .3, "sawtooth"); },
+    fase: function () { [523, 659, 784, 1047].forEach(function (f, i) { nota(f, i * .12, .25, "triangle", .1); }); },
+    derrota: function () { [392, 330, 262].forEach(function (f, i) { nota(f, i * .18, .3, "triangle", .1); }); }
+  };
+
+  // ---------- TELAS ----------
+  var TELAS = ["telaMapa", "telaJogo", "telaFim", "telaCert"];
+  function mostrar(id) {
+    TELAS.forEach(function (t) { $(t).classList.toggle("oculto", t !== id); });
+    window.scrollTo(0, 0);
+  }
+
+  function desenharMapa() {
+    var xp = xpTotal(), pat = patenteDe(xp), feitas = fasesFeitas();
+    var prox = PATENTES.filter(function (p) { return p.xp > xp; })[0];
+    $("nomeAluno").textContent = save.nome || "Aluno sem nome";
+    $("patente").textContent = pat.nome;
+    $("avatar").textContent = pat.avatar;
+    $("xpTexto").textContent = xp + " XP";
+    $("xpProx").textContent = prox ? "Próxima patente: " + prox.nome + " (" + prox.xp + " XP)" : "Patente máxima";
+    $("xpBarra").style.width = (prox ? Math.round((xp - pat.xp) / (prox.xp - pat.xp) * 100) : 100) + "%";
+    $("formNome").classList.toggle("oculto", !!save.nome);
+    $("resumo").textContent = feitas + " de " + FASES.length + " fases concluídas";
+    $("btnVerCert").classList.toggle("oculto", feitas < FASES.length);
+
+    var mapa = $("mapa"); mapa.textContent = "";
+    FASES.forEach(function (f, i) {
+      var feita = save.fases[i], liberada = i === 0 || !!save.fases[i - 1];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "fase" + (feita ? " feita" : liberada ? " atual" : "");
+      b.disabled = !liberada || !save.nome;
+      [["icone", liberada ? f.icone : "🔒"], ["num", "Fase " + (i + 1)], ["titulo", f.titulo], ["desc", f.desc],
+       ["estrelas", feita ? estrelas(feita.estrelas) + "  " + feita.xp + " XP" : liberada ? "Jogar →" : "Conclua a fase " + i]]
+        .forEach(function (par) { var s = document.createElement("span"); s.className = par[0]; s.textContent = par[1]; b.appendChild(s); });
+      b.addEventListener("click", function () { iniciarFase(i); });
+      mapa.appendChild(b);
+    });
+    mostrar("telaMapa");
+  }
+
+  // ---------- PARTIDA ----------
+  var jogo = null;
+  function iniciarFase(i) {
+    jogo = { fase: i, fila: embaralhar(FASES[i].q), vidas: VIDAS, combo: 0, xp: 0, certas: 0, primeira: 0, erradas: [], respondida: false };
+    mostrar("telaJogo");
+    desenharQuestao();
+  }
+
+  function desenharHud() {
+    $("hudFase").textContent = "Fase " + (jogo.fase + 1) + " · " + FASES[jogo.fase].titulo;
+    $("hudVidas").textContent = "❤️".repeat(jogo.vidas) + "🖤".repeat(VIDAS - jogo.vidas);
+    $("hudVidas").setAttribute("aria-label", jogo.vidas + " vidas");
+    $("hudCombo").textContent = jogo.combo >= 2 ? "🔥 Sequência x" + jogo.combo : jogo.xp + " XP";
+    var p = $("hudProgresso"); p.textContent = "";
+    for (var k = 0; k < FASES[jogo.fase].q.length; k++) { var s = document.createElement("i"); if (k < jogo.certas) s.className = "ok"; p.appendChild(s); }
+  }
+
+  function desenharQuestao() {
+    var q = jogo.fila[0];
+    jogo.respondida = false;
+    desenharHud();
+    $("qTipo").textContent = (q.tipo || "Pergunta") + " · " + (jogo.certas + 1) + " de " + FASES[jogo.fase].q.length;
+    $("qTexto").textContent = q.t;
+    $("qCodigo").classList.toggle("oculto", !q.cod);
+    $("qCodigo").textContent = q.cod || "";
+    $("retorno").classList.add("oculto");
+    var cx = $("qOpcoes"); cx.textContent = "";
+    embaralhar(q.op.map(function (txt, idx) { return { txt: txt, certa: idx === q.c }; })).forEach(function (o, k) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "op" + (q.mono ? " mono" : "");
+      var l = document.createElement("b"); l.textContent = "ABCD"[k];
+      var s = document.createElement("span"); s.textContent = o.txt;
+      b.appendChild(l); b.appendChild(s);
+      b.dataset.certa = o.certa ? "1" : "";
+      b.addEventListener("click", function () { responder(b); });
+      cx.appendChild(b);
+    });
+  }
+
+  function responder(botao) {
+    if (!jogo || jogo.respondida) return;
+    jogo.respondida = true;
+    var q = jogo.fila[0], acertou = botao.dataset.certa === "1", ganho = 0;
+    Array.prototype.forEach.call($("qOpcoes").children, function (b) {
+      b.disabled = true;
+      if (b.dataset.certa === "1") b.classList.add("certa");
+    });
+    if (acertou) {
+      ganho = XP_ACERTO + Math.min(jogo.combo, 5) * XP_COMBO;
+      jogo.combo++; jogo.xp += ganho; jogo.certas++;
+      if (jogo.erradas.indexOf(q) < 0) jogo.primeira++;
+      jogo.fila.shift();
+      som.certo(jogo.combo);
+    } else {
+      botao.classList.add("errada");
+      jogo.combo = 0; jogo.vidas--;
+      if (jogo.erradas.indexOf(q) < 0) jogo.erradas.push(q);
+      jogo.fila.push(jogo.fila.shift());
+      som.errado();
+    }
+    desenharHud();
+    var r = $("retorno");
+    r.className = "retorno " + (acertou ? "ok" : "erro");
+    $("retTitulo").textContent = acertou ? (jogo.combo >= 2 ? "✅ Correto! Sequência de " + jogo.combo + "." : "✅ Correto!") : "❌ Não foi dessa vez. Perdeu 1 vida.";
+    $("retTexto").textContent = q.e;
+    $("retGanho").textContent = acertou ? "+" + ganho + " XP" : (jogo.vidas > 0 ? "Esta questão volta no fim da fase." : "");
+    $("btnProx").textContent = jogo.vidas <= 0 ? "Ver resultado" : jogo.fila.length && !(acertou && !jogo.fila.length) ? "Continuar →" : "Concluir fase";
+    if (!jogo.fila.length) $("btnProx").textContent = "Concluir fase 🎉";
+    $("btnProx").focus();
+  }
+
+  function avancar() {
+    if (!jogo || !jogo.respondida) return;
+    if (jogo.vidas <= 0) return fimDaFase(false);
+    if (!jogo.fila.length) return fimDaFase(true);
+    desenharQuestao();
+  }
+
+  function fimDaFase(venceu) {
+    var i = jogo.fase, total = FASES[i].q.length, ultima = i === FASES.length - 1;
+    var num = $("fimNumeros"); num.textContent = "";
+    function caixa(valor, rotulo) {
+      var d = document.createElement("div"), a = document.createElement("strong"), b = document.createElement("small");
+      a.textContent = valor; b.textContent = rotulo; d.appendChild(a); d.appendChild(b); num.appendChild(d);
+    }
+    var principal = $("btnFimPrincipal");
+    if (venceu) {
+      var bonus = jogo.vidas * XP_VIDA, xp = jogo.xp + bonus;
+      var est = jogo.primeira === total ? 3 : jogo.primeira === total - 1 ? 2 : 1;
+      var antes = save.fases[i], eraCompleto = fasesFeitas() === FASES.length;
+      if (!antes || xp > antes.xp) save.fases[i] = { xp: xp, estrelas: Math.max(est, antes ? antes.estrelas : 0), primeira: Math.max(jogo.primeira, antes ? antes.primeira : 0) };
+      salvar();
+      $("fimTitulo").textContent = "Fase " + (i + 1) + " concluída!";
+      $("fimEstrelas").textContent = estrelas(est);
+      $("fimTexto").textContent = est === 3 ? "Perfeito: todas de primeira." : "Jogue de novo sem errar para ganhar 3 estrelas.";
+      caixa(jogo.primeira + "/" + total, "acertos de primeira");
+      caixa("+" + bonus, "bônus de vidas");
+      caixa(xp + " XP", antes && xp <= antes.xp ? "recorde: " + antes.xp : "novo recorde");
+      var completo = fasesFeitas() === FASES.length;
+      principal.textContent = completo && (ultima || !eraCompleto) ? "🎓 Ver certificado" : ultima ? "Mapa de fases" : "Próxima fase →";
+      principal.onclick = completo && (ultima || !eraCompleto) ? mostrarCertificado : ultima ? desenharMapa : function () { iniciarFase(i + 1); };
+      som.fase(); confete();
+    } else {
+      $("fimTitulo").textContent = "As vidas acabaram";
+      $("fimEstrelas").textContent = "💔";
+      $("fimTexto").textContent = "Releia as explicações e tente de novo. Você acertou " + jogo.certas + " de " + total + ".";
+      principal.textContent = "Tentar de novo";
+      principal.onclick = function () { iniciarFase(i); };
+      som.derrota();
+    }
+    jogo = null;
+    mostrar("telaFim");
+    principal.focus();
+  }
+
+  // ---------- CERTIFICADO ----------
+  function mostrarCertificado() {
+    var xp = xpTotal(), primeira = 0, est = 0, total = 0;
+    var tab = $("certTabela"); tab.textContent = "";
+    function linha(celulas, tag) {
+      var tr = document.createElement("tr");
+      celulas.forEach(function (c) { var td = document.createElement(tag); td.textContent = c; tr.appendChild(td); });
+      tab.appendChild(tr);
+    }
+    linha(["Fase", "Acertos de primeira", "Estrelas"], "th");
+    FASES.forEach(function (f, i) {
+      var s = save.fases[i] || { primeira: 0, estrelas: 0 };
+      primeira += s.primeira; est += s.estrelas; total += f.q.length;
+      linha([(i + 1) + ". " + f.titulo, s.primeira + " de " + f.q.length, estrelas(s.estrelas)], "td");
+    });
+    $("certNome").textContent = save.nome || "Aluno";
+    $("certPatente").textContent = patenteDe(xp).nome;
+    var qd = $("certQuadro"); qd.textContent = "";
+    [[primeira + " de " + total, "acertos de primeira"], [Math.round(primeira / total * 100) + "%", "aproveitamento"], [est + " de " + FASES.length * 3, "estrelas"], [xp, "XP"]]
+      .forEach(function (p) { var d = document.createElement("div"), a = document.createElement("strong"), b = document.createElement("small"); a.textContent = p[0]; b.textContent = p[1]; d.appendChild(a); d.appendChild(b); qd.appendChild(d); });
+    $("certData").textContent = "Emitido em " + new Date().toLocaleDateString("pt-BR") + " · O aproveitamento considera a melhor tentativa de cada fase.";
+    mostrar("telaCert");
+    confete();
+  }
+
+  // ---------- CONFETE ----------
+  function confete() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var c = $("confete"), g = c.getContext("2d"), cores = ["#f16529", "#ffc145", "#3ecf8e", "#5aa9ff", "#ff6b6b"], ps = [], fim = Date.now() + 2200;
+    c.width = innerWidth; c.height = innerHeight;
+    for (var i = 0; i < 110; i++) ps.push({ x: Math.random() * c.width, y: -20 - Math.random() * c.height * .5, vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 4, t: 5 + Math.random() * 6, cor: cores[i % cores.length], r: Math.random() * 6 });
+    (function quadro() {
+      g.clearRect(0, 0, c.width, c.height);
+      if (Date.now() > fim) return;
+      ps.forEach(function (p) { p.x += p.vx; p.y += p.vy; p.r += .1; g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.cor; g.fillRect(-p.t / 2, -p.t / 2, p.t, p.t * .6); g.restore(); });
+      requestAnimationFrame(quadro);
+    })();
+  }
+
+  // ---------- EVENTOS ----------
+  $("formNome").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var n = $("campoNome").value.trim();
+    if (!n) return;
+    save.nome = n.slice(0, 40); salvar(); desenharMapa();
+  });
+  $("btnProx").addEventListener("click", avancar);
+  $("btnSair").addEventListener("click", function () {
+    if (jogo && (jogo.certas || jogo.erradas.length) && !confirm("Sair da fase? O progresso desta tentativa será perdido.")) return;
+    jogo = null; desenharMapa();
+  });
+  $("btnFimMapa").addEventListener("click", desenharMapa);
+  $("btnCertMapa").addEventListener("click", desenharMapa);
+  $("btnVerCert").addEventListener("click", mostrarCertificado);
+  $("btnImprimir").addEventListener("click", function () { window.print(); });
+  $("btnZerar").addEventListener("click", function () {
+    if (!confirm("Apagar o nome, o XP e todas as fases deste navegador?")) return;
+    save.nome = ""; save.fases = {}; salvar(); $("campoNome").value = ""; desenharMapa();
+  });
+  function atualizarSom() { $("btnSom").textContent = save.som ? "🔊 Som" : "🔇 Mudo"; $("btnSom").setAttribute("aria-pressed", String(save.som)); }
+  $("btnSom").addEventListener("click", function () { save.som = !save.som; salvar(); atualizarSom(); });
+  document.addEventListener("keydown", function (ev) {
+    if (!jogo || $("telaJogo").classList.contains("oculto") || ev.ctrlKey || ev.altKey || ev.metaKey) return;
+    var k = ev.key.toLowerCase(), idx = "abcd".indexOf(k);
+    if (idx < 0) idx = "1234".indexOf(k);
+    if (idx >= 0 && k.length === 1 && !jogo.respondida) { var b = $("qOpcoes").children[idx]; if (b) responder(b); }
+  });
+
+  atualizarSom();
+  desenharMapa();
+})();
+</script>
+</body>
+</html>
