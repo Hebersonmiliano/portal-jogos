@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Missão HTML5 — Documento de Design do Jogo (GDD) · Portal Pixel</title>
+  <meta name="description" content="Documento de design (GDD) de Missão HTML5: objetivos, mecânicas, conteúdo das 12 fases, telas, arquitetura, testes e histórico de versões.">
+  <link rel="icon" type="image/svg+xml" href="../assets/marca/icone.svg">
+  <meta name="theme-color" content="#0f1020">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/estilo.css?v=20261025-atualizado">
+  <link rel="stylesheet" href="../assets/guia.css?v=20261027">
+</head>
+<body class="guia-missao-html5">
+  <header class="topo">
+    <a class="marca" href="../index.html"><img class="marca-icone" src="../assets/marca/icone.svg" alt="" width="34" height="34"><span class="marca-nome">Portal Pixel</span></a>
+    <a class="voltar" href="../jogo.html?id=missao-html5">← Voltar ao jogo</a>
+  </header>
+  <main class="guia">
+    <div class="guia-cabecalho">
+      <span class="guia-selo">GUIA COMPLETO</span>
+      <h1>Missão HTML5 — Documento de Design do Jogo (GDD)</h1>
+      <a class="botao guia-jogar" href="../jogo.html?id=missao-html5">▶ Jogar agora</a>
+    </div>
+    <div class="guia-grade">
+      <nav class="guia-indice" aria-label="Índice do guia"><strong>Índice</strong><ol><li><a href="#visão-geral">Visão geral</a></li><li><a href="#objetivos-pedagógicos">Objetivos pedagógicos</a></li><li><a href="#público-e-uso-em-sala">Público e uso em sala</a></li><li><a href="#ciclo-de-jogo">Ciclo de jogo</a></li><li><a href="#mecânicas">Mecânicas</a></li><li><a href="#conteúdo">Conteúdo</a></li><li><a href="#telas">Telas</a></li><li><a href="#controles">Controles</a></li><li><a href="#áudio">Áudio</a></li><li><a href="#acessibilidade">Acessibilidade</a></li><li><a href="#arquitetura-técnica">Arquitetura técnica</a></li><li><a href="#integração-com-o-portal-pixel">Integração com o Portal Pixel</a></li><li><a href="#testes-realizados-na-versão-140">Testes realizados na versão 1.4.0</a></li><li><a href="#histórico-de-versões">Histórico de versões</a></li><li><a href="#limitações-e-próximos-passos">Limitações e próximos passos</a></li></ol></nav>
+      <article class="guia-texto">
+<p>Versão do jogo: <strong>1.4.0</strong> · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano</p>
+<p>Este documento descreve o jogo Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.</p>
+<p><img loading="lazy" decoding="async" alt="Capa de Missão HTML5" src="../assets/missao-html5/capa.jpg" /></p>
+<h2 id="visão-geral">Visão geral</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Título</td>
+<td>Missão HTML5</td>
+</tr>
+<tr>
+<td>Gênero</td>
+<td>Educativo, jogo de perguntas (quiz) com progressão por fases</td>
+</tr>
+<tr>
+<td>Plataforma</td>
+<td>Navegador, no computador e no celular</td>
+</tr>
+<tr>
+<td>Público</td>
+<td>Alunos do curso técnico em Desenvolvimento de Sistemas</td>
+</tr>
+<tr>
+<td>Jogadores</td>
+<td>1 por vez; vários alunos podem se revezar no mesmo computador</td>
+</tr>
+<tr>
+<td>Duração</td>
+<td>Cerca de 3 a 5 minutos por fase</td>
+</tr>
+<tr>
+<td>Tecnologia</td>
+<td>HTML5, CSS e JavaScript puros, em um único arquivo, sem bibliotecas</td>
+</tr>
+<tr>
+<td>Endereço</td>
+<td><code>jogo.html?id=missao-html5</code> no Portal Pixel</td>
+</tr>
+<tr>
+<td>Código</td>
+<td><code>jogos/missao-html5/index.html</code> no repositório <code>portal-jogos</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resumo em uma frase:</strong> o aluno avança por 12 fases de HTML5, CSS e JavaScript respondendo questões sorteadas, com vidas, cronômetro, XP, patentes, ranking e certificado.</p>
+<h2 id="objetivos-pedagógicos">Objetivos pedagógicos</h2>
+<ol>
+<li>Revisar o conteúdo de front-end do curso: marcação com HTML5, estilo com CSS e lógica com JavaScript.</li>
+<li>Treinar a leitura de código, com questões de completar o código, achar o erro e prever o resultado.</li>
+<li>Corrigir o erro no momento em que ele acontece: toda resposta, certa ou errada, mostra uma explicação curta.</li>
+<li>Garantir que o aluno veja todo o conteúdo da fase: a questão errada volta para o fim da fila e a fase só termina quando todas forem acertadas.</li>
+<li>Dar ao professor um registro simples do desempenho: o certificado mostra os acertos de primeira por fase e o aproveitamento.</li>
+</ol>
+<h2 id="público-e-uso-em-sala">Público e uso em sala</h2>
+<ul>
+<li><strong>Revisão antes da prova:</strong> cada aluno joga a trilha do conteúdo estudado e mostra o certificado.</li>
+<li><strong>Competição no laboratório:</strong> os alunos se revezam no mesmo computador com o botão Trocar de aluno, e o ranking mostra a classificação.</li>
+<li><strong>Atividade para casa:</strong> o jogo funciona no celular e guarda o progresso no navegador do aluno.</li>
+<li><strong>Alunos que leem mais devagar:</strong> o professor pode desligar o cronômetro no mapa de fases. Sem cronômetro não há bônus de rapidez, e o restante do jogo é igual.</li>
+</ul>
+<h2 id="ciclo-de-jogo">Ciclo de jogo</h2>
+<ol>
+<li>O aluno digita o nome. Sem nome, as fases ficam bloqueadas.</li>
+<li>No mapa, escolhe a trilha (HTML5, CSS ou JavaScript) e a fase liberada.</li>
+<li>A fase sorteia 5 questões do banco e embaralha as alternativas.</li>
+<li>O aluno responde. A tela mostra a alternativa certa e a explicação.</li>
+<li>Acerto: ganha XP e a questão sai da fila. Erro ou tempo esgotado: perde uma vida e a questão volta para o fim da fila.</li>
+<li>Fila vazia: fase concluída, com estrelas, XP e a próxima fase liberada. Sem vidas: a fase recomeça com um novo sorteio.</li>
+<li>Trilha concluída: o certificado da trilha fica disponível.</li>
+</ol>
+<p><img loading="lazy" decoding="async" alt="Mapa de fases" src="../assets/missao-html5/mapa.jpg" /></p>
+<h2 id="mecânicas">Mecânicas</h2>
+<h3 id="vidas-e-fila-de-questões">Vidas e fila de questões</h3>
+<p>Cada fase começa com 3 vidas. Um erro, ou o fim do tempo, tira uma vida e manda a questão para o fim da fila. Com isso o aluno pode errar até 2 vezes por fase; no terceiro erro a fase termina e pode ser repetida.</p>
+<h3 id="sorteio">Sorteio</h3>
+<p>Cada fase tem um banco de 8 a 10 questões e sorteia 5 por partida. A ordem das questões e das alternativas muda a cada vez. Isso dificulta decorar a posição das respostas e copiar do colega ao lado.</p>
+<h3 id="cronômetro">Cronômetro</h3>
+<p>Cada questão tem 40 segundos. Uma barra mostra o tempo, fica vermelha nos últimos 10 segundos e emite um som nos últimos 5. O cronômetro é ligado por padrão e pode ser desligado no mapa de fases.</p>
+<p><img loading="lazy" decoding="async" alt="Questão com cronômetro" src="../assets/missao-html5/questao.jpg" /></p>
+<h3 id="pontuação-xp">Pontuação (XP)</h3>
+<table>
+<thead>
+<tr>
+<th>Origem</th>
+<th>XP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Acerto</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Sequência de acertos</td>
+<td>+20 para cada acerto seguido anterior, até +100</td>
+</tr>
+<tr>
+<td>Rapidez (com cronômetro)</td>
+<td>até +50, proporcional ao tempo que sobrou</td>
+</tr>
+<tr>
+<td>Vidas restantes ao concluir a fase</td>
+<td>+50 por vida</td>
+</tr>
+</tbody>
+</table>
+<p>O máximo por fase é 1.100 XP com cronômetro e 850 XP sem. O jogo guarda o melhor resultado de cada fase, então repetir uma fase só aumenta o XP quando o aluno supera o próprio recorde.</p>
+<h3 id="estrelas">Estrelas</h3>
+<table>
+<thead>
+<tr>
+<th>Acertos de primeira na fase</th>
+<th>Estrelas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5 de 5</td>
+<td>3</td>
+</tr>
+<tr>
+<td>4 de 5</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3 ou menos</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="patentes">Patentes</h3>
+<p>O XP somado das três trilhas define a patente do aluno.</p>
+<table>
+<thead>
+<tr>
+<th>Patente</th>
+<th>XP necessário</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Estagiário</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Dev Júnior</td>
+<td>1.500</td>
+</tr>
+<tr>
+<td>Dev Pleno</td>
+<td>4.000</td>
+</tr>
+<tr>
+<td>Dev Sênior</td>
+<td>7.000</td>
+</tr>
+<tr>
+<td>Arquiteto Web</td>
+<td>10.000</td>
+</tr>
+</tbody>
+</table>
+<p>Concluir só a trilha de HTML5 leva até Dev Pleno. Para chegar a Arquiteto Web é preciso jogar bem as três trilhas.</p>
+<h3 id="ranking-da-turma">Ranking da turma</h3>
+<p>Ao concluir uma fase, o aluno entra no ranking, que mostra os 10 melhores por XP, com patente, fases concluídas e estrelas. O botão Trocar de aluno apaga o progresso do aluno atual e mantém a pontuação dele no ranking. O botão Limpar ranking zera a tabela.</p>
+<p>O ranking fica salvo no navegador. Ele reúne os alunos que jogaram no mesmo computador, não a turma inteira em computadores diferentes.</p>
+<p><img loading="lazy" decoding="async" alt="Ranking da turma" src="../assets/missao-html5/ranking.jpg" /></p>
+<h3 id="certificado">Certificado</h3>
+<p>Cada trilha concluída libera um certificado com o nome do aluno, a patente, os acertos de primeira por fase, o aproveitamento e a data. O botão Imprimir abre a impressão do navegador, que também salva em PDF. O aproveitamento considera a melhor tentativa de cada fase.</p>
+<p><img loading="lazy" decoding="async" alt="Certificado" src="../assets/missao-html5/certificado.jpg" /></p>
+<h2 id="conteúdo">Conteúdo</h2>
+<h3 id="trilhas-e-fases">Trilhas e fases</h3>
+<table>
+<thead>
+<tr>
+<th>Trilha</th>
+<th>Fase</th>
+<th>Conteúdo</th>
+<th>Banco</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTML5</td>
+<td>1. Estrutura da página</td>
+<td>DOCTYPE, html, head, body, title, meta charset, viewport, lang</td>
+<td>10</td>
+</tr>
+<tr>
+<td>HTML5</td>
+<td>2. Texto e listas</td>
+<td>Títulos, parágrafo, br, hr, ul, ol, li, strong, em</td>
+<td>10</td>
+</tr>
+<tr>
+<td>HTML5</td>
+<td>3. Links e mídia</td>
+<td>a, href, target, img, src, alt, audio, video, caminho relativo</td>
+<td>10</td>
+</tr>
+<tr>
+<td>HTML5</td>
+<td>4. Tags semânticas</td>
+<td>header, nav, main, section, article, aside, footer, figure</td>
+<td>10</td>
+</tr>
+<tr>
+<td>HTML5</td>
+<td>5. Formulários</td>
+<td>form, input e seus tipos, label, required, placeholder, select, textarea</td>
+<td>10</td>
+</tr>
+<tr>
+<td>HTML5</td>
+<td>6. Desafio final</td>
+<td>Tabelas, link de CSS, script, comentário, aninhamento, caça ao erro</td>
+<td>10</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td>1. Seletores e sintaxe</td>
+<td>Regra, seletor de tag, classe e id, color, background-color</td>
+<td>8</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td>2. Texto e modelo de caixa</td>
+<td>font-size, font-weight, text-align, padding, border, margin</td>
+<td>8</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td>3. Layout e responsivo</td>
+<td>Flexbox, grid, media query, rem, :hover, especificidade</td>
+<td>8</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>1. Variáveis e tipos</td>
+<td>let, const, string, number, boolean, console.log</td>
+<td>8</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>2. Decisão e repetição</td>
+<td>if e else, operadores de comparação e lógicos, for, while</td>
+<td>8</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>3. Funções, listas e página</td>
+<td>function, return, arrays, getElementById, eventos</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<p>Total: 3 trilhas, 12 fases e 108 questões.</p>
+<h3 id="tipos-de-questão">Tipos de questão</h3>
+<ul>
+<li><strong>Pergunta:</strong> conceito direto, com quatro alternativas.</li>
+<li><strong>Complete o código:</strong> um trecho com uma lacuna.</li>
+<li><strong>Ache o erro:</strong> um trecho com um erro para identificar.</li>
+<li><strong>O que este código mostra?:</strong> leitura de código, na trilha de JavaScript.</li>
+</ul>
+<p><img loading="lazy" decoding="async" alt="Trilha de JavaScript" src="../assets/missao-html5/javascript.jpg" /></p>
+<h3 id="regras-de-escrita-das-questões">Regras de escrita das questões</h3>
+<ol>
+<li>Uma única alternativa certa e três erradas plausíveis.</li>
+<li>Enunciado curto, com uma ideia só.</li>
+<li>A explicação diz por que a resposta está certa e, quando ajuda, desfaz a confusão mais comum.</li>
+<li>Código de exemplo com no máximo 6 linhas.</li>
+</ol>
+<h2 id="telas">Telas</h2>
+<table>
+<thead>
+<tr>
+<th>Tela</th>
+<th>O que mostra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mapa</td>
+<td>Perfil com patente e barra de XP, abas das trilhas, fases, cronômetro, ranking</td>
+</tr>
+<tr>
+<td>Partida</td>
+<td>Fase, vidas, sequência, progresso, tempo, pergunta, código, alternativas, explicação</td>
+</tr>
+<tr>
+<td>Resultado da fase</td>
+<td>Estrelas, acertos de primeira, bônus de vidas, XP e recorde</td>
+</tr>
+<tr>
+<td>Certificado</td>
+<td>Nome, patente, aproveitamento e tabela por fase</td>
+</tr>
+</tbody>
+</table>
+<p><img loading="lazy" decoding="async" alt="Explicação depois da resposta" src="../assets/missao-html5/explicacao.jpg" /></p>
+<p>No celular, as alternativas ficam em uma coluna e o mapa em duas.</p>
+<p><img loading="lazy" decoding="async" alt="Jogo no celular" src="../assets/missao-html5/celular.jpg" /></p>
+<h2 id="controles">Controles</h2>
+<table>
+<thead>
+<tr>
+<th>Ação</th>
+<th>Mouse ou toque</th>
+<th>Teclado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Responder</td>
+<td>Clicar na alternativa</td>
+<td>A, B, C, D ou 1, 2, 3, 4</td>
+</tr>
+<tr>
+<td>Continuar</td>
+<td>Botão Continuar</td>
+<td>Enter</td>
+</tr>
+<tr>
+<td>Sair da fase</td>
+<td>Botão Voltar ao mapa</td>
+<td>Tab até o botão e Enter</td>
+</tr>
+</tbody>
+</table>
+<h2 id="áudio">Áudio</h2>
+<p>Os sons são gerados no navegador com a Web Audio API, sem arquivos: acerto (mais agudo conforme a sequência), erro, aviso dos últimos 5 segundos, fase concluída e derrota. O botão Som no topo liga e desliga, e a escolha fica salva.</p>
+<h2 id="acessibilidade">Acessibilidade</h2>
+<ul>
+<li>Todos os botões funcionam por teclado e têm foco visível.</li>
+<li>Acerto e erro usam cor, ícone e texto, não só a cor.</li>
+<li>O resultado de cada resposta é anunciado para leitores de tela.</li>
+<li>Quem ativou a redução de movimento no sistema não vê o confete nem as animações.</li>
+<li>O cronômetro pode ser desligado.</li>
+</ul>
+<h2 id="arquitetura-técnica">Arquitetura técnica</h2>
+<p>O jogo é um arquivo único, <code>jogos/missao-html5/index.html</code>, com HTML, CSS e JavaScript. Não usa bibliotecas, imagens nem servidor.</p>
+<h3 id="formato-de-uma-questão">Formato de uma questão</h3>
+<pre><code>{ tipo: "Complete o código",          // opcional; o padrão é "Pergunta"
+  t: "Qual atributo informa o destino do link?",
+  cod: "&lt;a ____=\"https://www.exemplo.com\"&gt;Visitar&lt;/a&gt;",   // opcional
+  mono: true,                          // alternativas em fonte de código
+  op: ["src", "link", "href", "url"],
+  c: 2,                                // posição da alternativa certa, a partir de 0
+  e: "No &lt;a&gt;, o atributo href guarda o endereço de destino." }
+</code></pre>
+<h3 id="como-ampliar-o-conteúdo">Como ampliar o conteúdo</h3>
+<ul>
+<li><strong>Nova questão:</strong> acrescente um objeto na lista <code>q</code> da fase. O sorteio já passa a incluí-la.</li>
+<li><strong>Nova fase:</strong> acrescente <code>{ icone, titulo, desc, q: [...] }</code> na lista da trilha, com pelo menos 5 questões.</li>
+<li><strong>Nova trilha:</strong> crie a lista de fases e acrescente <code>{ id, nome, icone, fases }</code> em <code>TRILHAS</code>.</li>
+</ul>
+<p>Os textos entram na página como texto puro, então tags como <code>&lt;p&gt;</code> aparecem escritas e não são interpretadas.</p>
+<h3 id="constantes-de-ajuste">Constantes de ajuste</h3>
+<table>
+<thead>
+<tr>
+<th>Constante</th>
+<th>Valor</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POR_FASE</code></td>
+<td>5</td>
+<td>Questões sorteadas por fase</td>
+</tr>
+<tr>
+<td><code>VIDAS</code></td>
+<td>3</td>
+<td>Vidas por fase</td>
+</tr>
+<tr>
+<td><code>TEMPO</code></td>
+<td>40</td>
+<td>Segundos por questão</td>
+</tr>
+<tr>
+<td><code>XP_ACERTO</code></td>
+<td>100</td>
+<td>XP por acerto</td>
+</tr>
+<tr>
+<td><code>XP_COMBO</code></td>
+<td>20</td>
+<td>XP por acerto seguido anterior, até 5</td>
+</tr>
+<tr>
+<td><code>XP_TEMPO</code></td>
+<td>50</td>
+<td>XP máximo de rapidez</td>
+</tr>
+<tr>
+<td><code>XP_VIDA</code></td>
+<td>50</td>
+<td>XP por vida restante</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dados-salvos">Dados salvos</h3>
+<p>Tudo fica no <code>localStorage</code> do navegador. Nada é enviado para a internet.</p>
+<table>
+<thead>
+<tr>
+<th>Chave</th>
+<th>Conteúdo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>portalpixel.missao-html5.v1</code></td>
+<td>Nome, melhor resultado de cada fase, trilha aberta, som e cronômetro</td>
+</tr>
+<tr>
+<td><code>portalpixel.missao-html5.ranking</code></td>
+<td>Até 50 alunos com nome, XP, estrelas, fases e data</td>
+</tr>
+</tbody>
+</table>
+<p>O progresso da versão 1.0, que só tinha HTML5, é convertido ao abrir o jogo.</p>
+<h2 id="integração-com-o-portal-pixel">Integração com o Portal Pixel</h2>
+<table>
+<thead>
+<tr>
+<th>Arquivo</th>
+<th>Papel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>jogos.js</code></td>
+<td>Entrada do catálogo: textos, versão, capa, guia e o histórico em <code>novidades</code></td>
+</tr>
+<tr>
+<td><code>assets/missao-html5.js</code> e <code>.css</code></td>
+<td>Apresentação com capturas, trilhas e atualizações</td>
+</tr>
+<tr>
+<td><code>assets/missao-html5/</code></td>
+<td>Capa e capturas reais do jogo</td>
+</tr>
+<tr>
+<td><code>guias/missao-html5.md</code></td>
+<td>Este documento, a fonte da página <code>guias/missao-html5.html</code></td>
+</tr>
+<tr>
+<td><code>j/missao-html5/</code> e <code>previas/missao-html5.jpg</code></td>
+<td>Link curto e imagem para compartilhar</td>
+</tr>
+</tbody>
+</table>
+<p>Para publicar uma versão nova: altere o jogo, aumente <code>VERSAO</code> no jogo e <code>versao</code> no catálogo, acrescente a versão no início de <code>novidades</code>, atualize este documento e gere a página do guia de novo.</p>
+<h2 id="testes-realizados-na-versão-140">Testes realizados na versão 1.4.0</h2>
+<ul>
+<li>Partida automática completa nas 12 fases, conferindo que cada questão sorteada tem 4 alternativas e exatamente 1 certa.</li>
+<li>Derrota por falta de vidas e nova tentativa.</li>
+<li>Fim do tempo contando como erro.</li>
+<li>Cronômetro desligado: sem barra e sem bônus de rapidez.</li>
+<li>Conversão do progresso salvo pela versão 1.0.</li>
+<li>Ranking com dois alunos e Trocar de aluno.</li>
+<li>Certificado das três trilhas.</li>
+<li>Página do jogo e vitrine da página inicial no portal.</li>
+</ul>
+<p>Ainda não testado: uso em um celular físico e impressão do certificado em papel.</p>
+<h2 id="histórico-de-versões">Histórico de versões</h2>
+<table>
+<thead>
+<tr>
+<th>Versão</th>
+<th>Data</th>
+<th>Mudanças</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.4</td>
+<td>10/11/2026</td>
+<td>Trilhas de CSS e JavaScript, abas, um certificado por trilha, patentes recalculadas</td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>10/11/2026</td>
+<td>Ranking da turma e botão Trocar de aluno</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>10/11/2026</td>
+<td>Banco de HTML5 com 10 questões por fase e sorteio de 5</td>
+</tr>
+<tr>
+<td>1.1</td>
+<td>10/11/2026</td>
+<td>Cronômetro de 40 segundos com bônus de rapidez, que pode ser desligado</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>10/11/2026</td>
+<td>Lançamento: 6 fases e 30 questões de HTML5, vidas, sequência, XP, patentes e certificado</td>
+</tr>
+</tbody>
+</table>
+<h2 id="limitações-e-próximos-passos">Limitações e próximos passos</h2>
+<ul>
+<li><strong>Ranking entre computadores:</strong> o ranking é local. Um ranking da turma inteira exige um serviço externo para guardar as pontuações, com conta e regras de privacidade para dados de alunos.</li>
+<li><strong>Banco de CSS e JavaScript:</strong> as fases têm 8 questões; a meta é chegar a 10, como em HTML5.</li>
+<li><strong>Relatório para o professor:</strong> exportar os resultados do ranking em uma planilha.</li>
+<li><strong>Novas trilhas:</strong> lógica de programação, banco de dados e Git seguem o mesmo formato.</li>
+</ul></article>
+    </div>
+  </main>
+</body>
+</html>

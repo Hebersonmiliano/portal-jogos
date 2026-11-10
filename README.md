@@ -60,6 +60,20 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ## Publicar
 
+### Missão HTML5
+
+Disponível em `jogo.html?id=missao-html5`, em `jogos/missao-html5/` (um único `index.html`, sem bibliotecas). Versão 1.4.0: jogo de perguntas para o curso de Desenvolvimento de Sistemas, com três trilhas (HTML5, CSS e JavaScript), 12 fases e 108 questões. Cada fase sorteia 5 questões; há vidas, cronômetro de 40 segundos que pode ser desligado, XP, patentes, ranking salvo no navegador e um certificado por trilha.
+
+A apresentação usa o campo `vitrineMissao` no catálogo, `assets/missao-html5.js` e `.css`, e a capa e as capturas reais em `assets/missao-html5/`. Aparece na página do jogo e na vitrine da página inicial, e lista as atualizações a partir do campo `novidades`.
+
+A documentação do jogo (GDD) fica em `guias/missao-html5.md` e vira a página `guias/missao-html5.html` (campo `guia` no catálogo):
+
+```bash
+python3 ferramentas/guias/gerar.py guias/missao-html5.md missao-html5 "Documento de design (GDD) de Missão HTML5: objetivos, mecânicas, conteúdo das 12 fases, telas, arquitetura, testes e histórico de versões."
+```
+
+Para publicar uma versão nova: altere o jogo, aumente `VERSAO` no jogo e `versao` no catálogo, acrescente a versão no início de `novidades`, atualize o GDD, gere o guia de novo e troque a chave de cache de `jogos.js` nas duas páginas. O link de compartilhamento fica em `j/missao-html5/`.
+
 ### Brisa
 
 Disponível em `jogo.html?id=brisa`, com a cópia de distribuição em `jogos/brisa/` (um único `index.html`, HTML5 com Canvas 2D e Web Audio, sem bibliotecas). Versão 0.2.0: jogo cozy de sobrevivência e crafting em pixel art isométrica, com personagem articulado, casa em seis fases com interior, pesca no lago e no mar, machado, picareta e minérios, Bancada, Forno e Fogão, horta e trilha lo-fi gerada no navegador. Funciona no computador e no celular e salva no `localStorage`.

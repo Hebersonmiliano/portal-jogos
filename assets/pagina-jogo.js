@@ -60,6 +60,11 @@ if (!jogo) {
       apresentacao.hidden = false;
       apresentacao.append(criarVitrineFaisca2(jogo, () => iniciar.click(), true));
     }
+    if (jogo.vitrineMissao) {
+      const apresentacao = document.getElementById("apresentacao-missao");
+      apresentacao.hidden = false;
+      apresentacao.append(criarVitrineMissao(jogo, () => iniciar.click()));
+    }
     if (jogo.vitrineCafe) {
       const apresentacao = document.getElementById("apresentacao-cafe");
       apresentacao.hidden = false;
@@ -101,6 +106,10 @@ if (!jogo) {
       if (jogo.id === "faisca-2") {
         document.getElementById("apresentacao-faisca2").hidden = true;
         palco.scrollIntoView({block:"start",behavior:"auto"});
+      }
+      if (jogo.vitrineMissao) {
+        document.getElementById("apresentacao-missao").hidden = true;
+        palco.scrollIntoView({ block: "start", behavior: "auto" });
       }
       if (jogo.vitrineCafe) {
         document.getElementById("apresentacao-cafe").hidden = true;
