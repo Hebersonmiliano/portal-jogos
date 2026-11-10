@@ -35,6 +35,8 @@
   .barra i { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--acc),var(--acc-2)); transition:width .5s; }
   .xpbox .linha { display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-bottom:5px; }
   .nome-form { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .turma-linha { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; font-size:.9rem; color:var(--muted); }
+  .turma-linha select { flex:1; min-width:180px; max-width:420px; padding:9px 10px; border-radius:10px; border:2px solid var(--borda); background:var(--codigo); color:var(--ink); font:inherit; }
   .nome-form input { flex:1; min-width:180px; padding:11px 12px; border-radius:10px; border:2px solid var(--borda); background:var(--codigo); color:var(--ink); font:inherit; }
 
   /* mapa */
@@ -169,6 +171,11 @@
         <input id="campoNome" type="text" maxlength="40" placeholder="Digite seu nome para começar" aria-label="Seu nome" autocomplete="off" required>
         <button class="acao" type="submit">Salvar nome</button>
       </form>
+      <div class="turma-linha oculto" id="linhaTurma">
+        <label for="campoTurma">Turma:</label>
+        <select id="campoTurma"><option value="">Sem turma (não envia ao professor)</option></select>
+        <span id="statusEnvio" role="status"></span>
+      </div>
     </section>
 
     <section class="card">
@@ -193,7 +200,7 @@
       </div>
       <table class="rank" id="ranking"></table>
       <p class="nota" id="rankVazio">Ninguém pontuou ainda. Conclua uma fase para entrar no ranking.</p>
-      <p class="nota">O ranking fica salvo neste navegador. Para comparar a turma, os alunos jogam no mesmo computador usando "Trocar de aluno", ou cada um mostra o próprio certificado.</p>
+      <p class="nota" id="rankNota"></p>
     </section>
     <p class="versao" id="versao"></p>
   </div>
@@ -770,17 +777,19 @@
     { xp: 11000, nome: "Dev Sênior", avatar: "🚀" },
     { xp: 16000, nome: "Arquiteto Web", avatar: "👑" }
   ];
-  var VERSAO = "1.6.0";
+  var VERSAO = "1.7.0";
   var POR_FASE = 5, VIDAS = 3, TEMPO = 40, XP_ACERTO = 100, XP_COMBO = 20, XP_VIDA = 50, XP_TEMPO = 50;
   var CHAVE = "portalpixel.missao-html5.v1", CHAVE_RANK = "portalpixel.missao-html5.ranking";
 
   // ---------- ESTADO SALVO ----------
-  var save = { nome: "", fases: {}, som: true, tempo: true, trilha: "html" };
+  var save = { nome: "", fases: {}, som: true, tempo: true, trilha: "html", turma: "", enviadas: {} };
   try {
     var bruto = JSON.parse(localStorage.getItem(CHAVE));
     if (bruto && typeof bruto === "object") {
       save.nome = String(bruto.nome || "").slice(0, 40);
       save.som = bruto.som !== false;
+      save.turma = String(bruto.turma || "").slice(0, 100);
+      if (bruto.enviadas && typeof bruto.enviadas === "object") save.enviadas = bruto.enviadas;
       save.tempo = bruto.tempo !== false;
       if (TRILHAS.some(function (t) { return t.id === bruto.trilha; })) save.trilha = bruto.trilha;
       var antigas = bruto.fases && typeof bruto.fases === "object" ? bruto.fases : {};
@@ -802,7 +811,7 @@
   function embaralhar(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function criar(tag, classe, texto) { var e = document.createElement(tag); if (classe) e.className = classe; if (texto != null) e.textContent = texto; return e; }
 
-  // ---------- RANKING (deste navegador) ----------
+  // ---------- RANKING (online com turma, senão deste navegador) ----------
   function lerRanking() {
     try { var r = JSON.parse(localStorage.getItem(CHAVE_RANK)); return Array.isArray(r) ? r : []; } catch (e) { return []; }
   }
@@ -816,15 +825,20 @@
     try { localStorage.setItem(CHAVE_RANK, JSON.stringify(r.slice(0, 50))); } catch (e) {}
   }
   function desenharRanking() {
-    var r = lerRanking(), tab = $("ranking"), id = save.nome.toLowerCase();
+    var online = !!(save.turma && rankOnline), tab = $("ranking");
+    var r = online ? rankOnline.map(function (x) { return { nome: x.name, xp: x.xp, estrelas: x.stars, fases: x.phases }; }) : lerRanking();
+    var id = (online ? nomeCurto(save.nome) : save.nome).toLowerCase();
     tab.textContent = "";
     $("rankVazio").classList.toggle("oculto", r.length > 0);
-    $("btnLimparRank").classList.toggle("oculto", !r.length);
+    $("btnLimparRank").classList.toggle("oculto", online || !r.length);
+    $("rankNota").textContent = online
+      ? "Ranking online da turma " + save.turma + ", com os 20 primeiros. Os nomes aparecem abreviados. Vale como estudo, não como nota."
+      : "Este ranking fica salvo só neste navegador." + ($("linhaTurma").classList.contains("oculto") ? "" : " Escolha sua turma no topo da página para entrar no ranking online e enviar seus resultados ao professor.");
     if (!r.length) return;
     var cab = criar("tr");
     ["#", "Aluno", "Patente", "Fases", "Estrelas", "XP"].forEach(function (c) { cab.appendChild(criar("th", null, c)); });
     tab.appendChild(cab);
-    r.slice(0, 10).forEach(function (x, i) {
+    r.slice(0, online ? 20 : 10).forEach(function (x, i) {
       var tr = criar("tr", String(x.nome).toLowerCase() === id ? "eu" : null);
       [["🥇", "🥈", "🥉"][i] || (i + 1) + "º", x.nome, patenteDe(x.xp).nome, x.fases, x.estrelas, x.xp].forEach(function (c) { tr.appendChild(criar("td", null, c)); });
       tab.appendChild(tr);
@@ -860,6 +874,80 @@
     window.scrollTo(0, 0);
   }
 
+  // ---------- BANCO DE DADOS (Portal de Avaliações) ----------
+  // Com uma turma escolhida, o melhor resultado de cada fase vai para o banco que o professor
+  // consulta no painel. Envio que falha fica pendente e é refeito na próxima vez.
+  // A correção acontece aqui no navegador, então isto serve para ranking e acompanhamento,
+  // nunca como nota oficial.
+  var API = "https://provabd.hebersonmiliano.chatgpt.site", JOGO_ID = "trilha-dev";
+  var rankOnline = null, enviando = false, falhou = false;
+  function pedir(caminho, corpo) {
+    var op = corpo ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo), cache: "no-store" } : { cache: "no-store" };
+    return fetch(API + caminho, op).then(function (r) {
+      return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || "Falha"); return d; });
+    });
+  }
+  function assinatura(r) { return r.xp + "/" + r.estrelas + "/" + r.primeira; }
+  function nomeCurto(n) { var p = String(n).trim().replace(/\s+/g, " ").split(" "); return p.length > 1 ? p[0] + " " + p[p.length - 1][0].toUpperCase() + "." : p[0]; }
+  function pendentes() {
+    var l = [];
+    if (!save.turma || save.nome.trim().length < 2) return l;
+    TRILHAS.forEach(function (tr) {
+      tr.fases.forEach(function (f, i) {
+        var r = feita(tr, i), k = chave(tr, i);
+        if (r && save.enviadas[k] !== assinatura(r)) l.push({ k: k, trilha: tr.id, fase: i, r: r });
+      });
+    });
+    return l;
+  }
+  function desenharEnvio() {
+    var n = pendentes().length, t = "";
+    if (save.turma && save.nome && save.nome.trim().length < 2) t = "Use um nome com 2 letras ou mais para enviar.";
+    else if (save.turma && enviando) t = "Enviando…";
+    else if (save.turma && n) t = falhou ? "Guardado neste aparelho: " + n + " resultado(s) serão enviados ao professor quando o servidor responder." : "";
+    else if (save.turma && somar()) t = "✓ Resultados enviados ao professor";
+    $("statusEnvio").textContent = t;
+  }
+  function sincronizar() {
+    if (enviando) return;
+    var fila = pendentes();
+    if (!fila.length) { desenharEnvio(); return; }
+    var nome = save.nome, turma = save.turma;
+    enviando = true; falhou = false; desenharEnvio();
+    function fim() {
+      enviando = false; desenharEnvio();
+      if (falhou) return;
+      carregarRanking();
+      if (pendentes().length) sincronizar();
+    }
+    (function proximo() {
+      var p = fila.shift();
+      if (!p || save.nome !== nome || save.turma !== turma) return fim();
+      pedir("/api/game/result", {
+        game: JOGO_ID, name: nome, turma: turma, trail: p.trilha, phase: p.fase,
+        xp: Math.min(1500, Math.round(p.r.xp) || 0), stars: Math.min(3, Math.max(1, p.r.estrelas || 1)), firstTry: Math.min(5, Math.max(0, p.r.primeira || 0))
+      }).then(function () { save.enviadas[p.k] = assinatura(p.r); salvar(); proximo(); })
+        .catch(function () { falhou = true; fim(); });
+    })();
+  }
+  function carregarRanking() {
+    var turma = save.turma;
+    if (!turma) { rankOnline = null; desenharRanking(); return; }
+    pedir("/api/game/ranking?game=" + JOGO_ID + "&turma=" + encodeURIComponent(turma))
+      .then(function (d) { if (save.turma === turma) { rankOnline = d.ranking || []; desenharRanking(); } })
+      .catch(function () { if (save.turma === turma) { rankOnline = null; desenharRanking(); } });
+  }
+  function carregarTurmas() {
+    pedir("/api/classes").then(function (d) {
+      var sel = $("campoTurma"), lista = (d.classes || []).slice();
+      if (save.turma && lista.indexOf(save.turma) < 0) lista.push(save.turma);
+      lista.forEach(function (n) { var o = criar("option", null, n); o.value = n; sel.appendChild(o); });
+      sel.value = save.turma;
+      $("linhaTurma").classList.toggle("oculto", !lista.length);
+      desenharRanking(); sincronizar(); carregarRanking();
+    }).catch(function () {});
+  }
+
   function desenharMapa() {
     var xp = xpTotal(), pat = patenteDe(xp), tr = trilha(), feitas = feitasNa(tr);
     var prox = PATENTES.filter(function (p) { return p.xp > xp; })[0];
@@ -871,6 +959,7 @@
     $("xpBarra").style.width = (prox ? Math.round((xp - pat.xp) / (prox.xp - pat.xp) * 100) : 100) + "%";
     $("formNome").classList.toggle("oculto", !!save.nome);
     $("btnZerar").classList.toggle("oculto", !save.nome);
+    desenharEnvio();
     $("resumo").textContent = "Trilha " + tr.nome + ": " + feitas + " de " + tr.fases.length + " fases concluídas";
     $("btnVerCert").classList.toggle("oculto", feitas < tr.fases.length);
     $("btnVerCert").textContent = "🎓 Certificado de " + tr.nome;
@@ -1020,7 +1109,7 @@
         estrelas: Math.max(est, antes ? antes.estrelas : 0),
         primeira: Math.max(jogo.primeira, antes ? antes.primeira : 0)
       };
-      salvar(); registrarRanking();
+      salvar(); registrarRanking(); sincronizar();
       $("fimTitulo").textContent = "Fase " + (i + 1) + " concluída!";
       $("fimEstrelas").textContent = estrelas(est);
       $("fimTexto").textContent = est === 3 ? "Perfeito: todas de primeira." : "Jogue de novo sem errar para ganhar 3 estrelas. As questões são sorteadas a cada partida.";
@@ -1085,7 +1174,7 @@
     ev.preventDefault();
     var n = $("campoNome").value.trim();
     if (!n) return;
-    save.nome = n.slice(0, 40); salvar(); desenharMapa();
+    save.nome = n.slice(0, 40); save.enviadas = {}; salvar(); desenharMapa(); sincronizar();
   });
   $("btnProx").addEventListener("click", avancar);
   $("btnSair").addEventListener("click", function () {
@@ -1099,12 +1188,16 @@
   $("btnTempo").addEventListener("click", function () { save.tempo = !save.tempo; salvar(); desenharMapa(); });
   $("btnZerar").addEventListener("click", function () {
     if (!confirm("Trocar de aluno? O progresso de " + save.nome + " sai deste navegador. A pontuação continua no ranking.")) return;
-    save.nome = ""; save.fases = {}; save.trilha = TRILHAS[0].id; salvar(); $("campoNome").value = ""; desenharMapa();
+    save.nome = ""; save.fases = {}; save.enviadas = {}; save.trilha = TRILHAS[0].id; salvar(); $("campoNome").value = ""; desenharMapa();
   });
   $("btnLimparRank").addEventListener("click", function () {
     if (!confirm("Apagar o ranking deste navegador?")) return;
     try { localStorage.removeItem(CHAVE_RANK); } catch (e) {}
     desenharRanking();
+  });
+  $("campoTurma").addEventListener("change", function () {
+    save.turma = this.value; save.enviadas = {}; rankOnline = null; falhou = false; salvar();
+    desenharRanking(); desenharEnvio(); sincronizar(); carregarRanking();
   });
   function atualizarSom() { $("btnSom").textContent = save.som ? "🔊 Som" : "🔇 Mudo"; $("btnSom").setAttribute("aria-pressed", String(save.som)); }
   $("btnSom").addEventListener("click", function () { save.som = !save.som; salvar(); atualizarSom(); });
@@ -1118,6 +1211,7 @@
   $("versao").textContent = "Trilha Dev · versão " + VERSAO;
   atualizarSom();
   desenharMapa();
+  carregarTurmas();
 })();
 </script>
 </body>

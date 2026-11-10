@@ -24,9 +24,9 @@
       <a class="botao guia-jogar" href="../jogo.html?id=missao-html5">▶ Jogar agora</a>
     </div>
     <div class="guia-grade">
-      <nav class="guia-indice" aria-label="Índice do guia"><strong>Índice</strong><ol><li><a href="#visão-geral">Visão geral</a></li><li><a href="#objetivos-pedagógicos">Objetivos pedagógicos</a></li><li><a href="#público-e-uso-em-sala">Público e uso em sala</a></li><li><a href="#ciclo-de-jogo">Ciclo de jogo</a></li><li><a href="#mecânicas">Mecânicas</a></li><li><a href="#conteúdo">Conteúdo</a></li><li><a href="#telas">Telas</a></li><li><a href="#controles">Controles</a></li><li><a href="#áudio">Áudio</a></li><li><a href="#acessibilidade">Acessibilidade</a></li><li><a href="#arquitetura-técnica">Arquitetura técnica</a></li><li><a href="#integração-com-o-portal-pixel">Integração com o Portal Pixel</a></li><li><a href="#testes-realizados-na-versão-160">Testes realizados na versão 1.6.0</a></li><li><a href="#histórico-de-versões">Histórico de versões</a></li><li><a href="#limitações-e-próximos-passos">Limitações e próximos passos</a></li></ol></nav>
+      <nav class="guia-indice" aria-label="Índice do guia"><strong>Índice</strong><ol><li><a href="#visão-geral">Visão geral</a></li><li><a href="#objetivos-pedagógicos">Objetivos pedagógicos</a></li><li><a href="#público-e-uso-em-sala">Público e uso em sala</a></li><li><a href="#ciclo-de-jogo">Ciclo de jogo</a></li><li><a href="#mecânicas">Mecânicas</a></li><li><a href="#conteúdo">Conteúdo</a></li><li><a href="#telas">Telas</a></li><li><a href="#controles">Controles</a></li><li><a href="#áudio">Áudio</a></li><li><a href="#acessibilidade">Acessibilidade</a></li><li><a href="#arquitetura-técnica">Arquitetura técnica</a></li><li><a href="#integração-com-o-portal-pixel">Integração com o Portal Pixel</a></li><li><a href="#testes-realizados-na-versão-170">Testes realizados na versão 1.7.0</a></li><li><a href="#histórico-de-versões">Histórico de versões</a></li><li><a href="#limitações-e-próximos-passos">Limitações e próximos passos</a></li></ol></nav>
       <article class="guia-texto">
-<p>Versão do jogo: <strong>1.6.0</strong> · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano</p>
+<p>Versão do jogo: <strong>1.7.0</strong> · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano</p>
 <p>Este documento descreve o jogo Trilha Dev, que até a versão 1.5 se chamava Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.</p>
 <p><img loading="lazy" decoding="async" alt="Capa de Trilha Dev" src="../assets/missao-html5/capa.jpg" /></p>
 <h2 id="visão-geral">Visão geral</h2>
@@ -197,7 +197,13 @@
 <p>Concluir bem a trilha de HTML5 leva perto de Dev Pleno. Para chegar a Arquiteto Web é preciso jogar bem quase todas as trilhas. Na versão 1.5 os níveis passaram a pedir mais XP, então um aluno que já tinha jogado pode aparecer com uma patente menor até avançar nas trilhas novas.</p>
 <h3 id="ranking-da-turma">Ranking da turma</h3>
 <p>Ao concluir uma fase, o aluno entra no ranking, que mostra os 10 melhores por XP, com patente, fases concluídas e estrelas. O botão Trocar de aluno apaga o progresso do aluno atual e mantém a pontuação dele no ranking. O botão Limpar ranking zera a tabela.</p>
-<p>O ranking fica salvo no navegador. Ele reúne os alunos que jogaram no mesmo computador, não a turma inteira em computadores diferentes.</p>
+<p>Sem turma escolhida, o ranking fica salvo no navegador e reúne só os alunos que jogaram no mesmo computador.</p>
+<p>Com uma turma escolhida na tela inicial, o ranking passa a ser online: mostra os 20 melhores da turma, somando o melhor resultado de cada fase. Os nomes aparecem abreviados (primeiro nome e inicial do último), porque a lista pode ser vista sem senha.</p>
+<h3 id="turma-e-envio-ao-professor">Turma e envio ao professor</h3>
+<p>A lista de turmas vem do Portal de Avaliações (<code>hebersonmiliano.github.io/portal-de-avaliacoes</code>), onde o professor cadastra as turmas no painel. Depois de escolher a turma, cada fase concluída envia ao banco de dados do portal o nome do aluno, a turma, a trilha, a fase, o XP, as estrelas e os acertos de primeira. O banco guarda o melhor resultado de cada fase e conta as partidas.</p>
+<p>O professor vê os resultados no painel do Portal de Avaliações, na seção Trilha Dev: posição, fases concluídas, estrelas, XP, avanço em cada trilha e última atividade, com filtro por turma, exportação em CSV e botão para remover um aluno.</p>
+<p>Se o envio falhar (sem internet ou servidor fora do ar), o resultado fica guardado no aparelho e o jogo tenta de novo na próxima vez que for aberto.</p>
+<p><strong>Não vale como nota.</strong> O jogo corrige as respostas no navegador do aluno, então um aluno com conhecimento técnico consegue forjar a pontuação. Use para acompanhar o estudo; a nota oficial vem da prova com código do Portal de Avaliações.</p>
 <p><img loading="lazy" decoding="async" alt="Ranking da turma" src="../assets/missao-html5/ranking.jpg" /></p>
 <h3 id="certificado">Certificado</h3>
 <p>Cada trilha concluída libera um certificado com o nome do aluno, a patente, os acertos de primeira por fase, o aproveitamento e a data. O botão Imprimir abre a impressão do navegador, que também salva em PDF. O aproveitamento considera a melhor tentativa de cada fase.</p>
@@ -494,7 +500,7 @@
 </tbody>
 </table>
 <h3 id="dados-salvos">Dados salvos</h3>
-<p>Tudo fica no <code>localStorage</code> do navegador. Nada é enviado para a internet.</p>
+<p>O progresso fica no <code>localStorage</code> do navegador. Sem turma escolhida, nada é enviado para a internet. Com turma, o melhor resultado de cada fase vai para o banco do Portal de Avaliações (<code>POST /api/game/result</code> em <code>provabd.hebersonmiliano.chatgpt.site</code>). O campo <code>turma</code> guarda a turma escolhida e <code>enviadas</code> marca o que já foi enviado.</p>
 <table>
 <thead>
 <tr>
@@ -546,7 +552,7 @@
 </tbody>
 </table>
 <p>Para publicar uma versão nova: altere o jogo, aumente <code>VERSAO</code> no jogo e <code>versao</code> no catálogo, acrescente a versão no início de <code>novidades</code>, atualize este documento e gere a página do guia de novo.</p>
-<h2 id="testes-realizados-na-versão-160">Testes realizados na versão 1.6.0</h2>
+<h2 id="testes-realizados-na-versão-170">Testes realizados na versão 1.7.0</h2>
 <ul>
 <li>Conferência automática das 210 questões: 10 por fase, 4 alternativas diferentes, 1 certa e explicação preenchida.</li>
 <li>Quatro partidas automáticas completas em cada uma das 21 fases, que passaram por 199 das 210 questões.</li>
@@ -558,6 +564,14 @@
 <li>Certificado das seis trilhas.</li>
 <li>Página do jogo e vitrine da página inicial no portal.</li>
 </ul>
+<p>Os itens acima foram executados até a versão 1.6 e não foram repetidos na 1.7. Na versão 1.7 foram testados, na prévia local do Portal de Avaliações com banco temporário:</p>
+<ul>
+<li>Testes automáticos do servidor: gravação do melhor resultado, recusa de dados inválidos e de turma desconhecida, ranking com nomes abreviados e separação das turmas por professor.</li>
+<li>Escolha de turma com progresso já salvo: as fases antigas foram enviadas ao banco.</li>
+<li>Uma fase jogada até o fim: resultado enviado e ranking online atualizado.</li>
+<li>Painel do professor: tabela, filtro por turma e seção Trilha Dev.</li>
+</ul>
+<p>Não testado na 1.7: envio pelo servidor de produção, que ainda precisa ser publicado com as rotas novas.</p>
 <p>Ainda não testado: uso em um celular físico e impressão do certificado em papel.</p>
 <h2 id="histórico-de-versões">Histórico de versões</h2>
 <table>
@@ -569,6 +583,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>1.7</td>
+<td>10/11/2026</td>
+<td>Escolha de turma, envio dos resultados ao banco do Portal de Avaliações, ranking online e seção Trilha Dev no painel do professor</td>
+</tr>
 <tr>
 <td>1.6</td>
 <td>10/11/2026</td>
