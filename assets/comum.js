@@ -134,7 +134,7 @@ function criarCartao(jogo) {
     info.append(fatos, el("span", "cartao-convite", "Investigar o caso →"));
   }
   if (jogo.vitrineMissao) {
-    info.append(el("p", "mis-mini-resumo", "Seis trilhas e 21 fases, de HTML5 a Git, com ranking e certificado."), el("span", "mis-mini-convite", "Começar a missão →"));
+    info.append(el("p", "mis-mini-resumo", "Seis trilhas e 21 fases, de HTML5 a Git, com ranking e certificado."), el("span", "mis-mini-convite", "Começar a trilha →"));
   }
   if (jogo.vitrineImperio2) {
     a.classList.add("cartao-imp2");

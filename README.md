@@ -60,16 +60,16 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ## Publicar
 
-### Missão HTML5
+### Trilha Dev (antes Missão HTML5)
 
-Disponível em `jogo.html?id=missao-html5`, em `jogos/missao-html5/` (um único `index.html`, sem bibliotecas). Versão 1.5.0: jogo de perguntas para o curso de Desenvolvimento de Sistemas, com seis trilhas (HTML5, CSS, JavaScript, lógica de programação, banco de dados e Git), 21 fases e 210 questões. Cada fase sorteia 5 questões; há vidas, cronômetro de 40 segundos que pode ser desligado, XP, patentes, ranking salvo no navegador e um certificado por trilha.
+Disponível em `jogo.html?id=missao-html5`, em `jogos/missao-html5/` (um único `index.html`, sem bibliotecas). Versão 1.6.0. O id, as pastas e os arquivos continuam como `missao-html5`, para não quebrar os links já compartilhados nem o progresso salvo dos alunos. Jogo de perguntas para o curso de Desenvolvimento de Sistemas, com seis trilhas (HTML5, CSS, JavaScript, lógica de programação, banco de dados e Git), 21 fases e 210 questões. Cada fase sorteia 5 questões; há vidas, cronômetro de 40 segundos que pode ser desligado, XP, patentes, ranking salvo no navegador e um certificado por trilha.
 
 A apresentação usa o campo `vitrineMissao` no catálogo, `assets/missao-html5.js` e `.css`, e a capa e as capturas reais em `assets/missao-html5/`. Aparece na página do jogo e na vitrine da página inicial, e lista as atualizações a partir do campo `novidades`.
 
 A documentação do jogo (GDD) fica em `guias/missao-html5.md` e vira a página `guias/missao-html5.html` (campo `guia` no catálogo):
 
 ```bash
-python3 ferramentas/guias/gerar.py guias/missao-html5.md missao-html5 "Documento de design (GDD) de Missão HTML5: objetivos, mecânicas, conteúdo das 21 fases, telas, arquitetura, testes e histórico de versões."
+python3 ferramentas/guias/gerar.py guias/missao-html5.md missao-html5 "Documento de design (GDD) de Trilha Dev: objetivos, mecânicas, conteúdo das 21 fases, telas, arquitetura, testes e histórico de versões."
 ```
 
 Para publicar uma versão nova: altere o jogo, aumente `VERSAO` no jogo e `versao` no catálogo, acrescente a versão no início de `novidades`, atualize o GDD, gere o guia de novo e troque a chave de cache de `jogos.js` nas duas páginas. O link de compartilhamento fica em `j/missao-html5/`.

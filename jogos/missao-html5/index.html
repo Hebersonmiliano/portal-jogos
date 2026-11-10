@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Missão HTML5 — Portal Pixel</title>
+<title>Trilha Dev — Portal Pixel</title>
 <meta name="description" content="Jogo de perguntas sobre HTML5, CSS, JavaScript, lógica de programação, banco de dados e Git para alunos de Desenvolvimento de Sistemas: 21 fases, 210 questões sorteadas, cronômetro, ranking e certificado.">
 <style>
   :root { --bg:#141a26; --painel:#1e2636; --painel-2:#273247; --ink:#eef2f8; --muted:#9aa7bd; --acc:#f16529; --acc-2:#ffc145; --ok:#3ecf8e; --erro:#ff6b6b; --borda:#34415a; --codigo:#0e131d; }
@@ -141,7 +141,7 @@
 </head>
 <body>
 <header>
-  <h1>Missão <span>HTML5</span></h1>
+  <h1>Trilha <span>Dev</span></h1>
   <div class="lado">
     <button class="mini" id="btnSom" type="button" aria-pressed="true">🔊 Som</button>
     <a href="../../index.html">← Portal Pixel</a>
@@ -770,7 +770,7 @@
     { xp: 11000, nome: "Dev Sênior", avatar: "🚀" },
     { xp: 16000, nome: "Arquiteto Web", avatar: "👑" }
   ];
-  var VERSAO = "1.5.0";
+  var VERSAO = "1.6.0";
   var POR_FASE = 5, VIDAS = 3, TEMPO = 40, XP_ACERTO = 100, XP_COMBO = 20, XP_VIDA = 50, XP_TEMPO = 50;
   var CHAVE = "portalpixel.missao-html5.v1", CHAVE_RANK = "portalpixel.missao-html5.ranking";
 
@@ -1055,7 +1055,7 @@
       primeira += s.primeira; est += s.estrelas; total += POR_FASE;
       linha([(i + 1) + ". " + f.titulo, s.primeira + " de " + POR_FASE, estrelas(s.estrelas)], "td");
     });
-    $("certCabecalho").textContent = "PORTAL PIXEL · MISSÃO HTML5 · TRILHA " + tr.nome.toUpperCase();
+    $("certCabecalho").textContent = "PORTAL PIXEL · TRILHA DEV · " + tr.nome.toUpperCase();
     $("certNome").textContent = save.nome || "Aluno";
     $("certTexto").textContent = "concluiu as " + tr.fases.length + " fases da trilha " + tr.nome + ", com " + total + " questões respondidas, e alcançou a patente " + patenteDe(xp).nome + ".";
     var qd = $("certQuadro"); qd.textContent = "";
@@ -1115,7 +1115,7 @@
     if (idx >= 0 && k.length === 1 && !jogo.respondida) { var b = $("qOpcoes").children[idx]; if (b) responder(b); }
   });
 
-  $("versao").textContent = "Missão HTML5 · versão " + VERSAO;
+  $("versao").textContent = "Trilha Dev · versão " + VERSAO;
   atualizarSom();
   desenharMapa();
 })();
