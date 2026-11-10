@@ -15,7 +15,7 @@ window.SITE = {
   // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
   estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
-  carrossel: ["faisca-2", "lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
+  carrossel: ["duelo-dos-mundos", "faisca-2", "lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -206,6 +206,26 @@ window.JOGOS = [
     status: "disponivel",
     lancamento: "2026-11-09",
     novidades: [{ versao: "1.0", data: "2026-11-09", itens: ["Primeira versão: quiz de competição para 2 alunos com música", "Nova versão: perguntas em ordem aleatória a cada partida"] }, { versao: "1.1", data: "2026-11-09", itens: ["Perguntas em ordem aleatória a cada partida"] }, { versao: "1.2", data: "2026-11-09", itens: ["Contagem 3, 2, 1, valendo!", "Sequência de acertos com bônus", "Pergunta valendo dobrado (a cada 4 perguntas)"] }, { versao: "1.3", data: "2026-11-09", itens: ["Quem erra perde 5 pontos", "Vitória com fogos mais fortes e título em destaque"] }, { versao: "1.4", data: "2026-11-09", itens: ["A música fica mais rápida quando alguém está na frente"] }],
+  },
+  {
+    id: "duelo-dos-mundos",
+    titulo: "Portal Pixel: Duelo dos Mundos",
+    chamada: "Os mundos colidiram. Monte seu baralho, convoque heróis do Portal Pixel e domine o campo.",
+    genero: ["Estratégia", "RPG"],
+    tags: ["cartas", "card game", "turnos", "baralho", "Portal Pixel", "Faísca", "Setor 404", "celular"],
+    descricao: "Jogo de cartas colecionáveis do universo Portal Pixel. Escolha o baralho Chamas do Castelo ou Rebelião 404, invoque personagens, use técnicas e cenários e enfrente uma IA em partidas rápidas. A coleção inicial reúne 24 cartas com personagens e cenas dos jogos do portal e foi planejada para receber uma nova expansão a cada lançamento.",
+    controles: "Mouse ou toque: selecione uma carta da mão para jogar, escolha seus personagens para atacar e encerre o turno quando terminar. O progresso, as vitórias e o baralho escolhido ficam salvos neste navegador.",
+    url: "jogos/duelo-dos-mundos/index.html",
+    versao: "0.1.0",
+    capa: "assets/faisca-2/capa.jpg",
+    cor: "#9b5cff",
+    icone: "🃏",
+    engine: "HTML5 · CSS · JavaScript",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-11-10",
+    destaque: true,
+    novidades: [{ versao: "0.1", data: "2026-11-10", itens: ["Primeira versão jogável contra a IA", "24 cartas em duas coleções", "Galeria, tutorial e salvamento local"] }],
   },
   {
     id: "faisca-2",
@@ -692,3 +712,4 @@ window.JOGOS = [
     destaque: false,
   },
 ];
+

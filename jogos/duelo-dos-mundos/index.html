@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0920">
+  <meta name="description" content="Duelo dos Mundos, o jogo de cartas do universo Portal Pixel.">
+  <title>Portal Pixel: Duelo dos Mundos</title>
+  <link rel="icon" href="../../assets/marca/icone.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="../../index.html" class="brand"><img src="../../assets/marca/icone.svg" alt=""><span>PORTAL PIXEL</span></a>
+    <nav><button data-view="arena">Duelo</button><button data-view="collection">Coleção</button><button data-view="rules">Como jogar</button><a href="GDD.md" target="_blank">GDD</a></nav>
+    <div class="profile"><span>🏆 <b id="wins">0</b></span><button id="sound" title="Som">♪</button></div>
+  </header>
+
+  <main>
+    <section id="home" class="view active hero">
+      <div class="hero-copy">
+        <span class="eyebrow">O CARD GAME DO PORTAL PIXEL</span>
+        <h1>DUELO<br><em>DOS MUNDOS</em></h1>
+        <p>Os portais se romperam. Heróis, máquinas e guardiões agora dividem o mesmo campo. Escolha um mundo, domine suas combinações e restaure o equilíbrio.</p>
+        <div class="hero-actions"><button class="primary" id="newGame">Começar duelo</button><button class="secondary" data-view="collection">Ver 24 cartas</button></div>
+        <div class="facts"><span>⚔ Partidas de 5–8 min</span><span>🃏 24 cartas iniciais</span><span>📱 Celular e computador</span></div>
+      </div>
+      <div class="hero-cards" aria-label="Cartas em destaque">
+        <div id="featuredA"></div><div id="featuredB"></div><div id="featuredC"></div>
+      </div>
+    </section>
+
+    <section id="deck" class="view setup">
+      <div class="section-title"><span>PREPARE-SE</span><h2>Escolha seu baralho</h2><p>Cada mundo joga de um jeito diferente.</p></div>
+      <div class="deck-grid">
+        <button class="deck-card fire" data-deck="faisca"><img src="../../assets/faisca-2/capa.jpg" alt="Faísca diante do Castelo das Cinzas"><span>CHAMAS DO CASTELO</span><h3>Faísca</h3><p>Ataques rápidos, dano direto e efeitos ao invocar.</p><b>🔥 AGRESSIVO</b></button>
+        <button class="deck-card tech" data-deck="setor"><img src="../../assets/setor-404/capa-cinco.png" alt="Maya e a fábrica do Setor 404"><span>REBELIÃO 404</span><h3>Setor 404</h3><p>Escudos, sobrecarga e máquinas que evoluem juntas.</p><b>⚙ TÁTICO</b></button>
+      </div>
+    </section>
+
+    <section id="arena" class="view arena" aria-live="polite">
+      <div class="battle-head"><button class="secondary small" id="leave">← Sair</button><div id="turnLabel">Seu turno</div><button class="primary small" id="endTurn">Encerrar turno</button></div>
+      <div class="player enemy"><div class="avatar enemy-avatar">404</div><div><b>NEXUS-IA</b><span id="enemyDeck">Baralho desconhecido</span></div><div class="life"><span>VIDA</span><b id="enemyLife">20</b></div><div class="energy">⚡ <b id="enemyEnergy">1</b>/10</div></div>
+      <div id="enemyHand" class="hand enemy-hand"></div>
+      <div id="enemyBoard" class="board"></div>
+      <div class="portal-line"><span></span><b id="message">Escolha uma carta para começar.</b><span></span></div>
+      <div id="playerBoard" class="board"></div>
+      <div id="playerHand" class="hand"></div>
+      <div class="player"><div class="avatar">PX</div><div><b>VOCÊ</b><span id="playerDeck">—</span></div><div class="life"><span>VIDA</span><b id="playerLife">20</b></div><div class="energy">⚡ <b id="playerEnergy">1</b>/10</div></div>
+    </section>
+
+    <section id="collection" class="view collection"><div class="section-title"><span>ARQUIVO DOS MUNDOS</span><h2>Coleção inicial</h2><p>Novos jogos do portal poderão liberar novas coleções.</p></div><div class="filters"><button class="active" data-filter="all">Todas</button><button data-filter="faisca">🔥 Faísca</button><button data-filter="setor">⚙ Setor 404</button></div><div id="gallery" class="gallery"></div></section>
+
+    <section id="rules" class="view rules"><div class="section-title"><span>MANUAL DO DUELISTA</span><h2>Como jogar</h2></div><div class="rule-grid"><article><b>01</b><h3>Ganhe energia</h3><p>Você começa com 1 energia. O limite aumenta a cada turno, até 10.</p></article><article><b>02</b><h3>Invoque aliados</h3><p>Jogue personagens em até três espaços. Eles precisam esperar um turno para atacar.</p></article><article><b>03</b><h3>Use técnicas</h3><p>Técnicas produzem efeitos imediatos; cenários fortalecem sua estratégia.</p></article><article><b>04</b><h3>Quebre o portal</h3><p>Ataque o rival quando não houver defensor. Reduza a vida dele de 20 para zero.</p></article></div><div class="rules-note"><h3>Expansões vivas</h3><p>Cada novo jogo lançado no Portal Pixel pode acrescentar personagens, chefes, locais e relíquias. As cartas ficam separadas dos sistemas do duelo, facilitando expansões sem reprogramar o núcleo.</p></div></section>
+  </main>
+  <div id="modal" class="modal" hidden><div id="modalCard"></div><button id="closeModal">Fechar</button></div>
+  <script src="game.js"></script>
+</body>
+</html>
+
