@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missão HTML5 — Portal Pixel</title>
+<meta name="description" content="Jogo de perguntas sobre HTML5, CSS e JavaScript para alunos de Desenvolvimento de Sistemas: 12 fases, 108 questões sorteadas, cronômetro, ranking e certificado.">
+<style>
+  :root { --bg:#141a26; --painel:#1e2636; --painel-2:#273247; --ink:#eef2f8; --muted:#9aa7bd; --acc:#f16529; --acc-2:#ffc145; --ok:#3ecf8e; --erro:#ff6b6b; --borda:#34415a; --codigo:#0e131d; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; font-family:system-ui,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:10px 16px; background:var(--painel); border-bottom:1px solid var(--borda); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  header h1 { font-size:1.15rem; margin:0; }
+  header h1 span { color:var(--acc); }
+  header .lado { display:flex; gap:10px; align-items:center; }
+  header a { color:var(--acc-2); text-decoration:none; font-weight:600; font-size:.9rem; }
+  main { max-width:860px; margin:0 auto; padding:16px; display:grid; gap:14px; }
+  .card { background:var(--painel); border:1px solid var(--borda); border-radius:14px; padding:16px; }
+  .oculto { display:none !important; }
+  button { font:inherit; cursor:pointer; }
+  .acao { border:0; border-radius:10px; padding:11px 18px; font-weight:700; background:var(--acc); color:#fff; }
+  .acao.sec { background:transparent; color:var(--ink); border:2px solid var(--borda); }
+  .acao:disabled { opacity:.45; cursor:not-allowed; }
+  .mini { border:1px solid var(--borda); background:var(--painel-2); color:var(--ink); border-radius:8px; padding:6px 10px; }
+  button:focus-visible, input:focus-visible { outline:3px solid var(--acc-2); outline-offset:2px; }
+
+  /* perfil */
+  .perfil { display:flex; gap:14px; align-items:center; flex-wrap:wrap; justify-content:space-between; }
+  .perfil .quem { display:flex; gap:12px; align-items:center; }
+  .avatar { width:52px; height:52px; border-radius:50%; background:var(--acc); display:grid; place-items:center; font-size:1.6rem; }
+  .perfil strong { font-size:1.05rem; }
+  .perfil small { color:var(--muted); display:block; }
+  .xpbox { flex:1; min-width:220px; }
+  .barra { height:12px; border-radius:99px; background:var(--codigo); overflow:hidden; border:1px solid var(--borda); }
+  .barra i { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--acc),var(--acc-2)); transition:width .5s; }
+  .xpbox .linha { display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-bottom:5px; }
+  .nome-form { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .nome-form input { flex:1; min-width:180px; padding:11px 12px; border-radius:10px; border:2px solid var(--borda); background:var(--codigo); color:var(--ink); font:inherit; }
+
+  /* mapa */
+  .mapa { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .fase { text-align:left; border:2px solid var(--borda); background:var(--painel-2); color:var(--ink); border-radius:14px; padding:14px; display:grid; gap:4px; position:relative; }
+  .fase:not(:disabled):hover { border-color:var(--acc); transform:translateY(-2px); }
+  .fase:disabled { opacity:.5; cursor:not-allowed; }
+  .fase .icone { font-size:1.8rem; }
+  .fase .num { font-size:.75rem; color:var(--acc-2); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .fase .titulo { font-weight:700; }
+  .fase .desc { font-size:.82rem; color:var(--muted); line-height:1.3; }
+  .fase .estrelas { letter-spacing:2px; color:var(--acc-2); }
+  .fase.feita { border-color:var(--ok); }
+  .fase.atual { border-color:var(--acc); box-shadow:0 0 0 3px rgba(241,101,41,.25); }
+
+  /* trilhas, ranking e tempo */
+  .abas { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .aba { border:2px solid var(--borda); background:var(--painel-2); color:var(--ink); border-radius:99px; padding:8px 14px; font-weight:700; }
+  .aba[aria-pressed="true"] { border-color:var(--acc); background:var(--acc); color:#fff; }
+  .rank { width:100%; border-collapse:collapse; font-size:.92rem; }
+  .rank th, .rank td { padding:7px 8px; border-bottom:1px solid var(--borda); text-align:left; }
+  .rank th { color:var(--muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; }
+  .rank td:nth-child(n+4), .rank th:nth-child(n+4) { text-align:right; }
+  .rank tr.eu td { color:var(--acc-2); font-weight:700; }
+  .rank-topo { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .rank-topo h2 { margin:0; font-size:1.05rem; }
+  .nota { color:var(--muted); font-size:.85rem; margin:8px 0 0; line-height:1.4; }
+  .tempo { display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .tempo .trilho { flex:1; height:8px; border-radius:99px; background:var(--codigo); border:1px solid var(--borda); overflow:hidden; }
+  .tempo .trilho i { display:block; height:100%; background:var(--ok); }
+  .tempo.acabando .trilho i { background:var(--erro); }
+  .tempo span { font-variant-numeric:tabular-nums; font-size:.85rem; color:var(--muted); min-width:32px; text-align:right; }
+  .versao { text-align:center; color:var(--muted); font-size:.8rem; margin:0; }
+
+  /* partida */
+  .hud { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .hud .vidas { font-size:1.2rem; letter-spacing:3px; }
+  .hud .combo { font-weight:700; color:var(--acc-2); min-width:110px; text-align:right; }
+  .progresso { display:flex; gap:6px; margin-top:10px; }
+  .progresso i { flex:1; height:8px; border-radius:99px; background:var(--codigo); border:1px solid var(--borda); }
+  .progresso i.ok { background:var(--ok); border-color:var(--ok); }
+  .pergunta { font-size:1.15rem; font-weight:600; line-height:1.4; margin:0 0 10px; }
+  .tipo { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--acc-2); margin-bottom:6px; }
+  pre { margin:0 0 12px; background:var(--codigo); border:1px solid var(--borda); border-radius:10px; padding:12px; overflow-x:auto; font-family:ui-monospace,Consolas,monospace; font-size:.95rem; line-height:1.5; color:#cfe3ff; white-space:pre-wrap; word-break:break-word; }
+  .opcoes { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .op { display:flex; gap:10px; align-items:center; text-align:left; border:2px solid var(--borda); background:var(--painel-2); color:var(--ink); border-radius:12px; padding:12px; min-height:58px; line-height:1.3; }
+  .op b { flex:none; width:28px; height:28px; border-radius:8px; background:var(--codigo); display:grid; place-items:center; font-size:.85rem; color:var(--acc-2); }
+  .op span { word-break:break-word; }
+  .op.mono span { font-family:ui-monospace,Consolas,monospace; font-size:.95rem; }
+  .op:not(:disabled):hover { border-color:var(--acc); }
+  .op.certa { border-color:var(--ok); background:rgba(62,207,142,.15); }
+  .op.errada { border-color:var(--erro); background:rgba(255,107,107,.15); animation:treme .3s; }
+  .op:disabled { cursor:default; }
+  @keyframes treme { 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .retorno { margin-top:12px; border-radius:12px; padding:12px 14px; border:2px solid var(--borda); display:grid; gap:10px; }
+  .retorno.ok { border-color:var(--ok); }
+  .retorno.erro { border-color:var(--erro); }
+  .retorno p { margin:0; line-height:1.45; }
+  .retorno .titulo { font-weight:700; }
+  .retorno.ok .titulo { color:var(--ok); }
+  .retorno.erro .titulo { color:var(--erro); }
+  .retorno .linha { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .ganho { color:var(--acc-2); font-weight:700; }
+
+  /* resultado */
+  .resultado { text-align:center; display:grid; gap:10px; justify-items:center; }
+  .resultado h2 { margin:0; font-size:1.5rem; }
+  .resultado .estrelonas { font-size:2.6rem; letter-spacing:6px; color:var(--acc-2); }
+  .resultado .numeros { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .resultado .numeros div { background:var(--painel-2); border:1px solid var(--borda); border-radius:10px; padding:10px 14px; min-width:110px; }
+  .resultado .numeros strong { display:block; font-size:1.3rem; }
+  .resultado .numeros small { color:var(--muted); }
+  .botoes { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+
+  /* certificado */
+  .certificado { background:#fffaf0; color:#23211d; border:6px double #c8963e; border-radius:10px; padding:26px 20px; text-align:center; display:grid; gap:8px; }
+  .certificado h2 { margin:0; font-size:1.6rem; color:#b5451b; }
+  .certificado .aluno { font-size:1.7rem; font-weight:800; border-bottom:2px solid #c8963e; padding:0 20px 4px; justify-self:center; }
+  .certificado p { margin:0; line-height:1.5; }
+  .certificado .quadro { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
+  .certificado .quadro div { border:1px solid #d9c9a3; border-radius:8px; padding:8px 14px; min-width:120px; background:#fff; }
+  .certificado .quadro strong { display:block; font-size:1.25rem; }
+  .certificado small { color:#6b665c; }
+  .tabela { width:100%; border-collapse:collapse; font-size:.9rem; margin-top:6px; }
+  .tabela th, .tabela td { border:1px solid #d9c9a3; padding:5px 8px; text-align:left; }
+  .tabela td:last-child, .tabela th:last-child { text-align:center; }
+
+  #confete { position:fixed; inset:0; pointer-events:none; z-index:5; }
+
+  @media (max-width:640px) {
+    main { padding:10px; }
+    .mapa { grid-template-columns:1fr 1fr; }
+    .opcoes { grid-template-columns:1fr; }
+    .pergunta { font-size:1.05rem; }
+  }
+  @media (max-width:380px) { .mapa { grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+  @media print {
+    body { background:#fff; }
+    header, .nao-imprime, #confete { display:none !important; }
+    .card { border:0; padding:0; background:#fff; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Missão <span>HTML5</span></h1>
+  <div class="lado">
+    <button class="mini" id="btnSom" type="button" aria-pressed="true">🔊 Som</button>
+    <a href="../../index.html">← Portal Pixel</a>
+  </div>
+</header>
+
+<main>
+  <!-- TELA: MAPA -->
+  <div id="telaMapa" style="display:grid; gap:14px;">
+    <section class="card">
+      <div class="perfil">
+        <div class="quem">
+          <div class="avatar" id="avatar">🧑‍💻</div>
+          <div>
+            <strong id="nomeAluno">Aluno</strong>
+            <small id="patente">Estagiário</small>
+          </div>
+        </div>
+        <div class="xpbox">
+          <div class="linha"><span id="xpTexto">0 XP</span><span id="xpProx"></span></div>
+          <div class="barra"><i id="xpBarra"></i></div>
+        </div>
+      </div>
+      <form class="nome-form" id="formNome">
+        <input id="campoNome" type="text" maxlength="40" placeholder="Digite seu nome para começar" aria-label="Seu nome" autocomplete="off" required>
+        <button class="acao" type="submit">Salvar nome</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <p style="margin:0 0 12px; line-height:1.45;"><strong>Como jogar:</strong> escolha uma trilha. Cada fase sorteia 5 questões de um banco maior, então cada partida é diferente. Você tem 3 vidas por fase e 40 segundos por questão. Questão errada volta para o fim da fila, então só passa quem acerta todas. Acertos seguidos e respostas rápidas rendem bônus de XP. Conclua uma trilha para receber o certificado dela.</p>
+      <div class="abas" id="abas"></div>
+      <div class="mapa" id="mapa"></div>
+    </section>
+
+    <section class="card nao-imprime" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:space-between; align-items:center;">
+      <span id="resumo" style="color:var(--muted)"></span>
+      <div class="botoes">
+        <button class="acao oculto" id="btnVerCert" type="button">🎓 Ver certificado</button>
+        <button class="acao sec" id="btnTempo" type="button" aria-pressed="true">⏱️ Cronômetro: ligado</button>
+        <button class="acao sec" id="btnZerar" type="button">Trocar de aluno</button>
+      </div>
+    </section>
+
+    <section class="card nao-imprime">
+      <div class="rank-topo">
+        <h2>🏅 Ranking da turma</h2>
+        <button class="mini oculto" id="btnLimparRank" type="button">Limpar ranking</button>
+      </div>
+      <table class="rank" id="ranking"></table>
+      <p class="nota" id="rankVazio">Ninguém pontuou ainda. Conclua uma fase para entrar no ranking.</p>
+      <p class="nota">O ranking fica salvo neste navegador. Para comparar a turma, os alunos jogam no mesmo computador usando "Trocar de aluno", ou cada um mostra o próprio certificado.</p>
+    </section>
+    <p class="versao" id="versao"></p>
+  </div>
+
+  <!-- TELA: PARTIDA -->
+  <div id="telaJogo" class="oculto" style="display:grid; gap:14px;">
+    <section class="card">
+      <div class="hud">
+        <div><strong id="hudFase"></strong></div>
+        <div class="vidas" id="hudVidas" aria-live="polite"></div>
+        <div class="combo" id="hudCombo"></div>
+      </div>
+      <div class="progresso" id="hudProgresso"></div>
+      <div class="tempo" id="hudTempo" aria-hidden="true"><div class="trilho"><i></i></div><span id="hudSeg"></span></div>
+    </section>
+    <section class="card">
+      <span class="tipo" id="qTipo"></span>
+      <p class="pergunta" id="qTexto"></p>
+      <pre id="qCodigo" class="oculto"></pre>
+      <div class="opcoes" id="qOpcoes"></div>
+      <div class="retorno oculto" id="retorno" aria-live="polite">
+        <p class="titulo" id="retTitulo"></p>
+        <p id="retTexto"></p>
+        <div class="linha">
+          <span class="ganho" id="retGanho"></span>
+          <button class="acao" id="btnProx" type="button">Continuar →</button>
+        </div>
+      </div>
+    </section>
+    <div class="nao-imprime"><button class="acao sec" id="btnSair" type="button">← Voltar ao mapa</button></div>
+  </div>
+
+  <!-- TELA: RESULTADO DA FASE -->
+  <div id="telaFim" class="oculto">
+    <section class="card resultado">
+      <h2 id="fimTitulo"></h2>
+      <div class="estrelonas" id="fimEstrelas"></div>
+      <p id="fimTexto" style="margin:0; color:var(--muted)"></p>
+      <div class="numeros" id="fimNumeros"></div>
+      <div class="botoes">
+        <button class="acao" id="btnFimPrincipal" type="button"></button>
+        <button class="acao sec" id="btnFimMapa" type="button">Mapa de fases</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- TELA: CERTIFICADO -->
+  <div id="telaCert" class="oculto" style="display:grid; gap:14px;">
+    <section class="certificado">
+      <small id="certCabecalho"></small>
+      <h2>🎓 Certificado de conclusão</h2>
+      <p>Certificamos que</p>
+      <div class="aluno" id="certNome"></div>
+      <p id="certTexto"></p>
+      <div class="quadro" id="certQuadro"></div>
+      <table class="tabela" id="certTabela"></table>
+      <small id="certData"></small>
+    </section>
+    <div class="botoes nao-imprime">
+      <button class="acao" id="btnImprimir" type="button">🖨️ Imprimir / salvar PDF</button>
+      <button class="acao sec" id="btnCertMapa" type="button">Mapa de fases</button>
+    </div>
+  </div>
+</main>
+
+<canvas id="confete"></canvas>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- CONTEÚDO ----------
+  // Cada fase tem um banco de questões; a partida sorteia POR_FASE delas.
+  // c = índice da resposta certa em "op". "cod" (opcional) mostra um trecho de código.
+  var HTML = [
+    { icone: "🧱", titulo: "Estrutura da página", desc: "DOCTYPE, head, body, title e meta.", q: [
+      { t: "O que significa a sigla HTML?", op: ["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "HyperLinks and Text Management Language"], c: 0,
+        e: "HTML é HyperText Markup Language: uma linguagem de marcação de hipertexto. Ela marca o conteúdo com tags; não é uma linguagem de programação." },
+      { t: "Qual é a primeira linha de um documento HTML5?", mono: true, op: ["<!DOCTYPE html>", "<html5>", "<head>", "<?html version=\"5\"?>"], c: 0,
+        e: "<!DOCTYPE html> avisa ao navegador que o documento segue o padrão HTML5. Ele vem antes da tag <html>." },
+      { t: "Em qual tag fica tudo o que o visitante vê na página?", mono: true, op: ["<head>", "<body>", "<title>", "<meta>"], c: 1,
+        e: "O <body> guarda o conteúdo visível: textos, imagens, links, formulários. O <head> guarda informações sobre a página." },
+      { t: "Qual tag define o texto que aparece na aba do navegador?", mono: true, op: ["<h1>", "<header>", "<title>", "<name>"], c: 2,
+        e: "O <title> fica dentro do <head> e aparece na aba do navegador, nos favoritos e nos resultados de busca." },
+      { tipo: "Complete o código", t: "Qual linha faz os acentos (ç, ã, é) aparecerem corretamente?", cod: "<head>\n  ______\n  <title>Minha página</title>\n</head>", mono: true,
+        op: ["<meta charset=\"utf-8\">", "<meta lang=\"pt-BR\">", "<acentos on>", "<font type=\"utf-8\">"], c: 0,
+        e: "<meta charset=\"utf-8\"> define a codificação de caracteres. Sem ela, acentos podem virar símbolos estranhos." },
+      { t: "Qual tag envolve o documento inteiro, logo depois do DOCTYPE?", mono: true, op: ["<body>", "<html>", "<main>", "<page>"], c: 1,
+        e: "<html> é o elemento raiz: dentro dele ficam o <head> e o <body>." },
+      { t: "O que fica dentro do <head>?", op: ["Os parágrafos e as imagens da página", "Informações sobre a página, como título, codificação e ligação com o CSS", "Somente o rodapé", "O menu de navegação"], c: 1,
+        e: "O <head> guarda informações para o navegador e os buscadores. Nada do que está nele aparece como conteúdo da página." },
+      { tipo: "Complete o código", t: "Qual atributo informa o idioma da página?", cod: "<html ____=\"pt-BR\">", mono: true, op: ["idioma", "language", "lang", "locale"], c: 2,
+        e: "lang=\"pt-BR\" informa o idioma. Leitores de tela usam isso para pronunciar o texto do jeito certo." },
+      { t: "Qual linha faz a página se ajustar à tela do celular?", mono: true, op: ["<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">", "<meta name=\"mobile\" content=\"on\">", "<body size=\"celular\">", "<meta charset=\"mobile\">"], c: 0,
+        e: "A meta viewport manda o navegador usar a largura real do aparelho. Sem ela, o celular mostra a página pequena, como no computador." },
+      { t: "Qual é a extensão de um arquivo de página HTML?", mono: true, op: [".htm5", ".html", ".web", ".css"], c: 1,
+        e: "Páginas HTML usam a extensão .html. A página inicial de um site costuma se chamar index.html." }
+    ] },
+    { icone: "✍️", titulo: "Texto e listas", desc: "Títulos, parágrafos, listas e destaque.", q: [
+      { t: "Qual tag marca o título mais importante da página?", mono: true, op: ["<h6>", "<title>", "<h1>", "<head>"], c: 2,
+        e: "Os títulos vão de <h1> (mais importante) até <h6> (menos importante). O recomendado é um <h1> principal por página." },
+      { t: "Qual tag cria um parágrafo?", mono: true, op: ["<p>", "<br>", "<text>", "<paragraph>"], c: 0,
+        e: "<p> marca um parágrafo. O <br> só quebra a linha; ele não cria um parágrafo novo." },
+      { t: "Você precisa de uma lista numerada (1, 2, 3...). Qual tag usar?", mono: true, op: ["<ul>", "<ol>", "<list>", "<dl>"], c: 1,
+        e: "<ol> é a lista ordenada (ordered list), com números. <ul> é a lista não ordenada, com marcadores." },
+      { tipo: "Complete o código", t: "Qual tag falta para criar cada item da lista?", cod: "<ul>\n  <___>Arroz</___>\n  <___>Feijão</___>\n</ul>", mono: true,
+        op: ["item", "li", "p", "ul"], c: 1,
+        e: "Cada item de lista usa <li> (list item), tanto dentro de <ul> quanto de <ol>." },
+      { t: "Qual tag indica que um trecho do texto é muito importante?", mono: true, op: ["<strong>", "<big>", "<font>", "<h1>"], c: 0,
+        e: "<strong> indica importância forte e costuma aparecer em negrito. Tem significado: leitores de tela também percebem a ênfase." },
+      { t: "Qual tag quebra a linha sem começar um parágrafo novo?", mono: true, op: ["<br>", "<p>", "<hr>", "<nl>"], c: 0,
+        e: "<br> (break) quebra a linha. Ele não tem tag de fechamento." },
+      { t: "Qual tag cria uma lista com marcadores, sem números?", mono: true, op: ["<ol>", "<li>", "<ul>", "<dl>"], c: 2,
+        e: "<ul> é a lista não ordenada (unordered list). Use quando a ordem dos itens não importa." },
+      { t: "Qual tag dá ênfase a uma palavra e costuma aparecer em itálico?", mono: true, op: ["<i-talic>", "<em>", "<strong>", "<span>"], c: 1,
+        e: "<em> (emphasis) dá ênfase ao trecho. <strong> indica importância forte." },
+      { t: "Quantos níveis de título o HTML oferece?", op: ["3, de <h1> a <h3>", "5, de <h1> a <h5>", "6, de <h1> a <h6>", "10, de <h1> a <h10>"], c: 2,
+        e: "São 6 níveis, de <h1> a <h6>. Use na ordem, sem pular níveis, para organizar o conteúdo." },
+      { t: "Qual tag desenha uma linha horizontal para separar assuntos?", mono: true, op: ["<line>", "<br>", "<hr>", "<border>"], c: 2,
+        e: "<hr> (horizontal rule) marca uma mudança de assunto e aparece como uma linha." }
+    ] },
+    { icone: "🔗", titulo: "Links e mídia", desc: "Links, imagens, áudio e vídeo.", q: [
+      { tipo: "Complete o código", t: "Qual atributo informa o destino do link?", cod: "<a ____=\"https://www.exemplo.com\">Visitar</a>", mono: true,
+        op: ["src", "link", "href", "url"], c: 2,
+        e: "No <a>, o atributo href (hypertext reference) guarda o endereço de destino." },
+      { tipo: "Complete o código", t: "Qual atributo informa o arquivo da imagem?", cod: "<img ____=\"foto.jpg\" alt=\"Foto da turma\">", mono: true,
+        op: ["href", "src", "file", "img"], c: 1,
+        e: "No <img>, o atributo src (source) aponta para o arquivo da imagem. href é usado em links." },
+      { t: "Para que serve o atributo alt da imagem?", op: ["Define a altura da imagem", "Descreve a imagem para leitores de tela e quando ela não carrega", "Troca a imagem ao passar o mouse", "Deixa a imagem mais leve"], c: 1,
+        e: "alt é o texto alternativo. Ele descreve a imagem para quem usa leitor de tela e aparece quando a imagem não carrega." },
+      { t: "Como fazer um link abrir em uma nova aba?", mono: true, op: ["target=\"_blank\"", "open=\"new\"", "href=\"_blank\"", "tab=\"new\""], c: 0,
+        e: "target=\"_blank\" no <a> abre o destino em uma nova aba." },
+      { t: "Qual tag do HTML5 exibe um vídeo sem precisar de plugin?", mono: true, op: ["<media>", "<movie>", "<video>", "<flash>"], c: 2,
+        e: "O HTML5 trouxe <video> e <audio>. Com o atributo controls, o navegador mostra os botões de reproduzir e pausar." },
+      { t: "Qual tag cria um link?", mono: true, op: ["<link>", "<a>", "<href>", "<url>"], c: 1,
+        e: "<a> (âncora) cria o link. A tag <link> existe, mas serve para ligar a página a arquivos como o CSS." },
+      { t: "Qual tag do HTML5 toca um arquivo de som?", mono: true, op: ["<sound>", "<mp3>", "<audio>", "<music>"], c: 2,
+        e: "<audio> toca sons e músicas direto no navegador, sem plugin." },
+      { tipo: "Complete o código", t: "Qual atributo mostra os botões de reproduzir e pausar?", cod: "<video src=\"aula.mp4\" ________></video>", mono: true, op: ["buttons", "controls", "play", "menu"], c: 1,
+        e: "controls faz o navegador mostrar os controles do vídeo ou do áudio." },
+      { tipo: "Ache o erro", t: "O que falta nesta imagem?", cod: "<img src=\"logo.png\">", op: ["A tag de fechamento </img>", "O atributo alt, com a descrição da imagem", "O atributo href", "Nada, está completa"], c: 1,
+        e: "Toda imagem com conteúdo precisa de alt. <img> não tem tag de fechamento." },
+      { t: "Como apontar para contato.html, que está na mesma pasta da página?", mono: true, op: ["href=\"contato.html\"", "href=\"C:\\site\\contato.html\"", "src=\"contato.html\"", "link=\"contato\""], c: 0,
+        e: "Isso é um caminho relativo: basta o nome do arquivo. Caminhos do seu computador, como C:\\, não funcionam quando o site é publicado." }
+    ] },
+    { icone: "🏛️", titulo: "Tags semânticas", desc: "header, nav, main, section, article, footer.", q: [
+      { t: "Qual tag semântica agrupa o menu de navegação do site?", mono: true, op: ["<menu-bar>", "<nav>", "<links>", "<div>"], c: 1,
+        e: "<nav> marca um bloco de links de navegação, como o menu principal." },
+      { t: "Qual tag marca o conteúdo principal, que só aparece uma vez na página?", mono: true, op: ["<main>", "<body>", "<section>", "<center>"], c: 0,
+        e: "<main> marca o conteúdo principal e deve aparecer uma única vez. Cabeçalho, menu e rodapé ficam fora dele." },
+      { t: "Onde costumam ficar os direitos autorais e o contato, no fim da página?", mono: true, op: ["<bottom>", "<end>", "<header>", "<footer>"], c: 3,
+        e: "<footer> é o rodapé da página ou de uma seção." },
+      { t: "Qual é a diferença entre <div> e <section>?", op: ["Nenhuma, são iguais", "<div> não tem significado; <section> indica uma seção temática do conteúdo", "<section> só funciona em celular", "<div> é do HTML5 e <section> é antiga"], c: 1,
+        e: "<div> é um bloco genérico, sem significado. <section> diz ao navegador e aos buscadores que ali existe uma seção com um tema." },
+      { t: "Uma notícia de blog, que faz sentido sozinha fora da página, deve ficar em qual tag?", mono: true, op: ["<article>", "<aside>", "<span>", "<nav>"], c: 0,
+        e: "<article> marca um conteúdo independente: uma notícia, um post, um comentário. <aside> é para conteúdo lateral, relacionado." },
+      { t: "Qual tag marca o cabeçalho da página, com logotipo e título?", mono: true, op: ["<head>", "<header>", "<top>", "<h1>"], c: 1,
+        e: "<header> é o cabeçalho visível. Não confunda com <head>, que guarda informações e não aparece na página." },
+      { t: "Qual tag marca um conteúdo lateral, relacionado ao principal?", mono: true, op: ["<aside>", "<side>", "<article>", "<left>"], c: 0,
+        e: "<aside> serve para barras laterais, notas e conteúdos relacionados." },
+      { t: "Qual é a vantagem das tags semânticas?", op: ["Deixam a página colorida", "Ajudam buscadores e leitores de tela a entender cada parte da página", "Fazem a página carregar sem internet", "Substituem o CSS"], c: 1,
+        e: "Tags semânticas dizem o que cada parte é. Isso melhora a acessibilidade, a busca e a manutenção do código." },
+      { t: "Qual dupla de tags coloca uma imagem com legenda?", mono: true, op: ["<img> e <label>", "<figure> e <figcaption>", "<picture> e <title>", "<div> e <legend>"], c: 1,
+        e: "<figure> agrupa a imagem e <figcaption> guarda a legenda dela." },
+      { t: "Qual destas tags NÃO é semântica?", mono: true, op: ["<article>", "<nav>", "<div>", "<footer>"], c: 2,
+        e: "<div> é um bloco genérico: não diz nada sobre o conteúdo. Use quando nenhuma tag semântica servir." }
+    ] },
+    { icone: "📝", titulo: "Formulários", desc: "form, input, label e validação.", q: [
+      { t: "Qual tag agrupa os campos e envia os dados ao servidor?", mono: true, op: ["<input>", "<form>", "<fieldset>", "<send>"], c: 1,
+        e: "<form> é o formulário. Os campos dentro dele são enviados para o endereço indicado no atributo action." },
+      { tipo: "Complete o código", t: "Qual tipo faz o navegador validar o formato do e-mail?", cod: "<input type=\"____\" name=\"contato\">", mono: true,
+        op: ["text", "mail", "email", "@"], c: 2,
+        e: "type=\"email\" é um dos tipos novos do HTML5. O navegador confere o formato e, no celular, mostra o teclado com @." },
+      { t: "Qual atributo impede o envio do formulário com o campo vazio?", mono: true, op: ["required", "validate", "notnull", "must"], c: 0,
+        e: "required torna o campo obrigatório. O navegador avisa o usuário antes de enviar, sem precisar de JavaScript." },
+      { t: "Qual tag dá um nome visível ao campo e se liga a ele pelo atributo for?", mono: true, op: ["<name>", "<caption>", "<label>", "<title>"], c: 2,
+        e: "<label for=\"id-do-campo\"> liga o texto ao campo. Clicar no texto foca o campo, e leitores de tela anunciam o nome." },
+      { t: "Qual atributo mostra uma dica dentro do campo enquanto ele está vazio?", mono: true, op: ["value", "hint", "title", "placeholder"], c: 3,
+        e: "placeholder mostra um texto de exemplo que some ao digitar. Ele não substitui o <label>." },
+      { t: "Qual tipo de campo esconde os caracteres digitados?", mono: true, op: ["type=\"hidden\"", "type=\"password\"", "type=\"secret\"", "type=\"text\""], c: 1,
+        e: "type=\"password\" troca os caracteres por pontos. type=\"hidden\" é outra coisa: um campo que não aparece na tela." },
+      { t: "Qual tag cria um campo de texto com várias linhas?", mono: true, op: ["<input type=\"text\">", "<textarea>", "<text>", "<p>"], c: 1,
+        e: "<textarea> aceita várias linhas, como em um campo de mensagem." },
+      { t: "Qual tag cria uma lista suspensa de opções?", mono: true, op: ["<select>", "<list>", "<dropdown>", "<ul>"], c: 0,
+        e: "<select> cria a lista suspensa, e cada opção fica em uma tag <option>." },
+      { t: "A pessoa deve escolher só uma opção entre várias. Qual tipo usar?", mono: true, op: ["type=\"checkbox\"", "type=\"radio\"", "type=\"one\"", "type=\"button\""], c: 1,
+        e: "Campos radio com o mesmo name permitem só uma escolha. checkbox permite marcar várias." },
+      { t: "Qual botão envia o formulário?", mono: true, op: ["<button type=\"submit\">", "<button type=\"send\">", "<a href=\"enviar\">", "<input type=\"go\">"], c: 0,
+        e: "Um botão com type=\"submit\" dentro do <form> envia os dados." }
+    ] },
+    { icone: "🏆", titulo: "Desafio final", desc: "Tabelas, boas práticas e caça ao erro.", q: [
+      { t: "Em uma tabela, qual tag cria uma linha?", mono: true, op: ["<td>", "<tr>", "<th>", "<row>"], c: 1,
+        e: "<tr> (table row) cria uma linha. Dentro dela ficam as células <td> e os cabeçalhos <th>." },
+      { t: "Qual tag marca uma célula de cabeçalho da tabela?", mono: true, op: ["<thead>", "<td>", "<th>", "<header>"], c: 2,
+        e: "<th> (table header) é a célula de cabeçalho. <thead> agrupa as linhas de cabeçalho, mas a célula em si é <th>." },
+      { tipo: "Ache o erro", t: "O que está errado neste código?", cod: "<p>Olá, <strong>mundo</p></strong>", op: ["Falta o atributo class", "<strong> não pode ficar dentro de <p>", "As tags foram fechadas na ordem errada", "Não há erro"], c: 2,
+        e: "A última tag aberta é a primeira a fechar. O certo é <p>Olá, <strong>mundo</strong></p>." },
+      { tipo: "Complete o código", t: "Qual linha liga a página a um arquivo CSS externo?", cod: "<head>\n  ______\n</head>", mono: true,
+        op: ["<link rel=\"stylesheet\" href=\"estilo.css\">", "<css src=\"estilo.css\">", "<style href=\"estilo.css\">", "<a href=\"estilo.css\">"], c: 0,
+        e: "<link rel=\"stylesheet\" href=\"...\"> fica dentro do <head> e carrega o arquivo CSS." },
+      { t: "Como escrever um comentário em HTML?", mono: true, op: ["// comentário", "/* comentário */", "<!-- comentário -->", "# comentário"], c: 2,
+        e: "Comentários em HTML ficam entre <!-- e -->. O navegador não mostra, mas quem abrir o código-fonte consegue ler." },
+      { t: "Qual tag cria uma célula comum de dados na tabela?", mono: true, op: ["<td>", "<tr>", "<cell>", "<th>"], c: 0,
+        e: "<td> (table data) é a célula de dados. <th> é a célula de cabeçalho." },
+      { tipo: "Ache o erro", t: "O que está errado neste link?", cod: "<a href=\"pagina.html>Abrir</a>", op: ["Falta fechar as aspas do href", "Falta o atributo alt", "<a> não pode ter texto", "Não há erro"], c: 0,
+        e: "O valor do atributo começa e termina com aspas. Sem a aspa final, o navegador lê o resto como parte do endereço." },
+      { t: "Qual linha carrega um arquivo JavaScript na página?", mono: true, op: ["<script src=\"app.js\"><\/script>", "<js href=\"app.js\">", "<link rel=\"script\" href=\"app.js\">", "<javascript>app.js</javascript>"], c: 0,
+        e: "A tag <script> com o atributo src carrega o arquivo JavaScript." },
+      { t: "Qual destas tags NÃO tem tag de fechamento?", mono: true, op: ["<p>", "<div>", "<img>", "<ul>"], c: 2,
+        e: "<img> é um elemento vazio: não tem conteúdo nem fechamento. O mesmo vale para <br>, <hr>, <input> e <meta>." },
+      { tipo: "Complete o código", t: "Qual atributo faz a célula ocupar duas colunas?", cod: "<td _______=\"2\">Total</td>", mono: true, op: ["rowspan", "colspan", "width", "merge"], c: 1,
+        e: "colspan junta colunas e rowspan junta linhas." }
+    ] }
+  ];
+
+  var CSS = [
+    { icone: "🎯", titulo: "Seletores e sintaxe", desc: "Regra, seletor, classe, id e cores.", q: [
+      { t: "O que significa a sigla CSS?", op: ["Cascading Style Sheets", "Creative Style System", "Computer Style Sheets", "Colorful Site Styles"], c: 0,
+        e: "CSS é Cascading Style Sheets, ou folhas de estilo em cascata. O HTML marca o conteúdo e o CSS cuida da aparência." },
+      { t: "Nesta regra, como se chama a parte \"p\"?", cod: "p { color: red; }", op: ["Propriedade", "Valor", "Seletor", "Atributo"], c: 2,
+        e: "O seletor escolhe quais elementos recebem o estilo. Dentro das chaves ficam os pares de propriedade e valor." },
+      { t: "Como selecionar os elementos com class=\"destaque\"?", mono: true, op: ["#destaque", ".destaque", "destaque", "*destaque"], c: 1,
+        e: "O ponto seleciona por classe. Uma classe pode ser usada em vários elementos." },
+      { t: "Como selecionar o elemento com id=\"topo\"?", mono: true, op: [".topo", "#topo", "@topo", "topo"], c: 1,
+        e: "A cerquilha (#) seleciona por id. Um id deve aparecer uma única vez na página." },
+      { t: "Qual propriedade muda a cor do texto?", mono: true, op: ["text-color", "font-color", "color", "foreground"], c: 2,
+        e: "color define a cor do texto." },
+      { t: "Qual propriedade muda a cor de fundo?", mono: true, op: ["background-color", "color-back", "fill", "bgcolor"], c: 0,
+        e: "background-color define a cor de fundo do elemento." },
+      { tipo: "Ache o erro", t: "O que está errado nesta regra?", cod: "h1 { color = blue; }", op: ["Falta o ponto antes de h1", "Usou = no lugar de dois-pontos", "blue não é uma cor válida", "Não há erro"], c: 1,
+        e: "No CSS, propriedade e valor são separados por dois-pontos: color: blue;" },
+      { t: "Em qual tag escrever CSS dentro do próprio arquivo HTML?", mono: true, op: ["<css>", "<style>", "<script>", "<design>"], c: 1,
+        e: "A tag <style>, dentro do <head>, guarda CSS interno. Em projetos maiores, prefira um arquivo .css separado." }
+    ] },
+    { icone: "📦", titulo: "Texto e modelo de caixa", desc: "Fonte, alinhamento, padding, borda e margem.", q: [
+      { t: "Qual propriedade muda o tamanho da letra?", mono: true, op: ["text-size", "font-size", "size", "letter-size"], c: 1,
+        e: "font-size define o tamanho da fonte, por exemplo font-size: 18px;" },
+      { t: "Como deixar o texto em negrito?", mono: true, op: ["font-weight: bold;", "text-style: bold;", "font: strong;", "weight: 700px;"], c: 0,
+        e: "font-weight controla o peso da fonte. bold equivale a 700." },
+      { t: "Como centralizar o texto dentro do elemento?", mono: true, op: ["align: center;", "text-align: center;", "center: text;", "font-align: middle;"], c: 1,
+        e: "text-align alinha o texto: left, center, right ou justify." },
+      { t: "Qual propriedade cria espaço entre o conteúdo e a borda?", mono: true, op: ["margin", "padding", "spacing", "gap"], c: 1,
+        e: "padding é o espaço interno, entre o conteúdo e a borda." },
+      { t: "Qual propriedade cria espaço do lado de fora da borda?", mono: true, op: ["padding", "border", "margin", "outline"], c: 2,
+        e: "margin é o espaço externo, que afasta o elemento dos vizinhos." },
+      { t: "Qual é a ordem do modelo de caixa, de dentro para fora?", op: ["Conteúdo, padding, borda, margem", "Conteúdo, margem, borda, padding", "Borda, conteúdo, padding, margem", "Margem, padding, borda, conteúdo"], c: 0,
+        e: "Todo elemento é uma caixa: conteúdo no centro, depois padding, borda e, por fora, a margem." },
+      { t: "Qual linha cria uma borda preta, sólida, de 2 pixels?", mono: true, op: ["border: 2px solid black;", "border: black 2 line;", "line: 2px black;", "border-style: 2px;"], c: 0,
+        e: "O atalho border recebe largura, estilo e cor." },
+      { t: "Qual propriedade arredonda os cantos?", mono: true, op: ["corner-round", "border-radius", "round", "border-curve"], c: 1,
+        e: "border-radius arredonda os cantos. Com 50% em um quadrado, vira um círculo." }
+    ] },
+    { icone: "📱", titulo: "Layout e responsivo", desc: "Flexbox, grid, media query e prioridade.", q: [
+      { t: "Como transformar um elemento em um contêiner flex?", mono: true, op: ["display: flex;", "flex: on;", "layout: flexbox;", "position: flex;"], c: 0,
+        e: "display: flex coloca os filhos lado a lado e libera as propriedades de alinhamento do flexbox." },
+      { t: "No flexbox, qual propriedade distribui os itens no eixo principal?", mono: true, op: ["align-items", "justify-content", "text-align", "float"], c: 1,
+        e: "justify-content distribui no eixo principal. align-items alinha no eixo cruzado." },
+      { t: "Como esconder um elemento e tirar o espaço dele da página?", mono: true, op: ["visible: no;", "display: none;", "hide: true;", "opacity: hidden;"], c: 1,
+        e: "display: none remove o elemento do layout." },
+      { t: "Qual regra aplica estilos só em telas com até 600 pixels de largura?", mono: true, op: ["@media (max-width: 600px) { }", "@screen 600px { }", "@mobile { }", "if (width < 600px) { }"], c: 0,
+        e: "A media query aplica o bloco de regras só quando a condição é verdadeira. É a base do layout responsivo." },
+      { t: "Qual unidade é relativa ao tamanho da fonte da raiz da página?", mono: true, op: ["px", "rem", "cm", "pt"], c: 1,
+        e: "1rem é o tamanho da fonte do elemento raiz, normalmente 16px. Usar rem ajuda a respeitar o tamanho que o usuário escolheu." },
+      { t: "Como mudar o estilo quando o mouse passa por cima do botão?", mono: true, op: ["button:hover { }", "button.mouse { }", "button@over { }", "hover(button) { }"], c: 0,
+        e: ":hover é uma pseudoclasse: vale enquanto o ponteiro está sobre o elemento." },
+      { t: "Qual seletor tem mais prioridade quando duas regras entram em conflito?", op: ["Seletor de tag, como p", "Seletor de classe, como .aviso", "Seletor de id, como #aviso", "Todos têm a mesma prioridade"], c: 2,
+        e: "Isso se chama especificidade: id vence classe, e classe vence tag. Com a mesma especificidade, vale a regra que vem por último." },
+      { t: "Como ativar o layout em grade?", mono: true, op: ["display: grid;", "display: table;", "grid: on;", "layout: grid;"], c: 0,
+        e: "display: grid cria uma grade. As colunas são definidas com grid-template-columns." }
+    ] }
+  ];
+
+  var JS = [
+    { icone: "🧮", titulo: "Variáveis e tipos", desc: "let, const, tipos e console.", q: [
+      { t: "Qual palavra declara uma variável cujo valor pode mudar?", mono: true, op: ["const", "let", "fixed", "dim"], c: 1,
+        e: "let declara uma variável que pode receber outro valor depois." },
+      { t: "Qual palavra declara um valor que não pode ser reatribuído?", mono: true, op: ["const", "let", "var", "static"], c: 0,
+        e: "const declara uma constante: depois de criada, não aceita outro valor." },
+      { t: "Como mostrar uma mensagem no console do navegador?", mono: true, op: ["print(\"Olá\")", "console.log(\"Olá\")", "echo \"Olá\"", "write(\"Olá\")"], c: 1,
+        e: "console.log() escreve no console, que fica nas ferramentas do desenvolvedor (F12)." },
+      { t: "Qual é o tipo do valor \"42\", escrito entre aspas?", op: ["number", "string", "boolean", "array"], c: 1,
+        e: "Tudo que está entre aspas é texto, ou seja, string, mesmo que pareça um número." },
+      { t: "O que este código mostra?", cod: "console.log(\"2\" + 2);", mono: true, op: ["4", "\"22\"", "NaN", "Erro"], c: 1,
+        e: "Quando um dos lados é texto, o + junta os valores em vez de somar. O resultado é o texto \"22\"." },
+      { t: "Como escrever um comentário de uma linha em JavaScript?", mono: true, op: ["<!-- comentário -->", "# comentário", "// comentário", "-- comentário"], c: 2,
+        e: "// comenta até o fim da linha. Para várias linhas, use /* e */." },
+      { t: "Qual tipo guarda apenas verdadeiro ou falso?", op: ["string", "number", "boolean", "null"], c: 2,
+        e: "boolean tem dois valores: true e false." },
+      { t: "O que este código mostra?", cod: "let nome = \"Ana\";\nconsole.log(nome.length);", mono: true, op: ["3", "\"Ana\"", "1", "undefined"], c: 0,
+        e: "length devolve a quantidade de caracteres do texto. \"Ana\" tem 3." }
+    ] },
+    { icone: "🔀", titulo: "Decisão e repetição", desc: "if, else, operadores, for e while.", q: [
+      { t: "Qual operador compara valor e tipo ao mesmo tempo?", mono: true, op: ["=", "==", "===", "=>"], c: 2,
+        e: "=== é a igualdade estrita. O = sozinho atribui um valor; não compara." },
+      { t: "O que este código mostra?", cod: "let idade = 16;\nif (idade >= 18) {\n  console.log(\"Maior\");\n} else {\n  console.log(\"Menor\");\n}", mono: true, op: ["Maior", "Menor", "16", "Nada"], c: 1,
+        e: "16 não é maior ou igual a 18. A condição é falsa e o programa executa o bloco do else." },
+      { t: "Qual operador significa E: as duas condições precisam ser verdadeiras?", mono: true, op: ["&&", "||", "!", "&"], c: 0,
+        e: "&& é o E lógico: só dá verdadeiro quando os dois lados são verdadeiros." },
+      { t: "Qual operador significa OU: basta uma condição ser verdadeira?", mono: true, op: ["&&", "||", "??", "!="], c: 1,
+        e: "|| é o OU lógico: dá verdadeiro quando pelo menos um lado é verdadeiro." },
+      { t: "O que este código mostra?", cod: "for (let i = 0; i < 3; i++) {\n  console.log(i);\n}", mono: true, op: ["1, 2, 3", "0, 1, 2", "0, 1, 2, 3", "3"], c: 1,
+        e: "O i começa em 0 e o laço repete enquanto i for menor que 3: mostra 0, 1 e 2." },
+      { t: "Qual estrutura repete um bloco enquanto a condição for verdadeira?", mono: true, op: ["if", "while", "switch", "else"], c: 1,
+        e: "while repete enquanto a condição for verdadeira. Se ela nunca ficar falsa, o laço não termina." },
+      { t: "Qual é o resultado de 10 % 3?", mono: true, op: ["3", "1", "0.3", "30"], c: 1,
+        e: "% devolve o resto da divisão. 10 dividido por 3 dá 3 e sobra 1." },
+      { t: "Qual é o valor de !true?", mono: true, op: ["true", "false", "1", "undefined"], c: 1,
+        e: "! é o NÃO lógico: inverte o valor. O contrário de true é false." }
+    ] },
+    { icone: "⚙️", titulo: "Funções, listas e página", desc: "function, return, arrays e DOM.", q: [
+      { t: "Qual linha declara uma função?", mono: true, op: ["function somar(a, b) { }", "def somar(a, b):", "func somar(a, b) { }", "somar = function:"], c: 0,
+        e: "function nome(parâmetros) { ... } declara uma função em JavaScript." },
+      { t: "Qual palavra devolve o resultado de uma função?", mono: true, op: ["give", "return", "output", "send"], c: 1,
+        e: "return devolve o valor e encerra a função." },
+      { t: "O que este código mostra?", cod: "let frutas = [\"uva\", \"maçã\", \"pera\"];\nconsole.log(frutas[0]);", mono: true, op: ["uva", "maçã", "pera", "3"], c: 0,
+        e: "As posições de um array começam em 0. frutas[0] é o primeiro item." },
+      { t: "Qual método adiciona um item no fim do array?", mono: true, op: ["add()", "push()", "append()", "insert()"], c: 1,
+        e: "push() coloca o item no fim do array." },
+      { t: "Como saber quantos itens o array tem?", mono: true, op: ["frutas.size", "frutas.count()", "frutas.length", "len(frutas)"], c: 2,
+        e: "length devolve a quantidade de itens do array." },
+      { t: "Como pegar o elemento da página que tem id=\"titulo\"?", mono: true, op: ["document.getElementById(\"titulo\")", "page.find(\"titulo\")", "html.id(\"titulo\")", "document.get(\"#titulo\")"], c: 0,
+        e: "document.getElementById() devolve o elemento com aquele id. document.querySelector(\"#titulo\") também funciona." },
+      { t: "Como executar uma função quando o botão é clicado?", mono: true, op: ["botao.addEventListener(\"click\", abrir)", "botao.onPress(abrir)", "botao.click = abrir()", "listen(botao, abrir)"], c: 0,
+        e: "addEventListener liga um evento a uma função. Note que a função é passada sem parênteses." },
+      { t: "Qual propriedade troca o texto de um elemento?", mono: true, op: ["textContent", "value", "text()", "label"], c: 0,
+        e: "elemento.textContent = \"novo texto\" troca o texto que aparece na página." }
+    ] }
+  ];
+
+  var TRILHAS = [
+    { id: "html", nome: "HTML5", icone: "🧱", fases: HTML },
+    { id: "css", nome: "CSS", icone: "🎨", fases: CSS },
+    { id: "js", nome: "JavaScript", icone: "⚡", fases: JS }
+  ];
+
+  var PATENTES = [
+    { xp: 0, nome: "Estagiário", avatar: "🧑‍🎓" },
+    { xp: 1500, nome: "Dev Júnior", avatar: "🧑‍💻" },
+    { xp: 4000, nome: "Dev Pleno", avatar: "🦾" },
+    { xp: 7000, nome: "Dev Sênior", avatar: "🚀" },
+    { xp: 10000, nome: "Arquiteto Web", avatar: "👑" }
+  ];
+  var VERSAO = "1.4.0";
+  var POR_FASE = 5, VIDAS = 3, TEMPO = 40, XP_ACERTO = 100, XP_COMBO = 20, XP_VIDA = 50, XP_TEMPO = 50;
+  var CHAVE = "portalpixel.missao-html5.v1", CHAVE_RANK = "portalpixel.missao-html5.ranking";
+
+  // ---------- ESTADO SALVO ----------
+  var save = { nome: "", fases: {}, som: true, tempo: true, trilha: "html" };
+  try {
+    var bruto = JSON.parse(localStorage.getItem(CHAVE));
+    if (bruto && typeof bruto === "object") {
+      save.nome = String(bruto.nome || "").slice(0, 40);
+      save.som = bruto.som !== false;
+      save.tempo = bruto.tempo !== false;
+      if (TRILHAS.some(function (t) { return t.id === bruto.trilha; })) save.trilha = bruto.trilha;
+      var antigas = bruto.fases && typeof bruto.fases === "object" ? bruto.fases : {};
+      // A versão 1.0 guardava as fases de HTML como "0".."5".
+      Object.keys(antigas).forEach(function (k) { save.fases[/^\d+$/.test(k) ? "html-" + k : k] = antigas[k]; });
+    }
+  } catch (e) {}
+  function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(save)); } catch (e) {} }
+
+  function $(id) { return document.getElementById(id); }
+  function trilha() { return TRILHAS.filter(function (t) { return t.id === save.trilha; })[0] || TRILHAS[0]; }
+  function chave(tr, i) { return tr.id + "-" + i; }
+  function feita(tr, i) { return save.fases[chave(tr, i)]; }
+  function feitasNa(tr) { var n = 0; tr.fases.forEach(function (f, i) { if (feita(tr, i)) n++; }); return n; }
+  function somar(campo) { var s = 0; TRILHAS.forEach(function (tr) { tr.fases.forEach(function (f, i) { var r = feita(tr, i); if (r) s += campo ? r[campo] || 0 : 1; }); }); return s; }
+  function xpTotal() { return somar("xp"); }
+  function patenteDe(xp) { var p = PATENTES[0]; PATENTES.forEach(function (x) { if (xp >= x.xp) p = x; }); return p; }
+  function estrelas(n) { return "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n); }
+  function embaralhar(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function criar(tag, classe, texto) { var e = document.createElement(tag); if (classe) e.className = classe; if (texto != null) e.textContent = texto; return e; }
+
+  // ---------- RANKING (deste navegador) ----------
+  function lerRanking() {
+    try { var r = JSON.parse(localStorage.getItem(CHAVE_RANK)); return Array.isArray(r) ? r : []; } catch (e) { return []; }
+  }
+  function registrarRanking() {
+    if (!save.nome) return;
+    var r = lerRanking(), id = save.nome.toLowerCase();
+    var novo = { nome: save.nome, xp: xpTotal(), estrelas: somar("estrelas"), fases: somar(), data: new Date().toISOString().slice(0, 10) };
+    r = r.filter(function (x) { return String(x.nome).toLowerCase() !== id; });
+    r.push(novo);
+    r.sort(function (a, b) { return b.xp - a.xp; });
+    try { localStorage.setItem(CHAVE_RANK, JSON.stringify(r.slice(0, 50))); } catch (e) {}
+  }
+  function desenharRanking() {
+    var r = lerRanking(), tab = $("ranking"), id = save.nome.toLowerCase();
+    tab.textContent = "";
+    $("rankVazio").classList.toggle("oculto", r.length > 0);
+    $("btnLimparRank").classList.toggle("oculto", !r.length);
+    if (!r.length) return;
+    var cab = criar("tr");
+    ["#", "Aluno", "Patente", "Fases", "Estrelas", "XP"].forEach(function (c) { cab.appendChild(criar("th", null, c)); });
+    tab.appendChild(cab);
+    r.slice(0, 10).forEach(function (x, i) {
+      var tr = criar("tr", String(x.nome).toLowerCase() === id ? "eu" : null);
+      [["🥇", "🥈", "🥉"][i] || (i + 1) + "º", x.nome, patenteDe(x.xp).nome, x.fases, x.estrelas, x.xp].forEach(function (c) { tr.appendChild(criar("td", null, c)); });
+      tab.appendChild(tr);
+    });
+  }
+
+  // ---------- SOM (Web Audio, sem arquivos) ----------
+  var ctx = null;
+  function nota(freq, ini, dur, tipo, vol) {
+    if (!save.som) return;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === "suspended") ctx.resume();
+      var o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + ini;
+      o.type = tipo || "square"; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.08, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + dur);
+    } catch (e) {}
+  }
+  var som = {
+    certo: function (combo) { var b = 520 + Math.min(combo, 5) * 40; nota(b, 0, .12); nota(b * 1.5, .09, .18); },
+    errado: function () { nota(180, 0, .25, "sawtooth"); nota(130, .12, .3, "sawtooth"); },
+    tique: function () { nota(880, 0, .05, "square", .04); },
+    fase: function () { [523, 659, 784, 1047].forEach(function (f, i) { nota(f, i * .12, .25, "triangle", .1); }); },
+    derrota: function () { [392, 330, 262].forEach(function (f, i) { nota(f, i * .18, .3, "triangle", .1); }); }
+  };
+
+  // ---------- TELAS ----------
+  var TELAS = ["telaMapa", "telaJogo", "telaFim", "telaCert"];
+  function mostrar(id) {
+    TELAS.forEach(function (t) { $(t).classList.toggle("oculto", t !== id); });
+    window.scrollTo(0, 0);
+  }
+
+  function desenharMapa() {
+    var xp = xpTotal(), pat = patenteDe(xp), tr = trilha(), feitas = feitasNa(tr);
+    var prox = PATENTES.filter(function (p) { return p.xp > xp; })[0];
+    $("nomeAluno").textContent = save.nome || "Aluno sem nome";
+    $("patente").textContent = pat.nome;
+    $("avatar").textContent = pat.avatar;
+    $("xpTexto").textContent = xp + " XP";
+    $("xpProx").textContent = prox ? "Próxima patente: " + prox.nome + " (" + prox.xp + " XP)" : "Patente máxima";
+    $("xpBarra").style.width = (prox ? Math.round((xp - pat.xp) / (prox.xp - pat.xp) * 100) : 100) + "%";
+    $("formNome").classList.toggle("oculto", !!save.nome);
+    $("btnZerar").classList.toggle("oculto", !save.nome);
+    $("resumo").textContent = "Trilha " + tr.nome + ": " + feitas + " de " + tr.fases.length + " fases concluídas";
+    $("btnVerCert").classList.toggle("oculto", feitas < tr.fases.length);
+    $("btnVerCert").textContent = "🎓 Certificado de " + tr.nome;
+    $("btnTempo").textContent = save.tempo ? "⏱️ Cronômetro: ligado" : "⏱️ Cronômetro: desligado";
+    $("btnTempo").setAttribute("aria-pressed", String(save.tempo));
+
+    var abas = $("abas"); abas.textContent = "";
+    TRILHAS.forEach(function (t) {
+      var b = criar("button", "aba", t.icone + " " + t.nome + " · " + feitasNa(t) + "/" + t.fases.length);
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(t === tr));
+      b.addEventListener("click", function () { save.trilha = t.id; salvar(); desenharMapa(); });
+      abas.appendChild(b);
+    });
+
+    var mapa = $("mapa"); mapa.textContent = "";
+    tr.fases.forEach(function (f, i) {
+      var r = feita(tr, i), liberada = i === 0 || !!feita(tr, i - 1);
+      var b = criar("button", "fase" + (r ? " feita" : liberada ? " atual" : ""));
+      b.type = "button";
+      b.disabled = !liberada || !save.nome;
+      [["icone", liberada ? f.icone : "🔒"], ["num", "Fase " + (i + 1)], ["titulo", f.titulo], ["desc", f.desc],
+       ["estrelas", r ? estrelas(r.estrelas) + "  " + r.xp + " XP" : liberada ? "Jogar →" : "Conclua a fase " + i]]
+        .forEach(function (par) { b.appendChild(criar("span", par[0], par[1])); });
+      b.addEventListener("click", function () { iniciarFase(i); });
+      mapa.appendChild(b);
+    });
+    desenharRanking();
+    mostrar("telaMapa");
+  }
+
+  // ---------- PARTIDA ----------
+  var jogo = null, relogio = null;
+  function iniciarFase(i) {
+    var tr = trilha();
+    jogo = { tr: tr, fase: i, fila: embaralhar(tr.fases[i].q).slice(0, POR_FASE), total: POR_FASE, vidas: VIDAS, combo: 0, xp: 0, certas: 0, primeira: 0, erradas: [], respondida: false, fim: 0 };
+    mostrar("telaJogo");
+    desenharQuestao();
+  }
+
+  function pararTempo() { if (relogio) { clearInterval(relogio); relogio = null; } }
+  function iniciarTempo() {
+    pararTempo();
+    var barra = $("hudTempo");
+    barra.classList.toggle("oculto", !save.tempo);
+    if (!save.tempo) return;
+    jogo.fim = Date.now() + TEMPO * 1000;
+    var ultimo = TEMPO;
+    function passo() {
+      if (!jogo || jogo.respondida) return pararTempo();
+      var resta = Math.max(0, jogo.fim - Date.now()), seg = Math.ceil(resta / 1000);
+      barra.querySelector(".trilho i").style.width = (resta / (TEMPO * 10)) + "%";
+      barra.classList.toggle("acabando", seg <= 10);
+      $("hudSeg").textContent = seg + "s";
+      if (seg <= 5 && seg < ultimo && seg > 0) som.tique();
+      ultimo = seg;
+      if (resta <= 0) responder(null);
+    }
+    passo();
+    relogio = setInterval(passo, 100);
+  }
+
+  function desenharHud() {
+    $("hudFase").textContent = jogo.tr.nome + " · Fase " + (jogo.fase + 1) + " · " + jogo.tr.fases[jogo.fase].titulo;
+    $("hudVidas").textContent = "❤️".repeat(jogo.vidas) + "🖤".repeat(VIDAS - jogo.vidas);
+    $("hudVidas").setAttribute("aria-label", jogo.vidas + " vidas");
+    $("hudCombo").textContent = jogo.combo >= 2 ? "🔥 Sequência x" + jogo.combo : jogo.xp + " XP";
+    var p = $("hudProgresso"); p.textContent = "";
+    for (var k = 0; k < jogo.total; k++) p.appendChild(criar("i", k < jogo.certas ? "ok" : null));
+  }
+
+  function desenharQuestao() {
+    var q = jogo.fila[0];
+    jogo.respondida = false;
+    desenharHud();
+    $("qTipo").textContent = (q.tipo || "Pergunta") + " · " + (jogo.certas + 1) + " de " + jogo.total;
+    $("qTexto").textContent = q.t;
+    $("qCodigo").classList.toggle("oculto", !q.cod);
+    $("qCodigo").textContent = q.cod || "";
+    $("retorno").classList.add("oculto");
+    var cx = $("qOpcoes"); cx.textContent = "";
+    embaralhar(q.op.map(function (txt, idx) { return { txt: txt, certa: idx === q.c }; })).forEach(function (o, k) {
+      var b = criar("button", "op" + (q.mono ? " mono" : ""));
+      b.type = "button";
+      b.appendChild(criar("b", null, "ABCD"[k]));
+      b.appendChild(criar("span", null, o.txt));
+      b.dataset.certa = o.certa ? "1" : "";
+      b.addEventListener("click", function () { responder(b); });
+      cx.appendChild(b);
+    });
+    iniciarTempo();
+  }
+
+  // botao = alternativa clicada; null = o tempo acabou.
+  function responder(botao) {
+    if (!jogo || jogo.respondida) return;
+    jogo.respondida = true;
+    pararTempo();
+    var q = jogo.fila[0], acertou = !!botao && botao.dataset.certa === "1", ganho = 0, rapidez = 0;
+    Array.prototype.forEach.call($("qOpcoes").children, function (b) {
+      b.disabled = true;
+      if (b.dataset.certa === "1") b.classList.add("certa");
+    });
+    if (acertou) {
+      if (save.tempo) rapidez = Math.round(Math.max(0, jogo.fim - Date.now()) / (TEMPO * 1000) * XP_TEMPO);
+      ganho = XP_ACERTO + Math.min(jogo.combo, 5) * XP_COMBO + rapidez;
+      jogo.combo++; jogo.xp += ganho; jogo.certas++;
+      if (jogo.erradas.indexOf(q) < 0) jogo.primeira++;
+      jogo.fila.shift();
+      som.certo(jogo.combo);
+    } else {
+      if (botao) botao.classList.add("errada");
+      jogo.combo = 0; jogo.vidas--;
+      if (jogo.erradas.indexOf(q) < 0) jogo.erradas.push(q);
+      jogo.fila.push(jogo.fila.shift());
+      som.errado();
+    }
+    desenharHud();
+    $("retorno").className = "retorno " + (acertou ? "ok" : "erro");
+    $("retTitulo").textContent = acertou ? (jogo.combo >= 2 ? "✅ Correto! Sequência de " + jogo.combo + "." : "✅ Correto!")
+      : botao ? "❌ Não foi dessa vez. Perdeu 1 vida." : "⏰ O tempo acabou. Perdeu 1 vida.";
+    $("retTexto").textContent = q.e;
+    $("retGanho").textContent = acertou ? "+" + ganho + " XP" + (rapidez ? " (rapidez +" + rapidez + ")" : "") : (jogo.vidas > 0 ? "Esta questão volta no fim da fase." : "");
+    $("btnProx").textContent = jogo.vidas <= 0 ? "Ver resultado" : jogo.fila.length ? "Continuar →" : "Concluir fase 🎉";
+    $("btnProx").focus();
+  }
+
+  function avancar() {
+    if (!jogo || !jogo.respondida) return;
+    if (jogo.vidas <= 0) return fimDaFase(false);
+    if (!jogo.fila.length) return fimDaFase(true);
+    desenharQuestao();
+  }
+
+  function fimDaFase(venceu) {
+    var tr = jogo.tr, i = jogo.fase, total = jogo.total, ultima = i === tr.fases.length - 1;
+    var num = $("fimNumeros"); num.textContent = "";
+    function caixa(valor, rotulo) { var d = criar("div"); d.appendChild(criar("strong", null, valor)); d.appendChild(criar("small", null, rotulo)); num.appendChild(d); }
+    var principal = $("btnFimPrincipal");
+    pararTempo();
+    if (venceu) {
+      var bonus = jogo.vidas * XP_VIDA, xp = jogo.xp + bonus;
+      var est = jogo.primeira === total ? 3 : jogo.primeira === total - 1 ? 2 : 1;
+      var antes = feita(tr, i), eraCompleta = feitasNa(tr) === tr.fases.length;
+      save.fases[chave(tr, i)] = {
+        xp: Math.max(xp, antes ? antes.xp : 0),
+        estrelas: Math.max(est, antes ? antes.estrelas : 0),
+        primeira: Math.max(jogo.primeira, antes ? antes.primeira : 0)
+      };
+      salvar(); registrarRanking();
+      $("fimTitulo").textContent = "Fase " + (i + 1) + " concluída!";
+      $("fimEstrelas").textContent = estrelas(est);
+      $("fimTexto").textContent = est === 3 ? "Perfeito: todas de primeira." : "Jogue de novo sem errar para ganhar 3 estrelas. As questões são sorteadas a cada partida.";
+      caixa(jogo.primeira + "/" + total, "acertos de primeira");
+      caixa("+" + bonus, "bônus de vidas");
+      caixa(xp + " XP", antes && xp <= antes.xp ? "recorde: " + antes.xp : "novo recorde");
+      var cert = feitasNa(tr) === tr.fases.length && (ultima || !eraCompleta);
+      principal.textContent = cert ? "🎓 Ver certificado" : ultima ? "Mapa de fases" : "Próxima fase →";
+      principal.onclick = cert ? mostrarCertificado : ultima ? desenharMapa : function () { iniciarFase(i + 1); };
+      som.fase(); confete();
+    } else {
+      $("fimTitulo").textContent = "As vidas acabaram";
+      $("fimEstrelas").textContent = "💔";
+      $("fimTexto").textContent = "Releia as explicações e tente de novo. Você acertou " + jogo.certas + " de " + total + ".";
+      principal.textContent = "Tentar de novo";
+      principal.onclick = function () { iniciarFase(i); };
+      som.derrota();
+    }
+    jogo = null;
+    mostrar("telaFim");
+    principal.focus();
+  }
+
+  // ---------- CERTIFICADO (um por trilha) ----------
+  function mostrarCertificado() {
+    var tr = trilha(), xp = xpTotal(), primeira = 0, est = 0, total = 0;
+    var tab = $("certTabela"); tab.textContent = "";
+    function linha(celulas, tag) { var l = criar("tr"); celulas.forEach(function (c) { l.appendChild(criar(tag, null, c)); }); tab.appendChild(l); }
+    linha(["Fase", "Acertos de primeira", "Estrelas"], "th");
+    tr.fases.forEach(function (f, i) {
+      var s = feita(tr, i) || { primeira: 0, estrelas: 0 };
+      primeira += s.primeira; est += s.estrelas; total += POR_FASE;
+      linha([(i + 1) + ". " + f.titulo, s.primeira + " de " + POR_FASE, estrelas(s.estrelas)], "td");
+    });
+    $("certCabecalho").textContent = "PORTAL PIXEL · MISSÃO HTML5 · TRILHA " + tr.nome.toUpperCase();
+    $("certNome").textContent = save.nome || "Aluno";
+    $("certTexto").textContent = "concluiu as " + tr.fases.length + " fases da trilha " + tr.nome + ", com " + total + " questões respondidas, e alcançou a patente " + patenteDe(xp).nome + ".";
+    var qd = $("certQuadro"); qd.textContent = "";
+    [[primeira + " de " + total, "acertos de primeira"], [Math.round(primeira / total * 100) + "%", "aproveitamento"], [est + " de " + tr.fases.length * 3, "estrelas"], [xp, "XP total"]]
+      .forEach(function (p) { var d = criar("div"); d.appendChild(criar("strong", null, p[0])); d.appendChild(criar("small", null, p[1])); qd.appendChild(d); });
+    $("certData").textContent = "Emitido em " + new Date().toLocaleDateString("pt-BR") + " · O aproveitamento considera a melhor tentativa de cada fase.";
+    mostrar("telaCert");
+    confete();
+  }
+
+  // ---------- CONFETE ----------
+  function confete() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var c = $("confete"), g = c.getContext("2d"), cores = ["#f16529", "#ffc145", "#3ecf8e", "#5aa9ff", "#ff6b6b"], ps = [], fim = Date.now() + 2200;
+    c.width = innerWidth; c.height = innerHeight;
+    for (var i = 0; i < 110; i++) ps.push({ x: Math.random() * c.width, y: -20 - Math.random() * c.height * .5, vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 4, t: 5 + Math.random() * 6, cor: cores[i % cores.length], r: Math.random() * 6 });
+    (function quadro() {
+      g.clearRect(0, 0, c.width, c.height);
+      if (Date.now() > fim) return;
+      ps.forEach(function (p) { p.x += p.vx; p.y += p.vy; p.r += .1; g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.cor; g.fillRect(-p.t / 2, -p.t / 2, p.t, p.t * .6); g.restore(); });
+      requestAnimationFrame(quadro);
+    })();
+  }
+
+  // ---------- EVENTOS ----------
+  $("formNome").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var n = $("campoNome").value.trim();
+    if (!n) return;
+    save.nome = n.slice(0, 40); salvar(); desenharMapa();
+  });
+  $("btnProx").addEventListener("click", avancar);
+  $("btnSair").addEventListener("click", function () {
+    if (jogo && !jogo.respondida && (jogo.certas || jogo.erradas.length) && !confirm("Sair da fase? O progresso desta tentativa será perdido.")) return;
+    pararTempo(); jogo = null; desenharMapa();
+  });
+  $("btnFimMapa").addEventListener("click", desenharMapa);
+  $("btnCertMapa").addEventListener("click", desenharMapa);
+  $("btnVerCert").addEventListener("click", mostrarCertificado);
+  $("btnImprimir").addEventListener("click", function () { window.print(); });
+  $("btnTempo").addEventListener("click", function () { save.tempo = !save.tempo; salvar(); desenharMapa(); });
+  $("btnZerar").addEventListener("click", function () {
+    if (!confirm("Trocar de aluno? O progresso de " + save.nome + " sai deste navegador. A pontuação continua no ranking.")) return;
+    save.nome = ""; save.fases = {}; save.trilha = TRILHAS[0].id; salvar(); $("campoNome").value = ""; desenharMapa();
+  });
+  $("btnLimparRank").addEventListener("click", function () {
+    if (!confirm("Apagar o ranking deste navegador?")) return;
+    try { localStorage.removeItem(CHAVE_RANK); } catch (e) {}
+    desenharRanking();
+  });
+  function atualizarSom() { $("btnSom").textContent = save.som ? "🔊 Som" : "🔇 Mudo"; $("btnSom").setAttribute("aria-pressed", String(save.som)); }
+  $("btnSom").addEventListener("click", function () { save.som = !save.som; salvar(); atualizarSom(); });
+  document.addEventListener("keydown", function (ev) {
+    if (!jogo || $("telaJogo").classList.contains("oculto") || ev.ctrlKey || ev.altKey || ev.metaKey) return;
+    var k = ev.key.toLowerCase(), idx = "abcd".indexOf(k);
+    if (idx < 0) idx = "1234".indexOf(k);
+    if (idx >= 0 && k.length === 1 && !jogo.respondida) { var b = $("qOpcoes").children[idx]; if (b) responder(b); }
+  });
+
+  $("versao").textContent = "Missão HTML5 · versão " + VERSAO;
+  atualizarSom();
+  desenharMapa();
+})();
+</script>
+</body>
+</html>

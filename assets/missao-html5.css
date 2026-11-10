@@ -1,0 +1,61 @@
+/* Apresentação de Missão HTML5 (página do jogo e vitrine da página inicial) */
+.mis-vitrine { background:#141a26; color:#eef2f8; border:1px solid #34415a; border-radius:18px; overflow:hidden; margin:22px 0; }
+.mis-hero { display:grid; grid-template-columns:.9fr 1.1fr; align-items:center; gap:28px; padding:34px; background:radial-gradient(700px 400px at 90% 10%, rgba(241,101,41,.18), transparent 60%); }
+.mis-selo { font-size:11px; font-weight:800; letter-spacing:.14em; color:#ffc145; }
+.mis-texto h2 { font-size:clamp(28px,4vw,46px); line-height:1.08; margin:14px 0; color:#fff; }
+.mis-resumo { line-height:1.65; color:#c3cde0; margin:0; }
+.mis-fatos, .mis-acoes { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.mis-fatos span { font-size:12px; font-weight:800; padding:7px 11px; background:#273247; border:1px solid #34415a; border-radius:99px; }
+.mis-vitrine .mis-jogar { background:#f16529; color:#fff; border-color:#f16529; }
+.mis-vitrine .botao-sec { background:transparent; color:#eef2f8; border-color:#4a5a78; }
+.mis-nota { font-size:12px; color:#9aa7bd; margin:14px 0 0; }
+.mis-capa { width:100%; border-radius:14px; border:2px solid #34415a; box-shadow:0 18px 40px rgba(0,0,0,.45); }
+
+.mis-numeros { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:0 34px 8px; }
+.mis-numeros article { background:#1e2636; border:1px solid #34415a; border-radius:14px; padding:16px; }
+.mis-icone { font-size:26px; }
+.mis-numeros h3 { font-size:18px; margin:8px 0 6px; color:#ffc145; }
+.mis-numeros p { font-size:13px; line-height:1.5; margin:0; color:#c3cde0; }
+
+.mis-subtitulo { font-size:20px; margin:26px 34px 14px; color:#fff; }
+.mis-cenas { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; padding:0 34px; }
+.mis-cenas article { background:#1e2636; border:1px solid #34415a; border-radius:14px; overflow:hidden; }
+.mis-cenas img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; object-position:top; border-bottom:1px solid #34415a; }
+.mis-cenas h4 { font-size:16px; margin:12px 14px 6px; color:#fff; }
+.mis-cenas p { font-size:13px; line-height:1.5; margin:0 14px 14px; color:#c3cde0; }
+
+.mis-trilhas { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; padding:0 34px; }
+.mis-trilhas article { background:#1e2636; border:1px solid #34415a; border-top:4px solid #f16529; border-radius:14px; padding:16px; }
+.mis-trilhas article:nth-child(2) { border-top-color:#5aa9ff; }
+.mis-trilhas article:nth-child(3) { border-top-color:#ffc145; }
+.mis-trilhas h4 { font-size:18px; margin:0; color:#fff; }
+.mis-total { font-size:12px; font-weight:800; color:#9aa7bd; margin:4px 0 10px; }
+.mis-trilhas ol { margin:0; padding-left:20px; display:grid; gap:4px; font-size:14px; color:#c3cde0; }
+
+.mis-linha { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; padding:0 34px; }
+.mis-linha article { background:#1e2636; border:1px solid #34415a; border-radius:14px; padding:14px 16px; }
+.mis-linha article.mis-atual { border-color:#f16529; box-shadow:0 0 0 1px #f16529 inset; }
+.mis-linha-cab { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+.mis-linha-cab strong { font-size:13px; background:#ffc145; color:#1a1400; padding:3px 10px; border-radius:99px; }
+.mis-linha-cab span { font-weight:800; font-size:14px; color:#fff; }
+.mis-linha ul { margin:0; padding-left:18px; display:grid; gap:4px; font-size:13px; line-height:1.45; color:#c3cde0; }
+
+.mis-creditos { font-size:12px; line-height:1.6; padding:22px 34px 26px; margin:0; color:#9aa7bd; }
+
+/* Cartão na grade de jogos */
+.mis-mini-resumo { font-size:13px; line-height:1.45; margin:6px 0 4px; }
+.mis-mini-convite { font-size:13px; font-weight:800; color:#f16529; }
+
+@media (max-width:900px) {
+  .mis-numeros { grid-template-columns:repeat(2,1fr); }
+  .mis-cenas, .mis-trilhas { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:780px) {
+  .mis-hero { grid-template-columns:1fr; padding:22px; }
+  .mis-numeros, .mis-cenas, .mis-trilhas, .mis-linha { padding:0 22px; }
+  .mis-subtitulo { margin:22px 22px 12px; }
+  .mis-creditos { padding:18px 22px 22px; }
+}
+@media (max-width:560px) {
+  .mis-numeros, .mis-cenas, .mis-trilhas { grid-template-columns:1fr; }
+}

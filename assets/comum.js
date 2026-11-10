@@ -133,6 +133,9 @@ function criarCartao(jogo) {
     jogo.apresentacao.recursos.forEach((r) => fatos.append(el("span", null, r.valor + " " + r.rotulo.split(" ")[0])));
     info.append(fatos, el("span", "cartao-convite", "Investigar o caso →"));
   }
+  if (jogo.vitrineMissao) {
+    info.append(el("p", "mis-mini-resumo", "HTML5, CSS e JavaScript em 12 fases, com ranking e certificado."), el("span", "mis-mini-convite", "Começar a missão →"));
+  }
   if (jogo.vitrineImperio2) {
     a.classList.add("cartao-imp2");
     info.append(el("p", "imp2-mini-resumo", "A sequência: contratos com prazo, linha automática, manutenção, energia, dia e noite."), el("span", "imp2-mini-convite", "Abrir a oficina →"));
