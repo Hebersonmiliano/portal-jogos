@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Missão HTML5 — Portal Pixel</title>
-<meta name="description" content="Jogo de perguntas sobre HTML5, CSS e JavaScript para alunos de Desenvolvimento de Sistemas: 12 fases, 108 questões sorteadas, cronômetro, ranking e certificado.">
+<meta name="description" content="Jogo de perguntas sobre HTML5, CSS, JavaScript, lógica de programação, banco de dados e Git para alunos de Desenvolvimento de Sistemas: 21 fases, 210 questões sorteadas, cronômetro, ranking e certificado.">
 <style>
   :root { --bg:#141a26; --painel:#1e2636; --painel-2:#273247; --ink:#eef2f8; --muted:#9aa7bd; --acc:#f16529; --acc-2:#ffc145; --ok:#3ecf8e; --erro:#ff6b6b; --borda:#34415a; --codigo:#0e131d; }
   * { box-sizing:border-box; }
@@ -426,7 +426,11 @@
       { tipo: "Ache o erro", t: "O que está errado nesta regra?", cod: "h1 { color = blue; }", op: ["Falta o ponto antes de h1", "Usou = no lugar de dois-pontos", "blue não é uma cor válida", "Não há erro"], c: 1,
         e: "No CSS, propriedade e valor são separados por dois-pontos: color: blue;" },
       { t: "Em qual tag escrever CSS dentro do próprio arquivo HTML?", mono: true, op: ["<css>", "<style>", "<script>", "<design>"], c: 1,
-        e: "A tag <style>, dentro do <head>, guarda CSS interno. Em projetos maiores, prefira um arquivo .css separado." }
+        e: "A tag <style>, dentro do <head>, guarda CSS interno. Em projetos maiores, prefira um arquivo .css separado." },
+      { t: "Como escrever um comentário em CSS?", mono: true, op: ["// comentário", "/* comentário */", "<!-- comentário -->", "# comentário"], c: 1,
+        e: "Comentários em CSS ficam entre /* e */. O formato <!-- --> é do HTML." },
+      { t: "Qual seletor pega só os parágrafos que estão dentro de um elemento com class=\"card\"?", mono: true, op: [".card p", "p.card", ".card, p", "p > .card"], c: 0,
+        e: "O espaço indica descendência: .card p seleciona os <p> dentro de .card. Já p.card seleciona o <p> que tem a classe card." }
     ] },
     { icone: "📦", titulo: "Texto e modelo de caixa", desc: "Fonte, alinhamento, padding, borda e margem.", q: [
       { t: "Qual propriedade muda o tamanho da letra?", mono: true, op: ["text-size", "font-size", "size", "letter-size"], c: 1,
@@ -444,7 +448,11 @@
       { t: "Qual linha cria uma borda preta, sólida, de 2 pixels?", mono: true, op: ["border: 2px solid black;", "border: black 2 line;", "line: 2px black;", "border-style: 2px;"], c: 0,
         e: "O atalho border recebe largura, estilo e cor." },
       { t: "Qual propriedade arredonda os cantos?", mono: true, op: ["corner-round", "border-radius", "round", "border-curve"], c: 1,
-        e: "border-radius arredonda os cantos. Com 50% em um quadrado, vira um círculo." }
+        e: "border-radius arredonda os cantos. Com 50% em um quadrado, vira um círculo." },
+      { t: "Qual propriedade troca a fonte do texto, por exemplo para Arial?", mono: true, op: ["font-family", "font-name", "text-font", "typeface"], c: 0,
+        e: "font-family define a família da fonte. É comum indicar alternativas: font-family: Arial, sans-serif;" },
+      { t: "Como tirar o sublinhado de um link?", mono: true, op: ["text-decoration: none;", "underline: off;", "link-style: plain;", "border-bottom: 0;"], c: 0,
+        e: "text-decoration controla o sublinhado. none remove a linha." }
     ] },
     { icone: "📱", titulo: "Layout e responsivo", desc: "Flexbox, grid, media query e prioridade.", q: [
       { t: "Como transformar um elemento em um contêiner flex?", mono: true, op: ["display: flex;", "flex: on;", "layout: flexbox;", "position: flex;"], c: 0,
@@ -462,7 +470,11 @@
       { t: "Qual seletor tem mais prioridade quando duas regras entram em conflito?", op: ["Seletor de tag, como p", "Seletor de classe, como .aviso", "Seletor de id, como #aviso", "Todos têm a mesma prioridade"], c: 2,
         e: "Isso se chama especificidade: id vence classe, e classe vence tag. Com a mesma especificidade, vale a regra que vem por último." },
       { t: "Como ativar o layout em grade?", mono: true, op: ["display: grid;", "display: table;", "grid: on;", "layout: grid;"], c: 0,
-        e: "display: grid cria uma grade. As colunas são definidas com grid-template-columns." }
+        e: "display: grid cria uma grade. As colunas são definidas com grid-template-columns." },
+      { t: "No flexbox, como empilhar os itens um embaixo do outro?", mono: true, op: ["flex-direction: column;", "flex-wrap: down;", "display: block-flex;", "align: vertical;"], c: 0,
+        e: "flex-direction define o eixo principal. O padrão é row (lado a lado); column empilha os itens." },
+      { t: "Qual propriedade cria espaço entre os itens de um contêiner flex ou grid?", mono: true, op: ["spacing", "gap", "margin-between", "padding"], c: 1,
+        e: "gap define o espaço entre os itens, sem precisar de margem em cada um." }
     ] }
   ];
 
@@ -483,7 +495,11 @@
       { t: "Qual tipo guarda apenas verdadeiro ou falso?", op: ["string", "number", "boolean", "null"], c: 2,
         e: "boolean tem dois valores: true e false." },
       { t: "O que este código mostra?", cod: "let nome = \"Ana\";\nconsole.log(nome.length);", mono: true, op: ["3", "\"Ana\"", "1", "undefined"], c: 0,
-        e: "length devolve a quantidade de caracteres do texto. \"Ana\" tem 3." }
+        e: "length devolve a quantidade de caracteres do texto. \"Ana\" tem 3." },
+      { t: "Como converter o texto \"10\" em número?", mono: true, op: ["Number(\"10\")", "\"10\".number", "int(\"10\")", "toNumber \"10\""], c: 0,
+        e: "Number() converte o texto em número. Isso é útil porque o valor digitado em um campo chega como texto." },
+      { t: "O que este código mostra?", cod: "console.log(typeof 42);", mono: true, op: ["\"number\"", "\"string\"", "\"int\"", "42"], c: 0,
+        e: "typeof devolve o tipo do valor. 42 é do tipo number." }
     ] },
     { icone: "🔀", titulo: "Decisão e repetição", desc: "if, else, operadores, for e while.", q: [
       { t: "Qual operador compara valor e tipo ao mesmo tempo?", mono: true, op: ["=", "==", "===", "=>"], c: 2,
@@ -501,7 +517,11 @@
       { t: "Qual é o resultado de 10 % 3?", mono: true, op: ["3", "1", "0.3", "30"], c: 1,
         e: "% devolve o resto da divisão. 10 dividido por 3 dá 3 e sobra 1." },
       { t: "Qual é o valor de !true?", mono: true, op: ["true", "false", "1", "undefined"], c: 1,
-        e: "! é o NÃO lógico: inverte o valor. O contrário de true é false." }
+        e: "! é o NÃO lógico: inverte o valor. O contrário de true é false." },
+      { t: "Qual operador significa \"diferente\", comparando valor e tipo?", mono: true, op: ["<>", "!==", "=!", "!="], c: 1,
+        e: "!== é a diferença estrita. É o contrário de ===." },
+      { t: "O que este código mostra?", cod: "let n = 7;\nif (n % 2 === 0) {\n  console.log(\"par\");\n} else {\n  console.log(\"ímpar\");\n}", mono: true, op: ["par", "ímpar", "7", "1"], c: 1,
+        e: "7 dividido por 2 deixa resto 1. Como o resto não é 0, o programa executa o else." }
     ] },
     { icone: "⚙️", titulo: "Funções, listas e página", desc: "function, return, arrays e DOM.", q: [
       { t: "Qual linha declara uma função?", mono: true, op: ["function somar(a, b) { }", "def somar(a, b):", "func somar(a, b) { }", "somar = function:"], c: 0,
@@ -519,24 +539,238 @@
       { t: "Como executar uma função quando o botão é clicado?", mono: true, op: ["botao.addEventListener(\"click\", abrir)", "botao.onPress(abrir)", "botao.click = abrir()", "listen(botao, abrir)"], c: 0,
         e: "addEventListener liga um evento a uma função. Note que a função é passada sem parênteses." },
       { t: "Qual propriedade troca o texto de um elemento?", mono: true, op: ["textContent", "value", "text()", "label"], c: 0,
-        e: "elemento.textContent = \"novo texto\" troca o texto que aparece na página." }
+        e: "elemento.textContent = \"novo texto\" troca o texto que aparece na página." },
+      { t: "O que este código mostra?", cod: "function dobro(n) {\n  return n * 2;\n}\nconsole.log(dobro(4));", mono: true, op: ["4", "8", "n * 2", "undefined"], c: 1,
+        e: "A função recebe 4, multiplica por 2 e devolve 8." },
+      { t: "Qual laço percorre os itens de um array, um por um?", mono: true, op: ["for (const item of lista) { }", "loop lista as item { }", "each (lista) { }", "while item in lista { }"], c: 0,
+        e: "for...of entrega um item do array a cada volta." }
+    ] }
+  ];
+
+  var LOGICA = [
+    { icone: "🧠", titulo: "Algoritmos e variáveis", desc: "Algoritmo, variável, tipos, entrada e saída.", q: [
+      { t: "O que é um algoritmo?", op: ["Uma sequência finita de passos para resolver um problema", "Um tipo de computador", "Uma linguagem de programação", "Um erro no programa"], c: 0,
+        e: "Algoritmo é uma sequência de passos, em ordem e com fim, que resolve um problema. Uma receita de bolo é um exemplo." },
+      { t: "O que é uma variável?", op: ["Um espaço na memória, com nome, que guarda um valor", "Um comando que repete instruções", "Um erro de digitação", "Um arquivo salvo no disco"], c: 0,
+        e: "A variável guarda um valor que o programa pode ler e alterar. Ela tem um nome e um tipo." },
+      { t: "O que este algoritmo escreve?", cod: "x ← 5\nx ← x + 2\nescreva(x)", mono: true, op: ["5", "7", "x + 2", "52"], c: 1,
+        e: "x começa com 5. Depois recebe o próprio valor mais 2, ou seja, 7." },
+      { t: "Qual tipo de dado é adequado para guardar o nome de uma pessoa?", op: ["Inteiro", "Real", "Texto (cadeia de caracteres)", "Lógico"], c: 2,
+        e: "Nomes são textos. Inteiro e real guardam números, e lógico guarda verdadeiro ou falso." },
+      { t: "Qual tipo de dado guarda apenas verdadeiro ou falso?", op: ["Texto", "Lógico", "Inteiro", "Real"], c: 1,
+        e: "O tipo lógico, também chamado de booleano, só tem dois valores: verdadeiro e falso." },
+      { t: "O que este algoritmo escreve?", cod: "a ← 10\nb ← 3\nescreva(a mod b)", mono: true, op: ["3", "1", "0", "13"], c: 1,
+        e: "mod devolve o resto da divisão. 10 dividido por 3 dá 3 e sobra 1." },
+      { t: "Qual comando recebe um dado digitado pelo usuário?", mono: true, op: ["escreva", "leia", "se", "para"], c: 1,
+        e: "leia é a entrada: guarda em uma variável o que o usuário digitou. escreva é a saída." },
+      { t: "Qual comando mostra uma mensagem na tela?", mono: true, op: ["leia", "escreva", "enquanto", "inteiro"], c: 1,
+        e: "escreva é a saída de dados: mostra textos e valores na tela." },
+      { t: "O que este algoritmo escreve?", cod: "a ← 2\nb ← 5\na ← b\nescreva(a)", mono: true, op: ["2", "5", "7", "b"], c: 1,
+        e: "A atribuição copia o valor da direita para a variável da esquerda. Depois de a ← b, a vale 5." },
+      { t: "Qual destes é um nome de variável válido?", mono: true, op: ["1nota", "nota final", "nota1", "nota-1"], c: 2,
+        e: "Nomes de variável não começam com número e não têm espaço nem hífen. nota1 e nota_final são válidos." }
+    ] },
+    { icone: "🔀", titulo: "Decisão", desc: "Se, senão e operadores lógicos.", q: [
+      { t: "Qual estrutura executa um bloco só quando a condição é verdadeira?", mono: true, op: ["se", "para", "leia", "escreva"], c: 0,
+        e: "se é a estrutura de decisão. O bloco do senão, quando existe, roda quando a condição é falsa." },
+      { t: "O que este algoritmo escreve?", cod: "nota ← 6\nse nota >= 7 então\n  escreva(\"Aprovado\")\nsenão\n  escreva(\"Recuperação\")\nfimse", mono: true, op: ["Aprovado", "Recuperação", "6", "Nada"], c: 1,
+        e: "6 não é maior ou igual a 7. A condição é falsa e o algoritmo executa o bloco do senão." },
+      { t: "Qual é o resultado de: verdadeiro E falso?", op: ["verdadeiro", "falso", "Erro", "Depende"], c: 1,
+        e: "O E só dá verdadeiro quando os dois lados são verdadeiros." },
+      { t: "Qual é o resultado de: verdadeiro OU falso?", op: ["verdadeiro", "falso", "Erro", "Depende"], c: 0,
+        e: "O OU dá verdadeiro quando pelo menos um dos lados é verdadeiro." },
+      { t: "Qual é o resultado de: NÃO verdadeiro?", op: ["verdadeiro", "falso", "Erro", "Nada"], c: 1,
+        e: "O NÃO inverte o valor lógico." },
+      { t: "Em pseudocódigo, qual operador significa \"diferente\"?", mono: true, op: ["=", "<>", ">=", "←"], c: 1,
+        e: "<> significa diferente. O = compara igualdade e a seta ← atribui um valor." },
+      { t: "O que este algoritmo escreve?", cod: "idade ← 18\nse idade >= 18 então\n  escreva(\"Pode\")\nsenão\n  escreva(\"Não pode\")\nfimse", mono: true, op: ["Pode", "Não pode", "18", "Nada"], c: 0,
+        e: ">= inclui o próprio valor. 18 é maior ou igual a 18, então a condição é verdadeira." },
+      { t: "Qual condição verifica se o número n é par?", mono: true, op: ["n mod 2 = 0", "n / 2 = 0", "n mod 2 = 1", "n = par"], c: 0,
+        e: "Um número é par quando o resto da divisão por 2 é zero." },
+      { t: "Um menu tem as opções 1, 2 e 3. Qual estrutura organiza melhor essa escolha?", mono: true, op: ["escolha ... caso", "para ... faça", "leia", "enquanto"], c: 0,
+        e: "escolha/caso compara uma variável com vários valores fixos, sem precisar de vários se encadeados." },
+      { t: "O que este algoritmo escreve?", cod: "x ← 5\nse x > 3 E x < 10 então\n  escreva(\"Dentro\")\nsenão\n  escreva(\"Fora\")\nfimse", mono: true, op: ["Dentro", "Fora", "5", "Erro"], c: 0,
+        e: "5 é maior que 3 e também menor que 10. As duas condições são verdadeiras, então o E dá verdadeiro." }
+    ] },
+    { icone: "🔁", titulo: "Repetição e vetores", desc: "Para, enquanto, contador e vetor.", q: [
+      { t: "Qual estrutura é indicada quando já se sabe quantas vezes repetir?", mono: true, op: ["para", "se", "escolha", "leia"], c: 0,
+        e: "O para repete um número definido de vezes, controlando o contador sozinho." },
+      { t: "O que este algoritmo escreve?", cod: "para i de 1 até 3 faça\n  escreva(i)\nfimpara", mono: true, op: ["1, 2, 3", "0, 1, 2", "3", "1, 2"], c: 0,
+        e: "O i começa em 1 e vai até 3, incluindo o 3." },
+      { t: "Qual estrutura repete enquanto a condição for verdadeira, testando antes de cada volta?", mono: true, op: ["enquanto", "se", "para cada", "senão"], c: 0,
+        e: "O enquanto testa a condição antes de cada repetição. Se ela já começar falsa, o bloco não roda nenhuma vez." },
+      { t: "O que é um laço infinito?", op: ["Uma repetição cuja condição nunca fica falsa", "Um laço que repete 100 vezes", "Um erro de digitação", "Um vetor muito grande"], c: 0,
+        e: "Se nada dentro do laço muda a condição, ela nunca fica falsa e o programa não sai da repetição." },
+      { t: "O que este algoritmo escreve?", cod: "soma ← 0\npara i de 1 até 4 faça\n  soma ← soma + i\nfimpara\nescreva(soma)", mono: true, op: ["4", "10", "0", "1234"], c: 1,
+        e: "A soma acumula 1 + 2 + 3 + 4, que dá 10." },
+      { t: "O que é um vetor?", op: ["Uma variável que guarda vários valores do mesmo tipo, acessados por um índice", "Um comando de repetição", "Um tipo de erro", "Um operador lógico"], c: 0,
+        e: "O vetor guarda uma lista de valores sob o mesmo nome. Cada posição é acessada pelo índice." },
+      { t: "Como se chama a variável que aumenta de 1 em 1 a cada volta do laço?", op: ["Acumulador", "Contador", "Constante", "Vetor"], c: 1,
+        e: "O contador conta as repetições, por exemplo i ← i + 1." },
+      { t: "Como se chama a variável que vai somando valores a cada volta do laço?", op: ["Acumulador", "Contador", "Índice", "Parâmetro"], c: 0,
+        e: "O acumulador junta valores, por exemplo soma ← soma + nota. Ele precisa começar com um valor, normalmente 0." },
+      { t: "O que este algoritmo escreve?", cod: "i ← 0\nenquanto i < 3 faça\n  i ← i + 1\nfimenquanto\nescreva(i)", mono: true, op: ["0", "2", "3", "4"], c: 2,
+        e: "O laço soma 1 enquanto i for menor que 3. Quando i chega a 3, a condição fica falsa e o laço termina." },
+      { t: "Qual estrutura testa a condição no fim e executa o bloco pelo menos uma vez?", mono: true, op: ["repita ... até", "enquanto", "para", "se"], c: 0,
+        e: "O repita executa primeiro e testa depois. Por isso o bloco sempre roda ao menos uma vez." }
+    ] }
+  ];
+
+  var BANCO = [
+    { icone: "🗄️", titulo: "Conceitos", desc: "Tabela, registro, campo e chaves.", q: [
+      { t: "O que é um banco de dados?", op: ["Uma coleção organizada de dados relacionados", "Um programa para editar textos", "Um tipo de rede", "Uma linguagem de marcação"], c: 0,
+        e: "Um banco de dados guarda dados de forma organizada, para consultar e alterar depois." },
+      { t: "O que significa a sigla SQL?", op: ["Structured Query Language", "Simple Question List", "System Quality Level", "Server Queue Link"], c: 0,
+        e: "SQL é Structured Query Language, a linguagem de consulta usada nos bancos de dados relacionais." },
+      { t: "Em uma tabela, como se chama cada linha?", op: ["Campo", "Registro", "Chave", "Esquema"], c: 1,
+        e: "Cada linha é um registro: um aluno, um produto, um pedido." },
+      { t: "Em uma tabela, como se chama cada coluna?", op: ["Registro", "Campo (ou atributo)", "Consulta", "Índice"], c: 1,
+        e: "Cada coluna é um campo, uma característica guardada de todos os registros, como nome ou idade." },
+      { t: "Para que serve a chave primária?", op: ["Identificar cada registro de forma única", "Proteger a tabela com senha", "Ordenar a tabela por nome", "Apagar registros repetidos"], c: 0,
+        e: "A chave primária identifica cada registro sem ambiguidade. Um exemplo comum é o campo id." },
+      { t: "O que é uma chave estrangeira?", op: ["Um campo que aponta para a chave primária de outra tabela", "Uma senha de acesso externo", "Uma tabela copiada de outro banco", "Um campo que aceita qualquer valor"], c: 0,
+        e: "A chave estrangeira liga as tabelas: o pedido guarda o id do cliente que fez o pedido." },
+      { t: "Qual destes é um sistema gerenciador de banco de dados (SGBD)?", op: ["MySQL", "HTML", "Photoshop", "Windows"], c: 0,
+        e: "MySQL é um SGBD, assim como PostgreSQL, SQL Server e SQLite." },
+      { t: "A chave primária pode ter valores repetidos?", op: ["Sim, sem limite", "Não: ela é única e não fica vazia", "Só em tabelas pequenas", "Só quando o campo é de texto"], c: 1,
+        e: "A chave primária precisa ser única e não pode ser nula, senão não identifica o registro." },
+      { t: "Qual tipo de dado guarda textos de tamanho variável, como um nome?", mono: true, op: ["INT", "VARCHAR", "DATE", "BOOLEAN"], c: 1,
+        e: "VARCHAR guarda texto até um limite, por exemplo VARCHAR(100)." },
+      { t: "Qual tipo de dado guarda números inteiros?", mono: true, op: ["INT", "VARCHAR", "TEXT", "DATE"], c: 0,
+        e: "INT guarda números inteiros, como idade ou quantidade." }
+    ] },
+    { icone: "🔎", titulo: "Consultas", desc: "SELECT, WHERE, ORDER BY e funções.", q: [
+      { t: "Qual comando consulta dados de uma tabela?", mono: true, op: ["SELECT", "GET", "SHOW DATA", "READ"], c: 0,
+        e: "SELECT busca dados. É o comando mais usado do SQL." },
+      { tipo: "Complete o código", t: "Qual palavra indica a tabela consultada?", cod: "SELECT * ____ alunos;", mono: true, op: ["IN", "FROM", "TABLE", "OF"], c: 1,
+        e: "FROM informa de qual tabela os dados vêm." },
+      { t: "Em SELECT * FROM alunos, o que significa o asterisco?", op: ["Todas as colunas", "Todas as tabelas", "Um registro qualquer", "Multiplicação"], c: 0,
+        e: "O * pede todas as colunas da tabela. Para pedir só algumas, escreva os nomes delas." },
+      { t: "Qual cláusula filtra os registros por uma condição?", mono: true, op: ["FILTER", "WHERE", "IF", "HAVING ONLY"], c: 1,
+        e: "WHERE mantém só os registros que atendem à condição." },
+      { t: "Qual cláusula ordena o resultado?", mono: true, op: ["SORT BY", "ORDER BY", "GROUP", "ARRANGE"], c: 1,
+        e: "ORDER BY ordena pelo campo indicado, em ordem crescente por padrão." },
+      { t: "O que esta consulta devolve?", cod: "SELECT nome FROM alunos\nWHERE idade >= 18;", op: ["O nome dos alunos com 18 anos ou mais", "Todos os dados de todos os alunos", "A idade dos alunos menores de 18", "A quantidade de alunos"], c: 0,
+        e: "A consulta pede só a coluna nome e filtra os registros em que a idade é maior ou igual a 18." },
+      { t: "Qual palavra ordena do maior para o menor?", mono: true, op: ["ASC", "DESC", "DOWN", "REVERSE"], c: 1,
+        e: "DESC ordena em ordem decrescente. ASC é a ordem crescente, que é o padrão." },
+      { t: "Qual função conta os registros?", mono: true, op: ["COUNT(*)", "SUM(*)", "TOTAL()", "NUMBER()"], c: 0,
+        e: "COUNT(*) conta as linhas. SUM soma os valores de uma coluna." },
+      { t: "Qual condição busca os nomes que começam com a letra A?", mono: true, op: ["nome LIKE 'A%'", "nome = 'A'", "nome START 'A'", "nome IN 'A*'"], c: 0,
+        e: "LIKE compara com um padrão, e o % representa qualquer sequência de caracteres." },
+      { t: "Qual palavra remove as linhas repetidas do resultado?", mono: true, op: ["UNIQUE ONLY", "DISTINCT", "NOREPEAT", "SINGLE"], c: 1,
+        e: "SELECT DISTINCT cidade FROM alunos mostra cada cidade uma única vez." }
+    ] },
+    { icone: "✏️", titulo: "Alterar e relacionar", desc: "INSERT, UPDATE, DELETE e JOIN.", q: [
+      { t: "Qual comando insere um novo registro?", mono: true, op: ["INSERT INTO", "ADD ROW", "CREATE ROW", "PUT"], c: 0,
+        e: "INSERT INTO tabela (campos) VALUES (valores) cria um novo registro." },
+      { t: "Qual comando altera registros que já existem?", mono: true, op: ["CHANGE", "UPDATE", "ALTER ROW", "MODIFY"], c: 1,
+        e: "UPDATE altera os valores dos registros que atendem à condição do WHERE." },
+      { t: "Qual comando apaga registros de uma tabela?", mono: true, op: ["REMOVE", "DELETE", "ERASE", "CLEAR"], c: 1,
+        e: "DELETE FROM tabela WHERE condição apaga os registros que atendem à condição." },
+      { tipo: "Ache o erro", t: "Qual é o risco deste comando?", cod: "DELETE FROM alunos;", op: ["Apaga todos os registros, porque falta o WHERE", "Apaga só o primeiro registro", "Não faz nada", "Apaga o banco de dados inteiro"], c: 0,
+        e: "Sem WHERE, o DELETE vale para todos os registros da tabela. O mesmo cuidado vale para o UPDATE." },
+      { t: "Qual comando cria uma tabela?", mono: true, op: ["NEW TABLE", "CREATE TABLE", "MAKE TABLE", "ADD TABLE"], c: 1,
+        e: "CREATE TABLE define o nome da tabela, os campos e os tipos." },
+      { t: "Qual cláusula junta dados de duas tabelas relacionadas?", mono: true, op: ["JOIN", "MERGE ALL", "LINK", "CONNECT"], c: 0,
+        e: "JOIN combina as linhas de duas tabelas usando o campo que as relaciona, normalmente uma chave estrangeira." },
+      { tipo: "Complete o código", t: "Qual palavra falta neste comando?", cod: "UPDATE alunos ___ nota = 10\nWHERE id = 3;", mono: true, op: ["SET", "PUT", "TO", "WITH"], c: 0,
+        e: "No UPDATE, SET indica os campos e os novos valores." },
+      { tipo: "Complete o código", t: "Qual palavra falta neste comando?", cod: "INSERT INTO alunos (nome)\n______ ('Ana');", mono: true, op: ["VALUES", "DATA", "SET", "ADD"], c: 0,
+        e: "VALUES traz os valores, na mesma ordem dos campos listados." },
+      { t: "Qual comando apaga a tabela inteira, com a estrutura?", mono: true, op: ["DELETE TABLE", "DROP TABLE", "REMOVE TABLE", "CLEAR TABLE"], c: 1,
+        e: "DROP TABLE remove a tabela e todos os dados dela. Não há como desfazer sem um backup." },
+      { t: "Um cliente pode ter vários pedidos, e cada pedido é de um só cliente. Que relacionamento é esse?", op: ["Um para um (1:1)", "Um para muitos (1:N)", "Muitos para muitos (N:N)", "Nenhum"], c: 1,
+        e: "É um para muitos. A tabela de pedidos guarda a chave estrangeira do cliente." }
+    ] }
+  ];
+
+  var GIT = [
+    { icone: "🌱", titulo: "Primeiros passos", desc: "Repositório, add, commit e histórico.", q: [
+      { t: "O que é o Git?", op: ["Um sistema de controle de versão", "Um editor de código", "Uma linguagem de programação", "Um serviço de hospedagem de sites"], c: 0,
+        e: "O Git registra o histórico das alterações de um projeto e permite voltar a versões anteriores." },
+      { t: "Qual é a diferença entre Git e GitHub?", op: ["São a mesma coisa", "Git é a ferramenta de versão; GitHub é um serviço que hospeda repositórios", "GitHub é a versão paga do Git", "Git só funciona dentro do GitHub"], c: 1,
+        e: "O Git roda no seu computador. O GitHub guarda repositórios na internet e facilita o trabalho em equipe." },
+      { t: "Qual comando transforma a pasta atual em um repositório Git?", mono: true, op: ["git start", "git init", "git new", "git create"], c: 1,
+        e: "git init cria o repositório na pasta atual." },
+      { t: "Qual comando mostra o estado dos arquivos?", mono: true, op: ["git status", "git state", "git check", "git info"], c: 0,
+        e: "git status mostra o que foi alterado, o que está preparado e o que ainda não é acompanhado." },
+      { t: "Qual comando prepara um arquivo para o próximo commit?", mono: true, op: ["git add", "git save", "git push", "git prepare"], c: 0,
+        e: "git add coloca o arquivo na área de preparação (staging)." },
+      { t: "Qual comando grava um ponto no histórico do projeto?", mono: true, op: ["git save", "git commit", "git store", "git record"], c: 1,
+        e: "git commit grava as alterações preparadas, com uma mensagem que as descreve." },
+      { tipo: "Complete o código", t: "Qual opção informa a mensagem do commit?", cod: "git commit __ \"Adiciona página de contato\"", mono: true, op: ["-m", "-t", "--text", "-c"], c: 0,
+        e: "-m vem de message: a mensagem descreve o que o commit faz." },
+      { t: "Qual comando mostra o histórico de commits?", mono: true, op: ["git history", "git log", "git list", "git past"], c: 1,
+        e: "git log lista os commits, do mais recente para o mais antigo." },
+      { t: "Qual comando prepara todos os arquivos alterados da pasta?", mono: true, op: ["git add .", "git add all files", "git commit *", "git push ."], c: 0,
+        e: "O ponto representa a pasta atual: git add . prepara tudo o que mudou nela." },
+      { t: "O que é um repositório?", op: ["A pasta do projeto com o histórico de versões", "Um arquivo compactado", "A senha da conta", "Um tipo de commit"], c: 0,
+        e: "O repositório reúne os arquivos do projeto e todo o histórico de alterações." }
+    ] },
+    { icone: "☁️", titulo: "Repositório remoto", desc: "clone, push, pull e boas práticas.", q: [
+      { t: "Qual comando copia um repositório remoto para o seu computador?", mono: true, op: ["git copy", "git clone", "git download", "git get"], c: 1,
+        e: "git clone baixa o repositório com todo o histórico." },
+      { t: "Qual comando envia os seus commits para o repositório remoto?", mono: true, op: ["git send", "git push", "git upload", "git commit"], c: 1,
+        e: "git push envia os commits locais para o remoto." },
+      { t: "Qual comando traz as mudanças do remoto e aplica no seu ramo?", mono: true, op: ["git pull", "git take", "git push", "git update"], c: 0,
+        e: "git pull busca as mudanças e junta no ramo atual. Use antes de começar a trabalhar." },
+      { t: "Qual é o nome padrão do repositório remoto?", mono: true, op: ["origin", "main", "server", "github"], c: 0,
+        e: "origin é o apelido padrão do remoto de onde o repositório foi clonado." },
+      { t: "Qual comando liga o repositório local a um remoto?", mono: true, op: ["git remote add origin URL", "git connect URL", "git link origin URL", "git push add URL"], c: 0,
+        e: "git remote add dá um apelido ao endereço do remoto." },
+      { t: "Qual arquivo lista o que o Git deve ignorar?", mono: true, op: [".gitignore", "ignore.txt", ".gitkeep", "README.md"], c: 0,
+        e: "O .gitignore lista arquivos e pastas que não entram no repositório, como node_modules." },
+      { t: "O que NÃO deve ser enviado para um repositório público?", op: ["Senhas e chaves de acesso", "O arquivo README", "O código-fonte", "As imagens do site"], c: 0,
+        e: "Senhas, tokens e chaves ficam expostos para qualquer pessoa. Guarde em arquivos ignorados pelo Git." },
+      { t: "Qual arquivo apresenta o projeto na página do repositório?", mono: true, op: ["README.md", "index.html", "LEIA.txt", "about.git"], c: 0,
+        e: "O README.md explica o que é o projeto e como usar." },
+      { t: "Qual destas é uma boa mensagem de commit?", op: ["alterações", "asdf", "Corrige o cálculo da média na tela de notas", "final agora vai"], c: 2,
+        e: "Uma boa mensagem diz o que mudou, de forma curta e clara, para quem ler o histórico depois." },
+      { t: "Qual comando mostra as diferenças que ainda não foram preparadas?", mono: true, op: ["git diff", "git compare", "git changes", "git show all"], c: 0,
+        e: "git diff mostra, linha a linha, o que mudou nos arquivos." }
+    ] },
+    { icone: "🌿", titulo: "Ramos e equipe", desc: "branch, merge, conflito e pull request.", q: [
+      { t: "O que é um branch (ramo)?", op: ["Uma linha de desenvolvimento independente", "Uma cópia de segurança em outro computador", "Um commit com erro", "Um arquivo ignorado"], c: 0,
+        e: "O ramo permite trabalhar em uma mudança sem mexer no ramo principal." },
+      { t: "Qual comando cria um ramo e já muda para ele?", mono: true, op: ["git switch -c nova-tela", "git branch --go nova-tela", "git new nova-tela", "git push nova-tela"], c: 0,
+        e: "git switch -c cria o ramo e muda para ele. git checkout -b faz o mesmo." },
+      { t: "Qual comando lista os ramos?", mono: true, op: ["git branch", "git list", "git ramos", "git tree"], c: 0,
+        e: "git branch lista os ramos e marca o atual com um asterisco." },
+      { t: "Qual comando junta as mudanças de um ramo no ramo atual?", mono: true, op: ["git join", "git merge", "git add", "git mix"], c: 1,
+        e: "git merge traz os commits do outro ramo para o ramo atual." },
+      { t: "O que é um conflito de merge?", op: ["Duas alterações no mesmo trecho, e o Git não sabe qual manter", "Um erro de senha", "Um ramo apagado", "Um commit sem mensagem"], c: 0,
+        e: "No conflito, o Git marca o trecho e você escolhe o que fica antes de concluir o merge." },
+      { t: "O que é um pull request?", op: ["Um pedido para revisar e juntar as mudanças de um ramo", "Um comando para baixar arquivos", "Um tipo de conflito", "Uma cópia do repositório"], c: 0,
+        e: "No pull request a equipe revisa e comenta as mudanças antes de juntá-las ao ramo principal." },
+      { t: "O que é um fork?", op: ["Uma cópia do repositório na sua conta", "Um ramo apagado", "Um commit desfeito", "Um arquivo de configuração"], c: 0,
+        e: "O fork copia o repositório de outra pessoa para a sua conta, para você alterar sem mexer no original." },
+      { t: "Qual é o nome mais comum do ramo principal?", mono: true, op: ["main", "start", "root", "top"], c: 0,
+        e: "main é o nome padrão atual. Repositórios mais antigos usam master." },
+      { t: "Qual comando muda para um ramo que já existe?", mono: true, op: ["git switch nome-do-ramo", "git go nome-do-ramo", "git move nome-do-ramo", "git branch -m nome-do-ramo"], c: 0,
+        e: "git switch troca de ramo. git checkout também faz isso." },
+      { t: "Por que usar ramos no trabalho em equipe?", op: ["Cada pessoa trabalha na sua parte sem quebrar o ramo principal", "Para o repositório ocupar menos espaço", "Para não precisar fazer commit", "Para esconder o código dos colegas"], c: 0,
+        e: "Com ramos, o principal continua funcionando enquanto cada mudança é feita e revisada separadamente." }
     ] }
   ];
 
   var TRILHAS = [
     { id: "html", nome: "HTML5", icone: "🧱", fases: HTML },
     { id: "css", nome: "CSS", icone: "🎨", fases: CSS },
-    { id: "js", nome: "JavaScript", icone: "⚡", fases: JS }
+    { id: "js", nome: "JavaScript", icone: "⚡", fases: JS },
+    { id: "logica", nome: "Lógica", icone: "🧠", fases: LOGICA },
+    { id: "bd", nome: "Banco de dados", icone: "🗄️", fases: BANCO },
+    { id: "git", nome: "Git", icone: "🌿", fases: GIT }
   ];
 
   var PATENTES = [
     { xp: 0, nome: "Estagiário", avatar: "🧑‍🎓" },
-    { xp: 1500, nome: "Dev Júnior", avatar: "🧑‍💻" },
-    { xp: 4000, nome: "Dev Pleno", avatar: "🦾" },
-    { xp: 7000, nome: "Dev Sênior", avatar: "🚀" },
-    { xp: 10000, nome: "Arquiteto Web", avatar: "👑" }
+    { xp: 2500, nome: "Dev Júnior", avatar: "🧑‍💻" },
+    { xp: 6500, nome: "Dev Pleno", avatar: "🦾" },
+    { xp: 11000, nome: "Dev Sênior", avatar: "🚀" },
+    { xp: 16000, nome: "Arquiteto Web", avatar: "👑" }
   ];
-  var VERSAO = "1.4.0";
+  var VERSAO = "1.5.0";
   var POR_FASE = 5, VIDAS = 3, TEMPO = 40, XP_ACERTO = 100, XP_COMBO = 20, XP_VIDA = 50, XP_TEMPO = 50;
   var CHAVE = "portalpixel.missao-html5.v1", CHAVE_RANK = "portalpixel.missao-html5.ranking";
 
