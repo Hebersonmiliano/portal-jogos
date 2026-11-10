@@ -1,9 +1,9 @@
-// Apresentação de Missão HTML5: capturas reais do jogo, trilhas, números e histórico de atualizações.
+// Apresentação de Trilha Dev (id missao-html5, o nome antigo do jogo): capturas reais do jogo, trilhas, números e histórico de atualizações.
 // Usada na página do jogo (com o botão que inicia a partida) e na vitrine da página inicial.
 function criarVitrineMissao(jogo, iniciar) {
   const base = "assets/missao-html5/";
   const card = el("section", "mis-vitrine");
-  card.setAttribute("aria-label", "Conheça Missão HTML5");
+  card.setAttribute("aria-label", "Conheça Trilha Dev");
 
   // Chamada principal
   const hero = el("div", "mis-hero");
@@ -16,14 +16,14 @@ function criarVitrineMissao(jogo, iniciar) {
   const fatos = el("div", "mis-fatos");
   ["6 trilhas", "21 fases", "210 questões", "Certificado por trilha"].forEach((t) => fatos.append(el("span", null, t)));
   const acoes = el("div", "mis-acoes");
-  const jogar = el(iniciar ? "button" : "a", "botao mis-jogar", "▶ Começar a missão");
+  const jogar = el(iniciar ? "button" : "a", "botao mis-jogar", "▶ Começar a trilha");
   if (iniciar) { jogar.type = "button"; jogar.onclick = iniciar; }
   else jogar.href = "jogo.html?id=" + encodeURIComponent(jogo.id);
   acoes.append(jogar);
   if (jogo.guia) { const gdd = el("a", "botao botao-sec", "📖 Documentação (GDD)"); gdd.href = jogo.guia; acoes.append(gdd); }
   texto.append(fatos, acoes, el("p", "mis-nota", "Computador e celular · Versão " + (jogo.versao || "") + " · Progresso salvo no navegador"));
   const capa = el("img", "mis-capa");
-  capa.src = base + "capa.jpg"; capa.alt = "Capa de Missão HTML5 com uma questão do jogo ao fundo"; capa.loading = "lazy";
+  capa.src = base + "capa.jpg"; capa.alt = "Capa de Trilha Dev com uma questão do jogo ao fundo"; capa.loading = "lazy";
   hero.append(texto, capa);
   card.append(hero);
 

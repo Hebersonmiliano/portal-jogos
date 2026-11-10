@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Missão HTML5 — Documento de Design do Jogo (GDD) · Portal Pixel</title>
-  <meta name="description" content="Documento de design (GDD) de Missão HTML5: objetivos, mecânicas, conteúdo das 21 fases, telas, arquitetura, testes e histórico de versões.">
+  <title>Trilha Dev — Documento de Design do Jogo (GDD) · Portal Pixel</title>
+  <meta name="description" content="Documento de design (GDD) de Trilha Dev: objetivos, mecânicas, conteúdo das 21 fases, telas, arquitetura, testes e histórico de versões.">
   <link rel="icon" type="image/svg+xml" href="../assets/marca/icone.svg">
   <meta name="theme-color" content="#0f1020">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,15 +20,15 @@
   <main class="guia">
     <div class="guia-cabecalho">
       <span class="guia-selo">GUIA COMPLETO</span>
-      <h1>Missão HTML5 — Documento de Design do Jogo (GDD)</h1>
+      <h1>Trilha Dev — Documento de Design do Jogo (GDD)</h1>
       <a class="botao guia-jogar" href="../jogo.html?id=missao-html5">▶ Jogar agora</a>
     </div>
     <div class="guia-grade">
-      <nav class="guia-indice" aria-label="Índice do guia"><strong>Índice</strong><ol><li><a href="#visão-geral">Visão geral</a></li><li><a href="#objetivos-pedagógicos">Objetivos pedagógicos</a></li><li><a href="#público-e-uso-em-sala">Público e uso em sala</a></li><li><a href="#ciclo-de-jogo">Ciclo de jogo</a></li><li><a href="#mecânicas">Mecânicas</a></li><li><a href="#conteúdo">Conteúdo</a></li><li><a href="#telas">Telas</a></li><li><a href="#controles">Controles</a></li><li><a href="#áudio">Áudio</a></li><li><a href="#acessibilidade">Acessibilidade</a></li><li><a href="#arquitetura-técnica">Arquitetura técnica</a></li><li><a href="#integração-com-o-portal-pixel">Integração com o Portal Pixel</a></li><li><a href="#testes-realizados-na-versão-150">Testes realizados na versão 1.5.0</a></li><li><a href="#histórico-de-versões">Histórico de versões</a></li><li><a href="#limitações-e-próximos-passos">Limitações e próximos passos</a></li></ol></nav>
+      <nav class="guia-indice" aria-label="Índice do guia"><strong>Índice</strong><ol><li><a href="#visão-geral">Visão geral</a></li><li><a href="#objetivos-pedagógicos">Objetivos pedagógicos</a></li><li><a href="#público-e-uso-em-sala">Público e uso em sala</a></li><li><a href="#ciclo-de-jogo">Ciclo de jogo</a></li><li><a href="#mecânicas">Mecânicas</a></li><li><a href="#conteúdo">Conteúdo</a></li><li><a href="#telas">Telas</a></li><li><a href="#controles">Controles</a></li><li><a href="#áudio">Áudio</a></li><li><a href="#acessibilidade">Acessibilidade</a></li><li><a href="#arquitetura-técnica">Arquitetura técnica</a></li><li><a href="#integração-com-o-portal-pixel">Integração com o Portal Pixel</a></li><li><a href="#testes-realizados-na-versão-160">Testes realizados na versão 1.6.0</a></li><li><a href="#histórico-de-versões">Histórico de versões</a></li><li><a href="#limitações-e-próximos-passos">Limitações e próximos passos</a></li></ol></nav>
       <article class="guia-texto">
-<p>Versão do jogo: <strong>1.5.0</strong> · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano</p>
-<p>Este documento descreve o jogo Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.</p>
-<p><img loading="lazy" decoding="async" alt="Capa de Missão HTML5" src="../assets/missao-html5/capa.jpg" /></p>
+<p>Versão do jogo: <strong>1.6.0</strong> · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano</p>
+<p>Este documento descreve o jogo Trilha Dev, que até a versão 1.5 se chamava Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.</p>
+<p><img loading="lazy" decoding="async" alt="Capa de Trilha Dev" src="../assets/missao-html5/capa.jpg" /></p>
 <h2 id="visão-geral">Visão geral</h2>
 <table>
 <thead>
@@ -40,7 +40,7 @@
 <tbody>
 <tr>
 <td>Título</td>
-<td>Missão HTML5</td>
+<td>Trilha Dev (antes Missão HTML5)</td>
 </tr>
 <tr>
 <td>Gênero</td>
@@ -68,7 +68,7 @@
 </tr>
 <tr>
 <td>Endereço</td>
-<td><code>jogo.html?id=missao-html5</code> no Portal Pixel</td>
+<td><code>jogo.html?id=missao-html5</code> no Portal Pixel (o endereço mantém o nome antigo)</td>
 </tr>
 <tr>
 <td>Código</td>
@@ -546,7 +546,7 @@
 </tbody>
 </table>
 <p>Para publicar uma versão nova: altere o jogo, aumente <code>VERSAO</code> no jogo e <code>versao</code> no catálogo, acrescente a versão no início de <code>novidades</code>, atualize este documento e gere a página do guia de novo.</p>
-<h2 id="testes-realizados-na-versão-150">Testes realizados na versão 1.5.0</h2>
+<h2 id="testes-realizados-na-versão-160">Testes realizados na versão 1.6.0</h2>
 <ul>
 <li>Conferência automática das 210 questões: 10 por fase, 4 alternativas diferentes, 1 certa e explicação preenchida.</li>
 <li>Quatro partidas automáticas completas em cada uma das 21 fases, que passaram por 199 das 210 questões.</li>
@@ -569,6 +569,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>1.6</td>
+<td>10/11/2026</td>
+<td>Novo nome: Trilha Dev. Endereço, pastas e progresso salvo continuam os mesmos</td>
+</tr>
 <tr>
 <td>1.5</td>
 <td>10/11/2026</td>

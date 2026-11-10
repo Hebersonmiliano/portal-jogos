@@ -1,23 +1,23 @@
-# Missão HTML5 — Documento de Design do Jogo (GDD)
+# Trilha Dev — Documento de Design do Jogo (GDD)
 
-Versão do jogo: **1.5.0** · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano
+Versão do jogo: **1.6.0** · Atualizado em 10/11/2026 · Autor: Prof. Heberson Miliano
 
-Este documento descreve o jogo Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.
+Este documento descreve o jogo Trilha Dev, que até a versão 1.5 se chamava Missão HTML5: para quem ele é, como funciona, o que ensina, como foi construído e como evoluir. Ele acompanha o jogo publicado no Portal Pixel e deve ser atualizado a cada versão.
 
-![Capa de Missão HTML5](../assets/missao-html5/capa.jpg)
+![Capa de Trilha Dev](../assets/missao-html5/capa.jpg)
 
 ## Visão geral
 
 | Item | Descrição |
 |---|---|
-| Título | Missão HTML5 |
+| Título | Trilha Dev (antes Missão HTML5) |
 | Gênero | Educativo, jogo de perguntas (quiz) com progressão por fases |
 | Plataforma | Navegador, no computador e no celular |
 | Público | Alunos do curso técnico em Desenvolvimento de Sistemas |
 | Jogadores | 1 por vez; vários alunos podem se revezar no mesmo computador |
 | Duração | Cerca de 3 a 5 minutos por fase |
 | Tecnologia | HTML5, CSS e JavaScript puros, em um único arquivo, sem bibliotecas |
-| Endereço | `jogo.html?id=missao-html5` no Portal Pixel |
+| Endereço | `jogo.html?id=missao-html5` no Portal Pixel (o endereço mantém o nome antigo) |
 | Código | `jogos/missao-html5/index.html` no repositório `portal-jogos` |
 
 **Resumo em uma frase:** o aluno avança por 21 fases, em seis trilhas que vão de HTML5 a Git, respondendo questões sorteadas, com vidas, cronômetro, XP, patentes, ranking e certificado.
@@ -256,7 +256,7 @@ O progresso da versão 1.0, que só tinha HTML5, é convertido ao abrir o jogo.
 
 Para publicar uma versão nova: altere o jogo, aumente `VERSAO` no jogo e `versao` no catálogo, acrescente a versão no início de `novidades`, atualize este documento e gere a página do guia de novo.
 
-## Testes realizados na versão 1.5.0
+## Testes realizados na versão 1.6.0
 
 - Conferência automática das 210 questões: 10 por fase, 4 alternativas diferentes, 1 certa e explicação preenchida.
 - Quatro partidas automáticas completas em cada uma das 21 fases, que passaram por 199 das 210 questões.
@@ -274,6 +274,7 @@ Ainda não testado: uso em um celular físico e impressão do certificado em pap
 
 | Versão | Data | Mudanças |
 |---|---|---|
+| 1.6 | 10/11/2026 | Novo nome: Trilha Dev. Endereço, pastas e progresso salvo continuam os mesmos |
 | 1.5 | 10/11/2026 | Trilhas de Lógica, Banco de dados e Git; bancos de CSS e JavaScript com 10 questões; patentes recalculadas |
 | 1.4 | 10/11/2026 | Trilhas de CSS e JavaScript, abas, um certificado por trilha, patentes recalculadas |
 | 1.3 | 10/11/2026 | Ranking da turma e botão Trocar de aluno |

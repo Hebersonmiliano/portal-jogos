@@ -1,4 +1,4 @@
-/* Apresentação de Missão HTML5 (página do jogo e vitrine da página inicial) */
+/* Apresentação de Trilha Dev (página do jogo e vitrine da página inicial) */
 .mis-vitrine { background:#141a26; color:#eef2f8; border:1px solid #34415a; border-radius:18px; overflow:hidden; margin:22px 0; }
 .mis-hero { display:grid; grid-template-columns:.9fr 1.1fr; align-items:center; gap:28px; padding:34px; background:radial-gradient(700px 400px at 90% 10%, rgba(241,101,41,.18), transparent 60%); }
 .mis-selo { font-size:11px; font-weight:800; letter-spacing:.14em; color:#ffc145; }
