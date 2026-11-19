@@ -138,7 +138,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
           <div class="levels" role="group" aria-label="Nível de dificuldade">
             <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20</span><em>10 pts por acerto</em></button>
             <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada</span><em>20 pts por acerto</em></button>
-            <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>× ÷ maiores e contas mistas</span><em>30 pts por acerto</em></button>
+            <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>× ÷ da tabuada e contas mistas</span><em>30 pts por acerto</em></button>
           </div>
           <button class="btn" id="startBtn" type="submit">Começar rodada</button>
         </form>
@@ -245,10 +245,10 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
     }
     // difícil
     const kind = pick(["×","÷","mix","+"]);
-    if (kind === "×"){ a=rnd(6,15); b=rnd(6,15); return {text:`${a} × ${b}`, ans:a*b}; }
-    if (kind === "÷"){ b=rnd(3,12); ans=rnd(3,15); a=b*ans; return {text:`${a} ÷ ${b}`, ans}; }
-    if (kind === "+"){ a=rnd(100,500); b=rnd(50,400); return pick([{text:`${a} + ${b}`, ans:a+b},{text:`${a+b} − ${b}`, ans:a}]); }
-    a=rnd(2,9); b=rnd(2,9); const c=rnd(1,20);
+    if (kind === "×"){ a=rnd(3,12); b=rnd(2,9); return {text:`${a} × ${b}`, ans:a*b}; }
+    if (kind === "÷"){ b=rnd(2,9); ans=rnd(2,10); a=b*ans; return {text:`${a} ÷ ${b}`, ans}; }
+    if (kind === "+"){ a=rnd(50,200); b=rnd(10,99); return pick([{text:`${a} + ${b}`, ans:a+b},{text:`${a+b} − ${b}`, ans:a}]); }
+    a=rnd(2,6); b=rnd(2,6); const c=rnd(1,10);
     return pick([{text:`${a} × ${b} + ${c}`, ans:a*b+c},{text:`${a} × ${b} − ${c}`, ans:a*b-c},{text:`${c} + ${a} × ${b}`, ans:c+a*b}]);
   }
 
