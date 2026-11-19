@@ -63,6 +63,7 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sound{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 .rules{font-size:14px;color:var(--muted);margin:14px 0 0;padding-left:18px}
 .hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
 .hud div{background:var(--paper);border:2px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center}
@@ -122,6 +123,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
       <h1>Torneio de <mark>Matemática</mark></h1>
       <p class="sub">60 segundos, quantas contas você acerta? Os melhores entram no ranking da escola.</p>
     </div>
+    <button class="sound" id="soundBtn" type="button" aria-pressed="true">🔊 Som ligado</button>
   </header>
 
   <div class="layout">
@@ -144,6 +146,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
           <li>Você tem 60 segundos para responder o máximo de contas.</li>
           <li>Acertos seguidos dão bônus de sequência (+5 por acerto a partir do 3º seguido).</li>
           <li>Erro não tira pontos, mas quebra a sequência.</li>
+          <li>A música acelera conforme o tempo acaba. Dá para desligar o som no botão do topo.</li>
         </ul>
       </div>
 
@@ -249,6 +252,85 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
     return pick([{text:`${a} × ${b} + ${c}`, ans:a*b+c},{text:`${a} × ${b} − ${c}`, ans:a*b-c},{text:`${c} + ${a} × ${b}`, ans:c+a*b}]);
   }
 
+  // ---------- música (gerada no navegador) ----------
+  // Acelera e fica mais alta conforme o tempo acaba; nos últimos 10 s sobe uma oitava e toca o relógio.
+  const Music = (() => {
+    let ctx = null, master = null, sfxOut = null, noise = null, loop = null, nextTime = 0, step = 0, progress = () => 0;
+    let on = true;
+    try { on = localStorage.getItem("tm_som") !== "0"; } catch(e){}
+    const BASS = [45, 45, 41, 43];              // Lá, Lá, Fá, Sol (notas MIDI)
+    const ARP  = [0, 7, 12, 7, 3, 7, 12, 15];
+    const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    function init(){
+      if (ctx) return true;
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+      ctx = new AC();
+      master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+      sfxOut = ctx.createGain(); sfxOut.gain.value = 0.35; sfxOut.connect(ctx.destination);
+      noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.06), ctx.sampleRate);
+      const d = noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      return true;
+    }
+    function note(freq, t, dur, type, vol, dest){
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(dest || master); o.start(t); o.stop(t + dur + 0.05);
+    }
+    function hat(t, vol){
+      const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = noise; f.type = "highpass"; f.frequency.value = 7000; g.gain.value = vol;
+      s.connect(f); f.connect(g); g.connect(master); s.start(t);
+    }
+    function schedule(){
+      const p = Math.max(0, Math.min(1, progress()));
+      const bpm = 96 + p * 90;                  // 96 → 186 batidas por minuto
+      const eighth = 60 / bpm / 2;
+      master.gain.setTargetAtTime(on ? 0.10 + p * 0.25 : 0, ctx.currentTime, 0.25);
+      const up = p >= 0.84 ? 12 : 0;            // últimos ~10 s: uma oitava acima
+      while (nextTime < ctx.currentTime + 0.12){
+        const bar = Math.floor(step / 8) % 4, i = step % 8, root = BASS[bar];
+        if (i % 2 === 0) note(hz(root), nextTime, eighth * 1.7, "triangle", 0.55);
+        note(hz(root + 12 + ARP[i] + up), nextTime, eighth * 0.9, "square", 0.10 + p * 0.06);
+        if (i % 2 === 1 || p > 0.45) hat(nextTime, 0.12 + p * 0.25);
+        if (p > 0.84 && i % 4 === 0) note(hz(root - 12), nextTime, eighth * 0.8, "sawtooth", 0.25);
+        step++; nextTime += eighth;
+      }
+    }
+    return {
+      start(fn){
+        if (!init()) return;
+        ctx.resume && ctx.resume();
+        progress = fn; step = 0; nextTime = ctx.currentTime + 0.06;
+        clearInterval(loop); loop = setInterval(schedule, 25);
+      },
+      stop(){
+        clearInterval(loop); loop = null;
+        if (master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.04);
+      },
+      sfx(kind){
+        if (!ctx || !on) return;
+        const t = ctx.currentTime;
+        if (kind === "ok"){ note(hz(84), t, 0.09, "square", 0.25, sfxOut); note(hz(91), t + 0.07, 0.12, "square", 0.25, sfxOut); }
+        else if (kind === "no"){ note(hz(47), t, 0.22, "sawtooth", 0.3, sfxOut); }
+        else if (kind === "tick"){ note(hz(96), t, 0.05, "square", 0.3, sfxOut); }
+        else if (kind === "fim"){ [72, 76, 79, 84].forEach((m, k) => note(hz(m), t + k * 0.13, k === 3 ? 0.6 : 0.16, "square", 0.3, sfxOut)); }
+      },
+      get on(){ return on; },
+      toggle(){
+        on = !on;
+        try { localStorage.setItem("tm_som", on ? "1" : "0"); } catch(e){}
+        if (master && !loop) master.gain.value = 0;
+        return on;
+      },
+    };
+  })();
+  function paintSound(){ const b = $("soundBtn"); b.textContent = Music.on ? "🔊 Som ligado" : "🔇 Som desligado"; b.setAttribute("aria-pressed", String(Music.on)); }
+  $("soundBtn").addEventListener("click", () => { Music.toggle(); paintSound(); });
+  paintSound();
+
   // ---------- estado ----------
   let level = "facil";
   try { const s = localStorage.getItem("tm_level"); if (LEVELS[s]) level = s; } catch(e){}
@@ -282,6 +364,8 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
     updateHud();
     clearInterval(timer);
     timer = setInterval(tick, 200);
+    game.lastSec = ROUND;
+    Music.start(() => { const left = Math.max(0, (game.end - Date.now())/1000); return 1 - left/ROUND; });
     $("answer").focus();
   }
 
@@ -297,6 +381,8 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
     $("hudTime").textContent = Math.ceil(left);
     $("timefill").style.width = (left/ROUND*100) + "%";
     $("timebar").classList.toggle("low", left <= 10);
+    const sec = Math.ceil(left);
+    if (sec !== game.lastSec){ game.lastSec = sec; if (sec <= 10 && sec > 0) Music.sfx("tick"); }
     if (left <= 0) finish();
   }
 
@@ -319,11 +405,11 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
       const bonus = game.streak >= 3 ? 5 : 0;
       game.score += LEVELS[game.level].pts + bonus;
       $("feedback").textContent = bonus ? `Certo! +${LEVELS[game.level].pts} +${bonus} de sequência` : `Certo! +${LEVELS[game.level].pts}`;
-      $("feedback").className = "feedback ok"; inp.classList.add("flash-ok");
+      $("feedback").className = "feedback ok"; inp.classList.add("flash-ok"); Music.sfx("ok");
     } else {
       game.streak = 0;
       $("feedback").textContent = `Quase! ${game.q.text} = ${game.q.ans}`;
-      $("feedback").className = "feedback no"; inp.classList.add("flash-no");
+      $("feedback").className = "feedback no"; inp.classList.add("flash-no"); Music.sfx("no");
     }
     game.log.push({q:game.q.text, ans:game.q.ans, given:val, ok});
     updateHud();
@@ -341,6 +427,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
 
   function finish(){
     clearInterval(timer); timer = null;
+    Music.stop(); Music.sfx("fim");
     const g = game;
     show("scr-end");
     $("endScore").textContent = g.score + " pts";
