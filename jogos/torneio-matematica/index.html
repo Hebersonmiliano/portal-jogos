@@ -137,8 +137,8 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
           <input type="text" id="playerName" maxlength="24" placeholder="Ex.: Ana Souza – 6º B" required>
           <div class="levels" role="group" aria-label="Nível de dificuldade">
             <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20</span><em>10 pts por acerto</em></button>
-            <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada</span><em>20 pts por acerto</em></button>
-            <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>× ÷ da tabuada e contas mistas</span><em>30 pts por acerto</em></button>
+            <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada até o 9</span><em>20 pts por acerto</em></button>
+            <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>× e ÷ até a tabuada do 9 e contas mistas</span><em>30 pts por acerto</em></button>
           </div>
           <button class="btn" id="startBtn" type="submit">Começar rodada</button>
         </form>
@@ -240,13 +240,13 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
       op = pick(["+","−","×","×"]);
       if (op === "+"){ a=rnd(10,60); b=rnd(5,40); ans=a+b; }
       else if (op === "−"){ a=rnd(20,100); b=rnd(5,a); ans=a-b; }
-      else { a=rnd(2,10); b=rnd(2,10); ans=a*b; }
+      else { a=rnd(2,9); b=rnd(2,9); ans=a*b; }
       return {text:`${a} ${op} ${b}`, ans};
     }
     // difícil
     const kind = pick(["×","÷","mix","+"]);
-    if (kind === "×"){ a=rnd(3,12); b=rnd(2,9); return {text:`${a} × ${b}`, ans:a*b}; }
-    if (kind === "÷"){ b=rnd(2,9); ans=rnd(2,10); a=b*ans; return {text:`${a} ÷ ${b}`, ans}; }
+    if (kind === "×"){ a=rnd(2,9); b=rnd(2,9); return {text:`${a} × ${b}`, ans:a*b}; }
+    if (kind === "÷"){ b=rnd(2,9); ans=rnd(2,9); a=b*ans; return {text:`${a} ÷ ${b}`, ans}; }
     if (kind === "+"){ a=rnd(50,200); b=rnd(10,99); return pick([{text:`${a} + ${b}`, ans:a+b},{text:`${a+b} − ${b}`, ans:a}]); }
     a=rnd(2,6); b=rnd(2,6); const c=rnd(1,10);
     return pick([{text:`${a} × ${b} + ${c}`, ans:a*b+c},{text:`${a} × ${b} − ${c}`, ans:a*b-c},{text:`${c} + ${a} × ${b}`, ans:c+a*b}]);
