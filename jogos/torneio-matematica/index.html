@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Torneio de Matemática — Portal Pixel</title>
+<meta name="description" content="Torneio de contas para a escola: 60 segundos, três níveis de dificuldade e ranking dos melhores alunos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: caderno quadriculado — um cartão central de jogo ao lado do quadro de ranking; empilha no celular */
+:root{
+  --paper:#f6f8fb; --grid:#dfe7f2; --ink:#1d2a44; --muted:#5b6782;
+  --card:#ffffff; --line:#c9d4e5; --accent:#2f5bea; --accent-ink:#ffffff;
+  --marker:#ffcf3f; --good:#1f9d55; --bad:#d64545; --good-bg:#e3f6ec; --bad-bg:#fde8e8;
+  --gold:#d4a017; --silver:#8c97a8; --bronze:#b5703a;
+  --f-display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121826; --grid:#1c2538; --ink:#e8edf7; --muted:#9aa6bf; --card:#182033; --line:#2b3650;
+  --accent:#6f8fff; --accent-ink:#0d1220; --marker:#f2c230; --good:#47c27f; --bad:#ef6b6b;
+  --good-bg:#16352a; --bad-bg:#3a1c22; --gold:#f0c341; --silver:#aab4c5; --bronze:#d08a52; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121826; --grid:#1c2538; --ink:#e8edf7; --muted:#9aa6bf; --card:#182033; --line:#2b3650;
+  --accent:#6f8fff; --accent-ink:#0d1220; --marker:#f2c230; --good:#47c27f; --bad:#ef6b6b;
+  --good-bg:#16352a; --bad-bg:#3a1c22; --gold:#f0c341; --silver:#aab4c5; --bronze:#d08a52; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0}
+[hidden]{display:none!important}
+.voltar{display:inline-block;margin-bottom:14px;color:var(--accent);font-weight:700;text-decoration:none}
+.voltar:hover{text-decoration:underline}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;}
+.wrap{max-width:1080px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:22px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,5vw,42px);line-height:1.05;margin:0;text-wrap:balance}
+h1 mark{background:linear-gradient(transparent 55%,var(--marker) 55%);color:inherit;padding:0 4px}
+.sub{color:var(--muted);margin:6px 0 0}
+.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:22px;min-width:0}
+h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0 0 14px}
+label.lbl{display:block;font-weight:700;margin-bottom:6px}
+input[type=text],input.answer{width:100%;font:inherit;font-size:18px;padding:12px 14px;border:2px solid var(--line);
+  border-radius:10px;background:var(--paper);color:var(--ink)}
+input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+@media (max-width:440px){.levels{grid-template-columns:1fr}}
+.lvl{font:inherit;text-align:left;cursor:pointer;border:2px solid var(--line);background:var(--paper);color:var(--ink);
+  border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px}
+.lvl strong{font-family:var(--f-display);font-size:19px}
+.lvl span{font-size:13px;color:var(--muted)}
+.lvl em{font-style:normal;font-family:var(--f-num);font-size:12px;color:var(--accent)}
+.lvl[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--card)}
+.btn{font-family:var(--f-display);font-weight:600;font-size:19px;border:0;border-radius:12px;padding:13px 22px;cursor:pointer;
+  background:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rules{font-size:14px;color:var(--muted);margin:14px 0 0;padding-left:18px}
+.hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.hud div{background:var(--paper);border:2px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center}
+.hud small{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hud b{font-family:var(--f-num);font-size:24px;font-variant-numeric:tabular-nums}
+.timebar{height:8px;border-radius:99px;background:var(--grid);overflow:hidden;margin-bottom:22px}
+.timebar i{display:block;height:100%;background:var(--accent);transition:width .25s linear}
+.timebar.low i{background:var(--bad)}
+.question{font-family:var(--f-num);font-weight:700;font-size:clamp(40px,9vw,64px);text-align:center;margin:8px 0 18px;
+  font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.answer{text-align:center;font-family:var(--f-num)!important;font-size:28px!important}
+.feedback{min-height:28px;text-align:center;font-weight:700;margin-top:10px}
+.feedback.ok{color:var(--good)} .feedback.no{color:var(--bad)}
+.flash-ok{animation:ok .35s} .flash-no{animation:no .35s}
+@keyframes ok{0%{background:var(--good-bg)}100%{background:var(--paper)}}
+@keyframes no{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.pad button{font-family:var(--f-num);font-size:22px;padding:12px 0;border-radius:10px;border:2px solid var(--line);
+  background:var(--paper);color:var(--ink);cursor:pointer}
+.pad button.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+@media (hover:hover) and (pointer:fine){.pad{display:none}}
+.result-big{font-family:var(--f-num);font-size:56px;font-weight:700;text-align:center;line-height:1}
+.result-meta{text-align:center;color:var(--muted);margin:8px 0 18px}
+.review{list-style:none;padding:0;margin:0 0 18px;max-height:220px;overflow:auto;border:2px solid var(--line);border-radius:10px}
+.review li{display:flex;justify-content:space-between;gap:10px;padding:7px 12px;font-family:var(--f-num);font-size:15px;border-bottom:1px solid var(--line)}
+.review li:last-child{border-bottom:0}
+.review .x{color:var(--bad)} .review .v{color:var(--good)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{font:inherit;font-size:14px;font-weight:700;padding:6px 12px;border-radius:99px;border:2px solid var(--line);
+  background:transparent;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:2px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.n{font-family:var(--f-num);text-align:right}
+th.n{text-align:right}
+td.name{font-weight:700;overflow-wrap:anywhere}
+.pos{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-family:var(--f-num);font-weight:700;font-size:14px;border:2px solid var(--line)}
+.p1{background:var(--gold);border-color:var(--gold);color:#1d1600}
+.p2{background:var(--silver);border-color:var(--silver);color:#11161f}
+.p3{background:var(--bronze);border-color:var(--bronze);color:#1f1007}
+tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;border:1.5px solid var(--line);color:var(--muted);margin-left:6px;vertical-align:middle}
+.empty{color:var(--muted);text-align:center;padding:24px 8px}
+.note{font-size:13px;color:var(--muted);margin-top:12px}
+.tablewrap{overflow-x:auto}
+.confirm{margin-top:12px;padding:12px;border:2px solid var(--bad);border-radius:10px;background:var(--bad-bg)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="voltar" href="../../index.html">← Portal Pixel</a>
+  <header>
+    <div>
+      <h1>Torneio de <mark>Matemática</mark></h1>
+      <p class="sub">60 segundos, quantas contas você acerta? Os melhores entram no ranking da escola.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- JOGO -->
+    <section class="panel" aria-live="polite">
+      <!-- tela inicial -->
+      <div id="scr-start">
+        <h2>Prepare-se</h2>
+        <form id="startForm" autocomplete="off">
+          <label class="lbl" for="playerName">Seu nome</label>
+          <input type="text" id="playerName" maxlength="24" placeholder="Ex.: Ana Souza – 6º B" required>
+          <div class="levels" role="group" aria-label="Nível de dificuldade">
+            <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20</span><em>10 pts por acerto</em></button>
+            <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada</span><em>20 pts por acerto</em></button>
+            <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>× ÷ maiores e contas mistas</span><em>30 pts por acerto</em></button>
+          </div>
+          <button class="btn" id="startBtn" type="submit">Começar rodada</button>
+        </form>
+        <ul class="rules">
+          <li>Você tem 60 segundos para responder o máximo de contas.</li>
+          <li>Acertos seguidos dão bônus de sequência (+5 por acerto a partir do 3º seguido).</li>
+          <li>Erro não tira pontos, mas quebra a sequência.</li>
+        </ul>
+      </div>
+
+      <!-- jogando -->
+      <div id="scr-play" hidden>
+        <div class="hud">
+          <div><small>Tempo</small><b id="hudTime">60</b></div>
+          <div><small>Pontos</small><b id="hudScore">0</b></div>
+          <div><small>Sequência</small><b id="hudStreak">0</b></div>
+        </div>
+        <div class="timebar" id="timebar"><i id="timefill" style="width:100%"></i></div>
+        <div class="question" id="question">7 + 5</div>
+        <form id="answerForm" autocomplete="off">
+          <input class="answer" id="answer" inputmode="numeric" pattern="-?[0-9]*" aria-label="Sua resposta" placeholder="?">
+        </form>
+        <div class="pad" id="pad" aria-label="Teclado numérico">
+          <button type="button">7</button><button type="button">8</button><button type="button">9</button>
+          <button type="button">4</button><button type="button">5</button><button type="button">6</button>
+          <button type="button">1</button><button type="button">2</button><button type="button">3</button>
+          <button type="button" data-k="del">⌫</button><button type="button">0</button><button type="button" class="go" data-k="ok">OK</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <!-- resultado -->
+      <div id="scr-end" hidden>
+        <h2 id="endTitle">Fim da rodada!</h2>
+        <div class="result-big" id="endScore">0</div>
+        <p class="result-meta" id="endMeta"></p>
+        <ul class="review" id="review"></ul>
+        <p class="note" id="saveNote"></p>
+        <div class="row">
+          <button class="btn" id="againBtn" type="button">Jogar de novo</button>
+          <button class="btn ghost" id="otherBtn" type="button">Trocar aluno</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RANKING -->
+    <section class="panel">
+      <h2>Ranking</h2>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="geral" aria-selected="true">Geral</button>
+        <button class="tab" role="tab" data-tab="facil" aria-selected="false">Fácil</button>
+        <button class="tab" role="tab" data-tab="medio" aria-selected="false">Médio</button>
+        <button class="tab" role="tab" data-tab="dificil" aria-selected="false">Difícil</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>#</th><th>Aluno</th><th class="n">Acertos</th><th class="n">Pontos</th></tr></thead>
+          <tbody id="rankBody"><tr><td colspan="4" class="empty">Carregando ranking…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="note" id="rankNote">O ranking fica salvo neste computador ou celular.</p>
+      <div id="teacher">
+        <button class="btn ghost" id="resetBtn" type="button" style="font-size:15px;padding:8px 14px;margin-top:8px">Zerar ranking</button>
+        <div class="confirm" id="resetConfirm" hidden>
+          <p style="margin:0 0 10px">Apagar todas as pontuações do ranking? Isso não pode ser desfeito.</p>
+          <div class="row">
+            <button class="btn" id="resetYes" type="button" style="background:var(--bad);font-size:15px;padding:8px 14px">Sim, apagar tudo</button>
+            <button class="btn ghost" id="resetNo" type="button" style="font-size:15px;padding:8px 14px">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const LEVELS = {
+    facil:  {name:"Fácil",  pts:10},
+    medio:  {name:"Médio",  pts:20},
+    dificil:{name:"Difícil",pts:30},
+  };
+  const ROUND = 60;
+  const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+  const pick = (arr) => arr[rnd(0,arr.length-1)];
+
+  // ---------- geração de contas ----------
+  function makeQuestion(lvl){
+    let a,b,op,ans;
+    if (lvl === "facil"){
+      op = pick(["+","−"]);
+      if (op === "+"){ a=rnd(1,10); b=rnd(1,10); ans=a+b; }
+      else { a=rnd(2,20); b=rnd(1,a); ans=a-b; }
+      return {text:`${a} ${op} ${b}`, ans};
+    }
+    if (lvl === "medio"){
+      op = pick(["+","−","×","×"]);
+      if (op === "+"){ a=rnd(10,60); b=rnd(5,40); ans=a+b; }
+      else if (op === "−"){ a=rnd(20,100); b=rnd(5,a); ans=a-b; }
+      else { a=rnd(2,10); b=rnd(2,10); ans=a*b; }
+      return {text:`${a} ${op} ${b}`, ans};
+    }
+    // difícil
+    const kind = pick(["×","÷","mix","+"]);
+    if (kind === "×"){ a=rnd(6,15); b=rnd(6,15); return {text:`${a} × ${b}`, ans:a*b}; }
+    if (kind === "÷"){ b=rnd(3,12); ans=rnd(3,15); a=b*ans; return {text:`${a} ÷ ${b}`, ans}; }
+    if (kind === "+"){ a=rnd(100,500); b=rnd(50,400); return pick([{text:`${a} + ${b}`, ans:a+b},{text:`${a+b} − ${b}`, ans:a}]); }
+    a=rnd(2,9); b=rnd(2,9); const c=rnd(1,20);
+    return pick([{text:`${a} × ${b} + ${c}`, ans:a*b+c},{text:`${a} × ${b} − ${c}`, ans:a*b-c},{text:`${c} + ${a} × ${b}`, ans:c+a*b}]);
+  }
+
+  // ---------- estado ----------
+  let level = "facil";
+  try { const s = localStorage.getItem("tm_level"); if (LEVELS[s]) level = s; } catch(e){}
+  try { const n = localStorage.getItem("tm_name"); if (n) $("playerName").value = n; } catch(e){}
+  let game = null, timer = null;
+  let lastEntryKey = null;
+
+  function setLevel(l){
+    level = l;
+    document.querySelectorAll(".lvl").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lvl === l)));
+    try { localStorage.setItem("tm_level", l); } catch(e){}
+  }
+  document.querySelectorAll(".lvl").forEach(b => b.addEventListener("click", () => setLevel(b.dataset.lvl)));
+  setLevel(level);
+
+  function show(id){ ["scr-start","scr-play","scr-end"].forEach(s => $(s).hidden = (s !== id)); }
+
+  $("startForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = $("playerName").value.trim().replace(/\s+/g," ");
+    if (!name){ $("playerName").focus(); return; }
+    try { localStorage.setItem("tm_name", name); } catch(e){}
+    startGame(name);
+  });
+
+  function startGame(name){
+    game = {name, level, score:0, streak:0, best:0, correct:0, total:0, log:[], end: Date.now()+ROUND*1000, q:null};
+    show("scr-play");
+    $("feedback").textContent = ""; $("feedback").className = "feedback";
+    nextQuestion();
+    updateHud();
+    clearInterval(timer);
+    timer = setInterval(tick, 200);
+    $("answer").focus();
+  }
+
+  function nextQuestion(){
+    let q; do { q = makeQuestion(game.level); } while (game.q && q.text === game.q.text);
+    game.q = q;
+    $("question").textContent = q.text;
+    $("answer").value = "";
+  }
+
+  function tick(){
+    const left = Math.max(0, (game.end - Date.now())/1000);
+    $("hudTime").textContent = Math.ceil(left);
+    $("timefill").style.width = (left/ROUND*100) + "%";
+    $("timebar").classList.toggle("low", left <= 10);
+    if (left <= 0) finish();
+  }
+
+  function updateHud(){
+    $("hudScore").textContent = game.score;
+    $("hudStreak").textContent = game.streak;
+  }
+
+  function submitAnswer(){
+    if (!game || Date.now() > game.end) return;
+    const raw = $("answer").value.trim().replace("−","-");
+    if (raw === "" || !/^-?\d+$/.test(raw)) { $("answer").focus(); return; }
+    const val = parseInt(raw,10);
+    const ok = val === game.q.ans;
+    game.total++;
+    const inp = $("answer");
+    inp.classList.remove("flash-ok","flash-no"); void inp.offsetWidth;
+    if (ok){
+      game.correct++; game.streak++; game.best = Math.max(game.best, game.streak);
+      const bonus = game.streak >= 3 ? 5 : 0;
+      game.score += LEVELS[game.level].pts + bonus;
+      $("feedback").textContent = bonus ? `Certo! +${LEVELS[game.level].pts} +${bonus} de sequência` : `Certo! +${LEVELS[game.level].pts}`;
+      $("feedback").className = "feedback ok"; inp.classList.add("flash-ok");
+    } else {
+      game.streak = 0;
+      $("feedback").textContent = `Quase! ${game.q.text} = ${game.q.ans}`;
+      $("feedback").className = "feedback no"; inp.classList.add("flash-no");
+    }
+    game.log.push({q:game.q.text, ans:game.q.ans, given:val, ok});
+    updateHud();
+    nextQuestion();
+    inp.focus();
+  }
+  $("answerForm").addEventListener("submit", (e) => { e.preventDefault(); submitAnswer(); });
+  $("pad").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    const inp = $("answer");
+    if (b.dataset.k === "del") inp.value = inp.value.slice(0,-1);
+    else if (b.dataset.k === "ok") submitAnswer();
+    else if (inp.value.length < 6) inp.value += b.textContent;
+  });
+
+  function finish(){
+    clearInterval(timer); timer = null;
+    const g = game;
+    show("scr-end");
+    $("endScore").textContent = g.score + " pts";
+    const pct = g.total ? Math.round(g.correct/g.total*100) : 0;
+    $("endMeta").textContent = `${g.name} · ${LEVELS[g.level].name} · ${g.correct} de ${g.total} certas (${pct}%) · maior sequência ${g.best}`;
+    $("endTitle").textContent = g.correct >= 20 ? "Que fera!" : g.correct >= 10 ? "Mandou bem!" : "Fim da rodada!";
+    const ul = $("review"); ul.textContent = "";
+    if (!g.log.length){ const li=document.createElement("li"); li.textContent="Nenhuma resposta nesta rodada."; ul.appendChild(li); }
+    g.log.forEach(r => {
+      const li = document.createElement("li");
+      const a = document.createElement("span"); a.textContent = `${r.q} = ${r.ans}`;
+      const b = document.createElement("span"); b.className = r.ok ? "v" : "x"; b.textContent = r.ok ? "✓" : `✗ (${r.given})`;
+      li.append(a,b); ul.appendChild(li);
+    });
+    $("againBtn").focus();
+    saveScore(g);
+  }
+
+  $("againBtn").addEventListener("click", () => startGame(game.name));
+  $("otherBtn").addEventListener("click", () => { $("playerName").value = ""; show("scr-start"); $("playerName").focus(); });
+
+  // ---------- ranking ----------
+  let rows = [];      // {id,name,level,score,correct,total,at}
+  let tab = "geral";
+  const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim();
+
+  function localLoad(){ try { return JSON.parse(localStorage.getItem("tm_scores")||"[]"); } catch(e){ return []; } }
+  function localSave(list){ try { localStorage.setItem("tm_scores", JSON.stringify(list.slice(-500))); } catch(e){} }
+
+  function saveScore(g){
+    if (g.total === 0){ $("saveNote").textContent = "Rodada sem respostas não entra no ranking."; return; }
+    const entry = {name:g.name, nameKey:norm(g.name), level:g.level, score:g.score, correct:g.correct, total:g.total, at:Date.now()};
+    lastEntryKey = entry.nameKey + "|" + entry.level;
+    {
+      const list = localLoad(); list.push(entry); localSave(list); rows = list; render();
+      $("saveNote").textContent = "Pontuação salva no ranking deste aparelho.";
+    }
+  }
+
+  function bestPerStudent(list, lvl){
+    const best = new Map();
+    for (const r of list){
+      if (lvl !== "geral" && r.level !== lvl) continue;
+      const k = (r.nameKey || norm(r.name||"")) + "|" + r.level;
+      const cur = best.get(k);
+      if (!cur || r.score > cur.score || (r.score === cur.score && r.at < cur.at)) best.set(k, r);
+    }
+    return [...best.values()].sort((a,b) => b.score - a.score || b.correct - a.correct || a.at - b.at).slice(0, 15);
+  }
+
+  function render(){
+    const body = $("rankBody"); body.textContent = "";
+    const list = bestPerStudent(rows, tab);
+    if (!list.length){
+      const tr = document.createElement("tr"); const td = document.createElement("td");
+      td.colSpan = 4; td.className = "empty";
+      td.textContent = tab === "geral" ? "Ninguém jogou ainda. Seja o primeiro a entrar no ranking!" : `Ninguém jogou o nível ${LEVELS[tab].name} ainda.`;
+      tr.appendChild(td); body.appendChild(tr); return;
+    }
+    list.forEach((r,i) => {
+      const tr = document.createElement("tr");
+      if (lastEntryKey && lastEntryKey === (r.nameKey||norm(r.name)) + "|" + r.level) tr.className = "me";
+      const p = document.createElement("td"); const s = document.createElement("span");
+      s.className = "pos" + (i<3 ? " p"+(i+1) : ""); s.textContent = i+1; p.appendChild(s);
+      const n = document.createElement("td"); n.className = "name"; n.textContent = String(r.name||"").slice(0,24);
+      if (tab === "geral"){ const c = document.createElement("span"); c.className = "chip"; c.textContent = LEVELS[r.level]?.name || ""; n.appendChild(c); }
+      const c1 = document.createElement("td"); c1.className = "n"; c1.textContent = `${r.correct}/${r.total}`;
+      const c2 = document.createElement("td"); c2.className = "n"; c2.textContent = r.score;
+      tr.append(p,n,c1,c2); body.appendChild(tr);
+    });
+  }
+
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+    tab = t.dataset.tab;
+    document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x === t)));
+    render();
+  }));
+
+  // começa com o ranking local enquanto o compartilhado carrega
+  rows = localLoad(); render();
+  $("rankNote").textContent = "O ranking fica salvo neste computador ou celular. Cada aluno aparece uma vez por nível, com sua melhor pontuação.";
+
+  // ---------- professor: zerar ranking ----------
+  $("resetBtn").addEventListener("click", () => { $("resetConfirm").hidden = false; });
+  $("resetNo").addEventListener("click", () => { $("resetConfirm").hidden = true; });
+  $("resetYes").addEventListener("click", () => {
+    $("resetConfirm").hidden = true;
+    try { localStorage.removeItem("tm_scores"); } catch(e){}
+    rows = []; lastEntryKey = null; render();
+  });
+})();
+</script>
+
+</body>
+</html>
