@@ -120,6 +120,33 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
 .note{font-size:13px;color:var(--muted);margin-top:12px}
 .tablewrap{overflow-x:auto}
 .confirm{margin-top:12px;padding:12px;border:2px solid var(--bad);border-radius:10px;background:var(--bad-bg)}
+/* ---- rodada em tela cheia: só a conta, grande e limpa ---- */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.who{font-weight:700;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.quit{font:inherit;font-size:14px;font-weight:700;padding:6px 14px;border-radius:99px;border:2px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;flex:none}
+.stage{display:flex;flex-direction:column;align-items:center}
+#answerForm{width:100%;display:flex;justify-content:center}
+body.playing .voltar, body.playing .wrap > header, body.playing .layout > .panel:not(#gamePanel){display:none}
+body.playing .wrap{max-width:none;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;padding-block:max(10px,2vh)}
+body.playing .layout{flex:1;display:flex}
+body.playing #gamePanel{flex:1;display:flex;flex-direction:column;border:0;background:transparent;padding:0}
+body.playing #scr-play{flex:1;display:flex;flex-direction:column;width:100%;max-width:1100px;margin:0 auto}
+body.playing .who{font-size:clamp(14px,2.2vh,20px)}
+body.playing .hud{gap:clamp(8px,2vw,20px);margin-bottom:clamp(8px,2vh,18px)}
+body.playing .hud div{padding:clamp(4px,1vh,12px) 10px}
+body.playing .hud small{font-size:clamp(11px,1.6vh,15px)}
+body.playing .hud b{font-size:clamp(22px,5vh,52px)}
+body.playing .timebar{height:clamp(8px,1.4vh,14px);margin-bottom:0}
+body.playing .stage{flex:1;justify-content:center;padding-block:clamp(8px,2vh,24px)}
+body.playing .question{font-size:clamp(44px,min(15vw,20vh),220px);margin:0 0 clamp(10px,3vh,36px);line-height:1}
+body.playing .answer{font-size:clamp(28px,min(7vw,7vh),76px)!important;max-width:min(560px,100%);padding:clamp(8px,1.6vh,20px)}
+body.playing .feedback{font-size:clamp(16px,2.6vh,28px);min-height:1.6em}
+body.playing .pad{width:min(440px,100%);gap:clamp(6px,1vh,10px);margin-top:clamp(8px,1.5vh,16px)}
+body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3vh,30px)}
+@media (max-height:520px){
+  body.playing .pad{grid-template-columns:repeat(6,1fr);width:min(620px,100%)}
+  body.playing .hud div{padding:2px 8px}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -137,7 +164,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
 
   <div class="layout">
     <!-- JOGO -->
-    <section class="panel" aria-live="polite">
+    <section class="panel" id="gamePanel" aria-live="polite">
       <!-- tela inicial -->
       <div id="scr-start">
         <h2>Prepare-se</h2>
@@ -166,23 +193,26 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
 
       <!-- jogando -->
       <div id="scr-play" hidden>
+        <div class="topbar"><span class="who" id="whoPlays"></span><button class="quit" id="quitBtn" type="button">Encerrar</button></div>
         <div class="hud">
           <div><small>Tempo</small><b id="hudTime">60</b></div>
           <div><small>Pontos</small><b id="hudScore">0</b></div>
           <div><small>Sequência</small><b id="hudStreak">0</b></div>
         </div>
         <div class="timebar" id="timebar"><i id="timefill" style="width:100%"></i></div>
-        <div class="question" id="question">7 + 5</div>
-        <form id="answerForm" autocomplete="off">
-          <input class="answer" id="answer" inputmode="numeric" pattern="-?[0-9]*" aria-label="Sua resposta" placeholder="?">
-        </form>
-        <div class="pad" id="pad" aria-label="Teclado numérico">
-          <button type="button">7</button><button type="button">8</button><button type="button">9</button>
-          <button type="button">4</button><button type="button">5</button><button type="button">6</button>
-          <button type="button">1</button><button type="button">2</button><button type="button">3</button>
-          <button type="button" data-k="del">⌫</button><button type="button">0</button><button type="button" class="go" data-k="ok">OK</button>
+        <div class="stage">
+          <div class="question" id="question">7 + 5</div>
+          <form id="answerForm" autocomplete="off">
+            <input class="answer" id="answer" inputmode="numeric" pattern="-?[0-9]*" aria-label="Sua resposta" placeholder="?">
+          </form>
+          <div class="pad" id="pad" aria-label="Teclado numérico">
+            <button type="button">7</button><button type="button">8</button><button type="button">9</button>
+            <button type="button">4</button><button type="button">5</button><button type="button">6</button>
+            <button type="button">1</button><button type="button">2</button><button type="button">3</button>
+            <button type="button" data-k="del">⌫</button><button type="button">0</button><button type="button" class="go" data-k="ok">OK</button>
+          </div>
+          <div class="feedback" id="feedback"></div>
         </div>
-        <div class="feedback" id="feedback"></div>
       </div>
 
       <!-- resultado -->
@@ -404,6 +434,20 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
   document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
   setMode(mode);
 
+  // Em telas de toque, o teclado da tela substitui o do aparelho (que cobriria a conta)
+  if (window.matchMedia && matchMedia("(hover: none), (pointer: coarse)").matches){
+    $("answer").readOnly = true; $("answer").setAttribute("inputmode","none");
+  }
+
+  // ---------- tela cheia ----------
+  function enterFullscreen(){
+    const el = document.documentElement;
+    if (document.fullscreenElement || document.webkitFullscreenElement) return;
+    const f = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!f) return;
+    try { const p = f.call(el); if (p && p.catch) p.catch(() => {}); } catch(e){}
+  }
+
   function show(id){ ["scr-start","scr-play","scr-end"].forEach(s => $(s).hidden = (s !== id)); }
 
   $("startForm").addEventListener("submit", (e) => {
@@ -416,6 +460,9 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
 
   function startGame(name){
     game = {name, level, mode, bag:[], score:0, streak:0, best:0, correct:0, total:0, log:[], end: Date.now()+ROUND*1000, q:null};
+    enterFullscreen();
+    document.body.classList.add("playing");
+    $("whoPlays").textContent = `${name} · ${LEVELS[level].name}${mode === "d4" ? " · Desafio das 4" : ""}`;
     show("scr-play");
     $("feedback").textContent = ""; $("feedback").className = "feedback";
     nextQuestion();
@@ -488,6 +535,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
   function finish(){
     clearInterval(timer); timer = null;
     Music.stop(); Music.sfx("fim");
+    document.body.classList.remove("playing");
     const g = game;
     show("scr-end");
     $("endScore").textContent = g.score + " pts";
@@ -512,6 +560,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
     saveScore(g);
   }
 
+  $("quitBtn").addEventListener("click", () => { if (timer) finish(); });
   $("againBtn").addEventListener("click", () => startGame(game.name));
   $("otherBtn").addEventListener("click", () => { $("playerName").value = ""; show("scr-start"); $("playerName").focus(); });
 
