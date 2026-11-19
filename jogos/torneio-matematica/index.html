@@ -47,7 +47,7 @@ h1 mark{background:linear-gradient(transparent 55%,var(--marker) 55%);color:inhe
 .panel{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:22px;min-width:0}
 h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0 0 14px}
 label.lbl{display:block;font-weight:700;margin-bottom:6px}
-input[type=text],input.answer,#playerTurma{width:100%;font:inherit;font-size:18px;padding:12px 14px;border:2px solid var(--line);
+input[type=text],input.answer{width:100%;font:inherit;font-size:18px;padding:12px 14px;border:2px solid var(--line);
   border-radius:10px;background:var(--paper);color:var(--ink)}
 input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
@@ -174,8 +174,6 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
         <form id="startForm" autocomplete="off">
           <label class="lbl" for="playerName">Seu nome</label>
           <input type="text" id="playerName" maxlength="24" placeholder="Ex.: Ana Souza" required>
-          <label class="lbl" for="playerTurma" style="margin-top:12px">Turma</label>
-          <select id="playerTurma"><option value="">Sem turma (ranking só deste aparelho)</option></select>
           <div class="levels" role="group" aria-label="Nível de dificuldade">
             <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20</span><em>10 pts por acerto</em></button>
             <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada até o 9</span><em>20 pts por acerto</em></button>
@@ -240,7 +238,6 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
       <h2>Ranking</h2>
       <div class="scopes" role="group" aria-label="Qual ranking">
         <button class="scope" type="button" data-scope="escola" aria-pressed="true">Escola</button>
-        <button class="scope" type="button" data-scope="turma" aria-pressed="false">Minha turma</button>
         <button class="scope" type="button" data-scope="local" aria-pressed="false">Este aparelho</button>
       </div>
       <div class="tabs" role="tablist">
@@ -422,6 +419,7 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
   // ---------- estado ----------
   let level = "facil";
   try { const s = localStorage.getItem("tm_level"); if (LEVELS[s]) level = s; } catch(e){}
+  $("playerName").addEventListener("input", (e) => e.target.setCustomValidity(""));
   try { const n = localStorage.getItem("tm_name"); if (n) $("playerName").value = n; } catch(e){}
   let game = null, timer = null;
   let lastEntryKey = null;
@@ -463,7 +461,7 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
   $("startForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const name = $("playerName").value.trim().replace(/\s+/g," ");
-    if (!name){ $("playerName").focus(); return; }
+    if (name.length < 2){ $("playerName").setCustomValidity("Digite pelo menos dois caracteres."); $("playerName").reportValidity(); return; }
     try { localStorage.setItem("tm_name", name); } catch(e){}
     startGame(name);
   });
@@ -588,7 +586,7 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
     lastEntryKey = entry.nameKey + "|" + entry.level + "|" + entry.mode;
     {
       const list = localLoad(); list.push(entry); localSave(list); rows = list; render();
-      $("saveNote").textContent = turma ? "Pontuação salva neste aparelho." : "Pontuação salva no ranking deste aparelho. Escolha sua turma para entrar no ranking da escola.";
+      $("saveNote").textContent = "Pontuação salva neste aparelho.";
     }
     sendOnline(g);
   }
@@ -607,8 +605,6 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
   }
 
   // ---------- ranking online (banco do Portal de Avaliações) ----------
-  // Com uma turma escolhida, a melhor rodada de cada nível vai para o banco e entra no ranking
-  // da escola e da turma. As contas são corrigidas no navegador: vale como competição, não como nota.
   const API = "https://provabd.hebersonmiliano.chatgpt.site", GAME_ID = "torneio-matematica";
   function pedir(caminho, corpo){
     const op = corpo ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(corpo), cache:"no-store"} : {cache:"no-store"};
@@ -618,22 +614,10 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
     }));
   }
   const shortName = (name) => { const p = String(name).trim().split(/\s+/); return p.length > 1 ? p[0] + " " + p[p.length-1][0].toUpperCase() + "." : p[0]; };
-  let turma = "";
-  try { turma = localStorage.getItem("tm_turma") || ""; } catch(e){}
+  const turma = "TORNEIO DE MATEMATICA";
   let scope = "escola", online = undefined, onlineErr = false, reqId = 0, firstLoad = true, lastSent = null;
 
   function trailFor(t){ return t === "geral" ? "" : t === "d4" ? "d4-" + level : t; }
-
-  pedir("/api/classes").then(d => {
-    const sel = $("playerTurma"), list = d.classes || [];
-    list.forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n; sel.appendChild(o); });
-    if (list.includes(turma)) sel.value = turma; else { turma = ""; sel.value = ""; }
-  }).catch(() => { $("playerTurma").options[0].textContent = "Sem turma (ranking da escola fora do ar agora)"; });
-  $("playerTurma").addEventListener("change", (e) => {
-    turma = e.target.value;
-    try { localStorage.setItem("tm_turma", turma); } catch(err){}
-    if (scope === "turma") loadOnline();
-  });
 
   function filaLoad(){ try { return JSON.parse(localStorage.getItem("tm_fila") || "[]"); } catch(e){ return []; } }
   function filaSave(f){ try { localStorage.setItem("tm_fila", JSON.stringify(f.slice(-50))); } catch(e){} }
@@ -643,18 +627,22 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
     enviando = true;
     let fila = filaLoad(), ok = 0, falhou = false;
     while (fila.length){
-      try { await pedir("/api/game/result", fila[0]); ok++; fila.shift(); }
+      const item = fila[0];
+      try { await pedir("/api/game/result", item); ok++; }
       catch(e){
         // Dado recusado ou turma apagada: descarta. Servidor sem a rota (ainda não publicado) ou fora do ar: guarda.
-        if (e.status === 400 || (e.status === 404 && /turma/i.test(e.message))){ fila.shift(); } else { falhou = true; break; }
+        if (e.status !== 400 && !(e.status === 404 && item.turma !== turma && /turma/i.test(e.message))){ falhou = true; break; }
       }
+      fila = filaLoad();
+      const index = fila.findIndex((entry) => JSON.stringify(entry) === JSON.stringify(item));
+      if (index !== -1){ fila.splice(index, 1); filaSave(fila); }
     }
-    filaSave(fila); enviando = false;
+    enviando = false;
     return {ok, falhou, pendentes: fila.length};
   }
 
   function sendOnline(g){
-    if (!turma || g.name.trim().length < 2) return;
+    if (g.name.trim().length < 2) return;
     const acc = g.total ? g.correct / g.total : 0;
     const res = {game:GAME_ID, name:g.name, turma, trail:(g.mode === "d4" ? "d4-" : "") + g.level, phase:0,
       xp:Math.min(3000, g.score), stars: acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : 1, firstTry:Math.min(5, g.best)};
@@ -665,17 +653,16 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
       if (!r) return;
       $("saveNote").textContent = r.falhou
         ? "Sem conexão com o ranking da escola. A pontuação ficou guardada aqui e será enviada na próxima rodada."
-        : "Pontuação salva no ranking da escola e da turma " + turma + ".";
+        : r.ok ? "Pontuação salva no ranking da escola." : "O ranking da escola recusou o envio. A pontuação está salva neste aparelho.";
       if (scope !== "local") loadOnline();
     });
   }
 
   function loadOnline(){
     if (scope === "local"){ render(); return; }
-    if (scope === "turma" && !turma){ online = null; onlineErr = false; render(); return; }
     const id = ++reqId, trail = trailFor(tab);
     online = undefined; render();
-    pedir("/api/game/ranking?game=" + GAME_ID + (trail ? "&trail=" + trail : "") + (scope === "turma" ? "&turma=" + encodeURIComponent(turma) : ""))
+    pedir("/api/game/ranking?game=" + GAME_ID + (trail ? "&trail=" + trail : ""))
       .then(d => { if (id !== reqId) return; online = d.ranking || []; onlineErr = false; firstLoad = false; render(); })
       .catch(() => {
         if (id !== reqId) return;
@@ -699,17 +686,16 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
   }
   function renderOnline(){
     const body = $("rankBody"); body.textContent = "";
-    $("col3").textContent = scope === "escola" ? "Turma" : (tab === "geral" ? "Níveis" : "Estrelas");
-    $("col3").style.textAlign = scope === "escola" ? "left" : "";
+    $("col3").textContent = tab === "geral" ? "Níveis" : "Estrelas";
+    $("col3").style.textAlign = "";
     const lvlName = tab === "geral" ? "" : tab === "d4" ? "Desafio das 4 · " + LEVELS[level].name : LEVELS[tab].name;
-    $("rankNote").textContent = (scope === "escola" ? "Ranking de todas as turmas" : "Ranking da turma " + turma)
+    $("rankNote").textContent = "Ranking da escola"
       + (lvlName ? ", " + lvlName : "") + ". Mostra os 20 primeiros, com o primeiro nome e a inicial do sobrenome."
       + (tab === "geral" ? " O Geral soma a melhor rodada de cada nível." : "")
       + (tab === "d4" ? " O nível do Desafio é o escolhido na tela inicial." : "");
-    if (scope === "turma" && !turma) return emptyRow("Escolha sua turma na tela inicial para ver o ranking da turma.");
     if (online === undefined) return emptyRow("Carregando ranking…");
     if (onlineErr || !online) return emptyRow("O ranking da escola não respondeu agora. Veja a aba Este aparelho ou tente de novo daqui a pouco.");
-    if (!online.length) return emptyRow(scope === "escola" ? "Ninguém da escola entrou neste ranking ainda. Escolha sua turma e seja o primeiro!" : "Ninguém da turma entrou neste ranking ainda.");
+    if (!online.length) return emptyRow("Ninguém entrou neste ranking ainda. Seja o primeiro!");
     online.forEach((r,i) => {
       const tr = document.createElement("tr");
       if (lastSent && r.name === lastSent.name && (!r.turma || r.turma === lastSent.turma)) tr.className = "me";
@@ -717,8 +703,7 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
       s.className = "pos" + (i<3 ? " p"+(i+1) : ""); s.textContent = i+1; p.appendChild(s);
       const n = document.createElement("td"); n.className = "name"; n.textContent = r.name;
       const c1 = document.createElement("td"); c1.className = "n";
-      c1.textContent = scope === "escola" ? (r.turma || "") : (tab === "geral" ? String(r.phases) : "★".repeat(Math.max(1, Math.min(3, r.stars))));
-      if (scope === "escola"){ c1.style.textAlign = "left"; c1.style.fontFamily = "inherit"; c1.style.overflowWrap = "anywhere"; }
+      c1.textContent = tab === "geral" ? String(r.phases) : "★".repeat(Math.max(1, Math.min(3, r.stars)));
       const c2 = document.createElement("td"); c2.className = "n"; c2.textContent = r.xp;
       tr.append(p,n,c1,c2); body.appendChild(tr);
     });
@@ -760,6 +745,9 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
   $("teacher").hidden = true;
   loadOnline();
   flush();
+  window.addEventListener("online", () => {
+    flush().then((result) => { if (result?.ok && scope !== "local") loadOnline(); });
+  });
   document.querySelectorAll(".lvl").forEach(b => b.addEventListener("click", () => { if (tab === "d4" && scope !== "local") loadOnline(); }));
 
   // ---------- professor: zerar ranking ----------
