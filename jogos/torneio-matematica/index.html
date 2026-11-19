@@ -47,7 +47,7 @@ h1 mark{background:linear-gradient(transparent 55%,var(--marker) 55%);color:inhe
 .panel{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:22px;min-width:0}
 h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0 0 14px}
 label.lbl{display:block;font-weight:700;margin-bottom:6px}
-input[type=text],input.answer{width:100%;font:inherit;font-size:18px;padding:12px 14px;border:2px solid var(--line);
+input[type=text],input.answer,#playerTurma{width:100%;font:inherit;font-size:18px;padding:12px 14px;border:2px solid var(--line);
   border-radius:10px;background:var(--paper);color:var(--ink)}
 input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
@@ -100,6 +100,9 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline
 .review li{display:flex;justify-content:space-between;gap:10px;padding:7px 12px;font-family:var(--f-num);font-size:15px;border-bottom:1px solid var(--line)}
 .review li:last-child{border-bottom:0}
 .review .x{color:var(--bad)} .review .v{color:var(--good)}
+.scopes{display:flex;flex-wrap:wrap;margin-bottom:10px;border:2px solid var(--line);border-radius:10px;overflow:hidden;width:fit-content;max-width:100%}
+.scope{font:inherit;font-size:14px;font-weight:700;padding:6px 12px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.scope[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .tab{font:inherit;font-size:14px;font-weight:700;padding:6px 12px;border-radius:99px;border:2px solid var(--line);
   background:transparent;color:var(--muted);cursor:pointer}
@@ -170,7 +173,9 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
         <h2>Prepare-se</h2>
         <form id="startForm" autocomplete="off">
           <label class="lbl" for="playerName">Seu nome</label>
-          <input type="text" id="playerName" maxlength="24" placeholder="Ex.: Ana Souza – 6º B" required>
+          <input type="text" id="playerName" maxlength="24" placeholder="Ex.: Ana Souza" required>
+          <label class="lbl" for="playerTurma" style="margin-top:12px">Turma</label>
+          <select id="playerTurma"><option value="">Sem turma (ranking só deste aparelho)</option></select>
           <div class="levels" role="group" aria-label="Nível de dificuldade">
             <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20</span><em>10 pts por acerto</em></button>
             <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada até o 9</span><em>20 pts por acerto</em></button>
@@ -233,6 +238,11 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
     <!-- RANKING -->
     <section class="panel">
       <h2>Ranking</h2>
+      <div class="scopes" role="group" aria-label="Qual ranking">
+        <button class="scope" type="button" data-scope="escola" aria-pressed="true">Escola</button>
+        <button class="scope" type="button" data-scope="turma" aria-pressed="false">Minha turma</button>
+        <button class="scope" type="button" data-scope="local" aria-pressed="false">Este aparelho</button>
+      </div>
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" data-tab="geral" aria-selected="true">Geral</button>
         <button class="tab" role="tab" data-tab="facil" aria-selected="false">Fácil</button>
@@ -242,15 +252,15 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
       </div>
       <div class="tablewrap">
         <table>
-          <thead><tr><th>#</th><th>Aluno</th><th class="n">Acertos</th><th class="n">Pontos</th></tr></thead>
+          <thead><tr><th>#</th><th>Aluno</th><th class="n" id="col3">Acertos</th><th class="n">Pontos</th></tr></thead>
           <tbody id="rankBody"><tr><td colspan="4" class="empty">Carregando ranking…</td></tr></tbody>
         </table>
       </div>
-      <p class="note" id="rankNote">O ranking fica salvo neste computador ou celular.</p>
+      <p class="note" id="rankNote">Carregando ranking…</p>
       <div id="teacher">
-        <button class="btn ghost" id="resetBtn" type="button" style="font-size:15px;padding:8px 14px;margin-top:8px">Zerar ranking</button>
+        <button class="btn ghost" id="resetBtn" type="button" style="font-size:15px;padding:8px 14px;margin-top:8px">Zerar ranking deste aparelho</button>
         <div class="confirm" id="resetConfirm" hidden>
-          <p style="margin:0 0 10px">Apagar todas as pontuações do ranking? Isso não pode ser desfeito.</p>
+          <p style="margin:0 0 10px">Apagar as pontuações salvas neste aparelho? O ranking da escola não muda. Isso não pode ser desfeito.</p>
           <div class="row">
             <button class="btn" id="resetYes" type="button" style="background:var(--bad);font-size:15px;padding:8px 14px">Sim, apagar tudo</button>
             <button class="btn ghost" id="resetNo" type="button" style="font-size:15px;padding:8px 14px">Cancelar</button>
@@ -578,8 +588,9 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
     lastEntryKey = entry.nameKey + "|" + entry.level + "|" + entry.mode;
     {
       const list = localLoad(); list.push(entry); localSave(list); rows = list; render();
-      $("saveNote").textContent = "Pontuação salva no ranking deste aparelho.";
+      $("saveNote").textContent = turma ? "Pontuação salva neste aparelho." : "Pontuação salva no ranking deste aparelho. Escolha sua turma para entrar no ranking da escola.";
     }
+    sendOnline(g);
   }
 
   function bestPerStudent(list, lvl){
@@ -595,7 +606,128 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
     return [...best.values()].sort((a,b) => b.score - a.score || b.correct - a.correct || a.at - b.at).slice(0, 15);
   }
 
+  // ---------- ranking online (banco do Portal de Avaliações) ----------
+  // Com uma turma escolhida, a melhor rodada de cada nível vai para o banco e entra no ranking
+  // da escola e da turma. As contas são corrigidas no navegador: vale como competição, não como nota.
+  const API = "https://provabd.hebersonmiliano.chatgpt.site", GAME_ID = "torneio-matematica";
+  function pedir(caminho, corpo){
+    const op = corpo ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(corpo), cache:"no-store"} : {cache:"no-store"};
+    return fetch(API + caminho, op).then(r => r.json().catch(() => ({})).then(d => {
+      if (!r.ok){ const e = new Error(d.error || "Falha"); e.status = r.status; throw e; }
+      return d;
+    }));
+  }
+  const shortName = (name) => { const p = String(name).trim().split(/\s+/); return p.length > 1 ? p[0] + " " + p[p.length-1][0].toUpperCase() + "." : p[0]; };
+  let turma = "";
+  try { turma = localStorage.getItem("tm_turma") || ""; } catch(e){}
+  let scope = "escola", online = undefined, onlineErr = false, reqId = 0, firstLoad = true, lastSent = null;
+
+  function trailFor(t){ return t === "geral" ? "" : t === "d4" ? "d4-" + level : t; }
+
+  pedir("/api/classes").then(d => {
+    const sel = $("playerTurma"), list = d.classes || [];
+    list.forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n; sel.appendChild(o); });
+    if (list.includes(turma)) sel.value = turma; else { turma = ""; sel.value = ""; }
+  }).catch(() => { $("playerTurma").options[0].textContent = "Sem turma (ranking da escola fora do ar agora)"; });
+  $("playerTurma").addEventListener("change", (e) => {
+    turma = e.target.value;
+    try { localStorage.setItem("tm_turma", turma); } catch(err){}
+    if (scope === "turma") loadOnline();
+  });
+
+  function filaLoad(){ try { return JSON.parse(localStorage.getItem("tm_fila") || "[]"); } catch(e){ return []; } }
+  function filaSave(f){ try { localStorage.setItem("tm_fila", JSON.stringify(f.slice(-50))); } catch(e){} }
+  let enviando = false;
+  async function flush(){
+    if (enviando) return null;
+    enviando = true;
+    let fila = filaLoad(), ok = 0, falhou = false;
+    while (fila.length){
+      try { await pedir("/api/game/result", fila[0]); ok++; fila.shift(); }
+      catch(e){
+        // Dado recusado ou turma apagada: descarta. Servidor sem a rota (ainda não publicado) ou fora do ar: guarda.
+        if (e.status === 400 || (e.status === 404 && /turma/i.test(e.message))){ fila.shift(); } else { falhou = true; break; }
+      }
+    }
+    filaSave(fila); enviando = false;
+    return {ok, falhou, pendentes: fila.length};
+  }
+
+  function sendOnline(g){
+    if (!turma || g.name.trim().length < 2) return;
+    const acc = g.total ? g.correct / g.total : 0;
+    const res = {game:GAME_ID, name:g.name, turma, trail:(g.mode === "d4" ? "d4-" : "") + g.level, phase:0,
+      xp:Math.min(3000, g.score), stars: acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : 1, firstTry:Math.min(5, g.best)};
+    lastSent = {name:shortName(g.name), turma};
+    const fila = filaLoad(); fila.push(res); filaSave(fila);
+    $("saveNote").textContent = "Enviando para o ranking da escola…";
+    flush().then(r => {
+      if (!r) return;
+      $("saveNote").textContent = r.falhou
+        ? "Sem conexão com o ranking da escola. A pontuação ficou guardada aqui e será enviada na próxima rodada."
+        : "Pontuação salva no ranking da escola e da turma " + turma + ".";
+      if (scope !== "local") loadOnline();
+    });
+  }
+
+  function loadOnline(){
+    if (scope === "local"){ render(); return; }
+    if (scope === "turma" && !turma){ online = null; onlineErr = false; render(); return; }
+    const id = ++reqId, trail = trailFor(tab);
+    online = undefined; render();
+    pedir("/api/game/ranking?game=" + GAME_ID + (trail ? "&trail=" + trail : "") + (scope === "turma" ? "&turma=" + encodeURIComponent(turma) : ""))
+      .then(d => { if (id !== reqId) return; online = d.ranking || []; onlineErr = false; firstLoad = false; render(); })
+      .catch(() => {
+        if (id !== reqId) return;
+        online = null; onlineErr = true;
+        if (firstLoad){ firstLoad = false; setScope("local"); return; }
+        render();
+      });
+  }
+
+  function setScope(s){
+    scope = s;
+    document.querySelectorAll(".scope").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.scope === s)));
+    $("teacher").hidden = s !== "local";
+    loadOnline();
+  }
+  document.querySelectorAll(".scope").forEach(b => b.addEventListener("click", () => setScope(b.dataset.scope)));
+
+  function emptyRow(text){
+    const tr = document.createElement("tr"), td = document.createElement("td");
+    td.colSpan = 4; td.className = "empty"; td.textContent = text; tr.appendChild(td); $("rankBody").appendChild(tr);
+  }
+  function renderOnline(){
+    const body = $("rankBody"); body.textContent = "";
+    $("col3").textContent = scope === "escola" ? "Turma" : (tab === "geral" ? "Níveis" : "Estrelas");
+    $("col3").style.textAlign = scope === "escola" ? "left" : "";
+    const lvlName = tab === "geral" ? "" : tab === "d4" ? "Desafio das 4 · " + LEVELS[level].name : LEVELS[tab].name;
+    $("rankNote").textContent = (scope === "escola" ? "Ranking de todas as turmas" : "Ranking da turma " + turma)
+      + (lvlName ? ", " + lvlName : "") + ". Mostra os 20 primeiros, com o primeiro nome e a inicial do sobrenome."
+      + (tab === "geral" ? " O Geral soma a melhor rodada de cada nível." : "")
+      + (tab === "d4" ? " O nível do Desafio é o escolhido na tela inicial." : "");
+    if (scope === "turma" && !turma) return emptyRow("Escolha sua turma na tela inicial para ver o ranking da turma.");
+    if (online === undefined) return emptyRow("Carregando ranking…");
+    if (onlineErr || !online) return emptyRow("O ranking da escola não respondeu agora. Veja a aba Este aparelho ou tente de novo daqui a pouco.");
+    if (!online.length) return emptyRow(scope === "escola" ? "Ninguém da escola entrou neste ranking ainda. Escolha sua turma e seja o primeiro!" : "Ninguém da turma entrou neste ranking ainda.");
+    online.forEach((r,i) => {
+      const tr = document.createElement("tr");
+      if (lastSent && r.name === lastSent.name && (!r.turma || r.turma === lastSent.turma)) tr.className = "me";
+      const p = document.createElement("td"), s = document.createElement("span");
+      s.className = "pos" + (i<3 ? " p"+(i+1) : ""); s.textContent = i+1; p.appendChild(s);
+      const n = document.createElement("td"); n.className = "name"; n.textContent = r.name;
+      const c1 = document.createElement("td"); c1.className = "n";
+      c1.textContent = scope === "escola" ? (r.turma || "") : (tab === "geral" ? String(r.phases) : "★".repeat(Math.max(1, Math.min(3, r.stars))));
+      if (scope === "escola"){ c1.style.textAlign = "left"; c1.style.fontFamily = "inherit"; c1.style.overflowWrap = "anywhere"; }
+      const c2 = document.createElement("td"); c2.className = "n"; c2.textContent = r.xp;
+      tr.append(p,n,c1,c2); body.appendChild(tr);
+    });
+  }
+
   function render(){
+    if (scope !== "local") return renderOnline();
+    $("col3").textContent = "Acertos"; $("col3").style.textAlign = "";
+    $("rankNote").textContent = "Ranking salvo neste computador ou celular. Cada aluno aparece uma vez por nível, com sua melhor pontuação.";
     const body = $("rankBody"); body.textContent = "";
     const list = bestPerStudent(rows, tab);
     if (!list.length){
@@ -620,12 +752,15 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
   document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
     tab = t.dataset.tab;
     document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x === t)));
-    render();
+    if (scope === "local") render(); else loadOnline();
   }));
 
   // começa com o ranking local enquanto o compartilhado carrega
-  rows = localLoad(); render();
-  $("rankNote").textContent = "O ranking fica salvo neste computador ou celular. Cada aluno aparece uma vez por nível, com sua melhor pontuação.";
+  rows = localLoad();
+  $("teacher").hidden = true;
+  loadOnline();
+  flush();
+  document.querySelectorAll(".lvl").forEach(b => b.addEventListener("click", () => { if (tab === "d4" && scope !== "local") loadOnline(); }));
 
   // ---------- professor: zerar ranking ----------
   $("resetBtn").addEventListener("click", () => { $("resetConfirm").hidden = false; });
