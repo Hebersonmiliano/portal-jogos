@@ -64,6 +64,15 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline
 .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .sound{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:-6px 0 18px}
+@media (max-width:440px){.modes{grid-template-columns:1fr}}
+.mode{font:inherit;text-align:left;cursor:pointer;border:2px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.mode strong{font-family:var(--f-display);font-size:17px}
+.mode span{font-size:13px;color:var(--muted)}
+.mode[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--card)}
+.ops{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px}
+.ops span{font-size:14px;font-weight:700;padding:4px 10px;border-radius:99px;border:2px solid var(--line);font-variant-numeric:tabular-nums}
+.ops span.fraca{border-color:var(--bad);color:var(--bad)}
 .rules{font-size:14px;color:var(--muted);margin:14px 0 0;padding-left:18px}
 .hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
 .hud div{background:var(--paper);border:2px solid var(--line);border-radius:10px;padding:8px 10px;text-align:center}
@@ -140,12 +149,17 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
             <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada até o 9</span><em>20 pts por acerto</em></button>
             <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>× e ÷ até a tabuada do 9 e contas mistas</span><em>30 pts por acerto</em></button>
           </div>
+          <div class="modes" role="group" aria-label="Modo de jogo">
+            <button type="button" class="mode" data-mode="normal" aria-pressed="true"><strong>Normal</strong><span>Contas do nível escolhido</span></button>
+            <button type="button" class="mode" data-mode="d4" aria-pressed="false"><strong>Desafio das 4</strong><span>+ − × ÷ em partes iguais</span></button>
+          </div>
           <button class="btn" id="startBtn" type="submit">Começar rodada</button>
         </form>
         <ul class="rules">
           <li>Você tem 60 segundos para responder o máximo de contas.</li>
           <li>Acertos seguidos dão bônus de sequência (+5 por acerto a partir do 3º seguido).</li>
           <li>Erro não tira pontos, mas quebra a sequência.</li>
+          <li>No Desafio das 4, as contas se revezam entre soma, subtração, multiplicação e divisão. No fim você vê quanto acertou de cada uma.</li>
           <li>A música acelera conforme o tempo acaba. Dá para desligar o som no botão do topo.</li>
         </ul>
       </div>
@@ -176,6 +190,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
         <h2 id="endTitle">Fim da rodada!</h2>
         <div class="result-big" id="endScore">0</div>
         <p class="result-meta" id="endMeta"></p>
+        <div class="ops" id="opsBreak"></div>
         <ul class="review" id="review"></ul>
         <p class="note" id="saveNote"></p>
         <div class="row">
@@ -193,6 +208,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
         <button class="tab" role="tab" data-tab="facil" aria-selected="false">Fácil</button>
         <button class="tab" role="tab" data-tab="medio" aria-selected="false">Médio</button>
         <button class="tab" role="tab" data-tab="dificil" aria-selected="false">Difícil</button>
+        <button class="tab" role="tab" data-tab="d4" aria-selected="false">Desafio das 4</button>
       </div>
       <div class="tablewrap">
         <table>
@@ -228,6 +244,38 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
   const pick = (arr) => arr[rnd(0,arr.length-1)];
 
   // ---------- geração de contas ----------
+  const OPS = {"+":"Soma","−":"Subtração","×":"Multiplicação","÷":"Divisão","misto":"Mistas"};
+  // Desafio das 4: uma conta da operação pedida, com o tamanho dos números do nível
+  function makeOp(lvl, op){
+    let a, b, ans;
+    if (op === "+"){
+      if (lvl === "facil"){ a=rnd(1,10); b=rnd(1,10); }
+      else if (lvl === "medio"){ a=rnd(10,60); b=rnd(5,40); }
+      else { a=rnd(50,200); b=rnd(10,99); }
+      ans = a+b;
+    } else if (op === "−"){
+      if (lvl === "facil"){ a=rnd(2,20); b=rnd(1,a); }
+      else if (lvl === "medio"){ a=rnd(20,100); b=rnd(5,a); }
+      else { b=rnd(10,99); a=b+rnd(50,200); }
+      ans = a-b;
+    } else if (op === "×"){
+      const top = lvl === "facil" ? 5 : 9;
+      a=rnd(2,top); b=rnd(2,top); ans=a*b;
+    } else {
+      const top = lvl === "facil" ? 5 : 9;
+      b=rnd(2,top); ans=rnd(lvl === "facil" ? 1 : 2, top); a=b*ans;
+    }
+    return {text:`${a} ${op} ${b}`, ans, op};
+  }
+  function nextD4Op(){
+    if (!game.bag || !game.bag.length){
+      game.bag = ["+","−","×","÷"];
+      for (let i = game.bag.length-1; i > 0; i--){ const j = rnd(0,i); [game.bag[i],game.bag[j]] = [game.bag[j],game.bag[i]]; }
+    }
+    return game.bag.pop();
+  }
+  function opOf(text){ const s = text.match(/[+−×÷]/g) || []; return s.length > 1 ? "misto" : (s[0] || "+"); }
+
   function makeQuestion(lvl){
     let a,b,op,ans;
     if (lvl === "facil"){
@@ -346,6 +394,16 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
   document.querySelectorAll(".lvl").forEach(b => b.addEventListener("click", () => setLevel(b.dataset.lvl)));
   setLevel(level);
 
+  let mode = "normal";
+  try { if (localStorage.getItem("tm_mode") === "d4") mode = "d4"; } catch(e){}
+  function setMode(m){
+    mode = m;
+    document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+    try { localStorage.setItem("tm_mode", m); } catch(e){}
+  }
+  document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+  setMode(mode);
+
   function show(id){ ["scr-start","scr-play","scr-end"].forEach(s => $(s).hidden = (s !== id)); }
 
   $("startForm").addEventListener("submit", (e) => {
@@ -357,7 +415,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
   });
 
   function startGame(name){
-    game = {name, level, score:0, streak:0, best:0, correct:0, total:0, log:[], end: Date.now()+ROUND*1000, q:null};
+    game = {name, level, mode, bag:[], score:0, streak:0, best:0, correct:0, total:0, log:[], end: Date.now()+ROUND*1000, q:null};
     show("scr-play");
     $("feedback").textContent = ""; $("feedback").className = "feedback";
     nextQuestion();
@@ -370,7 +428,9 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
   }
 
   function nextQuestion(){
-    let q; do { q = makeQuestion(game.level); } while (game.q && q.text === game.q.text);
+    const op = game.mode === "d4" ? nextD4Op() : null;
+    let q; do { q = op ? makeOp(game.level, op) : makeQuestion(game.level); } while (game.q && q.text === game.q.text);
+    if (!q.op) q.op = opOf(q.text);
     game.q = q;
     $("question").textContent = q.text;
     $("answer").value = "";
@@ -411,7 +471,7 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
       $("feedback").textContent = `Quase! ${game.q.text} = ${game.q.ans}`;
       $("feedback").className = "feedback no"; inp.classList.add("flash-no"); Music.sfx("no");
     }
-    game.log.push({q:game.q.text, ans:game.q.ans, given:val, ok});
+    game.log.push({q:game.q.text, ans:game.q.ans, given:val, ok, op:game.q.op});
     updateHud();
     nextQuestion();
     inp.focus();
@@ -432,7 +492,13 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
     show("scr-end");
     $("endScore").textContent = g.score + " pts";
     const pct = g.total ? Math.round(g.correct/g.total*100) : 0;
-    $("endMeta").textContent = `${g.name} · ${LEVELS[g.level].name} · ${g.correct} de ${g.total} certas (${pct}%) · maior sequência ${g.best}`;
+    const box = $("opsBreak"); box.textContent = "";
+    for (const op of ["+","−","×","÷","misto"]){
+      const l = g.log.filter(r => r.op === op); if (!l.length) continue;
+      const c = l.filter(r => r.ok).length, sp = document.createElement("span");
+      sp.textContent = `${OPS[op]} ${c}/${l.length}`; if (c/l.length < 0.5) sp.className = "fraca"; box.appendChild(sp);
+    }
+    $("endMeta").textContent = `${g.name} · ${LEVELS[g.level].name}${g.mode === "d4" ? " · Desafio das 4" : ""} · ${g.correct} de ${g.total} certas (${pct}%) · maior sequência ${g.best}`;
     $("endTitle").textContent = g.correct >= 20 ? "Que fera!" : g.correct >= 10 ? "Mandou bem!" : "Fim da rodada!";
     const ul = $("review"); ul.textContent = "";
     if (!g.log.length){ const li=document.createElement("li"); li.textContent="Nenhuma resposta nesta rodada."; ul.appendChild(li); }
@@ -459,8 +525,8 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
 
   function saveScore(g){
     if (g.total === 0){ $("saveNote").textContent = "Rodada sem respostas não entra no ranking."; return; }
-    const entry = {name:g.name, nameKey:norm(g.name), level:g.level, score:g.score, correct:g.correct, total:g.total, at:Date.now()};
-    lastEntryKey = entry.nameKey + "|" + entry.level;
+    const entry = {name:g.name, nameKey:norm(g.name), level:g.level, mode:g.mode, score:g.score, correct:g.correct, total:g.total, at:Date.now()};
+    lastEntryKey = entry.nameKey + "|" + entry.level + "|" + entry.mode;
     {
       const list = localLoad(); list.push(entry); localSave(list); rows = list; render();
       $("saveNote").textContent = "Pontuação salva no ranking deste aparelho.";
@@ -470,8 +536,10 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
   function bestPerStudent(list, lvl){
     const best = new Map();
     for (const r of list){
-      if (lvl !== "geral" && r.level !== lvl) continue;
-      const k = (r.nameKey || norm(r.name||"")) + "|" + r.level;
+      const m = r.mode || "normal";
+      if (lvl === "d4" && m !== "d4") continue;
+      if (lvl !== "geral" && lvl !== "d4" && (r.level !== lvl || m !== "normal")) continue;
+      const k = (r.nameKey || norm(r.name||"")) + "|" + r.level + "|" + m;
       const cur = best.get(k);
       if (!cur || r.score > cur.score || (r.score === cur.score && r.at < cur.at)) best.set(k, r);
     }
@@ -484,16 +552,16 @@ tr.me td{background:color-mix(in srgb,var(--marker) 28%,transparent)}
     if (!list.length){
       const tr = document.createElement("tr"); const td = document.createElement("td");
       td.colSpan = 4; td.className = "empty";
-      td.textContent = tab === "geral" ? "Ninguém jogou ainda. Seja o primeiro a entrar no ranking!" : `Ninguém jogou o nível ${LEVELS[tab].name} ainda.`;
+      td.textContent = tab === "geral" ? "Ninguém jogou ainda. Seja o primeiro a entrar no ranking!" : (tab === "d4" ? "Ninguém jogou o Desafio das 4 ainda." : `Ninguém jogou o nível ${LEVELS[tab].name} ainda.`);
       tr.appendChild(td); body.appendChild(tr); return;
     }
     list.forEach((r,i) => {
       const tr = document.createElement("tr");
-      if (lastEntryKey && lastEntryKey === (r.nameKey||norm(r.name)) + "|" + r.level) tr.className = "me";
+      if (lastEntryKey && lastEntryKey === (r.nameKey||norm(r.name)) + "|" + r.level + "|" + (r.mode||"normal")) tr.className = "me";
       const p = document.createElement("td"); const s = document.createElement("span");
       s.className = "pos" + (i<3 ? " p"+(i+1) : ""); s.textContent = i+1; p.appendChild(s);
       const n = document.createElement("td"); n.className = "name"; n.textContent = String(r.name||"").slice(0,24);
-      if (tab === "geral"){ const c = document.createElement("span"); c.className = "chip"; c.textContent = LEVELS[r.level]?.name || ""; n.appendChild(c); }
+      if (tab === "geral" || tab === "d4"){ const c = document.createElement("span"); c.className = "chip"; c.textContent = (LEVELS[r.level]?.name || "") + (tab === "geral" && r.mode === "d4" ? " · 4 op." : ""); n.appendChild(c); }
       const c1 = document.createElement("td"); c1.className = "n"; c1.textContent = `${r.correct}/${r.total}`;
       const c2 = document.createElement("td"); c2.className = "n"; c2.textContent = r.score;
       tr.append(p,n,c1,c2); body.appendChild(tr);
