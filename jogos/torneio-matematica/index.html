@@ -735,7 +735,7 @@ body.playing .math-banner{display:none}
     const lvlName = tab === "geral" ? "" : tab === "d4" ? "Desafio das 4 · " + LEVELS[level].name : LEVELS[tab].name;
     $("rankNote").textContent = "Ranking da escola"
       + (lvlName ? ", " + lvlName : "") + ". Mostra os 20 primeiros, com o primeiro nome e a inicial do sobrenome."
-      + (tab === "geral" ? " A coluna Categorias conta quantas combinações de nível e modo têm pontuação. Os pontos são a soma da melhor rodada de cada categoria." : "")
+      + (tab === "geral" ? " Cada card informa quantas categorias de nível e modo têm pontuação. Os pontos são a soma da melhor rodada de cada categoria." : "")
       + (tab === "d4" ? " O nível do Desafio é o escolhido na tela inicial." : "");
     if (online === undefined) return emptyRow("Carregando ranking…");
     if (onlineErr || !online) return emptyRow("O ranking da escola não respondeu agora. Veja a aba Este aparelho ou tente de novo daqui a pouco.");
