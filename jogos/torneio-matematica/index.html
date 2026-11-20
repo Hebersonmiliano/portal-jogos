@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -165,10 +165,12 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
 .lvl[aria-pressed="true"]{outline:3px solid #eef5ff;outline-offset:3px}
 .rank-cards{display:grid;gap:12px;margin-top:18px}
 .rank-card{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:12px;padding:16px;border:1px solid #38435c;border-radius:18px;background:#18243b;position:relative;overflow:hidden}
+.rank-card{color:#edf3ff}
+.levels .lvl{color:#edf3ff}.levels .lvl span{color:#c1cde2}.levels .lvl em{color:#a8c7ff}
 .rank-card h3{margin:0;font:700 18px var(--f-display);overflow-wrap:anywhere}
 .rank-card small{display:block;color:#bac8e1;font-size:13px;margin-top:5px}
-.rank-card .score{font:700 24px var(--f-num);text-align:right}
-.rank-card .score small{font:400 12px var(--f-num)}
+.rank-card .rank-score{font:700 24px var(--f-num);text-align:right}
+.rank-card .rank-score small{font:400 12px var(--f-num)}
 .rank-card .medal{font-size:30px}
 .rank-card.top-1{min-height:100px;border-color:#ffcf69;background:linear-gradient(120deg,#4d3c22,#21273b);box-shadow:0 0 28px #ffc95718}
 .rank-card.top-2{min-height:76px;border-color:#afc4e1;background:linear-gradient(120deg,#334258,#20273b)}
@@ -181,7 +183,7 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
 .confetti i{position:absolute;top:-20px;width:9px;height:15px;animation:fall 2.8s ease-in forwards}
 @keyframes fall{to{transform:translateY(105vh) rotate(650deg);opacity:0}}
 @keyframes shine{50%,100%{transform:translateX(100%)}}
-@media(max-width:480px){.math-banner{height:145px;padding:18px}.math-banner strong{font-size:23px}.rank-card{padding:13px;gap:8px}.rank-card .score{font-size:21px}}
+@media(max-width:480px){.math-banner{height:145px;padding:18px}.math-banner strong{font-size:23px}.rank-card{padding:13px;gap:8px}.rank-card .rank-score{font-size:21px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.confetti{display:none}}
 body.playing .math-banner{display:none}
 </style>
@@ -836,9 +838,9 @@ body.playing .math-banner{display:none}
       if (mine){const badge = document.createElement("span");badge.className = "you-badge";badge.textContent = "Você";title.appendChild(badge);}
       const detail = document.createElement("small");
       const category = tab === "geral" ? "Geral" : tab === "d4" ? "Desafio das 4 · " + LEVELS[level].name : LEVELS[tab].name;
-      detail.textContent = category + " · " + cells[2].textContent + (scope === "local" ? " acertos" : tab === "geral" ? " categorias" : "");
+      detail.textContent = category + " · " + cells[2].textContent + (scope === "local" ? " acertos" : tab === "geral" ? (cells[2].textContent === "1" ? " categoria" : " categorias") : "");
       info.append(title,detail);
-      const score = document.createElement("div");score.className = "score";score.textContent = cells[3].textContent;
+      const score = document.createElement("div");score.className = "rank-score";score.textContent = cells[3].textContent;
       const label = document.createElement("small");label.textContent = "pontos";score.appendChild(label);
       card.append(medal,info,score);cards.appendChild(card);
     }
