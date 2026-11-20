@@ -198,7 +198,7 @@ window.JOGOS = [
     descricao: "Um torneio de matemática para a escola. O aluno coloca o nome, escolhe o nível e responde o máximo de contas em 60 segundos. Fácil tem soma e subtração até 20; Médio tem contas até 100 e tabuada até o 9; Difícil tem multiplicação e divisão até a tabuada do 9, somas maiores e contas mistas. Cada acerto vale 10, 20 ou 30 pontos, e acertos seguidos dão bônus. No modo Desafio das 4, as contas se revezam entre soma, subtração, multiplicação e divisão em partes iguais. No fim aparece quanto o aluno acertou de cada operação e a revisão de cada conta. A música acelera conforme o tempo acaba. Ao terminar a rodada, a pontuação é enviada automaticamente ao ranking online da escola e salva no banco do Portal de Avaliações. Se faltar conexão, o jogo guarda a pontuação no aparelho para enviar depois.",
     controles: "Digite a resposta e aperte Enter. No celular aparece um teclado numérico na tela. Funciona no computador e no celular.",
     url: "jogos/torneio-matematica/index.html",
-    versao: "1.7.1",
+    versao: "1.8.0",
     cor: "#2f5bea",
     icone: "➗",
     engine: "HTML5",
