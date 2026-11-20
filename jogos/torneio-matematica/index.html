@@ -228,6 +228,7 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
         <p class="note" id="saveNote"></p>
         <div class="row">
           <button class="btn" id="againBtn" type="button">Jogar de novo</button>
+          <button class="btn ghost" id="changeLevelBtn" type="button">Trocar nível</button>
           <button class="btn ghost" id="otherBtn" type="button">Trocar aluno</button>
         </div>
       </div>
@@ -564,12 +565,18 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
       const b = document.createElement("span"); b.className = r.ok ? "v" : "x"; b.textContent = r.ok ? "✓" : `✗ (${r.given})`;
       li.append(a,b); ul.appendChild(li);
     });
+    $("againBtn").textContent = `Repetir ${LEVELS[g.level].name}`;
     $("againBtn").focus();
+    if (g.total) selectRankTab(g.mode === "d4" ? "d4" : g.level);
     saveScore(g);
   }
 
   $("quitBtn").addEventListener("click", () => { if (timer) finish(); });
   $("againBtn").addEventListener("click", () => startGame(game.name));
+  $("changeLevelBtn").addEventListener("click", () => {
+    show("scr-start");
+    document.querySelector(`.lvl[data-lvl="${level}"]`).focus();
+  });
   $("otherBtn").addEventListener("click", () => { $("playerName").value = ""; show("scr-start"); $("playerName").focus(); });
 
   // ---------- ranking ----------
@@ -653,7 +660,7 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
       if (!r) return;
       $("saveNote").textContent = r.falhou
         ? "Sem conexão com o ranking da escola. A pontuação ficou guardada aqui e será enviada na próxima rodada."
-        : r.ok ? "Pontuação salva no ranking da escola." : "O ranking da escola recusou o envio. A pontuação está salva neste aparelho.";
+        : r.ok ? `Pontuação salva no ranking da escola · ${LEVELS[g.level].name}${g.mode === "d4" ? " · Desafio das 4" : ""}.` : "O ranking da escola recusou o envio. A pontuação está salva neste aparelho.";
       if (scope !== "local") loadOnline();
     });
   }
@@ -686,12 +693,12 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
   }
   function renderOnline(){
     const body = $("rankBody"); body.textContent = "";
-    $("col3").textContent = tab === "geral" ? "Níveis" : "Estrelas";
+    $("col3").textContent = tab === "geral" ? "Categorias" : "Estrelas";
     $("col3").style.textAlign = "";
     const lvlName = tab === "geral" ? "" : tab === "d4" ? "Desafio das 4 · " + LEVELS[level].name : LEVELS[tab].name;
     $("rankNote").textContent = "Ranking da escola"
       + (lvlName ? ", " + lvlName : "") + ". Mostra os 20 primeiros, com o primeiro nome e a inicial do sobrenome."
-      + (tab === "geral" ? " O Geral soma a melhor rodada de cada nível." : "")
+      + (tab === "geral" ? " A coluna Categorias conta quantas combinações de nível e modo têm pontuação. Os pontos são a soma da melhor rodada de cada categoria." : "")
       + (tab === "d4" ? " O nível do Desafio é o escolhido na tela inicial." : "");
     if (online === undefined) return emptyRow("Carregando ranking…");
     if (onlineErr || !online) return emptyRow("O ranking da escola não respondeu agora. Veja a aba Este aparelho ou tente de novo daqui a pouco.");
@@ -734,11 +741,12 @@ body.playing .pad button{padding:clamp(6px,1.6vh,16px) 0;font-size:clamp(18px,3v
     });
   }
 
-  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
-    tab = t.dataset.tab;
-    document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", String(x === t)));
-    if (scope === "local") render(); else loadOnline();
-  }));
+  function selectRankTab(nextTab){
+    tab = nextTab;
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.tab === tab)));
+    loadOnline();
+  }
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => selectRankTab(t.dataset.tab)));
 
   // começa com o ranking local enquanto o compartilhado carrega
   rows = localLoad();
