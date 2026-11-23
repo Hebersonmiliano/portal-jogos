@@ -652,6 +652,7 @@ body.playing .math-banner{display:none}
 
   // ---------- ranking online (banco do Portal de Avaliações) ----------
   const API = "https://provabd.hebersonmiliano.chatgpt.site", GAME_ID = "torneio-matematica";
+  const SCHOOL_RANK_LIMIT = 10;
   function pedir(caminho, corpo){
     const op = corpo ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(corpo), cache:"no-store"} : {cache:"no-store"};
     return fetch(API + caminho, op).then(r => r.json().catch(() => ({})).then(d => {
@@ -736,13 +737,13 @@ body.playing .math-banner{display:none}
     $("col3").style.textAlign = "";
     const lvlName = tab === "geral" ? "" : tab === "d4" ? "Desafio das 4 · " + LEVELS[level].name : LEVELS[tab].name;
     $("rankNote").textContent = "Ranking da escola"
-      + (lvlName ? ", " + lvlName : "") + ". Mostra os 20 primeiros, com o primeiro nome e a inicial do sobrenome."
+      + (lvlName ? ", " + lvlName : "") + `. Mostra os ${SCHOOL_RANK_LIMIT} primeiros, com o primeiro nome e a inicial do sobrenome.`
       + (tab === "geral" ? " Cada card informa quantas categorias de nível e modo têm pontuação. Os pontos são a soma da melhor rodada de cada categoria." : "")
       + (tab === "d4" ? " O nível do Desafio é o escolhido na tela inicial." : "");
     if (online === undefined) return emptyRow("Carregando ranking…");
     if (onlineErr || !online) return emptyRow("O ranking da escola não respondeu agora. Veja a aba Este aparelho ou tente de novo daqui a pouco.");
     if (!online.length) return emptyRow("Ninguém entrou neste ranking ainda. Seja o primeiro!");
-    online.forEach((r,i) => {
+    online.slice(0, SCHOOL_RANK_LIMIT).forEach((r,i) => {
       const tr = document.createElement("tr");
       if (lastSent && r.name === lastSent.name && (!r.turma || r.turma === lastSent.turma)) tr.className = "me";
       const p = document.createElement("td"), s = document.createElement("span");
