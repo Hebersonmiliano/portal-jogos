@@ -293,6 +293,10 @@ body.playing .math-banner{display:none}
         </table>
       </div>
       <p class="note" id="rankNote">Carregando ranking…</p>
+      <div id="rankSync" hidden>
+        <p class="note" id="rankSyncNote" role="status"></p>
+        <button class="btn ghost" id="retryRankSync" type="button">Reenviar pontuações</button>
+      </div>
       <div id="teacher">
         <button class="btn ghost" id="resetBtn" type="button" style="font-size:15px;padding:8px 14px;margin-top:8px">Zerar ranking deste aparelho</button>
         <div class="confirm" id="resetConfirm" hidden>
@@ -655,6 +659,7 @@ body.playing .math-banner{display:none}
   const SCHOOL_RANK_LIMIT = 10;
   function pedir(caminho, corpo){
     const op = corpo ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(corpo), cache:"no-store"} : {cache:"no-store"};
+    if (typeof AbortSignal.timeout === "function") op.signal = AbortSignal.timeout(10000);
     return fetch(API + caminho, op).then(r => r.json().catch(() => ({})).then(d => {
       if (!r.ok){ const e = new Error(d.error || "Falha"); e.status = r.status; throw e; }
       return d;
@@ -666,26 +671,83 @@ body.playing .math-banner{display:none}
 
   function trailFor(t){ return t === "geral" ? "" : t === "d4" ? "d4-" + level : t; }
 
-  function filaLoad(){ try { return JSON.parse(localStorage.getItem("tm_fila") || "[]"); } catch(e){ return []; } }
-  function filaSave(f){ try { localStorage.setItem("tm_fila", JSON.stringify(f.slice(-50))); } catch(e){} }
-  let enviando = false;
+  let memoryQueue = null, syncRequest = null, retryTimer = null, retryDelay = 15000, currentScore = null;
+  function filaLoad(){
+    if (memoryQueue) return memoryQueue;
+    try {
+      const entries = JSON.parse(localStorage.getItem("tm_fila") || "[]");
+      return Array.isArray(entries) ? entries.filter(entry => entry && typeof entry === "object") : [];
+    } catch(e){ return []; }
+  }
+  function filaSave(entries){
+    try {
+      localStorage.setItem("tm_fila", JSON.stringify(entries));
+      memoryQueue = null;
+    } catch(e){ memoryQueue = entries; }
+  }
+
   async function flush(){
-    if (enviando) return null;
-    enviando = true;
-    let fila = filaLoad(), ok = 0, falhou = false;
+    let fila = filaLoad();
+    const saved = new Set(), rejected = new Set();
     while (fila.length){
       const item = fila[0];
-      try { await pedir("/api/game/result", item); ok++; }
+      const key = JSON.stringify(item);
+      try {
+        let reply;
+        try { reply = await pedir("/api/game/result", item); }
+        catch(e){
+          if (e.status !== 404 || item.game !== GAME_ID || !item.turma || item.turma === turma || !/turma/i.test(e.message)) throw e;
+          reply = await pedir("/api/game/result", {...item, turma});
+        }
+        if (reply.ok !== true || !Number.isInteger(reply.xp) || reply.xp < item.xp) break;
+        saved.add(key);
+      }
       catch(e){
-        // Dado recusado ou turma apagada: descarta. Servidor sem a rota (ainda não publicado) ou fora do ar: guarda.
-        if (e.status !== 400 && !(e.status === 404 && item.turma !== turma && /turma/i.test(e.message))){ falhou = true; break; }
+        if (e.status !== 400) break;
+        rejected.add(key);
       }
       fila = filaLoad();
-      const index = fila.findIndex((entry) => JSON.stringify(entry) === JSON.stringify(item));
+      const index = fila.findIndex(entry => JSON.stringify(entry) === key);
       if (index !== -1){ fila.splice(index, 1); filaSave(fila); }
     }
-    enviando = false;
-    return {ok, falhou, pendentes: fila.length};
+    return {saved, rejected};
+  }
+
+  function syncRanking(){
+    if (syncRequest) return syncRequest;
+    clearTimeout(retryTimer);
+    if (!filaLoad().length) return;
+
+    $("rankSync").hidden = false;
+    $("rankSyncNote").textContent = "Enviando pontuações ao ranking da escola…";
+    $("retryRankSync").hidden = false;
+    $("retryRankSync").disabled = true;
+    const request = navigator.locks?.request
+      ? navigator.locks.request("torneio-matematica-sync", flush)
+      : flush();
+    syncRequest = request.catch(() => ({saved:new Set(), rejected:new Set()})).then(({saved, rejected}) => {
+      const pending = filaLoad();
+      $("retryRankSync").disabled = false;
+      $("retryRankSync").hidden = pending.length === 0;
+      const pendingMessage = memoryQueue
+        ? "Envio pendente. Mantenha esta página aberta para uma nova tentativa."
+        : "Pontuações pendentes neste navegador. O jogo tentará enviar de novo automaticamente.";
+      $("rankSyncNote").textContent = pending.length ? pendingMessage
+        : rejected.size ? "Há pontuações recusadas pelo servidor. Elas continuam disponíveis em Este aparelho."
+        : "Pontuações sincronizadas com o ranking da escola.";
+
+      if (currentScore){
+        if (saved.has(currentScore)) $("saveNote").textContent = "Pontuação confirmada no ranking da escola.";
+        else if (rejected.has(currentScore)) $("saveNote").textContent = "O servidor recusou esta pontuação. Confira em Este aparelho.";
+        else if (pending.some(entry => JSON.stringify(entry) === currentScore)) $("saveNote").textContent = pendingMessage;
+      }
+      if (saved.size && scope !== "local") loadOnline();
+      if (pending.length){
+        retryTimer = setTimeout(syncRanking, retryDelay);
+        retryDelay = Math.min(retryDelay * 2, 120000);
+      } else retryDelay = 15000;
+    }).finally(() => { syncRequest = null; });
+    return syncRequest;
   }
 
   function sendOnline(g){
@@ -693,16 +755,11 @@ body.playing .math-banner{display:none}
     const acc = g.total ? g.correct / g.total : 0;
     const res = {game:GAME_ID, name:g.name, turma, trail:(g.mode === "d4" ? "d4-" : "") + g.level, phase:0,
       xp:Math.min(3000, g.score), stars: acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : 1, firstTry:Math.min(5, g.best)};
+    currentScore = JSON.stringify(res);
     lastSent = {name:shortName(g.name), turma};
     const fila = filaLoad(); fila.push(res); filaSave(fila);
     $("saveNote").textContent = "Enviando para o ranking da escola…";
-    flush().then(r => {
-      if (!r) return;
-      $("saveNote").textContent = r.falhou
-        ? "Sem conexão com o ranking da escola. A pontuação ficou guardada aqui e será enviada na próxima rodada."
-        : r.ok ? `Pontuação salva no ranking da escola · ${LEVELS[g.level].name}${g.mode === "d4" ? " · Desafio das 4" : ""}.` : "O ranking da escola recusou o envio. A pontuação está salva neste aparelho.";
-      if (scope !== "local") loadOnline();
-    });
+    syncRanking();
   }
 
   function loadOnline(){
@@ -792,9 +849,11 @@ body.playing .math-banner{display:none}
   rows = localLoad();
   $("teacher").hidden = true;
   loadOnline();
-  flush();
-  window.addEventListener("online", () => {
-    flush().then((result) => { if (result?.ok && scope !== "local") loadOnline(); });
+  syncRanking();
+  $("retryRankSync").addEventListener("click", syncRanking);
+  window.addEventListener("online", syncRanking);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) syncRanking();
   });
   document.querySelectorAll(".lvl").forEach(b => b.addEventListener("click", () => { if (tab === "d4" && scope !== "local") loadOnline(); }));
 
