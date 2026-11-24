@@ -1,0 +1,64 @@
+/* Apresentação de Arena Dev (página do jogo e vitrine da página inicial) */
+.arena-vitrine { background:#0d1117; color:#e6edf3; border:1px solid #30363d; border-radius:18px; overflow:hidden; margin:22px 0; }
+.arena-hero { display:grid; grid-template-columns:.9fr 1.1fr; align-items:center; gap:28px; padding:34px; background:radial-gradient(700px 420px at 85% 15%, rgba(63,185,80,.22), transparent 60%); }
+.arena-selo { font-size:11px; font-weight:800; letter-spacing:.14em; color:#3fb950; }
+.arena-texto h2 { font-size:clamp(28px,4vw,46px); line-height:1.08; margin:14px 0; color:#fff; }
+.arena-resumo { line-height:1.65; color:#c9d1d9; margin:0; }
+.arena-fatos, .arena-acoes { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.arena-fatos span { font-size:12px; font-weight:800; padding:7px 11px; background:#161b22; border:1px solid #30363d; border-radius:99px; }
+.arena-vitrine .arena-jogar { background:#3fb950; color:#04130a; border-color:#3fb950; }
+.arena-nota { font-size:12px; color:#8b949e; margin:14px 0 0; }
+.arena-midia { margin:0; }
+.arena-gif { display:block; width:100%; aspect-ratio:16/9; border-radius:14px; border:2px solid #3fb950; box-shadow:0 0 0 4px rgba(63,185,80,.15), 0 18px 40px rgba(0,0,0,.5); background:#0d1117; }
+.arena-midia figcaption { font-size:12px; color:#8b949e; margin-top:8px; text-align:center; }
+
+.arena-numeros { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:0 34px 8px; }
+.arena-numeros article { background:#161b22; border:1px solid #30363d; border-radius:14px; padding:16px; }
+.arena-icone { font-size:26px; }
+.arena-numeros h3 { font-size:18px; margin:8px 0 6px; color:#3fb950; }
+.arena-numeros p { font-size:13px; line-height:1.5; margin:0; color:#c9d1d9; }
+
+.arena-subtitulo { font-size:20px; margin:26px 34px 14px; color:#fff; }
+.arena-cenas { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; padding:0 34px; }
+.arena-cenas article { background:#161b22; border:1px solid #30363d; border-radius:14px; overflow:hidden; }
+.arena-cenas img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; object-position:top; border-bottom:1px solid #30363d; }
+.arena-cenas h4 { font-size:16px; margin:12px 14px 6px; color:#fff; }
+.arena-cenas p { font-size:13px; line-height:1.5; margin:0 14px 14px; color:#c9d1d9; }
+
+.arena-cats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:0 34px; }
+.arena-cats article { background:#161b22; border:1px solid #30363d; border-left:4px solid #3fb950; border-radius:12px; padding:14px 16px; }
+.arena-cats article:nth-child(2) { border-left-color:#bc8cff; }
+.arena-cats article:nth-child(3) { border-left-color:#58a6ff; }
+.arena-cats article:nth-child(4) { border-left-color:#e3b341; }
+.arena-cats article:nth-child(5) { border-left-color:#f85149; }
+.arena-cats article:nth-child(6) { border-left-color:#39c5cf; }
+.arena-cats h4 { font-size:16px; margin:0 0 8px; color:#fff; }
+.arena-cats code { font-family:Consolas,"Cascadia Code",monospace; font-size:13px; color:#c9d1d9; }
+.arena-dica { font-size:13px; color:#8b949e; margin:12px 34px 0; }
+
+.arena-linha { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; padding:0 34px; }
+.arena-linha article { background:#161b22; border:1px solid #30363d; border-radius:14px; padding:14px 16px; }
+.arena-linha article.arena-atual { border-color:#3fb950; box-shadow:0 0 0 1px #3fb950 inset; }
+.arena-linha strong { display:inline-block; font-size:13px; background:#3fb950; color:#04130a; padding:3px 10px; border-radius:99px; margin-bottom:8px; }
+.arena-linha ul { margin:0; padding-left:18px; display:grid; gap:4px; font-size:13px; line-height:1.45; color:#c9d1d9; }
+
+.arena-creditos { font-size:12px; line-height:1.6; padding:22px 34px 26px; margin:0; color:#8b949e; }
+
+/* Cartão na grade de jogos */
+.arena-mini-resumo { font-size:13px; line-height:1.45; margin:6px 0 4px; }
+.arena-mini-convite { font-size:13px; font-weight:800; color:#3fb950; }
+
+@media (max-width:900px) {
+  .arena-numeros { grid-template-columns:repeat(2,1fr); }
+  .arena-cenas, .arena-cats { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:780px) {
+  .arena-hero { grid-template-columns:1fr; padding:22px; }
+  .arena-numeros, .arena-cenas, .arena-cats, .arena-linha { padding:0 22px; }
+  .arena-subtitulo { margin:22px 22px 12px; }
+  .arena-dica { margin:12px 22px 0; }
+  .arena-creditos { padding:18px 22px 22px; }
+}
+@media (max-width:560px) {
+  .arena-numeros, .arena-cenas, .arena-cats { grid-template-columns:1fr; }
+}

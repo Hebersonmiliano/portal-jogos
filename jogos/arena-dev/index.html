@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Code Cup — Torneio de Matemática</title>
+<title>Arena Dev — Torneio de matemática para Desenvolvimento de Sistemas</title>
 <meta name="description" content="Torneio de matemática para Desenvolvimento de Sistemas: duelos contra o computador, treino de 60 segundos, modo 2 jogadores e ranking dos melhores alunos da escola.">
 <link rel="icon" href="../../assets/marca/icone-32.png">
 <style>
@@ -132,9 +132,9 @@ tr.me td{background:rgba(63,185,80,.12)}
 <!-- MENU -->
 <section id="menu" class="screen on">
   <header class="logo">
-    <div class="tag mono">&gt; node torneio_de_matematica.js</div>
-    <h1>CODE<span>CUP</span></h1>
-    <p>Torneio de Matemática · Desenvolvimento de Sistemas</p>
+    <div class="tag mono">&gt; node arena_dev.js</div>
+    <h1>ARENA<span>DEV</span></h1>
+    <p>Torneio de matemática para Desenvolvimento de Sistemas</p>
   </header>
   <div class="card">
     <label class="f">Seu nome
@@ -320,7 +320,7 @@ const DIFF = {
   normal: { spd: 1.0, acc: 1.0 },
   hard: { spd: 0.72, acc: 1.12 },
 };
-const SKEY = 'codecup_cfg', RKEY = 'codecup_ranking';
+const SKEY = 'arenadev_cfg', RKEY = 'arenadev_ranking';
 let S = { nome: '', nome2: '', diff: 'normal', cats: Object.keys(CAT_INFO), muted: false };
 try { Object.assign(S, JSON.parse(localStorage.getItem(SKEY) || '{}')); } catch (e) { }
 function saveCfg() { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) { } }
@@ -568,7 +568,9 @@ function renderHud() {
     let scoreHtml;
     if (G.target) scoreHtml = `<div class="dots">${Array.from({ length: G.target }, (_, k) => `<i class="${k < G.sc[i] ? 'on' : ''}"></i>`).join('')}</div>`;
     else scoreHtml = `<div style="color:var(--mut);font-size:14px">${G.sc[i]} acertos</div>`;
+    const bub = box.querySelector('.bubble'); // mantém o balão "Acertou!/Errou" ao redesenhar o placar
     box.innerHTML = `<span class="av">${p.av}</span><div><div class="pn">${esc(p.nome)}</div>${scoreHtml}</div>`;
+    if (bub) box.appendChild(bub);
   });
   if (G.mode === 'train') { /* hudMid atualizado no loop */ }
   else $('#hudMid').textContent = G.players.length > 1 ? `${G.sc[0]} × ${G.sc[1]}` : '';
@@ -699,7 +701,7 @@ function startTournament() {
   const weakest = pool.shift();
   const me = { nome: playerName(), av: '🧑‍💻', isPlayer: true };
   R = { me, score: 0, ok: 0, err: 0, times: [], rounds: [[me, weakest, ...shuffle(pool)]], round: 0 };
-  showBracket('Bem-vindo ao <b>Code Cup</b>! Vença 3 partidas para ser campeão.');
+  showBracket('Bem-vindo à <b>Arena Dev</b>! Vença 3 partidas para ser campeão.');
 }
 
 function slot(c, r) {
@@ -769,7 +771,7 @@ function finishTournament(champion, killer) {
   const wins = champion ? 3 : R.round;
   showResult({
     emoji: champion ? '🏆' : '💥',
-    title: champion ? 'CAMPEÃO DO CODE CUP!' : 'Fim de torneio',
+    title: champion ? 'CAMPEÃO DA ARENA DEV!' : 'Fim de torneio',
     sub: champion ? 'Você venceu todas as partidas. Parabéns!' : `Você foi eliminado na ${ROUND_NAMES[R.round].toLowerCase()} por ${killer.av} ${esc(killer.nome)}.`,
     stats: [[R.score, 'pontos'], [fase, 'fase alcançada'], [accPct(R.ok, R.err), 'aproveitamento'], [avgTime(R.times), 'tempo médio por acerto']],
     again: startTournament,
@@ -856,8 +858,8 @@ function bestLocal(tab) {
    Com uma turma escolhida, a melhor pontuação de cada modo vai para o banco e entra
    no ranking da escola e da turma. As respostas são corrigidas no navegador:
    vale como competição, não como nota. */
-const API = 'https://provabd.hebersonmiliano.chatgpt.site', GAME_ID = 'code-cup', MAX_XP = 15000;
-const QKEY = 'codecup_fila', TKEY = 'codecup_turma';
+const API = 'https://provabd.hebersonmiliano.chatgpt.site', GAME_ID = 'arena-dev', MAX_XP = 15000;
+const QKEY = 'arenadev_fila', TKEY = 'arenadev_turma';
 function pedir(caminho, corpo) {
   const op = corpo ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo), cache: 'no-store' } : { cache: 'no-store' };
   return fetch(API + caminho, op).then(r => r.json().catch(() => ({})).then(d => {
@@ -868,9 +870,9 @@ function pedir(caminho, corpo) {
 const shortName = name => { const p = String(name).trim().split(/\s+/); return p.length > 1 ? p[0] + ' ' + p[p.length - 1][0].toUpperCase() + '.' : p[0]; };
 let turma = '';
 try { turma = localStorage.getItem(TKEY) || ''; } catch (e) { }
-// O servidor só aceita jogos cadastrados. Enquanto ele não reconhecer o Code Cup,
+// O servidor só aceita jogos cadastrados. Enquanto ele não reconhecer a Arena Dev,
 // as pontuações ficam na fila do aparelho e são enviadas quando o servidor estiver pronto.
-let serverReady = null; // null = verificando, true = aceita o code-cup, false = fora do ar ou sem o jogo
+let serverReady = null; // null = verificando, true = aceita o arena-dev, false = fora do ar ou sem o jogo
 
 pedir('/api/classes').then(d => {
   const sel = $('#inTurma'), list = d.classes || [];

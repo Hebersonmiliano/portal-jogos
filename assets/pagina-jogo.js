@@ -65,6 +65,11 @@ if (!jogo) {
       apresentacao.hidden = false;
       apresentacao.append(criarVitrineMissao(jogo, () => iniciar.click()));
     }
+    if (jogo.vitrineArena) {
+      const apresentacao = document.getElementById("apresentacao-arena");
+      apresentacao.hidden = false;
+      apresentacao.append(criarVitrineArena(jogo, () => iniciar.click()));
+    }
     if (jogo.vitrineCafe) {
       const apresentacao = document.getElementById("apresentacao-cafe");
       apresentacao.hidden = false;
@@ -109,6 +114,10 @@ if (!jogo) {
       }
       if (jogo.vitrineMissao) {
         document.getElementById("apresentacao-missao").hidden = true;
+        palco.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+      if (jogo.vitrineArena) {
+        document.getElementById("apresentacao-arena").hidden = true;
         palco.scrollIntoView({ block: "start", behavior: "auto" });
       }
       if (jogo.vitrineCafe) {

@@ -60,11 +60,13 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ## Publicar
 
-### Code Cup: Torneio de Matemática
+### Arena Dev
 
-Disponível em jogo.html?id=code-cup, em jogos/code-cup/ (um único index.html, HTML5, CSS3 e JavaScript puros, sem bibliotecas). Versão 1.0.0. Torneio eliminatório para Desenvolvimento de Sistemas: o aluno enfrenta adversários do computador em quartas, semifinal e final; quem acerta primeiro marca o ponto e vence quem fizer 5. As perguntas são geradas na hora em seis categorias (aritmética, precedência de operadores em JavaScript, binário/hexadecimal, potências de 2, lógica booleana e resto/divisão inteira), em três níveis. Há também Treino de 60 segundos e modo 2 jogadores.
+Disponível em `jogo.html?id=arena-dev`, em `jogos/arena-dev/` (um único `index.html`, HTML5, CSS3 e JavaScript puros, sem bibliotecas). Versão 1.0.0. Torneio eliminatório para Desenvolvimento de Sistemas: o aluno enfrenta adversários do computador em quartas, semifinal e final; quem acerta primeiro marca o ponto e vence quem fizer 5. As perguntas são geradas na hora em seis categorias (aritmética, precedência de operadores em JavaScript, binário/hexadecimal, potências de 2, lógica booleana e resto/divisão inteira), em três níveis. Há também Treino de 60 segundos e modo 2 jogadores.
 
-Ranking: com a turma escolhida, a melhor pontuação vai para o banco do Portal de Avaliações (jogo code-cup, trilhas 	orneio e 	reino, até 15000 pontos), com as abas Escola, Minha turma e Este aparelho. Depende da entrada code-cup em server/games.mjs do repositório portal-de-avaliacoes publicada; até lá o jogo guarda as pontuações numa fila no navegador e mostra o ranking do aparelho. O link de compartilhamento fica em j/code-cup/.
+Ranking: com a turma escolhida, a melhor pontuação vai para o banco do Portal de Avaliações (jogo `arena-dev`, trilhas `torneio` e `treino`, até 15000 pontos), com as abas Escola, Minha turma e Este aparelho. Depende da entrada `arena-dev` em `server/games.mjs` do repositório `portal-de-avaliacoes` publicada; até lá o jogo guarda as pontuações numa fila no navegador e mostra o ranking do aparelho.
+
+Apresentação: o campo `vitrineArena` no catálogo usa `assets/arena-dev.js` e `.css`, com a capa, as capturas e o GIF reais do jogo em `assets/arena-dev/`. Aparece na página do jogo e na vitrine da página inicial; o jogo também está no carrossel. O link de compartilhamento fica em `j/arena-dev/`.
 
 ### Trilha Dev (antes Missão HTML5)
 

@@ -15,7 +15,7 @@ window.SITE = {
   // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
   estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
-  carrossel: ["duelo-dos-mundos", "faisca-2", "lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
+  carrossel: ["arena-dev", "duelo-dos-mundos","faisca-2", "lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -208,21 +208,24 @@ window.JOGOS = [
     novidades: [{ versao: "1.6", data: "2026-11-19", itens: ["Ranking online da escola e da turma, salvo no banco do Portal de Avaliações", "Escolha da turma na tela inicial; sem turma, o ranking fica só no aparelho", "Pontuações guardadas e enviadas depois quando a internet ou o servidor falham"] }, { versao: "1.5", data: "2026-11-19", itens: ["A rodada abre em tela cheia, limpa, com a conta bem grande", "Tela que se ajusta a computador, tablet e celular, em pé ou deitado", "Botão Encerrar durante a rodada e teclado na tela nos aparelhos de toque"] }, { versao: "1.4", data: "2026-11-19", itens: ["Modo Desafio das 4: soma, subtração, multiplicação e divisão em partes iguais", "Resultado por operação no fim da rodada", "Aba Desafio das 4 no ranking"] }, { versao: "1.3", data: "2026-11-19", itens: ["Multiplicação e divisão só com números de 1 algarismo, até a tabuada do 9, nos níveis Médio e Difícil"] }, { versao: "1.2", data: "2026-11-19", itens: ["Nível Difícil mais leve: multiplicação e divisão da tabuada, somas menores e contas mistas mais curtas"] }, { versao: "1.1", data: "2026-11-19", itens: ["Música que acelera e fica mais alta conforme o tempo acaba", "Relógio nos últimos 10 segundos, sons de acerto e erro e botão para desligar o som"] }, { versao: "1.0", data: "2026-11-19", itens: ["Primeira versão: rodadas de 60 segundos em três níveis", "Bônus de sequência, revisão das contas e ranking por nível"] }],
   },
   {
-    id: "code-cup",
-    titulo: "Code Cup: Torneio de Matemática",
+    id: "arena-dev",
+    titulo: "Arena Dev",
     chamada: "Duelos de cálculo contra o computador, com binário, lógica e precedência de operadores. Ranking dos melhores alunos da escola.",
     genero: ["Educativo", "Arcade"],
     tags: ["matemática", "desenvolvimento de sistemas", "binário", "hexadecimal", "lógica booleana", "JavaScript", "precedência de operadores", "competição", "ranking", "2 jogadores", "ensino técnico"],
     descricao: "Um torneio de matemática para alunos de Desenvolvimento de Sistemas. No modo Torneio, o aluno enfrenta adversários controlados pelo computador numa chave de 8 competidores: quartas, semifinal e final. Os dois recebem a mesma pergunta e quem acerta primeiro marca o ponto; vence quem fizer 5. Quem erra fica travado e o adversário ainda pode responder. As perguntas são geradas na hora e ficam mais difíceis a cada fase: aritmética e porcentagem, precedência de operadores em JavaScript, conversão entre binário, decimal e hexadecimal, potências de 2, lógica booleana e resto da divisão. As alternativas erradas imitam erros comuns. Há também o Treino de 60 segundos e o modo 2 jogadores no mesmo computador. Respostas rápidas e acertos seguidos rendem mais pontos. Com a turma escolhida, a melhor pontuação do Torneio e do Treino entra no ranking online da escola e da turma, salvo no banco do Portal de Avaliações. Sem turma, o ranking fica salvo no computador ou celular.",
     controles: "Mouse ou toque: clique na resposta. Teclado: 1, 2, 3 e 4. No modo 2 jogadores, o jogador 1 usa 1 a 4 e o jogador 2 usa 7, 8, 9 e 0. Funciona no computador e no celular.",
-    url: "jogos/code-cup/index.html",
+    url: "jogos/arena-dev/index.html",
     versao: "1.0.0",
+    capa: "assets/arena-dev/capa.jpg",
     cor: "#3fb950",
     icone: "🏆",
     engine: "HTML5",
     mobile: true,
     status: "disponivel",
     lancamento: "2026-11-24",
+    destaque: true,
+    vitrineArena: true,
     novidades: [{ versao: "1.0", data: "2026-11-24", itens: ["Primeira versão: torneio eliminatório contra 8 adversários do computador", "Seis categorias de perguntas para Desenvolvimento de Sistemas, em três níveis", "Treino de 60 segundos e modo 2 jogadores", "Ranking online da escola e da turma, salvo no banco do Portal de Avaliações"] }],
   },
   {
