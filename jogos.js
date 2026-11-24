@@ -208,6 +208,24 @@ window.JOGOS = [
     novidades: [{ versao: "1.7.1", data: "2026-11-20", itens: ["A rodada destaca a aba do nível jogado e oferece um botão para trocar de nível."] }, { versao: "1.7", data: "2026-11-19", itens: ["Jogue informando só o nome. A pontuação vai automaticamente para o ranking online."] }, { versao: "1.6", data: "2026-11-19", itens: ["Ranking online da escola e da turma, salvo no banco do Portal de Avaliações", "Escolha da turma na tela inicial; sem turma, o ranking fica só no aparelho", "Pontuações guardadas e enviadas depois quando a internet ou o servidor falham"] }, { versao: "1.5", data: "2026-11-19", itens: ["A rodada abre em tela cheia, limpa, com a conta bem grande", "Tela que se ajusta a computador, tablet e celular, em pé ou deitado", "Botão Encerrar durante a rodada e teclado na tela nos aparelhos de toque"] }, { versao: "1.4", data: "2026-11-19", itens: ["Modo Desafio das 4: soma, subtração, multiplicação e divisão em partes iguais", "Resultado por operação no fim da rodada", "Aba Desafio das 4 no ranking"] }, { versao: "1.3", data: "2026-11-19", itens: ["Multiplicação e divisão só com números de 1 algarismo, até a tabuada do 9, nos níveis Médio e Difícil"] }, { versao: "1.2", data: "2026-11-19", itens: ["Nível Difícil mais leve: multiplicação e divisão da tabuada, somas menores e contas mistas mais curtas"] }, { versao: "1.1", data: "2026-11-19", itens: ["Música que acelera e fica mais alta conforme o tempo acaba", "Relógio nos últimos 10 segundos, sons de acerto e erro e botão para desligar o som"] }, { versao: "1.0", data: "2026-11-19", itens: ["Primeira versão: rodadas de 60 segundos em três níveis", "Bônus de sequência, revisão das contas e ranking por nível"] }],
   },
   {
+    id: "torneio-geografia",
+    titulo: "Torneio de Geografia",
+    chamada: "60 segundos pelo mundo: Brasil, capitais, mapas, natureza, bandeiras e ranking escolar.",
+    genero: ["Educativo", "Arcade"],
+    tags: ["geografia", "Brasil", "capitais", "mapas", "bandeiras", "clima", "educacional", "ranking", "escola"],
+    descricao: "Um torneio de geografia para a escola. O aluno informa o nome, escolhe entre três níveis e percorre seis rotas: Brasil, Mundo, Mapas, Natureza, Bandeiras ou Volta ao Mundo. Em 60 segundos, responde perguntas com quatro alternativas, acumula bônus por sequência e descobre seus pontos fortes no fim. A rodada mostra revisão completa e envia a pontuação ao ranking da escola, mantendo também uma cópia neste aparelho.",
+    controles: "Escolha uma das quatro respostas com mouse ou toque; no teclado, use A–D ou 1–4. Funciona no computador, tablet ou celular.",
+    url: "jogos/torneio-geografia/index.html",
+    versao: "1.0.0",
+    cor: "#2d9b6f",
+    icone: "🌎",
+    engine: "HTML5",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-11-24",
+    novidades: [{ versao: "1.0", data: "2026-11-24", itens: ["Primeira versão com três dificuldades e seis rotas", "Rodadas de 60 segundos, bônus de sequência e revisão", "Ranking escolar e ranking salvo no aparelho"] }],
+  },
+  {
     id: "quiz-competicao",
     titulo: "Quiz de competição: programação de jogos",
     chamada: "Dois alunos, 12 perguntas sobre jogos digitais, tempo e música que aumenta a tensão.",
@@ -730,4 +748,5 @@ window.JOGOS = [
     destaque: false,
   },
 ];
+
 
