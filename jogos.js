@@ -15,7 +15,7 @@ window.SITE = {
   // (ex.: "portalpixel" para portalpixel.goatcounter.com). Vazio = desligado.
   estatisticas: { goatcounter: "" },
   // Jogos que aparecem no carrossel do topo, nesta ordem.
-  carrossel: ["duelo-dos-mundos", "faisca-2", "lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
+  carrossel: ["arena-dev", "duelo-dos-mundos","faisca-2", "lenda-da-brasa", "brisa", "profundezas", "cafe-com-patas", "imperio-industrial-2", "ultima-transmissao", "setor-404", "faisca", "imperio-industrial", "security-test"],
   // Doações: preencha a chave Pix (de preferência uma chave ALEATÓRIA ou e-mail, nunca CPF)
   // e o botão "❤ Apoiar" aparece no site. Deixe vazio para esconder.
   doacao: {
@@ -224,6 +224,27 @@ window.JOGOS = [
     status: "disponivel",
     lancamento: "2026-11-24",
     novidades: [{ versao: "1.0", data: "2026-11-24", itens: ["Primeira versão com três dificuldades e seis rotas", "Rodadas de 60 segundos, bônus de sequência e revisão", "Ranking escolar e ranking salvo no aparelho"] }],
+  },
+  {
+    id: "arena-dev",
+    titulo: "Arena Dev",
+    chamada: "Duelos de cálculo contra o computador, com binário, lógica e precedência de operadores. Ranking dos melhores alunos da escola.",
+    genero: ["Educativo", "Arcade"],
+    tags: ["matemática", "desenvolvimento de sistemas", "binário", "hexadecimal", "lógica booleana", "JavaScript", "precedência de operadores", "competição", "ranking", "2 jogadores", "ensino técnico"],
+    descricao: "Um torneio de matemática para alunos de Desenvolvimento de Sistemas. No modo Torneio, o aluno enfrenta adversários controlados pelo computador numa chave de 8 competidores: quartas, semifinal e final. Os dois recebem a mesma pergunta e quem acerta primeiro marca o ponto; vence quem fizer 5. Quem erra fica travado e o adversário ainda pode responder. As perguntas são geradas na hora e ficam mais difíceis a cada fase: aritmética e porcentagem, precedência de operadores em JavaScript, conversão entre binário, decimal e hexadecimal, potências de 2, lógica booleana e resto da divisão. As alternativas erradas imitam erros comuns. Há também o Treino de 60 segundos e o modo 2 jogadores no mesmo computador. Respostas rápidas e acertos seguidos rendem mais pontos. Com a turma escolhida, a melhor pontuação do Torneio e do Treino entra no ranking online da escola e da turma, salvo no banco do Portal de Avaliações. Sem turma, o ranking fica salvo no computador ou celular.",
+    controles: "Mouse ou toque: clique na resposta. Teclado: 1, 2, 3 e 4. No modo 2 jogadores, o jogador 1 usa 1 a 4 e o jogador 2 usa 7, 8, 9 e 0. Funciona no computador e no celular.",
+    url: "jogos/arena-dev/index.html",
+    versao: "1.0.0",
+    capa: "assets/arena-dev/capa.jpg",
+    cor: "#3fb950",
+    icone: "🏆",
+    engine: "HTML5",
+    mobile: true,
+    status: "disponivel",
+    lancamento: "2026-11-24",
+    destaque: true,
+    vitrineArena: true,
+    novidades: [{ versao: "1.0", data: "2026-11-24", itens: ["Primeira versão: torneio eliminatório contra 8 adversários do computador", "Seis categorias de perguntas para Desenvolvimento de Sistemas, em três níveis", "Treino de 60 segundos e modo 2 jogadores", "Ranking online da escola e da turma, salvo no banco do Portal de Avaliações"] }],
   },
   {
     id: "quiz-competicao",

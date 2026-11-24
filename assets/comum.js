@@ -136,6 +136,9 @@ function criarCartao(jogo) {
   if (jogo.vitrineMissao) {
     info.append(el("p", "mis-mini-resumo", "Seis trilhas e 21 fases, de HTML5 a Git, com ranking e certificado."), el("span", "mis-mini-convite", "Começar a trilha →"));
   }
+  if (jogo.vitrineArena) {
+    info.append(el("p", "arena-mini-resumo", "Duelos de binário, lógica e operadores numa chave de 8, com ranking da escola."), el("span", "arena-mini-convite", "Entrar na arena →"));
+  }
   if (jogo.vitrineImperio2) {
     a.classList.add("cartao-imp2");
     info.append(el("p", "imp2-mini-resumo", "A sequência: contratos com prazo, linha automática, manutenção, energia, dia e noite."), el("span", "imp2-mini-convite", "Abrir a oficina →"));
