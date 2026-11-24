@@ -60,6 +60,12 @@ o site precisa dos cabeçalhos do arquivo `_headers`.
 
 ## Publicar
 
+### Code Cup: Torneio de Matemática
+
+Disponível em jogo.html?id=code-cup, em jogos/code-cup/ (um único index.html, HTML5, CSS3 e JavaScript puros, sem bibliotecas). Versão 1.0.0. Torneio eliminatório para Desenvolvimento de Sistemas: o aluno enfrenta adversários do computador em quartas, semifinal e final; quem acerta primeiro marca o ponto e vence quem fizer 5. As perguntas são geradas na hora em seis categorias (aritmética, precedência de operadores em JavaScript, binário/hexadecimal, potências de 2, lógica booleana e resto/divisão inteira), em três níveis. Há também Treino de 60 segundos e modo 2 jogadores.
+
+Ranking: com a turma escolhida, a melhor pontuação vai para o banco do Portal de Avaliações (jogo code-cup, trilhas 	orneio e 	reino, até 15000 pontos), com as abas Escola, Minha turma e Este aparelho. Depende da entrada code-cup em server/games.mjs do repositório portal-de-avaliacoes publicada; até lá o jogo guarda as pontuações numa fila no navegador e mostra o ranking do aparelho. O link de compartilhamento fica em j/code-cup/.
+
 ### Trilha Dev (antes Missão HTML5)
 
 Disponível em `jogo.html?id=missao-html5`, em `jogos/missao-html5/` (um único `index.html`, sem bibliotecas). Versão 1.7.0. Com uma turma escolhida, o jogo envia o melhor resultado de cada fase ao banco do Portal de Avaliações (repositório `portal-de-avaliacoes`, que publica uma cópia do jogo em `trilha-dev.html`); sem turma, tudo fica no navegador. O id, as pastas e os arquivos continuam como `missao-html5`, para não quebrar os links já compartilhados nem o progresso salvo dos alunos. Jogo de perguntas para o curso de Desenvolvimento de Sistemas, com seis trilhas (HTML5, CSS, JavaScript, lógica de programação, banco de dados e Git), 21 fases e 210 questões. Cada fase sorteia 5 questões; há vidas, cronômetro de 40 segundos que pode ser desligado, XP, patentes, ranking salvo no navegador e um certificado por trilha.

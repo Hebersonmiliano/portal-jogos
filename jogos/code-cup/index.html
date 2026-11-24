@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Cup — Torneio de Matemática</title>
+<meta name="description" content="Torneio de matemática para Desenvolvimento de Sistemas: duelos contra o computador, treino de 60 segundos, modo 2 jogadores e ranking dos melhores alunos da escola.">
+<link rel="icon" href="../../assets/marca/icone-32.png">
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel2:#1c232d;--line:#30363d;--txt:#e6edf3;--mut:#8b949e;--acc:#3fb950;--acc2:#58a6ff;--bad:#f85149;--gold:#e3b341;--purple:#bc8cff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(ellipse at top,#132018 0%,var(--bg) 55%);color:var(--txt);font-family:system-ui,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:980px;padding:20px 16px 40px}
+.mono{font-family:Consolas,"Cascadia Code","Fira Code",monospace}
+.screen{display:none}.screen.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
+h2{font-size:24px;margin-bottom:12px}
+h3{font-size:16px;margin:14px 0 6px;color:var(--acc2)}
+p{line-height:1.55;color:#c9d1d9}
+.btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:12px 18px;font-size:16px;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--acc);transform:translateY(-1px)}
+.btn.primary{background:var(--acc);color:#04130a;border-color:var(--acc)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent}
+.btn.small{padding:8px 12px;font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=text],select{background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:16px;width:100%}
+label.f{display:block;margin:10px 0;color:var(--mut);font-size:14px}
+label.f input,label.f select{margin-top:6px}
+/* menu */
+.logo{text-align:center;margin-top:24px}
+.logo .tag{color:var(--acc);font-size:14px;opacity:.85}
+.logo h1{font-size:clamp(44px,10vw,84px);letter-spacing:2px;line-height:1.05;font-weight:900}
+.logo h1 span{color:var(--acc);text-shadow:0 0 24px rgba(63,185,80,.45)}
+.logo p{color:var(--mut);margin-top:6px}
+.menu-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.menu-btns .big{grid-column:1/-1;font-size:20px;padding:18px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:6px}
+.cats label{display:flex;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
+/* bracket */
+.bracket{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;overflow-x:auto;padding-bottom:6px}
+.bcol{display:flex;flex-direction:column;justify-content:space-around;gap:10px;min-height:360px}
+.bcol h4{text-align:center;color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:1px}
+.bm{background:var(--bg);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.bs{padding:7px 10px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bs+.bs{border-top:1px solid var(--line)}
+.bs.me{color:var(--acc);font-weight:700}
+.bs.out{opacity:.38;text-decoration:line-through}
+.bs.empty{color:var(--mut)}
+.bm.champ{border-color:var(--gold)}
+.bm.champ .bs{color:var(--gold);font-weight:700}
+.next-match{text-align:center;font-size:20px;margin:16px 0}
+.next-match b{color:var(--acc)}
+/* play */
+.hud{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.pbox{display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;position:relative;transition:.2s}
+.pbox.right{flex-direction:row-reverse;text-align:right}
+.pbox .av{font-size:30px}
+.pbox .pn{font-weight:700;font-size:15px}
+.pbox.hit{border-color:var(--acc);box-shadow:0 0 18px rgba(63,185,80,.35)}
+.pbox.miss{border-color:var(--bad)}
+.dots{display:flex;gap:4px;margin-top:4px}
+.pbox.right .dots{justify-content:flex-end}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--acc)}
+.pbox.right .dots i.on{background:var(--acc2)}
+.bubble{position:absolute;top:-12px;font-size:12px;padding:3px 8px;border-radius:20px;font-weight:700;animation:pop .3s}
+.pbox .bubble{left:12px}.pbox.right .bubble{left:auto;right:12px}
+.bubble.ok{background:var(--acc);color:#04130a}.bubble.err{background:var(--bad);color:#fff}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.mid{text-align:center;min-width:110px}
+.mid .rl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--gold)}
+.mid .qn{font-size:22px;font-weight:800}
+.bar{height:8px;background:var(--panel);border-radius:8px;margin:14px 0;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));width:100%}
+.bar.low i{background:var(--bad)}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;text-align:center}
+.qcat{display:inline-block;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--purple);border:1px solid var(--purple);border-radius:20px;padding:3px 10px}
+.qtext{margin-top:12px;color:#c9d1d9;font-size:17px}
+.qcode{margin-top:10px;font-size:clamp(24px,5.5vw,40px);font-weight:700;color:var(--txt);word-break:break-word}
+.grids{margin-top:14px;display:grid;gap:14px}
+.grids.two{grid-template-columns:1fr 1fr}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gl{grid-column:1/-1;font-weight:700;color:var(--mut);font-size:14px}
+.opt{display:flex;align-items:center;gap:10px;background:var(--panel2);color:var(--txt);border:2px solid var(--line);border-radius:12px;padding:16px 14px;font-size:clamp(17px,3.4vw,22px);font-weight:700;cursor:pointer;text-align:left;transition:.12s}
+.opt:hover:not(:disabled){border-color:var(--acc2);transform:translateY(-1px)}
+.opt kbd{font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--mut);font-family:inherit}
+.opt.wrong{border-color:var(--bad);background:#3a1416}
+.opt.right{border-color:var(--acc);background:#0f2e17}
+.opt:disabled{cursor:default}
+.fb{min-height:28px;text-align:center;margin-top:12px;font-weight:700;font-size:17px}
+.fb.ok{color:var(--acc)}.fb.err{color:var(--bad)}.fb.neu{color:var(--mut)}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--mut)}
+.foot b{color:var(--gold)}
+#overlay{position:fixed;inset:0;background:rgba(13,17,23,.88);display:none;align-items:center;justify-content:center;font-size:clamp(56px,14vw,120px);font-weight:900;color:var(--acc);z-index:10}
+#overlay.on{display:flex}
+.floater{position:fixed;font-weight:900;color:var(--gold);font-size:22px;pointer-events:none;animation:up 1s forwards;z-index:5}
+@keyframes up{to{transform:translateY(-60px);opacity:0}}
+/* result / ranking */
+.big-emoji{font-size:80px;text-align:center}
+.res-title{text-align:center;font-size:32px;font-weight:900}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+.stat b{display:block;font-size:26px;color:var(--acc)}
+.stat span{color:var(--mut);font-size:13px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:15px}
+th{color:var(--mut);font-size:12px;text-transform:uppercase}
+td.pts{color:var(--gold);font-weight:800}
+.center{text-align:center}
+.seg .btn[aria-pressed=true]{background:var(--acc);color:#04130a;border-color:var(--acc)}
+.rank-note{color:var(--mut);font-size:14px;margin:10px 0}
+.menu-msg{color:var(--bad);font-weight:700;min-height:0}
+.menu-msg:empty{display:none}
+tr.me td{background:rgba(63,185,80,.12)}
+.mt{margin-top:16px}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+@media(max-width:700px){
+ .grids.two{grid-template-columns:1fr}
+ .menu-btns{grid-template-columns:1fr}
+ .pbox .av{font-size:24px}
+ .hud{grid-template-columns:1fr 1fr}
+ .mid{grid-column:1/-1;order:-1}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- MENU -->
+<section id="menu" class="screen on">
+  <header class="logo">
+    <div class="tag mono">&gt; node torneio_de_matematica.js</div>
+    <h1>CODE<span>CUP</span></h1>
+    <p>Torneio de Matemática · Desenvolvimento de Sistemas</p>
+  </header>
+  <div class="card">
+    <label class="f">Seu nome
+      <input type="text" id="inName" maxlength="40" placeholder="Nome e sobrenome">
+    </label>
+    <label class="f">Turma
+      <select id="inTurma"><option value="">Sem turma (ranking só deste aparelho)</option></select>
+    </label>
+    <p class="menu-msg" id="menuMsg"></p>
+    <div class="menu-btns">
+      <button class="btn primary big" data-go="tour">🏆 Jogar Torneio</button>
+      <button class="btn" data-go="train">⏱ Treino (60 segundos)</button>
+      <button class="btn" data-go="2p">👥 2 Jogadores</button>
+      <button class="btn ghost" data-go="rank">📊 Ranking</button>
+      <button class="btn ghost" data-go="cfg">⚙️ Configurações</button>
+      <button class="btn ghost" data-go="help" style="grid-column:1/-1">❓ Como jogar</button>
+    </div>
+  </div>
+</section>
+
+<!-- CONFIG -->
+<section id="cfg" class="screen">
+  <div class="card">
+    <h2>⚙️ Configurações</h2>
+    <label class="f">Dificuldade dos adversários
+      <select id="inDiff">
+        <option value="easy">Fácil</option>
+        <option value="normal">Normal</option>
+        <option value="hard">Difícil</option>
+      </select>
+    </label>
+    <label class="f">Nome do Jogador 2 (modo 2 jogadores)
+      <input type="text" id="inName2" maxlength="16" placeholder="Jogador 2">
+    </label>
+    <h3>Categorias de perguntas</h3>
+    <div class="cats" id="catsBox"></div>
+    <h3>Som</h3>
+    <label class="row"><input type="checkbox" id="inMute"> Silenciar efeitos sonoros</label>
+    <div class="row mt">
+      <button class="btn primary" data-go="menu">Salvar e voltar</button>
+      <button class="btn ghost" id="btnClearRank">Zerar ranking</button>
+    </div>
+  </div>
+</section>
+
+<!-- HELP -->
+<section id="help" class="screen">
+  <div class="card">
+    <h2>❓ Como jogar</h2>
+    <h3>🏆 Torneio</h3>
+    <p>8 competidores em chave eliminatória: quartas, semifinal e final. Em cada partida, você e o adversário recebem a mesma pergunta. <b>Quem acertar primeiro marca o ponto.</b> Vence quem fizer 5 pontos primeiro. Errou? Você fica travado nessa pergunta e o adversário ainda pode responder.</p>
+    <h3>⏱ Treino</h3>
+    <p>60 segundos para acertar o máximo possível. A dificuldade sobe a cada 5 acertos.</p>
+    <h3>👥 2 Jogadores</h3>
+    <p>No mesmo computador: o <b>Jogador 1</b> usa as teclas <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> e o <b>Jogador 2</b> usa <kbd>7</kbd> <kbd>8</kbd> <kbd>9</kbd> <kbd>0</kbd>. Também dá para tocar nos botões.</p>
+    <h3>📊 Ranking da escola</h3>
+    <p>Escolha sua <b>turma</b> no menu: a melhor pontuação do Torneio e do Treino entra no ranking da escola e da turma. Sem turma, o ranking fica só neste aparelho. O ranking mostra o primeiro nome e a inicial do sobrenome.</p>
+    <h3>⭐ Pontuação</h3>
+    <p>Cada acerto vale mais nas fases avançadas e quanto mais rápido você responde. Acertos seguidos formam <b>combos 🔥</b> que multiplicam os pontos. Vencer uma partida dá bônus.</p>
+    <h3>📚 Categorias</h3>
+    <p><b>Aritmética</b>: contas e porcentagem. <b>Precedência</b>: ordem dos operadores em JavaScript (<span class="mono">* / %</span> antes de <span class="mono">+ -</span>). <b>Binário/Hex</b>: conversão entre bases. <b>Potências de 2</b>: bits, bytes e combinações. <b>Lógica booleana</b>: <span class="mono">&amp;&amp;</span>, <span class="mono">||</span>, <span class="mono">!</span> e comparações. <b>Resto e divisão inteira</b>: <span class="mono">%</span> e <span class="mono">Math.floor</span>.</p>
+    <div class="mt"><button class="btn primary" data-go="menu">Voltar</button></div>
+  </div>
+</section>
+
+<!-- BRACKET -->
+<section id="bracketScr" class="screen">
+  <div class="card">
+    <div class="topbar"><h2>🏆 Chaveamento</h2><span class="mono" style="color:var(--gold)" id="bScore"></span></div>
+    <p id="bmsg" class="center" style="margin-bottom:12px"></p>
+    <div class="bracket" id="bracket"></div>
+    <div class="next-match" id="bnext"></div>
+    <div class="row" style="justify-content:center">
+      <button class="btn primary big" id="btnPlayMatch">▶ Jogar partida</button>
+      <button class="btn ghost" id="btnGiveUp">Abandonar torneio</button>
+    </div>
+  </div>
+</section>
+
+<!-- PLAY -->
+<section id="play" class="screen">
+  <div class="hud">
+    <div class="pbox" id="pb0"></div>
+    <div class="mid"><div class="rl" id="hudLabel"></div><div class="qn" id="hudMid"></div></div>
+    <div class="pbox right" id="pb1"></div>
+  </div>
+  <div class="bar" id="bar"><i id="barFill"></i></div>
+  <div class="qcard">
+    <span class="qcat" id="qcat"></span>
+    <div class="qtext" id="qtext"></div>
+    <div class="qcode mono" id="qcode"></div>
+  </div>
+  <div class="grids" id="grids"></div>
+  <div class="fb" id="fb"></div>
+  <div class="foot">
+    <span id="footL"></span>
+    <button class="btn ghost small" id="btnQuit">Sair</button>
+  </div>
+</section>
+
+<!-- RESULT -->
+<section id="result" class="screen">
+  <div class="card">
+    <div class="big-emoji" id="resEmoji"></div>
+    <div class="res-title" id="resTitle"></div>
+    <p class="center" id="resSub"></p>
+    <div class="stats" id="resStats"></div>
+    <p class="center rank-note" id="saveNote"></p>
+    <div class="row" style="justify-content:center" id="resBtns"></div>
+  </div>
+</section>
+
+<!-- RANKING -->
+<section id="rank" class="screen">
+  <div class="card">
+    <h2>📊 Ranking dos melhores alunos</h2>
+    <div class="row seg" id="rankScopes">
+      <button class="btn small" data-scope="escola">🏫 Escola</button>
+      <button class="btn small" data-scope="turma">👥 Minha turma</button>
+      <button class="btn small" data-scope="local">💻 Este aparelho</button>
+    </div>
+    <div class="row seg" id="rankTabs" style="margin-top:8px">
+      <button class="btn small" data-tab="torneio">🏆 Torneio</button>
+      <button class="btn small" data-tab="treino">⏱ Treino</button>
+    </div>
+    <p class="rank-note" id="rankNote"></p>
+    <div id="rankBox"></div>
+    <div class="mt"><button class="btn primary" data-go="menu">Voltar</button></div>
+  </div>
+</section>
+
+</div>
+<div id="overlay"></div>
+
+<script>
+"use strict";
+/* ===================== utilidades ===================== */
+const $ = s => document.querySelector(s);
+const rnd = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const evalExpr = e => Function('"use strict";return (' + e + ')')(); // só avalia expressões geradas pelo próprio jogo
+const bin = (n, bits) => n.toString(2).padStart(bits, '0');
+const bin8 = n => { const s = bin(n, 8); return s.slice(0, 4) + ' ' + s.slice(4); };
+const hex = n => '0x' + n.toString(16).toUpperCase();
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  window.scrollTo(0, 0);
+}
+
+/* ===================== som ===================== */
+let actx = null;
+function beep(f, d = 0.12, type = 'square', v = 0.05) {
+  if (S.muted) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = f; g.gain.value = v;
+    o.connect(g); g.connect(actx.destination);
+    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + d); o.stop(actx.currentTime + d);
+  } catch (e) { }
+}
+const sfx = {
+  ok: () => { beep(660); setTimeout(() => beep(880), 90); },
+  bad: () => beep(150, .25, 'sawtooth'),
+  lose: () => [440, 330, 220].forEach((f, i) => setTimeout(() => beep(f, .2, 'triangle'), i * 160)),
+  win: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, .18), i * 130)),
+};
+
+/* ===================== configurações ===================== */
+const CAT_INFO = {
+  arit: 'Aritmética',
+  prec: 'Precedência de operadores',
+  bin: 'Binário / Hexadecimal',
+  pot: 'Potências de 2',
+  log: 'Lógica booleana',
+  mod: 'Resto (%) e divisão inteira',
+};
+const DIFF = {
+  easy: { spd: 1.4, acc: 0.82 },
+  normal: { spd: 1.0, acc: 1.0 },
+  hard: { spd: 0.72, acc: 1.12 },
+};
+const SKEY = 'codecup_cfg', RKEY = 'codecup_ranking';
+let S = { nome: '', nome2: '', diff: 'normal', cats: Object.keys(CAT_INFO), muted: false };
+try { Object.assign(S, JSON.parse(localStorage.getItem(SKEY) || '{}')); } catch (e) { }
+function saveCfg() { try { localStorage.setItem(SKEY, JSON.stringify(S)); } catch (e) { } }
+
+function initCfgUI() {
+  $('#inName').value = S.nome;
+  $('#inName2').value = S.nome2;
+  $('#inDiff').value = S.diff;
+  $('#inMute').checked = S.muted;
+  $('#catsBox').innerHTML = Object.entries(CAT_INFO).map(([k, n]) =>
+    `<label><input type="checkbox" value="${k}" ${S.cats.includes(k) ? 'checked' : ''}> ${n}</label>`).join('');
+}
+function readCfgUI() {
+  S.nome = $('#inName').value.trim();
+  S.nome2 = $('#inName2').value.trim();
+  S.diff = $('#inDiff').value;
+  S.muted = $('#inMute').checked;
+  S.cats = [...document.querySelectorAll('#catsBox input:checked')].map(i => i.value);
+  saveCfg();
+}
+
+/* ===================== gerador de perguntas ===================== */
+function mk(cat, text, code, ans, opts) {
+  return { cat, text, code, answer: String(ans), options: opts.map(String) };
+}
+// 4 alternativas numéricas: resposta + "armadilhas" (erros comuns) + vizinhas
+function optsNum(ans, traps = [], spread) {
+  spread = spread || Math.max(3, Math.round(Math.abs(ans) * 0.12));
+  const min = ans < 0 ? -9999 : 0;
+  const s = new Set([ans]);
+  traps.forEach(t => { if (s.size < 4 && Number.isInteger(t) && t >= min) s.add(t); });
+  let g = 0;
+  while (s.size < 4 && g++ < 200) { const v = ans + rnd(1, spread) * (Math.random() < .5 ? -1 : 1); if (v >= min) s.add(v); }
+  let k = 1; while (s.size < 4) s.add(ans + spread + k++);
+  return shuffle([...s]);
+}
+// alternativas para conversões: troca bits da resposta (erro típico)
+function optsBits(n, bits, fmt) {
+  const s = new Set([n]); let g = 0;
+  while (s.size < 4 && g++ < 200) {
+    const v = Math.random() < .75 ? n ^ (1 << rnd(0, bits - 1)) : n + rnd(-3, 3);
+    if (v >= 0 && v < 2 ** bits) s.add(v);
+  }
+  return shuffle([...s]).map(fmt);
+}
+
+const GEN = {
+  arit(l) {
+    if (l === 1) {
+      let a = rnd(12, 99), b = rnd(11, 99);
+      if (Math.random() < .5) return mk('arit', 'Quanto é?', `${a} + ${b}`, a + b, optsNum(a + b, [a + b + 10, a + b - 10]));
+      if (b > a) [a, b] = [b, a];
+      return mk('arit', 'Quanto é?', `${a} − ${b}`, a - b, optsNum(a - b, [a - b + 10, a - b - 10]));
+    }
+    if (l === 2) {
+      if (Math.random() < .5) { const a = rnd(4, 15), b = rnd(3, 12); return mk('arit', 'Quanto é?', `${a} × ${b}`, a * b, optsNum(a * b, [a * b + a, a * b - b])); }
+      const b = rnd(3, 12), q = rnd(3, 15);
+      return mk('arit', 'Quanto é?', `${b * q} ÷ ${b}`, q, optsNum(q, [q + 1, q - 1]));
+    }
+    const t = rnd(1, 3);
+    if (t === 1) { const a = rnd(12, 49), b = rnd(3, 9); return mk('arit', 'Quanto é?', `${a} × ${b}`, a * b, optsNum(a * b, [a * b + 10, a * b - 10])); }
+    if (t === 2) { const a = rnd(6, 15), b = rnd(6, 12), c = rnd(10, 60); return mk('arit', 'Quanto é?', `${a} × ${b} + ${c}`, a * b + c, optsNum(a * b + c, [a * (b + c)])); }
+    const p = pick([10, 20, 25, 50, 75]), x = rnd(1, 20) * 20;
+    return mk('arit', 'Quanto é?', `${p}% de ${x}`, p * x / 100, optsNum(p * x / 100, [p * x / 10]));
+  },
+
+  prec(l) {
+    const a = rnd(2, 9), b = rnd(2, 9), c = rnd(2, 9), d = rnd(2, 6), e = rnd(2, 4);
+    let T;
+    if (l === 1) T = pick([
+      () => [`${a} + ${b} * ${c}`, [(a + b) * c]],
+      () => [`${a} * ${b} - ${c}`, [a * (b - c)]],
+      () => [`(${a} + ${b}) * ${c}`, [a + b * c]],
+      () => [`${a + b * c} - ${b} * ${c}`, [(a + b * c - b) * c]],
+    ]);
+    else if (l === 2) T = pick([
+      () => [`${a} + ${b} * ${c} - ${d}`, [(a + b) * c - d]],
+      () => [`${a} + ${b * d} / ${d}`, [(a + b * d) / d]],
+      () => [`(${a} + ${b}) % ${d}`, [a + b % d]],
+      () => [`${a} * ${b} % ${d}`, [a * (b % d)]],
+    ]);
+    else T = pick([
+      () => [`${a} + ${b} * ${c} % ${d}`, [(a + b) * c % d, a + b * (c % d)]],
+      () => [`${b} * 2 ** ${e}`, [(b * 2) ** e]],
+      () => [`${a * d} / ${d} - ${b} + ${c} * ${d}`, [(a - b + c) * d]],
+      () => [`(${a} + ${b}) * ${c} % ${d}`, [(a + b) * (c % d)]],
+    ]);
+    const [expr, traps] = T();
+    const ans = evalExpr(expr);
+    return mk('prec', 'Qual o resultado desta expressão em JavaScript?', expr, ans, optsNum(ans, traps, 6));
+  },
+
+  bin(l) {
+    if (l === 1) {
+      const n = rnd(1, 15);
+      const rev = parseInt(bin(n, 4).split('').reverse().join(''), 2);
+      return mk('bin', 'Converta de binário para decimal:', `${bin(n, 4)}₂`, n, optsNum(n, [rev], 4));
+    }
+    if (l === 2) {
+      if (Math.random() < .5) { const n = rnd(8, 63); return mk('bin', 'Converta para binário (6 bits):', `${n}₁₀`, bin(n, 6), optsBits(n, 6, x => bin(x, 6))); }
+      const n = rnd(16, 255);
+      return mk('bin', 'Converta de binário para decimal:', `${bin8(n)}₂`, n, optsNum(n, [n ^ 128, n ^ 1, n ^ 16], 16));
+    }
+    const t = rnd(1, 3), n = rnd(16, 255), hi = n >> 4, lo = n & 15;
+    if (t === 1) return mk('bin', 'Converta de hexadecimal para decimal:', hex(n), n, optsNum(n, [hi * 10 + lo, lo * 16 + hi, hi * 16], 16));
+    if (t === 2) return mk('bin', 'Converta para hexadecimal:', `${n}₁₀`, hex(n), optsBits(n, 8, hex));
+    return mk('bin', 'Converta de binário para hexadecimal:', `${bin8(n)}₂`, hex(n), optsBits(n, 8, hex));
+  },
+
+  pot(l) {
+    if (l === 1) { const n = rnd(1, 6); return mk('pot', 'Quanto vale?', `2 ** ${n}`, 2 ** n, optsNum(2 ** n, [2 * n, 2 ** (n + 1), 2 ** (n - 1), n * n])); }
+    if (l === 2) {
+      if (Math.random() < .5) { const n = rnd(5, 10); return mk('pot', 'Quanto vale?', `2 ** ${n}`, 2 ** n, optsNum(2 ** n, [2 ** (n + 1), 2 ** (n - 1), 2 * n])); }
+      const n = rnd(3, 8);
+      return mk('pot', `Quantos valores diferentes cabem em ${n} bits?`, `${n} bits`, 2 ** n, optsNum(2 ** n, [2 ** n - 1, 2 * n, 2 ** (n - 1)]));
+    }
+    const t = rnd(1, 3), n = rnd(4, 12);
+    if (t === 1) { const m = rnd(10, 16); return mk('pot', 'Quanto vale?', `2 ** ${m}`, 2 ** m, optsNum(2 ** m, [2 ** (m + 1), 2 ** (m - 1), 10 ** (m - 10) * 1000])); }
+    if (t === 2) return mk('pot', 'Qual o resultado?', `Math.log2(${2 ** n})`, n, optsNum(n, [n + 1, n - 1, 2 ** n / 2]));
+    return mk('pot', `Maior número inteiro sem sinal (unsigned) com ${n} bits?`, `${n} bits`, 2 ** n - 1, optsNum(2 ** n - 1, [2 ** n, 2 ** (n - 1), 2 ** n - 2]));
+  },
+
+  log(l) {
+    const B = () => pick(['true', 'false']);
+    let e;
+    if (l === 1) e = pick([() => `${B()} && ${B()}`, () => `${B()} || ${B()}`, () => `!${B()}`, () => `!${B()} && ${B()}`])();
+    else if (l === 2) e = pick([() => `!(${B()} || ${B()}) && ${B()}`, () => `${B()} && !${B()} || ${B()}`, () => `(${B()} || ${B()}) && !(${B()} && ${B()})`])();
+    else {
+      const x = rnd(1, 20), y = rnd(1, 20), z = rnd(1, 20);
+      e = pick([
+        () => `${x} > ${y} && ${y} !== ${z}`,
+        () => `${x} % 2 === 0 || ${y} < ${z}`,
+        () => `!(${x} >= ${y}) && ${z} > 10`,
+        () => `${x} + ${y} > ${z} * 2 || !${B()}`,
+        () => `"${x}" == ${x} && "${x}" === ${pick([x, `"${x}"`])}`,
+      ])();
+    }
+    return mk('log', 'Qual o valor da expressão?', e, String(evalExpr(e)), ['true', 'false']);
+  },
+
+  mod(l) {
+    if (l === 1) { const a = rnd(10, 40), b = rnd(2, 6); return mk('mod', 'Qual o resultado em JavaScript?', `${a} % ${b}`, a % b, optsNum(a % b, [Math.floor(a / b)], 3)); }
+    const a = rnd(30, 99), b = rnd(3, 9), c = rnd(3, 7);
+    if (l === 2) {
+      if (Math.random() < .5) return mk('mod', 'Qual o resultado em JavaScript?', `${a} % ${b}`, a % b, optsNum(a % b, [Math.floor(a / b)], 3));
+      return mk('mod', 'Qual o resultado em JavaScript?', `Math.floor(${a} / ${b})`, Math.floor(a / b), optsNum(Math.floor(a / b), [a % b, Math.ceil(a / b)], 3));
+    }
+    const e = pick([`(${a} + ${b}) % ${c}`, `Math.floor(${a} / ${b}) % ${c}`, `${a} % ${b} * ${c}`]);
+    const ans = evalExpr(e);
+    return mk('mod', 'Qual o resultado em JavaScript?', e, ans, optsNum(ans, [], 3));
+  },
+};
+
+let lastCode = '';
+function genQuestion(level) {
+  const cats = S.cats.length ? S.cats : Object.keys(CAT_INFO);
+  let q, g = 0;
+  do { q = GEN[pick(cats)](level); } while (q.code === lastCode && g++ < 10);
+  lastCode = q.code;
+  return q;
+}
+
+/* ===================== adversários ===================== */
+const CPUS = [
+  { nome: 'Null Pointer', av: '👾', acc: .55, spd: 8000 },
+  { nome: 'Bug Hunter', av: '🐞', acc: .60, spd: 7500 },
+  { nome: 'Ponto e Vírgula', av: '🧩', acc: .65, spd: 7000 },
+  { nome: 'Loop Infinito', av: '♾️', acc: .70, spd: 6500 },
+  { nome: 'Merge Conflict', av: '🔀', acc: .73, spd: 6000 },
+  { nome: 'Recursiva', av: '🌀', acc: .78, spd: 5500 },
+  { nome: 'Kernel Panic', av: '🔥', acc: .83, spd: 5000 },
+  { nome: 'Compiladora', av: '🤖', acc: .88, spd: 4500 },
+];
+const ROUND_NAMES = ['Quartas de final', 'Semifinal', 'Final'];
+const QTIME = [15000, 13000, 12000];
+
+/* ===================== motor da partida ===================== */
+let G = null;
+
+function startGame(cfg) {
+  G = Object.assign({ sc: cfg.players.map(() => 0), qn: 0, combo: 0, pts: 0, active: true, done: true, stats: { ok: 0, err: 0, times: [] } }, cfg);
+  $('#pb1').style.display = G.players.length > 1 ? '' : 'none';
+  $('#hudLabel').textContent = G.label || '';
+  $('#fb').textContent = '';
+  $('#grids').innerHTML = '';
+  $('#qcat').textContent = ''; $('#qtext').textContent = 'Prepare-se...'; $('#qcode').textContent = '';
+  renderHud();
+  show('play');
+  countdown(() => {
+    if (G.mode === 'train') G.end = performance.now() + G.duration;
+    nextQ();
+    loop();
+  });
+}
+
+function countdown(cb) {
+  const o = $('#overlay'); let n = 3; o.classList.add('on');
+  const step = () => {
+    if (!G || !G.active) { o.classList.remove('on'); return; }
+    if (n > 0) { o.textContent = n; beep(440, .1); n--; G.nextT = setTimeout(step, 650); }
+    else { o.textContent = 'VALENDO!'; beep(880, .2); G.nextT = setTimeout(() => { o.classList.remove('on'); cb(); }, 550); }
+  };
+  step();
+}
+
+function nextQ() {
+  if (!G.active) return;
+  if (G.mode === 'train') G.level = Math.min(3, 1 + Math.floor(G.sc[0] / 5));
+  if (G.mode === '2p') G.level = Math.min(3, 1 + Math.floor((G.sc[0] + G.sc[1]) / 4));
+  G.q = genQuestion(G.level);
+  G.lock = G.players.map(() => false);
+  G.done = false; G.qn++;
+  G.t0 = performance.now();
+  G.T = G.mode === 'train' ? Infinity : QTIME[G.level - 1];
+  $('#qcat').textContent = CAT_INFO[G.q.cat];
+  $('#qtext').textContent = G.q.text;
+  $('#qcode').textContent = G.q.code;
+  $('#fb').textContent = ''; $('#fb').className = 'fb';
+  document.querySelectorAll('.bubble').forEach(b => b.remove());
+  renderGrids();
+  renderHud();
+  // agenda a resposta do computador
+  G.players.forEach((p, i) => {
+    if (p.human) return;
+    const d = DIFF[S.diff] || DIFF.normal;
+    const t = p.spd * d.spd * (0.55 + Math.random() * 0.9);
+    if (t < G.T) G.cpuT = setTimeout(() => answer(i, null), t);
+  });
+}
+
+function renderGrids() {
+  const humans = G.players.map((p, i) => p.human ? i : -1).filter(i => i >= 0);
+  const box = $('#grids');
+  box.className = 'grids' + (humans.length > 1 ? ' two' : '');
+  box.innerHTML = humans.map(pi => `<div class="grid">
+    ${humans.length > 1 ? `<div class="gl">${G.players[pi].av} ${esc(G.players[pi].nome)}</div>` : ''}
+    ${G.q.options.map((o, i) => `<button class="opt mono" data-p="${pi}" data-i="${i}"><kbd>${G.players[pi].keys[i]}</kbd><span>${esc(o)}</span></button>`).join('')}
+  </div>`).join('');
+}
+
+function renderHud() {
+  G.players.forEach((p, i) => {
+    if (i > 1) return;
+    const box = $('#pb' + i);
+    let scoreHtml;
+    if (G.target) scoreHtml = `<div class="dots">${Array.from({ length: G.target }, (_, k) => `<i class="${k < G.sc[i] ? 'on' : ''}"></i>`).join('')}</div>`;
+    else scoreHtml = `<div style="color:var(--mut);font-size:14px">${G.sc[i]} acertos</div>`;
+    box.innerHTML = `<span class="av">${p.av}</span><div><div class="pn">${esc(p.nome)}</div>${scoreHtml}</div>`;
+  });
+  if (G.mode === 'train') { /* hudMid atualizado no loop */ }
+  else $('#hudMid').textContent = G.players.length > 1 ? `${G.sc[0]} × ${G.sc[1]}` : '';
+  const showPts = G.mode !== '2p';
+  $('#footL').innerHTML = showPts ? `Pontos: <b>${(G.basePts || 0) + G.pts}</b>${G.combo >= 2 ? ` &nbsp;🔥 combo x${G.combo}` : ''}` : `Nível ${G.level || 1}`;
+}
+
+function bubble(pi, ok, txt) {
+  const box = $('#pb' + pi); if (!box) return;
+  box.querySelectorAll('.bubble').forEach(b => b.remove());
+  const b = document.createElement('span');
+  b.className = 'bubble ' + (ok ? 'ok' : 'err'); b.textContent = txt;
+  box.appendChild(b);
+  box.classList.add(ok ? 'hit' : 'miss');
+  setTimeout(() => box.classList.remove('hit', 'miss'), 700);
+}
+
+function floater(text, el) {
+  const r = el.getBoundingClientRect();
+  const f = document.createElement('div');
+  f.className = 'floater'; f.textContent = text;
+  f.style.left = (r.left + r.width / 2 - 30) + 'px'; f.style.top = (r.top - 10) + 'px';
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1000);
+}
+
+function answer(pi, optIdx) {
+  if (!G || !G.active || G.done || G.lock[pi]) return;
+  const p = G.players[pi];
+  const el = performance.now() - G.t0;
+  let ok;
+  if (p.human) ok = G.q.options[optIdx] === G.q.answer;
+  else { const d = DIFF[S.diff] || DIFF.normal; ok = Math.random() < Math.min(.97, p.acc * d.acc); }
+
+  const btn = p.human ? document.querySelector(`.opt[data-p="${pi}"][data-i="${optIdx}"]`) : null;
+  const trackStats = pi === 0 && G.mode !== '2p';
+
+  if (ok) {
+    sfx.ok();
+    bubble(pi, true, p.human ? 'Acertou!' : 'Respondeu ✔');
+    if (trackStats) {
+      G.stats.ok++; G.stats.times.push(el);
+      G.combo++;
+      const bonus = Math.max(0, Math.round(200 - el / 50));
+      const pts = Math.round((100 * G.level + bonus) * (1 + 0.25 * Math.min(G.combo - 1, 4)));
+      G.pts += pts;
+      if (btn) floater('+' + pts, btn);
+    }
+    endQ(pi);
+  } else {
+    G.lock[pi] = true;
+    sfx.bad();
+    bubble(pi, false, p.human ? 'Errou!' : 'Errou ✖');
+    if (btn) btn.classList.add('wrong');
+    if (p.human) document.querySelectorAll(`.opt[data-p="${pi}"]`).forEach(b => b.disabled = true);
+    if (trackStats) { G.stats.err++; G.combo = 0; }
+    if (G.mode === 'train') endQ(-1, 'Errou! Resposta certa: ' + G.q.answer);
+    else if (G.lock.every(x => x)) endQ(-1, 'Ninguém acertou. Resposta: ' + G.q.answer);
+    else renderHud();
+  }
+}
+
+function endQ(w, msg) {
+  if (G.done) return;
+  G.done = true;
+  clearTimeout(G.cpuT);
+  document.querySelectorAll('#grids .opt').forEach(b => {
+    b.disabled = true;
+    if (G.q.options[+b.dataset.i] === G.q.answer) b.classList.add('right');
+  });
+  const fb = $('#fb');
+  if (w >= 0) {
+    G.sc[w]++;
+    const who = (w === 0 && G.mode !== '2p') ? 'Você' : G.players[w].nome;
+    fb.textContent = G.mode === 'train' ? 'Certo!' : `${who} marcou o ponto!`;
+    fb.className = 'fb ' + ((w === 0 || G.mode === '2p') ? 'ok' : 'err');
+    if (w > 0 && G.mode === 'cpu') G.combo = 0;
+  } else {
+    fb.textContent = msg || 'Tempo esgotado! Resposta: ' + G.q.answer;
+    fb.className = 'fb neu';
+    if (G.mode !== '2p') G.combo = 0;
+  }
+  renderHud();
+  const delay = G.mode === 'train' ? 700 : 1600;
+  G.nextT = setTimeout(() => {
+    if (!G.active) return;
+    if (G.target && G.sc.some(s => s >= G.target)) finishGame();
+    else nextQ();
+  }, delay);
+}
+
+function loop() {
+  if (!G || !G.active) return;
+  const now = performance.now();
+  const bar = $('#bar'), fill = $('#barFill');
+  if (G.mode === 'train') {
+    const rem = Math.max(0, G.end - now);
+    fill.style.width = (rem / G.duration * 100) + '%';
+    bar.classList.toggle('low', rem < 10000);
+    $('#hudMid').textContent = `⏱ ${Math.ceil(rem / 1000)}s`;
+    if (rem <= 0) { finishGame(); return; }
+  } else if (!G.done) {
+    const rem = Math.max(0, G.T - (now - G.t0));
+    fill.style.width = (rem / G.T * 100) + '%';
+    bar.classList.toggle('low', rem < 4000);
+    if (rem <= 0) endQ(-1);
+  }
+  G.raf = requestAnimationFrame(loop);
+}
+
+function stopGame() {
+  if (!G) return;
+  G.active = false;
+  clearTimeout(G.cpuT); clearTimeout(G.nextT); cancelAnimationFrame(G.raf);
+  $('#overlay').classList.remove('on');
+}
+function finishGame() {
+  if (!G || !G.active) return;
+  stopGame();
+  G.onEnd(G);
+}
+
+/* ===================== torneio ===================== */
+let R = null;
+function playerName() { return S.nome || 'Você'; }
+
+function startTournament() {
+  const pool = shuffle(CPUS.slice()).slice(0, 7).sort((a, b) => a.acc - b.acc);
+  const weakest = pool.shift();
+  const me = { nome: playerName(), av: '🧑‍💻', isPlayer: true };
+  R = { me, score: 0, ok: 0, err: 0, times: [], rounds: [[me, weakest, ...shuffle(pool)]], round: 0 };
+  showBracket('Bem-vindo ao <b>Code Cup</b>! Vença 3 partidas para ser campeão.');
+}
+
+function slot(c, r) {
+  if (!c) return `<div class="bs empty">?</div>`;
+  const out = R.rounds[r + 1] && !R.rounds[r + 1].includes(c);
+  return `<div class="bs ${c.isPlayer ? 'me' : ''} ${out ? 'out' : ''}">${c.av} ${esc(c.nome)}</div>`;
+}
+function renderBracket() {
+  const names = ['Quartas', 'Semifinal', 'Final', 'Campeão'];
+  let html = '';
+  for (let r = 0; r < 4; r++) {
+    const list = R.rounds[r];
+    html += `<div class="bcol"><h4>${names[r]}</h4>`;
+    if (r < 3) for (let m = 0; m < (8 >> r) / 2; m++) html += `<div class="bm">${slot(list && list[m * 2], r)}${slot(list && list[m * 2 + 1], r)}</div>`;
+    else html += `<div class="bm champ">${list ? slot(list[0], r) : '<div class="bs empty">🏆 ?</div>'}</div>`;
+    html += '</div>';
+  }
+  $('#bracket').innerHTML = html;
+}
+function showBracket(msg) {
+  renderBracket();
+  const opp = R.rounds[R.round][1];
+  $('#bmsg').innerHTML = msg;
+  $('#bScore').textContent = `Pontos: ${R.score}`;
+  $('#bnext').innerHTML = `${ROUND_NAMES[R.round]}: <b>${esc(R.me.nome)}</b> vs ${opp.av} <b style="color:var(--acc2)">${esc(opp.nome)}</b>`;
+  show('bracketScr');
+}
+
+function playMatch() {
+  const opp = R.rounds[R.round][1];
+  startGame({
+    mode: 'cpu', level: R.round + 1, target: 5, label: ROUND_NAMES[R.round], basePts: R.score,
+    players: [{ ...R.me, human: true, keys: ['1', '2', '3', '4'] }, { ...opp, human: false }],
+    onEnd: g => {
+      R.ok += g.stats.ok; R.err += g.stats.err; R.times.push(...g.stats.times);
+      R.score += g.pts;
+      const won = g.sc[0] > g.sc[1];
+      afterMatch(won, g);
+    },
+  });
+}
+
+function simMatch(a, b) {
+  const pa = a.acc ** 4 / (a.acc ** 4 + b.acc ** 4);
+  return Math.random() < pa ? a : b;
+}
+
+function afterMatch(won, g) {
+  const cur = R.rounds[R.round];
+  if (!won) { sfx.lose(); finishTournament(false, cur[1]); return; }
+  R.score += 500 * (R.round + 1);
+  const next = [R.me];
+  for (let i = 2; i < cur.length; i += 2) next.push(simMatch(cur[i], cur[i + 1]));
+  R.rounds.push(next);
+  R.round++;
+  if (next.length === 1) { sfx.win(); finishTournament(true); return; }
+  sfx.win();
+  showBracket(`✅ Você venceu por <b>${g.sc[0]} × ${g.sc[1]}</b> e ganhou <b>+${500 * R.round}</b> de bônus! Próxima fase: <b>${ROUND_NAMES[R.round]}</b>.`);
+}
+
+function avgTime(t) { return t.length ? (t.reduce((a, b) => a + b, 0) / t.length / 1000).toFixed(1) + 's' : '—'; }
+function accPct(ok, err) { return ok + err ? Math.round(ok / (ok + err) * 100) + '%' : '—'; }
+
+function finishTournament(champion, killer) {
+  const fase = champion ? 'Campeão 🏆' : ROUND_NAMES[R.round];
+  saveRank({ nome: R.me.nome, pts: R.score, trail: 'torneio', modo: 'Torneio', fase, data: new Date().toLocaleDateString('pt-BR') });
+  const wins = champion ? 3 : R.round;
+  showResult({
+    emoji: champion ? '🏆' : '💥',
+    title: champion ? 'CAMPEÃO DO CODE CUP!' : 'Fim de torneio',
+    sub: champion ? 'Você venceu todas as partidas. Parabéns!' : `Você foi eliminado na ${ROUND_NAMES[R.round].toLowerCase()} por ${killer.av} ${esc(killer.nome)}.`,
+    stats: [[R.score, 'pontos'], [fase, 'fase alcançada'], [accPct(R.ok, R.err), 'aproveitamento'], [avgTime(R.times), 'tempo médio por acerto']],
+    again: startTournament,
+  });
+  // estrelas: 3 = campeão, 2 = chegou à final, 1 = participou; firstTry = partidas vencidas
+  sendOnline('torneio', R.me.nome, R.score, champion ? 3 : R.round === 2 ? 2 : 1, wins);
+}
+
+/* ===================== treino e 2 jogadores ===================== */
+function startTrain() {
+  startGame({
+    mode: 'train', level: 1, target: null, duration: 60000, label: 'Treino',
+    players: [{ nome: playerName(), av: '🧑‍💻', human: true, keys: ['1', '2', '3', '4'] }],
+    onEnd: g => {
+      sfx.win();
+      const total = g.stats.ok + g.stats.err;
+      showResult({
+        emoji: '⏱', title: 'Tempo esgotado!', sub: 'Veja como você foi no treino:',
+        stats: [[g.pts, 'pontos'], [g.stats.ok, 'acertos'], [accPct(g.stats.ok, g.stats.err), 'aproveitamento'], [avgTime(g.stats.times), 'tempo médio por acerto']],
+        again: startTrain,
+      });
+      if (!total) { $('#saveNote').textContent = 'Rodada sem respostas não entra no ranking.'; return; }
+      saveRank({ nome: playerName(), pts: g.pts, trail: 'treino', modo: 'Treino', fase: `${g.stats.ok} acertos`, data: new Date().toLocaleDateString('pt-BR') });
+      const acc = g.stats.ok / total;
+      sendOnline('treino', playerName(), g.pts, acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : 1, Math.floor(g.stats.ok / 5));
+    },
+  });
+}
+
+function start2P() {
+  const n1 = S.nome || 'Jogador 1', n2 = S.nome2 || 'Jogador 2';
+  startGame({
+    mode: '2p', level: 1, target: 7, label: '2 Jogadores · primeiro a 7',
+    players: [
+      { nome: n1, av: '🟢', human: true, keys: ['1', '2', '3', '4'] },
+      { nome: n2, av: '🔵', human: true, keys: ['7', '8', '9', '0'] },
+    ],
+    onEnd: g => {
+      sfx.win();
+      const w = g.sc[0] > g.sc[1] ? 0 : 1;
+      showResult({
+        emoji: '🥇', title: `${esc(g.players[w].nome)} venceu!`, sub: `Placar final: ${g.sc[0]} × ${g.sc[1]}`,
+        stats: [[g.sc[0], esc(n1)], [g.sc[1], esc(n2)], [g.qn, 'perguntas']],
+        again: start2P,
+      });
+    },
+  });
+}
+
+/* ===================== resultado e ranking ===================== */
+function showResult(o) {
+  $('#resEmoji').textContent = o.emoji;
+  $('#resTitle').innerHTML = o.title;
+  $('#resSub').innerHTML = o.sub;
+  $('#saveNote').textContent = '';
+  $('#resStats').innerHTML = o.stats.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+  const box = $('#resBtns'); box.innerHTML = '';
+  const b1 = document.createElement('button'); b1.className = 'btn primary'; b1.textContent = '🔁 Jogar novamente'; b1.onclick = o.again;
+  const b2 = document.createElement('button'); b2.className = 'btn'; b2.textContent = '📊 Ranking'; b2.onclick = () => go('rank');
+  const b3 = document.createElement('button'); b3.className = 'btn ghost'; b3.textContent = 'Menu'; b3.onclick = () => go('menu');
+  box.append(b1, b2, b3);
+  show('result');
+}
+
+/* ---------- ranking deste aparelho ---------- */
+const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+function loadRank() { try { return JSON.parse(localStorage.getItem(RKEY) || '[]'); } catch (e) { return []; } }
+function saveRank(e) {
+  const r = loadRank(); r.push(e);
+  try { localStorage.setItem(RKEY, JSON.stringify(r.slice(-300))); } catch (err) { }
+}
+// cada aluno aparece uma vez por modo, com a melhor pontuação
+function bestLocal(tab) {
+  const best = new Map();
+  for (const e of loadRank()) {
+    if ((e.trail || (e.modo === 'Treino' ? 'treino' : 'torneio')) !== tab) continue;
+    const k = norm(e.nome), cur = best.get(k);
+    if (!cur || e.pts > cur.pts) best.set(k, e);
+  }
+  return [...best.values()].sort((a, b) => b.pts - a.pts).slice(0, 20);
+}
+
+/* ---------- ranking online (banco do Portal de Avaliações) ----------
+   Com uma turma escolhida, a melhor pontuação de cada modo vai para o banco e entra
+   no ranking da escola e da turma. As respostas são corrigidas no navegador:
+   vale como competição, não como nota. */
+const API = 'https://provabd.hebersonmiliano.chatgpt.site', GAME_ID = 'code-cup', MAX_XP = 15000;
+const QKEY = 'codecup_fila', TKEY = 'codecup_turma';
+function pedir(caminho, corpo) {
+  const op = corpo ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo), cache: 'no-store' } : { cache: 'no-store' };
+  return fetch(API + caminho, op).then(r => r.json().catch(() => ({})).then(d => {
+    if (!r.ok) { const e = new Error(d.error || 'Falha'); e.status = r.status; throw e; }
+    return d;
+  }));
+}
+const shortName = name => { const p = String(name).trim().split(/\s+/); return p.length > 1 ? p[0] + ' ' + p[p.length - 1][0].toUpperCase() + '.' : p[0]; };
+let turma = '';
+try { turma = localStorage.getItem(TKEY) || ''; } catch (e) { }
+// O servidor só aceita jogos cadastrados. Enquanto ele não reconhecer o Code Cup,
+// as pontuações ficam na fila do aparelho e são enviadas quando o servidor estiver pronto.
+let serverReady = null; // null = verificando, true = aceita o code-cup, false = fora do ar ou sem o jogo
+
+pedir('/api/classes').then(d => {
+  const sel = $('#inTurma'), list = d.classes || [];
+  list.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+  if (list.includes(turma)) sel.value = turma; else { turma = ''; sel.value = ''; }
+}).catch(() => { $('#inTurma').options[0].textContent = 'Sem turma (ranking da escola fora do ar agora)'; });
+$('#inTurma').addEventListener('change', e => {
+  turma = e.target.value;
+  try { localStorage.setItem(TKEY, turma); } catch (err) { }
+});
+
+pedir('/api/game/ranking?game=' + GAME_ID + '&trail=torneio')
+  .then(() => { serverReady = true; flush(); })
+  .catch(() => { serverReady = false; });
+
+function filaLoad() { try { return JSON.parse(localStorage.getItem(QKEY) || '[]'); } catch (e) { return []; } }
+function filaSave(f) { try { localStorage.setItem(QKEY, JSON.stringify(f.slice(-50))); } catch (e) { } }
+let enviando = false;
+async function flush() {
+  if (enviando || !serverReady) return null;
+  enviando = true;
+  let fila = filaLoad(), ok = 0, falhou = false;
+  while (fila.length) {
+    try { await pedir('/api/game/result', fila[0]); ok++; fila.shift(); }
+    catch (e) {
+      // Dado recusado ou turma apagada: descarta. Fora do ar: guarda para a próxima.
+      if (e.status === 400 || (e.status === 404 && /turma/i.test(e.message))) fila.shift(); else { falhou = true; break; }
+    }
+  }
+  filaSave(fila); enviando = false;
+  return { ok, falhou, pendentes: fila.length };
+}
+
+let lastSent = null;
+function sendOnline(trail, nome, pts, stars, extra) {
+  const note = $('#saveNote');
+  if (!turma) { note.textContent = 'Pontuação salva neste aparelho. Escolha sua turma no menu para entrar no ranking da escola.'; return; }
+  const res = { game: GAME_ID, name: nome, turma, trail, phase: 0, xp: Math.max(0, Math.min(MAX_XP, Math.round(pts))), stars, firstTry: Math.max(0, Math.min(5, extra)) };
+  lastSent = { name: shortName(nome), turma };
+  const fila = filaLoad(); fila.push(res); filaSave(fila);
+  if (!serverReady) { note.textContent = 'O ranking da escola não está disponível agora. A pontuação ficou guardada e será enviada depois.'; return; }
+  note.textContent = 'Enviando para o ranking da escola…';
+  flush().then(r => {
+    if (!r) return;
+    note.textContent = r.falhou
+      ? 'Sem conexão com o ranking da escola. A pontuação ficou guardada e será enviada depois.'
+      : `Pontuação salva no ranking da escola e da turma ${turma}.`;
+  });
+}
+
+/* ---------- tela de ranking ---------- */
+let rScope = 'escola', rTab = 'torneio', rReq = 0;
+function setPressed(box, attr, val) { document.querySelectorAll(`${box} [data-${attr}]`).forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === val))); }
+document.querySelectorAll('#rankScopes [data-scope]').forEach(b => b.onclick = () => { rScope = b.dataset.scope; renderRank(); });
+document.querySelectorAll('#rankTabs [data-tab]').forEach(b => b.onclick = () => { rTab = b.dataset.tab; renderRank(); });
+
+function rankTable(rows, cols, isMe) {
+  return `<table><tr><th>#</th>${cols.map(c => `<th>${c[0]}</th>`).join('')}</tr>
+    ${rows.map((r, i) => `<tr class="${isMe(r) ? 'me' : ''}"><td>${['🥇', '🥈', '🥉'][i] || i + 1}</td>${cols.map(c => `<td class="${c[2] || ''}">${esc(c[1](r))}</td>`).join('')}</tr>`).join('')}</table>`;
+}
+function renderRank() {
+  setPressed('#rankScopes', 'scope', rScope);
+  setPressed('#rankTabs', 'tab', rTab);
+  const box = $('#rankBox'), note = $('#rankNote'), modo = rTab === 'torneio' ? 'Torneio' : 'Treino';
+  if (rScope === 'local') {
+    note.textContent = `Ranking salvo neste computador ou celular (${modo}). Cada aluno aparece uma vez, com a melhor pontuação.`;
+    const rows = bestLocal(rTab);
+    box.innerHTML = rows.length
+      ? rankTable(rows, [['Nome', r => r.nome], ['Pontos', r => r.pts, 'pts'], ['Resultado', r => r.fase], ['Data', r => r.data]], r => norm(r.nome) === norm(S.nome))
+      : '<p>Ninguém jogou neste aparelho ainda. Seja o primeiro!</p>';
+    return;
+  }
+  note.textContent = (rScope === 'escola' ? 'Ranking de todas as turmas' : 'Ranking da turma ' + turma) + ` (${modo}). Mostra os 20 primeiros, com o primeiro nome e a inicial do sobrenome.`;
+  if (rScope === 'turma' && !turma) { box.innerHTML = '<p>Escolha sua turma no menu para ver o ranking da turma.</p>'; return; }
+  if (serverReady === false) { box.innerHTML = '<p>O ranking da escola não está disponível agora. Veja a aba <b>Este aparelho</b> ou tente mais tarde.</p>'; return; }
+  box.innerHTML = '<p>Carregando ranking…</p>';
+  const id = ++rReq;
+  pedir('/api/game/ranking?game=' + GAME_ID + '&trail=' + rTab + (rScope === 'turma' ? '&turma=' + encodeURIComponent(turma) : ''))
+    .then(d => {
+      if (id !== rReq) return;
+      const rows = d.ranking || [];
+      if (!rows.length) { box.innerHTML = `<p>Ninguém ${rScope === 'escola' ? 'da escola' : 'da turma'} entrou neste ranking ainda. Escolha sua turma e seja o primeiro!</p>`; return; }
+      const cols = [['Nome', r => r.name]];
+      if (rScope === 'escola') cols.push(['Turma', r => r.turma || '']);
+      cols.push(['Pontos', r => r.xp, 'pts']);
+      box.innerHTML = rankTable(rows, cols, r => lastSent && r.name === lastSent.name && (!r.turma || r.turma === lastSent.turma));
+    })
+    .catch(() => { if (id === rReq) box.innerHTML = '<p>O ranking da escola não respondeu agora. Veja a aba <b>Este aparelho</b> ou tente de novo daqui a pouco.</p>'; });
+}
+
+/* ===================== navegação e eventos ===================== */
+function go(where) {
+  readCfgUI();
+  $('#menuMsg').textContent = '';
+  if ((where === 'tour' || where === 'train') && S.nome.length < 2) {
+    $('#menuMsg').textContent = 'Digite seu nome (pelo menos 2 letras) para entrar no ranking.';
+    $('#inName').focus();
+    return;
+  }
+  if (where === 'tour') return startTournament();
+  if (where === 'train') return startTrain();
+  if (where === '2p') return start2P();
+  if (where === 'rank') renderRank();
+  if (where === 'cfg' || where === 'menu') initCfgUI();
+  show(where);
+}
+
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]');
+  if (g) { go(g.dataset.go); return; }
+  const o = e.target.closest('.opt');
+  if (o && !o.disabled) answer(+o.dataset.p, +o.dataset.i);
+});
+
+document.addEventListener('keydown', e => {
+  if (!G || !G.active || G.done || !$('#play').classList.contains('on')) return;
+  if (e.target.tagName === 'INPUT') return;
+  G.players.forEach((p, pi) => {
+    if (!p.human) return;
+    const i = p.keys.indexOf(e.key);
+    if (i >= 0 && i < G.q.options.length) answer(pi, i);
+  });
+});
+
+$('#btnPlayMatch').onclick = playMatch;
+$('#btnGiveUp').onclick = () => { if (confirm('Abandonar o torneio? Sua pontuação não será salva.')) go('menu'); };
+$('#btnQuit').onclick = () => { if (confirm('Sair da partida?')) { stopGame(); go('menu'); } };
+$('#btnClearRank').onclick = () => { if (confirm('Apagar todo o ranking deste navegador?')) { localStorage.removeItem(RKEY); alert('Ranking zerado.'); } };
+
+initCfgUI();
+</script>
+</body>
+</html>
