@@ -64,8 +64,8 @@ input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline
 .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .sound{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:-6px 0 18px}
-#levelOptions[hidden]+.modes{margin-top:14px}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}
+.modes+.levels{margin-top:0}
 @media (max-width:440px){.modes{grid-template-columns:1fr}}
 .mode{font:inherit;text-align:left;cursor:pointer;border:2px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
 .mode strong{font-family:var(--f-display);font-size:17px}
@@ -211,15 +211,16 @@ body.playing .math-banner{display:none}
         <form id="startForm" autocomplete="off">
           <label class="lbl" for="playerName">Seu nome</label>
           <input type="text" id="playerName" maxlength="24" placeholder="Ex.: Ana Souza" required>
-          <div class="levels" id="levelOptions" role="group" aria-label="Nível de dificuldade">
-            <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20 · × de 1 a 10</span><em>10 pts por acerto</em></button>
-            <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada até o 9</span><em>20 pts por acerto</em></button>
-            <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>× e ÷ até a tabuada do 9 e contas mistas</span><em>30 pts por acerto</em></button>
-          </div>
           <div class="modes" role="group" aria-label="Modo de jogo">
-            <button type="button" class="mode" data-mode="normal" aria-pressed="true"><strong>Normal</strong><span>Contas do nível escolhido</span></button>
-            <button type="button" class="mode" data-mode="divisao" aria-pressed="false"><strong>Divisão</strong><span>Tabuada de 1 a 10 · 10 pts por acerto</span></button>
-            <button type="button" class="mode" data-mode="d4" aria-pressed="false"><strong>Desafio das 4</strong><span>+ − × ÷ em partes iguais</span></button>
+            <button type="button" class="mode" data-mode="soma" aria-pressed="true"><strong>Adição e subtração</strong><span>Só contas de + e −</span></button>
+            <button type="button" class="mode" data-mode="multiplicacao" aria-pressed="false"><strong>Multiplicação</strong><span>Tabuada de 1 a 10 · 10 pts por acerto</span></button>
+            <button type="button" class="mode" data-mode="divisao" aria-pressed="false"><strong>Divisão</strong><span>Divisões exatas · 10 pts por acerto</span></button>
+            <button type="button" class="mode" data-mode="d4" aria-pressed="false"><strong>Todos juntos</strong><span>+ − × ÷ em partes iguais</span></button>
+          </div>
+          <div class="levels" id="levelOptions" role="group" aria-label="Nível de dificuldade">
+            <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20</span><em>10 pts por acerto</em></button>
+            <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ e − até 100</span><em>20 pts por acerto</em></button>
+            <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>+ e − com números maiores</span><em>30 pts por acerto</em></button>
           </div>
           <button class="btn" id="startBtn" type="submit">Começar rodada</button>
         </form>
@@ -228,7 +229,7 @@ body.playing .math-banner{display:none}
           <li>Acertos seguidos dão bônus de sequência (+5 por acerto a partir do 3º seguido).</li>
           <li>Erro não tira pontos, mas quebra a sequência.</li>
           <li>Na Divisão, use a tabuada. Se 7 × 6 = 42, então 42 ÷ 7 = 6.</li>
-          <li>No Desafio das 4, as contas se revezam entre soma, subtração, multiplicação e divisão. No fim você vê quanto acertou de cada uma.</li>
+          <li>Em Todos juntos, as quatro operações se revezam. No fim você vê quanto acertou de cada uma.</li>
           <li>A música acelera conforme o tempo acaba. Dá para desligar o som no botão do topo.</li>
         </ul>
       </div>
@@ -283,11 +284,13 @@ body.playing .math-banner{display:none}
       </div>
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" data-tab="geral" aria-selected="true">Geral</button>
+        <button class="tab" role="tab" data-tab="soma" aria-selected="false">Adição e subtração</button>
+        <button class="tab" role="tab" data-tab="multiplicacao" aria-selected="false">Multiplicação</button>
+        <button class="tab" role="tab" data-tab="divisao" aria-selected="false">Divisão</button>
+        <button class="tab" role="tab" data-tab="d4" aria-selected="false">Todos juntos</button>
         <button class="tab" role="tab" data-tab="facil" aria-selected="false">Fácil</button>
         <button class="tab" role="tab" data-tab="medio" aria-selected="false">Médio</button>
         <button class="tab" role="tab" data-tab="dificil" aria-selected="false">Difícil</button>
-        <button class="tab" role="tab" data-tab="divisao" aria-selected="false">Divisão</button>
-        <button class="tab" role="tab" data-tab="d4" aria-selected="false">Desafio das 4</button>
       </div>
       <div id="rankCards" class="rank-cards" aria-live="polite"></div>
       <div class="tablewrap" hidden>
@@ -324,7 +327,14 @@ body.playing .math-banner{display:none}
     dificil:{name:"Difícil",pts:30},
   };
   const ROUND = 60;
+  const ADD_SUB_MODE = "soma";
+  const MULTIPLICATION_MODE = "multiplicacao";
   const DIVISION_MODE = "divisao";
+  const MODE_NAMES = {
+    [ADD_SUB_MODE]:"Adição e subtração", [MULTIPLICATION_MODE]:"Multiplicação",
+    [DIVISION_MODE]:"Divisão", d4:"Todos juntos",
+  };
+  const usesLevels = m => m === ADD_SUB_MODE || m === "d4";
   const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
   const pick = (arr) => arr[rnd(0,arr.length-1)];
 
@@ -334,7 +344,7 @@ body.playing .math-banner{display:none}
     const divisor = rnd(1,10), ans = rnd(1,10), product = divisor * ans;
     return {text:`${product} ÷ ${divisor}`, ans, op:"÷", fact:`${divisor} × ${ans} = ${product}`};
   }
-  // Desafio das 4: uma conta da operação pedida, com o tamanho dos números do nível
+  // Gera uma conta da operação pedida, com o tamanho dos números do nível.
   function makeOp(lvl, op){
     let a, b, ans;
     if (op === "+"){
@@ -363,26 +373,6 @@ body.playing .math-banner{display:none}
       for (let i = game.bag.length-1; i > 0; i--){ const j = rnd(0,i); [game.bag[i],game.bag[j]] = [game.bag[j],game.bag[i]]; }
     }
     return game.bag.pop();
-  }
-  function opOf(text){ const s = text.match(/[+−×÷]/g) || []; return s.length > 1 ? "misto" : (s[0] || "+"); }
-
-  function makeQuestion(lvl){
-    let a,b,op,ans;
-    if (lvl === "facil") return makeOp(lvl, pick(["+","−","×"]));
-    if (lvl === "medio"){
-      op = pick(["+","−","×","×"]);
-      if (op === "+"){ a=rnd(10,60); b=rnd(5,40); ans=a+b; }
-      else if (op === "−"){ a=rnd(20,100); b=rnd(5,a); ans=a-b; }
-      else { a=rnd(2,9); b=rnd(2,9); ans=a*b; }
-      return {text:`${a} ${op} ${b}`, ans};
-    }
-    // difícil
-    const kind = pick(["×","÷","mix","+"]);
-    if (kind === "×"){ a=rnd(2,9); b=rnd(2,9); return {text:`${a} × ${b}`, ans:a*b}; }
-    if (kind === "÷"){ b=rnd(2,9); ans=rnd(2,9); a=b*ans; return {text:`${a} ÷ ${b}`, ans}; }
-    if (kind === "+"){ a=rnd(50,200); b=rnd(10,99); return pick([{text:`${a} + ${b}`, ans:a+b},{text:`${a+b} − ${b}`, ans:a}]); }
-    a=rnd(2,6); b=rnd(2,6); const c=rnd(1,10);
-    return pick([{text:`${a} × ${b} + ${c}`, ans:a*b+c},{text:`${a} × ${b} − ${c}`, ans:a*b-c},{text:`${c} + ${a} × ${b}`, ans:c+a*b}]);
   }
 
   // ---------- música (gerada no navegador) ----------
@@ -480,15 +470,15 @@ body.playing .math-banner{display:none}
   document.querySelectorAll(".lvl").forEach(b => b.addEventListener("click", () => setLevel(b.dataset.lvl)));
   setLevel(level);
 
-  let mode = "normal";
+  let mode = ADD_SUB_MODE;
   try {
     const saved = localStorage.getItem("tm_mode");
-    if (saved === "d4" || saved === DIVISION_MODE) mode = saved;
+    if (Object.hasOwn(MODE_NAMES, saved)) mode = saved;
   } catch(e){}
   function setMode(m){
     mode = m;
-    $("levelOptions").hidden = m === DIVISION_MODE;
-    $("startBtn").textContent = m === DIVISION_MODE ? "Começar divisão" : "Começar rodada";
+    $("levelOptions").hidden = !usesLevels(m);
+    $("startBtn").textContent = usesLevels(m) ? "Começar rodada" : `Começar ${MODE_NAMES[m].toLowerCase()}`;
     document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
     try { localStorage.setItem("tm_mode", m); } catch(e){}
   }
@@ -520,11 +510,11 @@ body.playing .math-banner{display:none}
   });
 
   function startGame(name){
-    const roundLevel = mode === DIVISION_MODE ? "facil" : level;
+    const roundLevel = usesLevels(mode) ? level : "facil";
     game = {name, level:roundLevel, mode, bag:[], score:0, streak:0, best:0, correct:0, total:0, log:[], end: Date.now()+ROUND*1000, q:null};
     enterFullscreen();
     document.body.classList.add("playing");
-    $("whoPlays").textContent = `${name} · ${categoryName(roundCategory(game), roundLevel)}`;
+    $("whoPlays").textContent = `${name} · ${categoryName(mode, roundLevel)}`;
     show("scr-play");
     $("feedback").textContent = ""; $("feedback").className = "feedback";
     nextQuestion();
@@ -537,13 +527,12 @@ body.playing .math-banner{display:none}
   }
 
   function nextQuestion(){
-    const op = game.mode === "d4" ? nextD4Op() : null;
+    const op = game.mode === "d4" ? nextD4Op() : "×";
     let q;
     do {
       if (game.mode === DIVISION_MODE) q = makeDivisionQuestion();
-      else q = op ? makeOp(game.level, op) : makeQuestion(game.level);
+      else q = makeOp(game.level, game.mode === ADD_SUB_MODE ? pick(["+","−"]) : op);
     } while (game.q && q.text === game.q.text);
-    if (!q.op) q.op = opOf(q.text);
     game.q = q;
     $("question").textContent = q.text;
     $("answer").value = "";
@@ -613,7 +602,7 @@ body.playing .math-banner{display:none}
       const c = l.filter(r => r.ok).length, sp = document.createElement("span");
       sp.textContent = `${OPS[op]} ${c}/${l.length}`; if (c/l.length < 0.5) sp.className = "fraca"; box.appendChild(sp);
     }
-    $("endMeta").textContent = `${g.name} · ${categoryName(roundCategory(g), g.level)} · ${g.correct} de ${g.total} certas (${pct}%) · maior sequência ${g.best}`;
+    $("endMeta").textContent = `${g.name} · ${categoryName(g.mode, g.level)} · ${g.correct} de ${g.total} certas (${pct}%) · maior sequência ${g.best}`;
     $("endTitle").textContent = g.correct >= 20 ? "Que fera!" : g.correct >= 10 ? "Mandou bem!" : "Fim da rodada!";
     const ul = $("review"); ul.textContent = "";
     if (!g.log.length){ const li=document.createElement("li"); li.textContent="Nenhuma resposta nesta rodada."; ul.appendChild(li); }
@@ -623,10 +612,10 @@ body.playing .math-banner{display:none}
       const b = document.createElement("span"); b.className = r.ok ? "v" : "x"; b.textContent = r.ok ? "✓" : `✗ (${r.given})`;
       li.append(a,b); ul.appendChild(li);
     });
-    $("againBtn").textContent = g.mode === DIVISION_MODE ? "Repetir divisão" : `Repetir ${LEVELS[g.level].name}`;
-    $("changeLevelBtn").textContent = g.mode === DIVISION_MODE ? "Trocar modo" : "Trocar nível";
+    $("againBtn").textContent = usesLevels(g.mode) ? "Repetir rodada" : `Repetir ${MODE_NAMES[g.mode].toLowerCase()}`;
+    $("changeLevelBtn").textContent = "Trocar modo";
     $("againBtn").focus();
-    if (g.total) selectRankTab(roundCategory(g));
+    if (g.total) selectRankTab(g.mode);
     saveScore(g);
   }
 
@@ -634,8 +623,7 @@ body.playing .math-banner{display:none}
   $("againBtn").addEventListener("click", () => startGame(game.name));
   $("changeLevelBtn").addEventListener("click", () => {
     show("scr-start");
-    const target = mode === DIVISION_MODE ? '.mode[data-mode="normal"]' : `.lvl[data-lvl="${level}"]`;
-    document.querySelector(target).focus();
+    document.querySelector(`.mode[data-mode="${mode}"]`).focus();
   });
   $("otherBtn").addEventListener("click", () => { $("playerName").value = ""; show("scr-start"); $("playerName").focus(); });
 
@@ -663,9 +651,11 @@ body.playing .math-banner{display:none}
     const best = new Map();
     for (const r of list){
       const m = r.mode || "normal";
-      if (lvl === DIVISION_MODE ? m !== DIVISION_MODE : m === DIVISION_MODE) continue;
-      if (lvl === "d4" && m !== "d4") continue;
-      if (LEVELS[lvl] && (r.level !== lvl || m !== "normal")) continue;
+      if (lvl === "geral"){
+        if (m !== "normal" && m !== "d4") continue;
+      } else if (LEVELS[lvl]){
+        if (m !== "normal" || r.level !== lvl) continue;
+      } else if (m !== lvl || (usesLevels(lvl) && r.level !== level)) continue;
       const k = (r.nameKey || norm(r.name||"")) + "|" + r.level + "|" + m;
       const cur = best.get(k);
       if (!cur || r.score > cur.score || (r.score === cur.score && r.at < cur.at)) best.set(k, r);
@@ -688,14 +678,16 @@ body.playing .math-banner{display:none}
   const turma = "TORNEIO DE MATEMATICA";
   let scope = "escola", online = undefined, onlineErr = false, reqId = 0, firstLoad = true, lastSent = null;
 
-  function roundCategory(g){ return g.mode === "normal" ? g.level : g.mode; }
   function categoryName(category, selectedLevel = level){
     if (category === "geral") return "Geral";
-    if (category === DIVISION_MODE) return "Divisão";
-    if (category === "d4") return "Desafio das 4 · " + LEVELS[selectedLevel].name;
+    if (usesLevels(category)) return MODE_NAMES[category] + " · " + LEVELS[selectedLevel].name;
+    if (MODE_NAMES[category]) return MODE_NAMES[category];
     return LEVELS[category].name;
   }
-  function trailFor(t, selectedLevel = level){ return t === "geral" ? "" : t === "d4" ? "d4-" + selectedLevel : t; }
+  function trailFor(t, selectedLevel = level){
+    if (t === "geral") return "";
+    return usesLevels(t) ? t + "-" + selectedLevel : t;
+  }
 
   let memoryQueue = null, syncRequest = null, retryTimer = null, retryDelay = 15000, currentScore = null;
   function filaLoad(){
@@ -779,7 +771,7 @@ body.playing .math-banner{display:none}
   function sendOnline(g){
     if (g.name.trim().length < 2) return;
     const acc = g.total ? g.correct / g.total : 0;
-    const res = {game:GAME_ID, name:g.name, turma, trail:trailFor(roundCategory(g), g.level), phase:0,
+    const res = {game:GAME_ID, name:g.name, turma, trail:trailFor(g.mode, g.level), phase:0,
       xp:Math.min(3000, g.score), stars: acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : 1, firstTry:Math.min(5, g.best)};
     currentScore = JSON.stringify(res);
     lastSent = {name:shortName(g.name), turma};
@@ -821,8 +813,9 @@ body.playing .math-banner{display:none}
     const lvlName = tab === "geral" ? "" : categoryName(tab);
     $("rankNote").textContent = "Ranking da escola"
       + (lvlName ? ", " + lvlName : "") + `. Mostra os ${SCHOOL_RANK_LIMIT} primeiros, com o primeiro nome e a inicial do sobrenome.`
-      + (tab === "geral" ? " Soma a melhor rodada de cada categoria. A Divisão tem classificação própria." : "")
-      + (tab === "d4" ? " O nível do Desafio é o escolhido na tela inicial." : "");
+      + (tab === "geral" ? " Soma as melhores rodadas de Todos juntos e do antigo modo Normal." : "")
+      + (LEVELS[tab] ? " Pontuações do antigo modo Normal." : "")
+      + (usesLevels(tab) ? " Veja o ranking do nível escolhido na tela inicial." : "");
     if (online === undefined) return emptyRow("Carregando ranking…");
     if (onlineErr || !online) return emptyRow("O ranking da escola não respondeu agora. Veja a aba Este aparelho ou tente de novo daqui a pouco.");
     if (!online.length) return emptyRow("Ninguém entrou neste ranking ainda. Seja o primeiro!");
@@ -881,7 +874,7 @@ body.playing .math-banner{display:none}
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) syncRanking();
   });
-  document.querySelectorAll(".lvl").forEach(b => b.addEventListener("click", () => { if (tab === "d4" && scope !== "local") loadOnline(); }));
+  document.querySelectorAll(".lvl").forEach(b => b.addEventListener("click", () => { if (usesLevels(tab)) loadOnline(); }));
 
 
   function celebrateRecord(g){
