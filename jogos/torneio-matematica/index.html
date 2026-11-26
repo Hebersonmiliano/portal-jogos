@@ -211,7 +211,7 @@ body.playing .math-banner{display:none}
           <label class="lbl" for="playerName">Seu nome</label>
           <input type="text" id="playerName" maxlength="24" placeholder="Ex.: Ana Souza" required>
           <div class="levels" role="group" aria-label="Nível de dificuldade">
-            <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20</span><em>10 pts por acerto</em></button>
+            <button type="button" class="lvl" data-lvl="facil" aria-pressed="true"><strong>Fácil</strong><span>+ e − até 20 · × de 1 a 10</span><em>10 pts por acerto</em></button>
             <button type="button" class="lvl" data-lvl="medio" aria-pressed="false"><strong>Médio</strong><span>+ − até 100 e tabuada até o 9</span><em>20 pts por acerto</em></button>
             <button type="button" class="lvl" data-lvl="dificil" aria-pressed="false"><strong>Difícil</strong><span>× e ÷ até a tabuada do 9 e contas mistas</span><em>30 pts por acerto</em></button>
           </div>
@@ -339,8 +339,9 @@ body.playing .math-banner{display:none}
       else { b=rnd(10,99); a=b+rnd(50,200); }
       ans = a-b;
     } else if (op === "×"){
-      const top = lvl === "facil" ? 5 : 9;
-      a=rnd(2,top); b=rnd(2,top); ans=a*b;
+      const min = lvl === "facil" ? 1 : 2;
+      const max = lvl === "facil" ? 10 : 9;
+      a=rnd(min,max); b=rnd(min,max); ans=a*b;
     } else {
       const top = lvl === "facil" ? 5 : 9;
       b=rnd(2,top); ans=rnd(lvl === "facil" ? 1 : 2, top); a=b*ans;
@@ -358,12 +359,7 @@ body.playing .math-banner{display:none}
 
   function makeQuestion(lvl){
     let a,b,op,ans;
-    if (lvl === "facil"){
-      op = pick(["+","−"]);
-      if (op === "+"){ a=rnd(1,10); b=rnd(1,10); ans=a+b; }
-      else { a=rnd(2,20); b=rnd(1,a); ans=a-b; }
-      return {text:`${a} ${op} ${b}`, ans};
-    }
+    if (lvl === "facil") return makeOp(lvl, pick(["+","−","×"]));
     if (lvl === "medio"){
       op = pick(["+","−","×","×"]);
       if (op === "+"){ a=rnd(10,60); b=rnd(5,40); ans=a+b; }
